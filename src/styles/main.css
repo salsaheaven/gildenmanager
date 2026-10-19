@@ -30,6 +30,30 @@ body {
   flex-direction: column;
 }
 
+/* Scrollbalken im Pixel-Stil statt der Browser-Standardbalken */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) #0c0914;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0c0914;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border: 2px solid #0c0914;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b58a0;
+}
+
 canvas.sprite {
   image-rendering: pixelated;
   display: block;
@@ -515,6 +539,10 @@ button:disabled {
   gap: 6px;
   max-height: 50vh;
   overflow-y: auto;
+  /* Platz für den Scrollbalken freihalten, damit nichts springt,
+     und etwas Innenabstand, damit Punkte und Pfeile an den Rändern nicht abgeschnitten werden */
+  scrollbar-gutter: stable;
+  padding: 5px 4px 4px 5px;
   align-content: start;
 }
 
