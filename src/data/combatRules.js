@@ -25,6 +25,9 @@ export const COMBAT_RULES = {
   enemyVariation: 0.25,
   enemyCritChance: 0.1,
 
+  // Unter diesem Mana-Anteil warnt der Kampfbericht "hat kaum noch Mana!"
+  lowManaWarning: 0.12,
+
   // Aggro durch Heilung und Schilde (Anteil der Menge)
   healThreat: 0.4,
   shieldThreat: 0.3,

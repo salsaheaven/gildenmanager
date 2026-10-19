@@ -11,14 +11,16 @@
 
 import { getBoss, MINIONS } from '../data/enemies.js';
 import { createHeroCanvas, createSpriteCanvas } from './PixelArt.js';
+import { playEffect } from './BattleEffects.js';
 import { Sound } from './Sound.js';
 
 // Zeitplan in Spielsekunden (bei Spieluhr 1x also echte Sekunden)
-const START_DELAY = 0.3;      // kurze Pause vor dem ersten Ereignis
-const ACTION_TIME = 0.12;     // Abstand zwischen zwei Aktionen
+const START_DELAY = 0.4;      // kurze Pause vor dem ersten Ereignis
+const ACTION_LEAD = 0.14;     // Zeit zwischen Aktion (Animation startet) und Wirkung (Zahl ploppt auf)
+const EFFECT_TIME = 0.08;     // Abstand nach einer Wirkung (Treffer, Heilung …)
 const INFO_TIME = 0.05;       // Abstand nach reinen Textzeilen
-const ROUND_PAUSE = 0.2;      // Pause zwischen zwei Runden
-const END_DELAY = 0.5;        // Pause vor dem Ergebnis
+const ROUND_PAUSE = 0.3;      // Pause zwischen zwei Runden
+const END_DELAY = 0.6;        // Pause vor dem Ergebnis
 const TICKER_LINES = 6;       // so viele Zeilen zeigt der Ticker
 
 export class BattleScene {
@@ -35,6 +37,7 @@ export class BattleScene {
     }
 
     this.time = 0;
+    this.speed = 1;  // aktuelle Geschwindigkeit der Spieluhr (für die Dauer der Animationen)
     this.entryIndex = 0;
     this.finished = false;
     this.units = {}; // Kämpfer-id → Elemente der Figur
@@ -87,6 +90,10 @@ export class BattleScene {
         <div class="unit-hp"><div></div><span></span></div>
       </div>
     `;
+    // Manabalken nur für Helden mit Mana (Heiler und Zauberer)
+    if (info.maxMana > 0) {
+      unit.querySelector('.unit-bars').insertAdjacentHTML('beforeend', '<div class="unit-mana"><div></div></div>');
+    }
     unit.querySelector('.unit-name').textContent = info.name;
     unit.querySelector('.unit-sprite').appendChild(this.createUnitCanvas(info));
 
@@ -101,8 +108,9 @@ export class BattleScene {
     }
     parent.appendChild(unit);
 
-    this.units[info.id] = { element: unit, maxHp: info.maxHp, isMinion: Boolean(info.minionId) };
+    this.units[info.id] = { element: unit, maxHp: info.maxHp, maxMana: info.maxMana, isMinion: Boolean(info.minionId) };
     this.setBars(info.id, info.hp, 0);
+    this.setMana(info.id, info.mana);
   }
 
   createUnitCanvas(info) {
@@ -128,6 +136,14 @@ export class BattleScene {
     unit.element.classList.toggle('dead', hp <= 0);
   }
 
+  setMana(unitId, mana) {
+    const unit = this.units[unitId];
+    if (!unit || !unit.maxMana || mana === null || mana === undefined) {
+      return;
+    }
+    unit.element.querySelector('.unit-mana div').style.width = Math.max(0, mana / unit.maxMana) * 100 + '%';
+  }
+
   // Jedes Ereignis bekommt einen Zeitpunkt
   scheduleEntries() {
     this.entryTimes = [];
@@ -139,8 +155,13 @@ export class BattleScene {
         time += ROUND_PAUSE;
       }
       this.entryTimes.push(time);
-      const isAction = entry.hits || entry.labels || entry.spawn || entry.cast;
-      time += isAction ? ACTION_TIME : INFO_TIME;
+      if (entry.kind === 'action') {
+        time += ACTION_LEAD;
+      } else if (entry.hits || entry.labels || entry.spawn || entry.cast) {
+        time += EFFECT_TIME;
+      } else {
+        time += INFO_TIME;
+      }
     }
     this.endTime = time + END_DELAY;
   }
@@ -149,10 +170,12 @@ export class BattleScene {
 
   // Wird regelmäßig aufgerufen. gameSeconds = vergangene Spielzeit seit dem letzten Aufruf
   // (0, wenn das Spiel pausiert ist). isPaused blendet den Pause-Hinweis ein.
-  update(gameSeconds, isPaused = false) {
+  // speed = Geschwindigkeit der Spieluhr, damit Animationen bei 4x auch schneller sind.
+  update(gameSeconds, isPaused = false, speed = 1) {
     if (this.finished) {
       return;
     }
+    this.speed = speed;
     this.container.querySelector('.battle-scene').classList.toggle('paused', isPaused);
     this.time += gameSeconds;
     while (this.entryIndex < this.result.log.length && this.entryTimes[this.entryIndex] <= this.time) {
@@ -188,7 +211,14 @@ export class BattleScene {
     if (entry.round > 0) {
       this.container.querySelector('.scene-round').textContent = 'Runde ' + entry.round;
     }
+    if (entry.kind === 'action') {
+      this.playAction(entry.action, quiet);
+      return;
+    }
     this.addTickerLine(entry);
+    if (entry.manaUpdate) {
+      this.setMana(entry.manaUpdate.targetId, entry.manaUpdate.mana);
+    }
 
     if (entry.spawn) {
       for (const info of entry.spawn) {
@@ -197,9 +227,6 @@ export class BattleScene {
     }
     if (entry.cast) {
       this.updateCastBar(entry.cast, quiet);
-    }
-    if (entry.sourceId && !quiet) {
-      this.lunge(entry.sourceId);
     }
     if (entry.hits) {
       for (const hit of entry.hits) {
@@ -211,6 +238,32 @@ export class BattleScene {
         this.showFloat(label.targetId, label.text, 'float-label');
       }
     }
+  }
+
+  // Eine Aktion beginnt: Mana anpassen, Ausfallschritt, Skill-Name und Animation
+  playAction(action, quiet) {
+    this.setMana(action.sourceId, action.manaAfter);
+    const source = this.units[action.sourceId];
+    if (quiet || !source) {
+      return;
+    }
+    this.lunge(action.sourceId);
+    if (action.showName && action.name) {
+      const cssClass = source.element.classList.contains('hero-unit') ? 'float-skill' : 'float-skill enemy-skill';
+      this.showFloat(action.sourceId, action.name, cssClass);
+    }
+
+    const field = this.container.querySelector('.scene-field');
+    const sourceSprite = source.element.querySelector('.unit-sprite');
+    const targetSprites = [];
+    for (const targetId of action.targetIds) {
+      if (this.units[targetId]) {
+        targetSprites.push(this.units[targetId].element.querySelector('.unit-sprite'));
+      }
+    }
+    // Das Geschoss soll ungefähr dann ankommen, wenn die Zahl aufploppt
+    const flightMilliseconds = (ACTION_LEAD * 1000 * 0.9) / Math.max(1, this.speed);
+    playEffect(field, action.fx, sourceSprite, targetSprites, flightMilliseconds);
   }
 
   addTickerLine(entry) {

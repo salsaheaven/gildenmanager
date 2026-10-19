@@ -13,7 +13,7 @@
 // baseStats     = Werte auf Level 1
 // growth        = so viel kommt pro Level dazu
 // abilities     = Skills der Klasse (Details in abilities.js)
-// basicAttack   = normaler Angriff, wenn gerade kein Skill passt (scaling: 'attack' oder 'magic')
+// basicAttack   = normaler Angriff, wenn gerade kein Skill passt (scaling: 'attack' oder 'magic', fx = Animation)
 // ============================================================
 
 export const HERO_CLASSES = [
@@ -28,7 +28,7 @@ export const HERO_CLASSES = [
     baseStats: { health: 120, mana: 0, attack: 10, magic: 0, defense: 12 },
     growth: { health: 12, mana: 0, attack: 2, magic: 0, defense: 2 },
     abilities: ['bulwarkStrike', 'challengingShout', 'ironWatch'],
-    basicAttack: { name: 'Hieb', scaling: 'attack', power: 1.0, threat: 3 },
+    basicAttack: { name: 'Hieb', scaling: 'attack', power: 1.0, threat: 3, fx: 'slash' },
   },
   {
     id: 'priest',
@@ -41,7 +41,7 @@ export const HERO_CLASSES = [
     baseStats: { health: 70, mana: 100, attack: 2, magic: 12, defense: 4 },
     growth: { health: 7, mana: 10, attack: 0, magic: 2.5, defense: 1 },
     abilities: ['streamOfLife', 'sparkOfGrace', 'silentDevotion'],
-    basicAttack: { name: 'Stabschlag', scaling: 'magic', power: 0.5 },
+    basicAttack: { name: 'Stabschlag', scaling: 'magic', power: 0.5, fx: 'holyBolt' },
   },
   {
     id: 'runeweaver',
@@ -54,7 +54,7 @@ export const HERO_CLASSES = [
     baseStats: { health: 80, mana: 90, attack: 3, magic: 10, defense: 6 },
     growth: { health: 8, mana: 9, attack: 0, magic: 2, defense: 1 },
     abilities: ['runeArmor', 'glyphCircle', 'releasingRune'],
-    basicAttack: { name: 'Runenstoß', scaling: 'magic', power: 0.6 },
+    basicAttack: { name: 'Runenstoß', scaling: 'magic', power: 0.6, fx: 'runeBolt' },
   },
   {
     id: 'mage',
@@ -67,7 +67,7 @@ export const HERO_CLASSES = [
     baseStats: { health: 60, mana: 110, attack: 2, magic: 15, defense: 3 },
     growth: { health: 6, mana: 11, attack: 0, magic: 3, defense: 0.5 },
     abilities: ['emberLance', 'ashRain', 'iceWreath'],
-    basicAttack: { name: 'Funkenwurf', scaling: 'magic', power: 0.7 },
+    basicAttack: { name: 'Funkenwurf', scaling: 'magic', power: 0.7, fx: 'spark' },
   },
   {
     id: 'rogue',
@@ -80,7 +80,7 @@ export const HERO_CLASSES = [
     baseStats: { health: 85, mana: 0, attack: 14, magic: 0, defense: 6 },
     growth: { health: 8, mana: 0, attack: 3, magic: 0, defense: 1 },
     abilities: ['shadowStab', 'silencingBlow', 'viperBite'],
-    basicAttack: { name: 'Dolchhieb', scaling: 'attack', power: 1.0 },
+    basicAttack: { name: 'Dolchhieb', scaling: 'attack', power: 1.0, fx: 'slash' },
   },
 ];
 

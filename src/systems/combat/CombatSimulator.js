@@ -94,11 +94,27 @@ export function simulateBattle(options) {
 }
 
 function takeHeroTurn(battle, hero) {
+  warnIfOutOfMana(battle, hero);
   const abilityId = chooseAbility(battle, hero);
   if (abilityId) {
     useAbility(battle, hero, abilityId, ABILITIES[abilityId]);
   } else {
     useBasicAttack(battle, hero);
+  }
+}
+
+// Geht einem Heiler oder Zauberer das Mana aus, gibt es (einmal) eine Warnung.
+// Erholt sich das Mana wieder über die Hälfte, kann später erneut gewarnt werden.
+function warnIfOutOfMana(battle, hero) {
+  if (hero.maxMana <= 0) {
+    return;
+  }
+  const manaPercent = hero.getManaPercent();
+  if (manaPercent < COMBAT_RULES.lowManaWarning && !hero.warnedLowMana) {
+    hero.warnedLowMana = true;
+    battle.addLog(hero.name + ' hat kaum noch Mana!', 'warning', { labels: [{ targetId: hero.id, text: 'Kein Mana!' }] });
+  } else if (manaPercent > 0.5) {
+    hero.warnedLowMana = false;
   }
 }
 

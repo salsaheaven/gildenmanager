@@ -25,7 +25,8 @@ export class Battle {
 
   // ---------- Bericht ----------
 
-  // kind    = 'info', 'damage', 'crit', 'heal', 'shield', 'mechanic', 'warning', 'death'
+  // kind    = 'info', 'damage', 'crit', 'heal', 'shield', 'mechanic', 'warning', 'death',
+  //           'action' (nur für die Szene, erscheint nicht im Bericht, siehe logAction)
   // details = Zusatzinfos für die Kampfszene (alle freiwillig):
   //   sourceId = wer handelt (macht einen kleinen Ausfallschritt)
   //   hits     = Liste von Treffern/Heilungen (siehe Combatant.describeHit)
@@ -36,6 +37,21 @@ export class Battle {
     if (this.recordLog) {
       this.log.push({ round: this.round, text: text, kind: kind, ...details });
     }
+  }
+
+  // Meldet eine Aktion für die Kampfszene (Animation + Skill-Name), ohne Text im Kampfbericht.
+  // showName = true: der Name ploppt klein über dem Handelnden auf (bei Skills, nicht bei normalen Angriffen)
+  logAction(source, name, fx, targets, showName) {
+    this.addLog('', 'action', {
+      action: {
+        sourceId: source.id,
+        name: name,
+        fx: fx,
+        targetIds: targets.map((target) => target.id),
+        showName: showName,
+        manaAfter: source.maxMana > 0 ? Math.round(source.mana) : null,
+      },
+    });
   }
 
   takeSnapshot() {

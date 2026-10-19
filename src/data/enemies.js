@@ -24,6 +24,9 @@
 //   duration      = Dauer des Fluchs in Runden
 //   minion, count = welche und wie viele Diener
 //   hint          = Tipp für den Spieler, wie man die Mechanik kontert
+//   fx            = Animation in der Kampfszene
+//
+// attackFx = Animation des normalen Angriffs (Boss und Diener)
 // ============================================================
 
 export const BOSSES = [
@@ -43,12 +46,13 @@ export const BOSSES = [
     name: 'Grimmzahn',
     title: 'Der Höhlenbär',
     sprite: 'bossBear',
+    attackFx: 'claw',
     stats: { health: 1250, attack: 27, defense: 10 },
     enrageRound: 25,
     mechanics: [
       {
         type: 'tankBuster', name: 'Zermalmender Prankenhieb',
-        firstAt: 4, every: 5, power: 3.5, castTime: 1, interruptible: false,
+        firstAt: 4, every: 5, power: 3.5, castTime: 1, interruptible: false, fx: 'bigImpact',
         hint: 'Schilde (Runenwirker) oder Eiserne Wacht (Krieger) fangen den Hieb ab.',
       },
     ],
@@ -58,17 +62,18 @@ export const BOSSES = [
     name: 'Schwester Morva',
     title: 'Die Schattenruferin',
     sprite: 'bossCultist',
+    attackFx: 'shadowBolt',
     stats: { health: 1250, attack: 25, defense: 5 },
     enrageRound: 30,
     mechanics: [
       {
         type: 'groupCast', name: 'Schattenwoge',
-        firstAt: 3, every: 4, power: 2.3, castTime: 1, interruptible: true,
+        firstAt: 3, every: 4, power: 2.3, castTime: 1, interruptible: true, fx: 'shadowWave',
         hint: 'Ein Schurke kann die Woge mit Stummschlag unterbrechen.',
       },
       {
         type: 'curse', name: 'Fluch der Fäulnis',
-        firstAt: 5, every: 6, power: 0.5, duration: 6, castTime: 0,
+        firstAt: 5, every: 6, power: 0.5, duration: 6, castTime: 0, fx: 'curse',
         hint: 'Der Runenwirker entfernt Flüche mit der Lösungsrune.',
       },
     ],
@@ -78,17 +83,18 @@ export const BOSSES = [
     name: 'Skarrix',
     title: 'Die Brutmutter',
     sprite: 'bossBroodmother',
+    attackFx: 'claw',
     stats: { health: 1500, attack: 26, defense: 8 },
     enrageRound: 30,
     mechanics: [
       {
         type: 'summon', name: 'Brut schlüpft',
-        firstAt: 2, every: 6, minion: 'broodling', count: 2, castTime: 0,
+        firstAt: 2, every: 6, minion: 'broodling', count: 2, castTime: 0, fx: 'summon',
         hint: 'Flächenschaden (Aschenregen des Magiers) räumt die Brut schnell weg.',
       },
       {
         type: 'frontWave', name: 'Säureschwall',
-        firstAt: 6, every: 7, power: 2.1, castTime: 1, interruptible: false,
+        firstAt: 6, every: 7, power: 2.1, castTime: 1, interruptible: false, fx: 'acidWave',
         hint: 'Trifft nur die vordere Reihe: weniger Nahkämpfer mitnehmen.',
       },
     ],
@@ -100,6 +106,7 @@ export const MINIONS = {
   broodling: {
     name: 'Brutling',
     sprite: 'minionBroodling',
+    attackFx: 'bite',
     stats: { health: 65, attack: 13, defense: 0 },
   },
 };

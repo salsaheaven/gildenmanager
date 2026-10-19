@@ -5,6 +5,7 @@
 // ============================================================
 
 import { COMBAT_RULES } from '../../data/combatRules.js';
+import { MINIONS } from '../../data/enemies.js';
 
 export function takeEnemyTurn(battle, enemy) {
   if (enemy.isStunned()) {
@@ -21,6 +22,7 @@ export function takeEnemyTurn(battle, enemy) {
 
 function minionAttack(battle, minion) {
   const target = battle.random.pick(battle.getLivingHeroes());
+  battle.logAction(minion, null, MINIONS[minion.minionId].attackFx, [target], false);
   enemyHits(battle, minion, target, 'beißt', 1.0);
 }
 
@@ -59,7 +61,9 @@ function takeBossTurn(battle, boss) {
     }
   }
 
-  enemyHits(battle, boss, battle.getBossTarget(), 'schlägt zu', 1.0);
+  const target = battle.getBossTarget();
+  battle.logAction(boss, null, bossData.attackFx, [target], false);
+  enemyHits(battle, boss, target, 'schlägt zu', 1.0);
 }
 
 function isMechanicDue(mechanic, round) {
@@ -70,11 +74,13 @@ function resolveMechanic(battle, boss, mechanic) {
   switch (mechanic.type) {
     case 'tankBuster': {
       const target = battle.getBossTarget();
+      battle.logAction(boss, mechanic.name, mechanic.fx, [target], true);
       battle.addLog(boss.name + ': ' + mechanic.name + '!', 'mechanic', { cast: { state: 'end' } });
       enemyHits(battle, boss, target, 'trifft mit voller Wucht', mechanic.power);
       break;
     }
     case 'groupCast':
+      battle.logAction(boss, mechanic.name, mechanic.fx, battle.getLivingHeroes(), true);
       battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die ganze Gruppe!', 'mechanic', { cast: { state: 'end' } });
       for (const hero of battle.getLivingHeroes()) {
         enemyHits(battle, boss, hero, 'trifft', mechanic.power);
@@ -82,6 +88,7 @@ function resolveMechanic(battle, boss, mechanic) {
       break;
     case 'frontWave': {
       const frontRow = battle.getLivingHeroes().filter((hero) => hero.row === 'front');
+      battle.logAction(boss, mechanic.name, mechanic.fx, frontRow, true);
       battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die vordere Reihe!', 'mechanic', { cast: { state: 'end' } });
       for (const hero of frontRow) {
         enemyHits(battle, boss, hero, 'trifft', mechanic.power);
@@ -93,6 +100,7 @@ function resolveMechanic(battle, boss, mechanic) {
       for (let i = 0; i < mechanic.count; i++) {
         spawned.push(battle.spawnMinion(mechanic.minion).describe());
       }
+      battle.logAction(boss, mechanic.name, mechanic.fx, [], true);
       battle.addLog(boss.name + ': ' + mechanic.name + '! ' + mechanic.count + ' Diener erscheinen.', 'mechanic',
         { spawn: spawned });
       break;
@@ -107,8 +115,9 @@ function resolveMechanic(battle, boss, mechanic) {
         remaining: mechanic.duration,
         isDebuff: true,
       });
+      battle.logAction(boss, mechanic.name, mechanic.fx, [target], true);
       battle.addLog(boss.name + ' belegt ' + target.name + ' mit ' + mechanic.name + '.', 'mechanic',
-        { sourceId: boss.id, labels: [{ targetId: target.id, text: 'Verflucht' }] });
+        { labels: [{ targetId: target.id, text: 'Verflucht' }] });
       break;
     }
     default:
@@ -134,7 +143,7 @@ function enemyHits(battle, enemy, target, verb, power) {
     text += ' (' + result.absorbed + ' vom Schild abgefangen)';
   }
   battle.addLog(text + '.', crit ? 'crit' : 'damage',
-    { sourceId: enemy.id, hits: [target.describeHit(result.damage, 'damage', crit, result.absorbed)] });
+    { hits: [target.describeHit(result.damage, 'damage', crit, result.absorbed)] });
   if (!target.alive) {
     battle.addLog(target.name + ' fällt!', 'death');
   }

@@ -39,7 +39,8 @@ src/data/      Reine Inhalte: rarities, items, lootBoxes, balancing, sprites (Pi
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: LootBoxScreen (Schatzkammer),
                HeroScreen (+ HeroDetailPanel, EquipPanel), TavernScreen, CombatLabScreen.
                CombatReport = Ergebnis, Schadensmesser und Kampfbericht (wiederverwendbar).
-               BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken); wird per update(sekunden) angetrieben.
+               BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken); läuft im Takt der Spieluhr.
+               BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
                Leisten: TopBar, NavBar. Helfer: PixelArt, Sound, Toast, format, TraitChip.
                DebugPanel = Test-Menü (Taste F2)
 tests/         Vitest-Tests (prüfen auch, ob die Daten gültig sind)

@@ -1,6 +1,7 @@
 // ============================================================
 // ABILITYEFFECTS – was passiert, wenn ein Held einen Skill oder Angriff benutzt
-// Rechnet Schaden, Heilung, Schilde, Buffs usw. aus und schreibt den Kampfbericht.
+// Ablauf: Ziele bestimmen → Aktion melden (für Animation und Skill-Namen in der Szene)
+//         → Wirkung ausrechnen (Schaden, Heilung, Schild …) und in den Kampfbericht schreiben.
 // ============================================================
 
 import { COMBAT_RULES } from '../../data/combatRules.js';
@@ -29,7 +30,7 @@ export function heroDealsDamage(battle, caster, target, actionName, scaling, pow
   const critText = output.crit ? ' kritisch' : '';
   battle.addLog(caster.name + ': ' + actionName + ' trifft ' + target.name + critText + ' für ' + result.damage + '.',
     output.crit ? 'crit' : 'damage',
-    { sourceId: caster.id, hits: [target.describeHit(result.damage, 'damage', output.crit, result.absorbed)] });
+    { hits: [target.describeHit(result.damage, 'damage', output.crit, result.absorbed)] });
   if (!target.alive) {
     battle.addLog(target.name + ' ist besiegt!', 'death');
   }
@@ -43,7 +44,43 @@ export function useBasicAttack(battle, caster) {
     return;
   }
   const attack = caster.basicAttack;
+  battle.logAction(caster, attack.name, attack.fx, [target], false);
   heroDealsDamage(battle, caster, target, attack.name, attack.scaling, attack.power, { threat: attack.threat || 1 });
+}
+
+// Wen trifft ein Skill? (siehe "target" in data/abilities.js)
+function getTargets(battle, caster, ability) {
+  let targets;
+  switch (ability.target) {
+    case 'focus':
+      targets = [battle.getFocusTarget()];
+      break;
+    case 'boss':
+      targets = [battle.boss];
+      break;
+    case 'allEnemies':
+      targets = battle.getLivingEnemies();
+      break;
+    case 'self':
+      targets = [caster];
+      break;
+    case 'lowestAlly':
+      targets = [battle.getLowestAlly()];
+      break;
+    case 'bossTarget':
+      targets = [battle.getBossTarget()];
+      break;
+    case 'allAllies':
+      targets = battle.getLivingHeroes();
+      break;
+    case 'debuffedAlly':
+      targets = [battle.getLivingHeroes().find((hero) => hero.hasDebuff())];
+      break;
+    default:
+      throw new Error('Unbekanntes Skill-Ziel: ' + ability.target);
+  }
+  // Leere Einträge (z.B. kein Ziel gefunden) entfernen
+  return targets.filter((target) => target && target.alive);
 }
 
 // Einen Skill ausführen. Mana und Abklingzeit werden hier abgezogen.
@@ -51,23 +88,32 @@ export function useAbility(battle, caster, abilityId, ability) {
   caster.mana -= ability.manaCost;
   caster.startCooldown(abilityId, ability.cooldown);
 
+  const targets = getTargets(battle, caster, ability);
+  if (targets.length === 0) {
+    return;
+  }
+  battle.logAction(caster, ability.name, ability.fx, targets, true);
+
   switch (ability.type) {
     case 'damage':
-      applyDamage(battle, caster, ability);
+      for (const target of targets) {
+        if (target.alive) {
+          heroDealsDamage(battle, caster, target, ability.name, ability.scaling, ability.power, ability);
+        }
+      }
       break;
     case 'dot':
-      applyPoison(battle, caster, abilityId, ability);
+      applyPoison(battle, caster, ability, targets[0]);
       break;
     case 'heal':
-      applyHeal(battle, caster, ability);
+      applyHeal(battle, caster, ability, targets[0]);
       break;
     case 'shield':
-      applyShield(battle, caster, ability);
+      applyShield(battle, caster, ability, targets);
       break;
     case 'buff':
       caster.addEffect({ kind: 'damageTaken', value: ability.value, remaining: ability.duration });
-      battle.addLog(caster.name + ' benutzt ' + ability.name + '.', 'shield',
-        { sourceId: caster.id, labels: [{ targetId: caster.id, text: ability.name }] });
+      battle.addLog(caster.name + ' benutzt ' + ability.name + '.', 'shield');
       break;
     case 'taunt':
       applyTaunt(battle, caster, ability);
@@ -75,13 +121,15 @@ export function useAbility(battle, caster, abilityId, ability) {
     case 'mana':
       caster.mana = Math.min(caster.maxMana, caster.mana + caster.maxMana * ability.value);
       battle.addLog(caster.name + ' sammelt sich: ' + ability.name + '.', 'info',
-        { labels: [{ targetId: caster.id, text: '+Mana' }] });
+        { labels: [{ targetId: caster.id, text: '+Mana' }], manaUpdate: { targetId: caster.id, mana: Math.round(caster.mana) } });
       break;
     case 'cleanse':
-      applyCleanse(battle, caster, ability);
+      targets[0].effects = targets[0].effects.filter((effect) => !effect.isDebuff);
+      battle.addLog(caster.name + ': ' + ability.name + ' befreit ' + targets[0].name + ' vom Fluch.', 'shield',
+        { labels: [{ targetId: targets[0].id, text: 'Fluch gelöst' }] });
       break;
     case 'stun':
-      applyStun(battle, caster, ability);
+      applyStun(battle, caster, ability, targets);
       break;
     case 'interrupt':
       applyInterrupt(battle, caster, ability);
@@ -91,21 +139,8 @@ export function useAbility(battle, caster, abilityId, ability) {
   }
 }
 
-function applyDamage(battle, caster, ability) {
-  const targets = ability.target === 'allEnemies' ? battle.getLivingEnemies() : [battle.getFocusTarget()];
-  for (const target of targets) {
-    if (target && target.alive) {
-      heroDealsDamage(battle, caster, target, ability.name, ability.scaling, ability.power, ability);
-    }
-  }
-}
-
 // Gift: macht mehrere Runden lang Schaden (wird am Rundenanfang abgerechnet)
-function applyPoison(battle, caster, abilityId, ability) {
-  const target = battle.getFocusTarget();
-  if (!target) {
-    return;
-  }
+function applyPoison(battle, caster, ability, target) {
   const output = rollOutput(battle, caster, ability.scaling, ability.power);
   target.addEffect({
     kind: 'dot',
@@ -116,36 +151,23 @@ function applyPoison(battle, caster, abilityId, ability) {
     isDebuff: true,
   });
   battle.addLog(caster.name + ' vergiftet ' + target.name + ' mit ' + ability.name + '.', 'damage',
-    { sourceId: caster.id, labels: [{ targetId: target.id, text: 'Gift' }] });
+    { labels: [{ targetId: target.id, text: 'Gift' }] });
 }
 
-function applyHeal(battle, caster, ability) {
-  const target = battle.getLowestAlly();
-  if (!target) {
-    return;
-  }
+function applyHeal(battle, caster, ability, target) {
   const output = rollOutput(battle, caster, ability.scaling, ability.power);
   const healed = target.heal(output.amount);
   caster.healingDone += healed;
   caster.threat += healed * COMBAT_RULES.healThreat;
   const critText = output.crit ? ' kritisch' : '';
   battle.addLog(caster.name + ': ' + ability.name + ' heilt ' + target.name + critText + ' um ' + healed + '.', 'heal',
-    { sourceId: caster.id, hits: [target.describeHit(healed, 'heal', output.crit)] });
+    { hits: [target.describeHit(healed, 'heal', output.crit)] });
 }
 
-function applyShield(battle, caster, ability) {
-  let targets;
-  if (ability.target === 'allAllies') {
-    targets = battle.getLivingHeroes();
-  } else {
-    targets = [battle.getBossTarget()];
-  }
+function applyShield(battle, caster, ability, targets) {
   let total = 0;
   const hits = [];
   for (const target of targets) {
-    if (!target) {
-      continue;
-    }
     const output = rollOutput(battle, caster, ability.scaling, ability.power);
     const amount = Math.round(output.amount);
     target.shield += amount;
@@ -155,9 +177,8 @@ function applyShield(battle, caster, ability) {
   // Schilde zählen in der Auswertung als "Heilung" (Schutz)
   caster.healingDone += total;
   caster.threat += total * COMBAT_RULES.shieldThreat;
-  const who = targets.length === 1 && targets[0] ? targets[0].name : 'die Gruppe';
-  battle.addLog(caster.name + ': ' + ability.name + ' schützt ' + who + ' (' + total + ').', 'shield',
-    { sourceId: caster.id, hits: hits });
+  const who = targets.length === 1 ? targets[0].name : 'die Gruppe';
+  battle.addLog(caster.name + ': ' + ability.name + ' schützt ' + who + ' (' + total + ').', 'shield', { hits: hits });
 }
 
 function applyTaunt(battle, caster, ability) {
@@ -167,29 +188,17 @@ function applyTaunt(battle, caster, ability) {
   }
   caster.threat = highest * COMBAT_RULES.tauntThreatFactor + 10;
   battle.forcedTarget = { combatant: caster, rounds: ability.duration };
-  battle.addLog(caster.name + ': ' + ability.name + '! Der Gegner wendet sich ihm zu.', 'info',
-    { sourceId: caster.id, labels: [{ targetId: caster.id, text: 'Herausforderung!' }] });
-}
-
-function applyCleanse(battle, caster, ability) {
-  const target = battle.getLivingHeroes().find((hero) => hero.hasDebuff());
-  if (!target) {
-    return;
-  }
-  target.effects = target.effects.filter((effect) => !effect.isDebuff);
-  battle.addLog(caster.name + ': ' + ability.name + ' befreit ' + target.name + ' vom Fluch.', 'shield',
-    { sourceId: caster.id, labels: [{ targetId: target.id, text: 'Fluch gelöst' }] });
+  battle.addLog(caster.name + ': ' + ability.name + '! Der Gegner wendet sich ihm zu.', 'info');
 }
 
 // Betäubung: Gegner verlieren ihren nächsten Zug. Ein Boss-Zauber wird dadurch nur verzögert.
-function applyStun(battle, caster, ability) {
+function applyStun(battle, caster, ability, targets) {
   const labels = [];
-  for (const enemy of battle.getLivingEnemies()) {
+  for (const enemy of targets) {
     enemy.addEffect({ kind: 'stun', remaining: ability.duration });
     labels.push({ targetId: enemy.id, text: 'Eingefroren' });
   }
-  battle.addLog(caster.name + ': ' + ability.name + ' friert alle Gegner ein!', 'mechanic',
-    { sourceId: caster.id, labels: labels });
+  battle.addLog(caster.name + ': ' + ability.name + ' friert alle Gegner ein!', 'mechanic', { labels: labels });
 }
 
 // Unterbrechen: bricht einen unterbrechbaren Boss-Zauber ab
@@ -197,7 +206,7 @@ function applyInterrupt(battle, caster, ability) {
   const boss = battle.boss;
   if (boss.casting && boss.casting.interruptible) {
     battle.addLog(caster.name + ': ' + ability.name + ' unterbricht ' + boss.casting.name + '!', 'mechanic',
-      { sourceId: caster.id, labels: [{ targetId: boss.id, text: 'UNTERBROCHEN!' }], cast: { state: 'end' } });
+      { labels: [{ targetId: boss.id, text: 'UNTERBROCHEN!' }], cast: { state: 'end' } });
     boss.casting = null;
   }
   heroDealsDamage(battle, caster, boss, ability.name, ability.scaling, ability.power, ability);

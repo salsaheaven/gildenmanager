@@ -83,6 +83,10 @@ function createLog(result) {
 
   let currentRound = -1;
   for (const entry of result.log) {
+    // Aktions-Einträge sind nur für die Kampfszene da
+    if (entry.kind === 'action') {
+      continue;
+    }
     if (entry.round !== currentRound) {
       currentRound = entry.round;
       if (currentRound > 0) {

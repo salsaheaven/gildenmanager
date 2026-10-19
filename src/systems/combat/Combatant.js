@@ -42,6 +42,7 @@ export class Combatant {
     this.effects = [];          // laufende Effekte (Buffs, Gift, Flüche, Betäubung)
     this.casting = null;        // Boss: Mechanik, die gerade vorbereitet wird
     this.enraged = false;       // Boss: rast bereits?
+    this.warnedLowMana = false; // Held: wurde schon vor leerem Mana gewarnt?
 
     // Statistik für die Auswertung (wie ein "Schadensmesser" im MMO)
     this.damageDone = 0;
@@ -70,6 +71,8 @@ export class Combatant {
       row: this.row,
       hp: this.hp,
       maxHp: this.maxHp,
+      mana: Math.round(this.mana),
+      maxMana: this.maxMana,
       heroId: this.heroId,
       classId: this.classId,
       bossId: this.bossData ? this.bossData.id : null,
