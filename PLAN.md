@@ -91,6 +91,14 @@ In kleinen, jeweils online testbaren Schritten:
 
 Nach M1 testen wir zusammen, ob der Loop Spaß macht, und passen dann an.
 
+## Balancing & Playtests
+Das Balancing kommt gesammelt später, wenn genug Ideen zusammen sind. Grundsatz: Jede Wahl braucht Vor- und Nachteile (siehe `KONZEPT.md`). Werkzeuge, von billig nach teuer:
+
+1. **Balancing-Bericht (Skript, ohne KI-Kosten):** ein Node-Skript, das für jeden Boss alle Kombinationen aus Taktik, Anweisungen und Gruppe per `estimateChances` durchrechnet. Es meldet automatisch **dominante Optionen**, die in allen Kämpfen besser sind (wie zurzeit „Priester heilt früh“), und **nutzlose Optionen**, die nie die beste Wahl sind. Kann jederzeit gebaut werden und liefert in Sekunden Ergebnisse.
+2. **Bot-Spieler (Skript, ohne KI-Kosten), sobald Dungeons, Beute und Leveln stehen:** ein regelbasierter Bot spielt das ganze Spiel durch (anheuern, ausrüsten, beste Gruppe losschicken). Er misst, wie viele Spieltage es bis zum Endboss dauert, wo der Fortschritt stockt und wie sich Gold und Beute entwickeln.
+3. **KI-Agents als Testspieler (kostet Nutzungslimit), ab etwa M1:** einige Agents spielen im Browser und schreiben Erfahrungsberichte: Was ist spannend, was langweilig, was unverständlich? Diese Fragen kann kein Skript beantworten.
+4. **Echte Spieler:** Das Spiel ist öffentlich unter https://salsaheaven.github.io/gildenmanager/ spielbar, der Link lässt sich also einfach teilen. Feedback könnte über **GitHub Issues** im Repo kommen (mit einer kleinen Vorlage für Feedback), oder über einen Feedback-Knopf im Spiel, der dorthin verlinkt. Wann und wie, entscheiden wir später.
+
 ## Verifikation
 - `npm run test`: Tests für Loot-Chancen (z.B. 10.000 Kisten simulieren und prüfen, ob die Verteilung stimmt), Kampf mit festem Seed, Leveln, Speichern/Laden
 - `npm run dev`: Im Browser durchspielen. Kiste öffnen, Held rekrutieren, Dungeon starten, Pause/Speed prüfen, neu laden und prüfen, ob der Spielstand erhalten bleibt.
