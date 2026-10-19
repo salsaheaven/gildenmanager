@@ -52,12 +52,12 @@ Jeder Boss hat 1 bis 3 **Mechaniken mit Konter**, sodass die Gruppenzusammenstel
 
 | Mechanik | Konter |
 |---|---|
-| Tank-Buster (riesiger Schlag auf den Tank) | Priester (große Heilung), Runenwirker (Schild), Krieger (Schildwall) |
-| Gefährlicher Zauber | Schurke (Tritt unterbricht) |
-| Diener-Wellen | Magier (Flächenschaden), Jäger (Mehrfachschuss), CC |
-| Schaden auf die ganze Gruppe | Druide (Flächenheilung), Paladin (Aura), Schamane (Totem) |
-| Wutanfall nach X Runden | Genug Schaden: Barde (Kriegslied), Hexenmeister (Flüche) |
-| Fluch oder Furcht | Runenwirker (Bannrune), Barde (Heldenballade) |
+| Tank-Buster (riesiger Schlag auf den Tank) | Priester (Strom des Lebens), Runenwirker (Runenpanzer), Krieger (Eiserne Wacht) |
+| Gefährlicher Zauber | Schurke (Stummschlag unterbricht) |
+| Diener-Wellen | Magier (Aschenregen), Jäger (Pfeilfächer), CC |
+| Schaden auf die ganze Gruppe | Druide (Hainsegen), Paladin (Schwur der Standhaftigkeit), Schamane (Felsenpfahl) |
+| Wutanfall nach X Runden | Genug Schaden: Barde (Lied der Klingen), Hexenmeister (Bruchmal) |
+| Fluch oder Furcht | Runenwirker (Lösungsrune), Barde (Weckruf) |
 | Flammenwelle auf die vordere Reihe | Weniger Nahkämpfer mitnehmen, Feuerresistenz |
 
 ### Klassen
@@ -66,18 +66,18 @@ Jeder Skill hat eine Abklingzeit und kostet bei Zauberern Mana. Alle Zahlen steh
 
 | Rolle | Klasse | Skill 1 | Skill 2 | Skill 3 | M1 |
 |---|---|---|---|---|---|
-| Tank | **Krieger** | Schildschlag (Schaden + viel Aggro) | Spott (zwingt den Gegner, ihn anzugreifen) | Schildwall (−50 % Schaden für 3 Runden) | ✅ |
-| Tank | **Paladin** | Heiliger Hieb (Schaden + Aggro) | Handauflegen (heilt sich selbst stark) | Aura der Hingabe (die ganze Gruppe nimmt −10 % Schaden) | |
-| Heiler | **Priester** | Große Heilung (riesige Einzelheilung, teuer) | Blitzheilung (schnell, kleiner, günstig) | Gebet der Hoffnung (stellt Mana wieder her) | ✅ |
-| Heiler | **Druide** | Verjüngung (Heilung über Zeit) | Wildwuchs (Heilung über Zeit für alle) | Wiedergeburt (belebt einen Gefallenen einmal pro Kampf) | |
-| Heiler | **Runenwirker** | Runenschild (fängt Schaden vorab ab) | Schutzzeichen (kleine Schilde für alle) | Bannrune (entfernt einen Fluch oder Debuff) | ✅ |
-| DD hinten | **Magier** | Feuerball (hoher Einzelschaden) | Flammensturm (Flächenschaden auf alle Gegner) | Frostnova (friert alle Gegner 1 Runde ein, CC) | ✅ |
-| DD hinten | **Jäger** | Gezielter Schuss (konstanter Einzelschaden) | Mehrfachschuss (trifft 3 Ziele) | Eisfalle (setzt einen Diener 3 Runden fest, CC) | |
-| DD vorne | **Schurke** | Meucheln (hohe Krit-Chance) | Tritt (unterbricht einen Boss-Zauber) | Giftklinge (Schaden über Zeit) | ✅ |
-| DD vorne | **Barbar** | Wirbelwind (Schaden an allen Gegnern vorne) | Blutrausch (mehr Schaden, je weniger Leben er hat) | Unbändig (ignoriert 2 Runden lang Betäubung und Furcht) | |
-| Support | **Barde** | Kriegslied (+20 % Schaden für die Gruppe) | Wiegenlied (schläfert einen Gegner ein, CC) | Heldenballade (beendet Furcht und Betäubung) | |
-| Support | **Schamane** | Totem der Stärke (+Angriff für die vordere Reihe) | Manaquell-Totem (Mana für alle Heiler und Zauberer) | Erdwall-Totem (−Flächenschaden für die Gruppe) | |
-| Support | **Hexenmeister** | Fluch der Schwäche (Boss macht −20 % Schaden) | Fluch der Verwundbarkeit (Boss nimmt +15 % Schaden) | Seelenentzug (Schaden, heilt den Hexenmeister) | |
+| Tank | **Krieger** | Bollwerkstoß (Schaden + viel Aggro) | Herausforderungsruf (zwingt den Gegner, ihn anzugreifen) | Eiserne Wacht (−50 % Schaden für 3 Runden) | ✅ |
+| Tank | **Paladin** | Lichtbrecher (Schaden + Aggro) | Gelübde der Genesung (heilt sich selbst stark) | Schwur der Standhaftigkeit (die ganze Gruppe nimmt −10 % Schaden) | |
+| Heiler | **Priester** | Strom des Lebens (riesige Einzelheilung, teuer) | Funke der Gnade (schnell, kleiner, günstig) | Stille Andacht (stellt Mana wieder her) | ✅ |
+| Heiler | **Druide** | Moosmantel (Heilung über Zeit) | Hainsegen (Heilung über Zeit für alle) | Ruf der Wurzeln (belebt einen Gefallenen einmal pro Kampf) | |
+| Heiler | **Runenwirker** | Runenpanzer (fängt Schaden vorab ab) | Glyphenkreis (kleine Schilde für alle) | Lösungsrune (entfernt einen Fluch oder Debuff) | ✅ |
+| DD hinten | **Magier** | Glutlanze (hoher Einzelschaden) | Aschenregen (Flächenschaden auf alle Gegner) | Eiskranz (friert alle Gegner 1 Runde ein, CC) | ✅ |
+| DD hinten | **Jäger** | Falkenauge (konstanter Einzelschaden) | Pfeilfächer (trifft 3 Ziele) | Fangnetz (setzt einen Diener 3 Runden fest, CC) | |
+| DD vorne | **Schurke** | Schattenstich (hohe Krit-Chance) | Stummschlag (unterbricht einen Boss-Zauber) | Natternbiss (Schaden über Zeit) | ✅ |
+| DD vorne | **Barbar** | Sensenkreis (Schaden an allen Gegnern vorne) | Wundenzorn (mehr Schaden, je weniger Leben er hat) | Steinherz (ignoriert 2 Runden lang Betäubung und Furcht) | |
+| Support | **Barde** | Lied der Klingen (+20 % Schaden für die Gruppe) | Schlummerweise (schläfert einen Gegner ein, CC) | Weckruf (beendet Furcht und Betäubung) | |
+| Support | **Schamane** | Bärenpfahl (+Angriff für die vordere Reihe) | Quellpfahl (Mana für alle Heiler und Zauberer) | Felsenpfahl (−Flächenschaden für die Gruppe) | |
+| Support | **Hexenmeister** | Welkfluch (Boss macht −20 % Schaden) | Bruchmal (Boss nimmt +15 % Schaden) | Zehrender Griff (Schaden, heilt den Hexenmeister) | |
 
 ## Noch offen (nächste Sessions)
 - **Kampf-Feinheiten:** Werteliste (Leben, Angriff, Magie, Rüstung, Krit, Mana …), Aggro-Formel, die genaue Wirkung der Taktiken
