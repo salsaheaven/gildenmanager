@@ -19,6 +19,11 @@ Das Projekt ist ein Vibecoding-Übungsprojekt. Der Code soll auch für Programmi
 - **Inhalte und Zahlen stehen immer in `src/data/`**, nie in der Logik. So lassen sich Namen, Werte und Chancen ändern, ohne die Logik anzufassen.
 - Nach jeder Änderung kurz und laienverständlich erklären, was in welcher Datei passiert ist
 
+## Arbeitsweise
+- **Klein und spielbar:** Große Features in Schritte zerlegen, die jeweils einzeln spielbar sind. Nach jedem Schritt pushen. GitHub Pages veröffentlicht dann automatisch, und man kann sofort online testen.
+- **Modular, auch um Token zu sparen:** Kleine Dateien mit einer klaren Aufgabe. Für eine Änderung nur die betroffenen Dateien lesen, nicht das ganze Projekt. Die Übersicht unten zeigt, wo was liegt.
+- Testhilfen wie ein Test-Menü oder ein Kampf-Labor sind ausdrücklich erwünscht, damit spätere Inhalte schnell prüfbar sind
+
 ## Aufbau
 ```
 src/core/      Spiel-Grundgerüst: Game (hält alles zusammen), GameClock, Random, SaveManager

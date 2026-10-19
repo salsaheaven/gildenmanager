@@ -74,10 +74,11 @@ Das Spielkonzept, auf dem diese Reihenfolge beruht, steht in [KONZEPT.md](KONZEP
 **M0 – Fundament ✅:** Setup, Spieluhr mit Pause/Speed, Speichern/Laden, Pixel-Grundlayout, Schatzkammer mit Lootboxen und Pity, online auf GitHub Pages.
 
 **M1 – Helden & erster Dungeon (wichtigster Meilenstein):**
-- 4 Klassen: Krieger (Tank), Priester (Heiler), Magier und Jäger (DD)
-- Rekrutierung mit Helden-Seltenheit und Eigenschaften
-- Ausrüstung anlegen, sodass Items endlich einen Zweck haben
-- 3 Normal-Dungeons mit Boss und Boss-Kiste, Kampfbericht, XP und Level, Verletzungen
+In kleinen, jeweils online testbaren Schritten:
+1. **Helden:** 5 Klassen (Krieger, Priester, Runenwirker, Magier, Schurke), Rekrutierung mit Helden-Seltenheit und Eigenschaften, Ausrüstung anlegen
+2. **Kampf-Labor:** Testbildschirm, auf dem eine Gruppe gegen einen Boss antritt. Er zeigt Kampfbericht und Siegchance aus 200 Simulationen und dient zum Testen und Balancen.
+3. **Dungeons:** 3 Normal-Dungeons mit Boss-Mechaniken, Taktikwahl, Live-Ticker mit Lebensbalken, Rückzug, Boss-Kiste
+4. **Fortschritt:** XP und Level, Verletzungen, Test-Menü (F2) für Gold, Kisten und Zeit
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 
 **M2 – Progression:** Talente, Zerlegen und Verbessern (+1 bis +10), Klassen-Sets + Sammelbuch, Heroisch-Modus mit Permadeath + Ehrenhalle.
