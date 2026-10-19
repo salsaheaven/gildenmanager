@@ -31,7 +31,10 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
 | Helden | Persönlichkeiten: zufällige Bewerber mit Namen, **Seltenheit** (Grün bis Orange) und Eigenschaften (z.B. „Gierig“, „Mutig“) |
 | Helden-Seltenheit | Bewirkt mehr Wachstum pro Level und mehr Eigenschafts- bzw. Talentplätze. Gute Ausrüstung kann eine niedrige Seltenheit ausgleichen. |
 | Klassen | 12 Klassen in 4 Rollen, Details siehe [Kampf](#kampf). M1 startet mit 5 Klassen. |
-| Dungeons | MMO-Klassiker: 5er-Gruppe aus Tank, Heiler und 3 DD. Stufen Normal → Heroisch → Raids (10 und mehr Helden). Jede Stufe hat ein empfohlenes Ausrüstungsniveau. |
+| Dungeons | MMO-Klassiker: 5er-Gruppe aus Tank, Heiler und 3 DD. Stufen Normal → Heroisch. Jede Stufe hat ein empfohlenes Ausrüstungsniveau. |
+| Aufbau eines Dungeons | Immer **mindestens eine Trash-Gruppe und ein Boss**. Spätere Dungeons haben mehrere Trash-Gruppen und 2 bis 3 Bosse. Leben und Mana werden zwischen den Begegnungen nur teilweise aufgefüllt. Man muss also mit seinen Kräften haushalten. |
+| Raids | Ein eigenes Kapitel, wird später gesondert geplant (10 und mehr Helden) |
+| Siegchance in Dungeons | Noch offen, ob sie dort überhaupt angezeigt wird. Idee: Man muss einen **klugen Kopf (Strategen) im Spiel bezahlen** oder ein **Gebäude bauen** (z.B. einen Kartenraum), das Kämpfe vorab simuliert. **Je höher die Ausbaustufe, desto genauer die Vorhersage**, etwa eine grobe Spanne auf Stufe 1 und ein genauer Wert auf der höchsten Stufe. Bis dahin zeigt der Dungeon nur das empfohlene Ausrüstungsniveau und Warnungen wie „Kein Heiler in der Gruppe!“. |
 | Tempo | Aktiv mit kurzen Timern: Dungeons dauern 30 Sekunden bis wenige Minuten, dazu gibt es Pause und Speed |
 | Scheitern | Normal-Dungeons: Die Helden werden **verletzt** und fallen eine Weile aus. **Permadeath nur in Hardcore-Inhalten** (Heroisch, Raids): Das Risiko geht man freiwillig für bessere Beute ein. |
 | Erbe | Stirbt ein Held, kommt seine **komplette Ausrüstung zurück ins Inventar**. Man verliert nur den Helden selbst (Level, Eigenschaften, Seltenheit), so bleibt das Spiel trotz Wipes schaffbar. Gefallene bekommen einen Platz in der **Ehrenhalle**. |
@@ -62,7 +65,7 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
   - Der Rückzug dauert **2 Runden**, in denen der Boss weiter angreift (auch mit Mechaniken). Die Helden heilen und verteidigen sich nur noch, Schaden machen sie keinen mehr. Auch beim Rückzug kann also noch jemand fallen.
   - Es gibt keine Beute, und alle Überlebenden sind verletzt.
 - **Darstellung:** Der vorberechnete Kampf wird in Spielzeit als **Kampfszene** abgespielt: Pixel-Helden gegen den Boss, Lebensbalken, aufploppende Schadens- und Heilzahlen wie im MMO, ein Zauberbalken für angekündigte Mechaniken und ein Ticker. Danach folgt der vollständige Kampfbericht. Man soll mitfiebern und sehen, wie Taktik und Gruppe wirken.
-- **Schnellkampf:** Einen Dungeon kann man erst sofort berechnen lassen, nachdem man ihn einige Male (z.B. 3-mal) erfolgreich abgeschlossen hat. Bis dahin muss man den Kampf ansehen. Zuerst lernt man also den Boss kennen, danach spart man beim Farmen Zeit.
+- **Schnellkampf:** Ein Run läuft immer in Spielzeit, egal ob man zuschaut. Erst nachdem man einen Dungeon einige Male (z.B. 3-mal) geschafft hat, kann man einen laufenden Run **sofort beenden** und spart damit Spieltage. Zuerst lernt man also den Dungeon kennen, danach farmt man ihn schneller.
 - **Zwei Reihen:** Vorne stehen Tanks und Nahkämpfer, hinten Fernkämpfer, Heiler und Supporter. Manche Bossfähigkeiten treffen nur eine Reihe.
 - **Ressourcen:** Alle Skills haben Abklingzeiten. Heiler und Zauberer brauchen zusätzlich **Mana**. Geht dem Heiler das Mana aus, wird es gefährlich.
 - **Tod (nur Hardcore):** Wer auf 0 Leben fällt, ist tot, auch wenn die Gruppe gewinnt. In Normal-Dungeons ist er stattdessen verletzt.
@@ -110,3 +113,4 @@ Jeder Skill hat eine Abklingzeit und kostet bei Zauberern Mana. Alle Zahlen steh
 - **KI-Gilden:** Fortschrittskurve, Namen, Persönlichkeit, Reaktionen
 - **Verbrauchsgüter:** Welche Tränke, Fläschchen und Proviant gibt es, und was bewirken sie genau?
 - **Wirtschaft:** Woher kommt Gold, wofür gibt man es aus?
+- **Level-Obergrenze:** Wie hoch geht das Heldenlevel? Davon hängt ein großer Teil der Skalierung ab (Wachstum pro Level, Boss- und Item-Werte, Dungeon-Stufen, Spieldauer). Bis zur Entscheidung sind alle Zahlen vorläufig.
