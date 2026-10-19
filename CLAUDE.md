@@ -28,11 +28,17 @@ Das Projekt ist ein Vibecoding-Übungsprojekt. Der Code soll auch für Programmi
 ```
 src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen), GameClock, Random, SaveManager
 src/entities/  Spielobjekte: Guild, Hero, Item, LootBox (später Expedition)
-src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem (später CombatSimulator …)
+src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem
+src/systems/combat/  Kampf: CombatSimulator (Rundenablauf), Battle (Zustand + Zielwahl),
+               Combatant (ein Kämpfer), HeroAI (welcher Skill?), EnemyAI (Boss-Mechaniken),
+               AbilityEffects (was ein Skill bewirkt), ChanceEstimator (200 Kämpfe → Siegchance),
+               TestGroup (Standard-Gruppe fürs Labor)
 src/data/      Reine Inhalte: rarities, items, lootBoxes, balancing, sprites (Pixel-Art als Text),
-               heroClasses, abilities, heroRarities, traits, heroNames
+               heroClasses, abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
+               enemies (Bosse + Diener), tactics, combatRules
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: LootBoxScreen (Schatzkammer),
-               HeroScreen (+ HeroDetailPanel, EquipPanel), TavernScreen.
+               HeroScreen (+ HeroDetailPanel, EquipPanel), TavernScreen, CombatLabScreen.
+               CombatReport = Ergebnis, Schadensmesser und Kampfbericht (wiederverwendbar).
                Leisten: TopBar, NavBar. Helfer: PixelArt, Sound, Toast, format, TraitChip.
                DebugPanel = Test-Menü (Taste F2)
 tests/         Vitest-Tests (prüfen auch, ob die Daten gültig sind)
@@ -41,6 +47,8 @@ tests/         Vitest-Tests (prüfen auch, ob die Daten gültig sind)
 - Die UI ruft Methoden von `Game` auf und hört auf `game.on('changed')` bzw. auf weitere Events.
 - Jede Klasse, die gespeichert wird, hat `toSaveData()` und `static fromSaveData()`.
 - Zufall läuft immer über `Random`, nie direkt über `Math.random()`. So bleibt er testbar und wird mitgespeichert.
+- Balancing des Kampfs: Im Kampf-Labor ausprobieren, oder per Node-Skript mit `estimateChances` viele Varianten durchrechnen.
+  Zielwerte für eine Level-1-Gruppe ohne Ausrüstung: Grimmzahn ~90 %, Morva ~70 %, Skarrix ~50 %.
 - Pixel-Art steht als Text-Raster in `src/data/sprites.js`. Ein Zeichen ist ein Pixel, die Farben stehen in `PALETTE`.
 
 ## Befehle

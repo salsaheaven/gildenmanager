@@ -1105,3 +1105,207 @@ h3 {
   flex-direction: column;
   gap: 6px;
 }
+
+/* ---------- Kampf-Labor ---------- */
+
+.lab-screen {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .lab-screen {
+    grid-template-columns: 1fr;
+  }
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.group-options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lab-hero-toggle {
+  --rarity: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  box-shadow: none;
+  border-left: 4px solid var(--rarity);
+  opacity: 0.6;
+}
+
+.lab-hero-toggle.selected {
+  opacity: 1;
+  background: #3d2f5c;
+  border-color: var(--rarity);
+}
+
+.group-preview {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  min-height: 56px;
+  align-items: flex-end;
+}
+
+.boss-title {
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.mechanic-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 17px;
+}
+
+.mechanic-list b {
+  display: block;
+  font-weight: normal;
+  color: #ff9f43;
+}
+
+.mechanic-list span {
+  color: var(--text-dim);
+}
+
+.lab-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.lab-results {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 400px;
+}
+
+.estimate-main {
+  font-family: var(--font-title);
+  font-size: 16px;
+  color: var(--text);
+}
+
+.estimate-main.good { color: #1eff00; }
+.estimate-main.ok { color: var(--gold); }
+.estimate-main.bad { color: #ff6b6b; }
+
+.estimate-sub {
+  color: var(--text-dim);
+  margin: 6px 0;
+}
+
+.estimate-falls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.fall-chip {
+  padding: 1px 6px;
+  font-size: 16px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.result-banner {
+  font-family: var(--font-title);
+  font-size: 12px;
+  padding: 12px;
+  text-align: center;
+  border: 3px solid;
+}
+
+.result-banner.victory { color: #1eff00; border-color: #1eff00; background: #0f2a10; }
+.result-banner.defeat { color: #ff6b6b; border-color: #ff6b6b; background: #2a0f0f; }
+.result-banner.neutral { color: var(--gold); border-color: var(--gold); }
+
+.meter-wrapper {
+  overflow-x: auto;
+}
+
+.meter {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 18px;
+}
+
+.meter th {
+  text-align: left;
+  font-weight: normal;
+  color: var(--text-dim);
+  padding: 4px 8px;
+  border-bottom: 2px solid var(--border);
+}
+
+.meter td {
+  padding: 4px 8px;
+}
+
+.meter-name {
+  /* Klassenfarbe aufgehellt, damit auch dunkle Farben (Schurke) lesbar sind */
+  color: color-mix(in srgb, var(--class-color) 55%, white);
+  white-space: nowrap;
+}
+
+.meter-bar {
+  position: relative;
+  min-width: 110px;
+  height: 20px;
+  background: #0c0914;
+}
+
+.meter-bar div {
+  height: 100%;
+}
+
+.meter-bar.damage div { background: #8b2e2e; }
+.meter-bar.healing div { background: #2e7d4f; }
+
+.meter-bar span {
+  position: absolute;
+  left: 6px;
+  top: 0;
+  line-height: 20px;
+}
+
+.status-alive { color: #1eff00; }
+.status-fallen { color: #ff6b6b; }
+
+.combat-log {
+  max-height: 55vh;
+  overflow-y: auto;
+  background: #0c0914;
+  border: 2px solid var(--border);
+  padding: 8px 12px;
+  font-size: 17px;
+}
+
+.log-round {
+  margin-top: 8px;
+  color: var(--gold);
+  font-family: var(--font-title);
+  font-size: 8px;
+}
+
+.log-line { color: var(--text-dim); }
+.log-crit { color: #ffd23f; }
+.log-heal { color: #1eff00; }
+.log-shield { color: #5ef2ff; }
+.log-mechanic { color: #ff9f43; }
+.log-warning { color: #ff6b6b; }
+.log-death { color: #ffffff; font-weight: bold; }

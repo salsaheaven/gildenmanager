@@ -12,6 +12,7 @@ import { NavBar } from './ui/NavBar.js';
 import { LootBoxScreen } from './ui/LootBoxScreen.js';
 import { HeroScreen } from './ui/HeroScreen.js';
 import { TavernScreen } from './ui/TavernScreen.js';
+import { CombatLabScreen } from './ui/CombatLabScreen.js';
 import { DebugPanel } from './ui/DebugPanel.js';
 import { Sound } from './ui/Sound.js';
 import { showToast } from './ui/Toast.js';
@@ -24,6 +25,7 @@ const TABS = [
   { id: 'treasury', name: 'Schatzkammer' },
   { id: 'heroes', name: 'Helden' },
   { id: 'tavern', name: 'Taverne' },
+  { id: 'lab', name: 'Kampf-Labor' },
 ];
 
 // ---------- Spielstand laden ----------
@@ -61,6 +63,7 @@ const navBar = new NavBar(document.getElementById('nav-bar'), TABS, showScreen);
 new LootBoxScreen(screenElements.treasury, game);
 new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'));
 const tavernScreen = new TavernScreen(screenElements.tavern, game);
+new CombatLabScreen(screenElements.lab, game);
 new DebugPanel(game);
 
 let currentScreen = null;
