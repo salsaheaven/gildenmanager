@@ -35,12 +35,13 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf), Battle (Zustand + Zi
                TestGroup (Standard-Gruppe fürs Labor)
 src/data/      Reine Inhalte: rarities, items, lootBoxes, balancing, sprites (Pixel-Art als Text),
                heroClasses, abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
-               enemies (Bosse + Diener), tactics, combatRules
+               enemies (Bosse + Diener), tactics, combatRules, heroOrders (Kampf-Anweisungen pro Klasse)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: LootBoxScreen (Schatzkammer),
                HeroScreen (+ HeroDetailPanel, EquipPanel), TavernScreen, CombatLabScreen.
                CombatReport = Ergebnis, Schadensmesser und Kampfbericht (wiederverwendbar).
                BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken); läuft im Takt der Spieluhr.
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
+               OrdersPanel = Auswahllisten für Anweisungen (Labor + Heldenbildschirm).
                Leisten: TopBar, NavBar. Helfer: PixelArt, Sound, Toast, format, TraitChip.
                DebugPanel = Test-Menü (Taste F2)
 tests/         Vitest-Tests (prüfen auch, ob die Daten gültig sind)

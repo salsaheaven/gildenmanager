@@ -42,6 +42,10 @@ export class TopBar {
     // Leertaste = Pause. preventDefault verhindert, dass die Leertaste
     // zusätzlich den zuletzt geklickten Knopf noch einmal drückt.
     document.addEventListener('keydown', (event) => {
+      // In Auswahllisten und Eingabefeldern bleibt die Leertaste normal
+      if (event.target.closest('select, input, textarea')) {
+        return;
+      }
       if (event.code === 'Space') {
         event.preventDefault();
         if (!event.repeat) {
@@ -51,7 +55,7 @@ export class TopBar {
       }
     });
     document.addEventListener('keyup', (event) => {
-      if (event.code === 'Space') {
+      if (event.code === 'Space' && !event.target.closest('select, input, textarea')) {
         event.preventDefault();
       }
     });

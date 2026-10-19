@@ -35,6 +35,7 @@ export function createHeroCombatant(hero) {
     stats: hero.getStats(),
     abilityIds: heroClass.abilities,
     basicAttack: heroClass.basicAttack,
+    orderSettings: hero.getOrderSettings(),
   });
 }
 

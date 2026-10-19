@@ -39,7 +39,7 @@ export function heroDealsDamage(battle, caster, target, actionName, scaling, pow
 
 // Normaler Angriff, wenn kein Skill passt
 export function useBasicAttack(battle, caster) {
-  const target = battle.getFocusTarget();
+  const target = battle.getFocusTarget(caster);
   if (!target) {
     return;
   }
@@ -53,7 +53,7 @@ function getTargets(battle, caster, ability) {
   let targets;
   switch (ability.target) {
     case 'focus':
-      targets = [battle.getFocusTarget()];
+      targets = [battle.getFocusTarget(caster)];
       break;
     case 'boss':
       targets = [battle.boss];

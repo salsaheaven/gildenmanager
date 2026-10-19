@@ -12,6 +12,7 @@ import { createHeroCanvas, createItemCanvas } from './PixelArt.js';
 import { createTraitChip } from './TraitChip.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
+import { renderOrders } from './OrdersPanel.js';
 
 export class HeroDetailPanel {
   // callbacks = { onSlotClicked(slot), onDismissed(), onGoToTavern() }
@@ -66,6 +67,9 @@ export class HeroDetailPanel {
       <h3>Ausrüstung</h3>
       <div class="equipment-grid"></div>
 
+      <h3>Anweisungen für den Kampf</h3>
+      <div class="hero-orders"></div>
+
       <div class="detail-actions">
         <button class="dismiss-button">Entlassen</button>
       </div>
@@ -82,6 +86,9 @@ export class HeroDetailPanel {
     this.renderStats();
     this.renderSkills();
     this.renderEquipment();
+    renderOrders(this.root.querySelector('.hero-orders'), [hero], (changedHero, orderId, optionId) => {
+      this.game.setHeroOrder(changedHero.id, orderId, optionId);
+    }, false);
     this.setupDismissButton();
   }
 

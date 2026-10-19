@@ -11,7 +11,8 @@ export class Combatant {
   //   id, name, side ('hero' oder 'enemy'), row ('front'/'back'),
   //   stats: { health, mana, attack, magic, defense },
   //   abilityIds (Liste), basicAttack, heroId (nur Helden), classId (nur Helden),
-  //   bossData (nur Bosse), isMinion + minionId (nur Diener)
+  //   bossData (nur Bosse), isMinion + minionId (nur Diener),
+  //   orderSettings (nur Helden: Anweisungen, siehe Hero.getOrderSettings)
   // }
   constructor(options) {
     this.id = options.id;
@@ -23,6 +24,7 @@ export class Combatant {
     this.bossData = options.bossData || null;
     this.isMinion = options.isMinion || false;
     this.minionId = options.minionId || null;
+    this.orderSettings = options.orderSettings || { abilityWhen: {} };
 
     this.maxHp = options.stats.health;
     this.hp = this.maxHp;

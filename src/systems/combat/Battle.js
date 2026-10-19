@@ -100,8 +100,12 @@ export class Battle {
     return target;
   }
 
-  // Ziel für Schadens-Skills: erst Diener (mit wenig Leben zuerst), dann der Boss
-  getFocusTarget() {
+  // Ziel für Schadens-Skills: erst Diener (mit wenig Leben zuerst), dann der Boss.
+  // Hat der Held die Anweisung "Boss zuerst", nimmt er den Boss, solange der lebt.
+  getFocusTarget(attacker = null) {
+    if (attacker && attacker.orderSettings.targetPriority === 'boss' && this.boss.alive) {
+      return this.boss;
+    }
     const minions = this.getLivingMinions();
     if (minions.length > 0) {
       minions.sort((a, b) => a.hp - b.hp);

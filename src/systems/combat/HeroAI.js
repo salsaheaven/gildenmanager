@@ -2,8 +2,9 @@
 // HEROAI – entscheidet, was ein Held in seinem Zug tut
 // Geht die Skills nach Priorität durch und nimmt den ersten, der
 //   1. bereit ist (keine Abklingzeit),
-//   2. genug Mana hat und
-//   3. dessen Bedingung ("when" in data/abilities.js) gerade zutrifft.
+//   2. genug Mana hat (und die Mana-Reserve aus den Anweisungen nicht angreift) und
+//   3. dessen Bedingung gerade zutrifft. Die Bedingung steht unter "when" in data/abilities.js,
+//      kann aber durch eine Anweisung des Spielers ersetzt werden (data/heroOrders.js).
 // Passt nichts, gibt es einen normalen Angriff.
 // ============================================================
 
@@ -22,23 +23,46 @@ export function chooseAbility(battle, hero) {
     if (hero.mana < ability.manaCost) {
       continue;
     }
-    if (isConditionMet(battle, hero, ability.when)) {
+    if (breaksManaReserve(hero, ability)) {
+      continue;
+    }
+    const condition = hero.orderSettings.abilityWhen[abilityId] || ability.when;
+    if (isConditionMet(battle, hero, condition, ability)) {
       return abilityId;
     }
   }
   return null;
 }
 
-// Alle Bedingungen, die in data/abilities.js unter "when" stehen können
-function isConditionMet(battle, hero, condition) {
+// Anweisung "Mana aufheben": Schadens-Skills nur, wenn danach noch genug Mana übrig ist
+function breaksManaReserve(hero, ability) {
+  const reserve = hero.orderSettings.manaReserve;
+  if (!reserve || ability.type !== 'damage' || ability.manaCost === 0) {
+    return false;
+  }
+  return (hero.mana - ability.manaCost) / hero.maxMana < reserve;
+}
+
+// Alle Bedingungen, die in data/abilities.js unter "when" (oder in Anweisungen) stehen können
+function isConditionMet(battle, hero, condition, ability) {
   const tactic = battle.tactic;
   const boss = battle.boss;
   const bossTarget = battle.getBossTarget();
   const lowestAlly = battle.getLowestAlly();
+  // Eine Anweisung "Heilen ab …" ersetzt die Heilschwelle der Taktik
+  const healThreshold = hero.orderSettings.healThreshold || tactic.healThreshold;
 
   switch (condition) {
     case 'always':
-      return battle.getFocusTarget() !== null;
+      return battle.getFocusTarget(hero) !== null;
+
+    // Sobald der Skill bereit ist
+    case 'ready':
+      return true;
+
+    // Nie benutzen
+    case 'never':
+      return false;
 
     // Der Boss greift gerade jemand anderen an
     case 'notTanking':
@@ -50,14 +74,23 @@ function isConditionMet(battle, hero, condition) {
       return busterComing || hero.getHpPercent() < tactic.selfDefenseThreshold;
     }
 
+    // Nur wenn ein Tank-Buster angekündigt ist (bei Selbst-Skills: nur, wenn er mich trifft)
+    case 'busterIncoming': {
+      const busterComing = boss.casting !== null && boss.casting.type === 'tankBuster';
+      return busterComing && (ability.target !== 'self' || bossTarget === hero);
+    }
+
     case 'allyHurt':
-      return lowestAlly !== null && lowestAlly.getHpPercent() < tactic.healThreshold;
+      return lowestAlly !== null && lowestAlly.getHpPercent() < healThreshold;
 
     case 'allyBadlyHurt':
-      return lowestAlly !== null && lowestAlly.getHpPercent() < tactic.healThreshold - 0.2;
+      return lowestAlly !== null && lowestAlly.getHpPercent() < healThreshold - 0.2;
 
     case 'lowMana':
       return hero.getManaPercent() < 0.3;
+
+    case 'halfMana':
+      return hero.getManaPercent() < 0.5;
 
     // Der, den der Boss angreift, hat keinen Schild
     case 'targetUnshielded':
@@ -66,14 +99,21 @@ function isConditionMet(battle, hero, condition) {
     // Gruppenschaden wird vorbereitet, oder die Gruppe ist schon angeschlagen
     case 'groupThreatened': {
       const groupHitComing = boss.casting && (boss.casting.type === 'groupCast' || boss.casting.type === 'frontWave');
-      return groupHitComing || battle.getAverageHeroHpPercent() < tactic.healThreshold;
+      return groupHitComing || battle.getAverageHeroHpPercent() < healThreshold;
     }
+
+    // Nur wenn Gruppenschaden angekündigt ist
+    case 'groupHitIncoming':
+      return boss.casting !== null && (boss.casting.type === 'groupCast' || boss.casting.type === 'frontWave');
 
     case 'allyDebuffed':
       return battle.getLivingHeroes().some((ally) => ally.hasDebuff());
 
     case 'multipleEnemies':
       return battle.getLivingEnemies().length >= 2;
+
+    case 'manyEnemies':
+      return battle.getLivingEnemies().length >= 3;
 
     case 'bossCasting':
       return boss.casting !== null;
@@ -83,7 +123,7 @@ function isConditionMet(battle, hero, condition) {
 
     // Das Ziel hat noch kein Gift von mir
     case 'targetWithoutPoison': {
-      const target = battle.getFocusTarget();
+      const target = battle.getFocusTarget(hero);
       if (!target) {
         return false;
       }

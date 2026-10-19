@@ -1884,3 +1884,48 @@ h3 {
 .scene-field.field-shake {
   animation: screen-shake 0.4s;
 }
+
+/* ---------- Anweisungen ---------- */
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.orders-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.orders-hero {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gold);
+}
+
+.order-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  color: var(--text-dim);
+}
+
+.order-row select {
+  font-family: var(--font-text);
+  font-size: 16px;
+  color: var(--text);
+  background: #120d1c;
+  border: 2px solid var(--border);
+  padding: 2px 4px;
+  min-width: 0;
+}
+
+.order-row select:focus {
+  outline: none;
+  border-color: var(--gold);
+}

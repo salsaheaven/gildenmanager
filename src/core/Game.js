@@ -242,6 +242,17 @@ export class Game {
     return count;
   }
 
+  // Ändert eine Kampf-Anweisung eines Helden (siehe data/heroOrders.js)
+  setHeroOrder(heroId, orderId, optionId) {
+    const hero = this.guild.findHero(heroId);
+    if (!hero) {
+      return false;
+    }
+    hero.setOrder(orderId, optionId);
+    this.emit('changed');
+    return true;
+  }
+
   // Nimmt ein Item ab und legt es ins Inventar
   unequipItem(heroId, slot) {
     const hero = this.guild.findHero(heroId);

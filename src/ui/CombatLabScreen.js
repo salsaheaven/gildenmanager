@@ -14,6 +14,7 @@ import { createTestGroup } from '../systems/combat/TestGroup.js';
 import { createHeroCanvas } from './PixelArt.js';
 import { renderCombatReport } from './CombatReport.js';
 import { BattleScene } from './BattleScene.js';
+import { renderOrders } from './OrdersPanel.js';
 import { Sound } from './Sound.js';
 
 const MAX_GROUP_SIZE = 5;
@@ -31,6 +32,7 @@ export class CombatLabScreen {
     this.tacticId = 'balanced';
     this.fightCounter = 0;             // sorgt dafür, dass jeder Kampf anders verläuft
     this.activeScene = null;           // die gerade laufende Kampfszene
+    this.testOrders = {};              // Anweisungen der Testgruppe: Klasse → { Anweisung → Option }
 
     this.root.innerHTML = `
       <div class="lab-screen">
@@ -50,6 +52,9 @@ export class CombatLabScreen {
           <h3>Taktik</h3>
           <div class="button-row tactic-buttons"></div>
           <p class="hint tactic-description"></p>
+
+          <h3>Anweisungen</h3>
+          <div class="orders-list"></div>
 
           <div class="lab-actions">
             <button class="big-button fight-button">Kampf ansehen</button>
@@ -83,6 +88,7 @@ export class CombatLabScreen {
     this.renderGroupPreview();
     this.renderBossList();
     this.renderTactics();
+    this.renderOrderList();
     const hasGroup = this.getGroup().length > 0;
     this.root.querySelector('.fight-button').disabled = !hasGroup;
     this.root.querySelector('.estimate-button').disabled = !hasGroup;
@@ -161,7 +167,12 @@ export class CombatLabScreen {
   // Die Helden, die gerade kämpfen würden
   getGroup() {
     if (this.mode === 'test') {
-      return createTestGroup(this.testLevel);
+      const group = createTestGroup(this.testLevel);
+      // Die Testgruppe wird jedes Mal neu erstellt, ihre Anweisungen merkt sich das Labor
+      for (const hero of group) {
+        hero.orders = { ...(this.testOrders[hero.classId] || {}) };
+      }
+      return group;
     }
     return this.game.guild.heroes.filter((hero) => this.selectedHeroIds.has(hero.id));
   }
@@ -194,6 +205,17 @@ export class CombatLabScreen {
       line.querySelector('span').textContent = mechanic.hint;
       info.querySelector('.mechanic-list').appendChild(line);
     }
+  }
+
+  renderOrderList() {
+    renderOrders(this.root.querySelector('.orders-list'), this.getGroup(), (hero, orderId, optionId) => {
+      if (this.mode === 'test') {
+        this.testOrders[hero.classId] = { ...(this.testOrders[hero.classId] || {}), [orderId]: optionId };
+      } else {
+        // Eigene Helden merken sich ihre Anweisungen dauerhaft (wird gespeichert)
+        this.game.setHeroOrder(hero.id, orderId, optionId);
+      }
+    });
   }
 
   renderTactics() {

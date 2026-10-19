@@ -10,6 +10,7 @@ import { getHeroRarity } from '../data/heroRarities.js';
 import { getRarity, getRarityRank } from '../data/rarities.js';
 import { getTrait } from '../data/traits.js';
 import { SLOT_NAMES } from '../data/items.js';
+import { getOrdersForClass } from '../data/heroOrders.js';
 
 // Alle Ausrüstungsplätze, z.B. ['weapon', 'offhand', 'head', …]
 export const EQUIPMENT_SLOTS = Object.keys(SLOT_NAMES);
@@ -30,6 +31,10 @@ export class Hero {
     this.looks = looks;
     this.level = 1;
     this.xp = 0;
+
+    // Anweisungen für den Kampf: Anweisungs-id → gewählte Option (siehe data/heroOrders.js).
+    // Fehlt eine Anweisung, gilt die Standard-Option.
+    this.orders = {};
 
     // Ausrüstung: pro Platz ein Item oder null (leer)
     this.equipment = {};
@@ -146,6 +151,35 @@ export class Hero {
     return item.getPower() - currentPower;
   }
 
+  // ---------- Anweisungen ----------
+
+  // Welche Option ist bei dieser Anweisung gewählt? (sonst die erste = Standard)
+  getChosenOption(order) {
+    const chosenId = this.orders[order.id];
+    const chosen = order.options.find((option) => option.id === chosenId);
+    return chosen || order.options[0];
+  }
+
+  setOrder(orderId, optionId) {
+    this.orders[orderId] = optionId;
+  }
+
+  // Fasst alle gewählten Optionen zu einem Paket für die Kampf-KI zusammen
+  getOrderSettings() {
+    const settings = { abilityWhen: {} };
+    for (const order of getOrdersForClass(this.classId)) {
+      const effects = this.getChosenOption(order).effects;
+      for (const key in effects) {
+        if (key === 'abilityWhen') {
+          Object.assign(settings.abilityWhen, effects.abilityWhen);
+        } else {
+          settings[key] = effects[key];
+        }
+      }
+    }
+    return settings;
+  }
+
   // ---------- Speichern ----------
 
   toSaveData() {
@@ -164,6 +198,7 @@ export class Hero {
       level: this.level,
       xp: this.xp,
       equipment: equipment,
+      orders: this.orders,
     };
   }
 
@@ -171,6 +206,7 @@ export class Hero {
     const hero = new Hero(data.id, data.name, data.classId, data.rarityId, data.traitIds, data.looks);
     hero.level = data.level;
     hero.xp = data.xp;
+    hero.orders = data.orders || {};
     for (const slot of EQUIPMENT_SLOTS) {
       const itemData = data.equipment[slot];
       hero.equipment[slot] = itemData ? Item.fromSaveData(itemData) : null;
