@@ -79,6 +79,12 @@ In kleinen, jeweils online testbaren Schritten:
 2. ✅ **Kampf-Labor:** Testbildschirm, auf dem eine Gruppe gegen einen Boss antritt. Er zeigt Kampfbericht und Siegchance aus 200 Simulationen und dient zum Testen und Balancen.
 3. ✅ **Dungeons:** 3 Normal-Dungeons mit Boss-Mechaniken, Taktikwahl, Live-Ticker mit Lebensbalken, Rückzug, Boss-Kiste
 4. **Fortschritt:** XP und Level, Verletzungen, Test-Menü (F2) für Gold, Kisten und Zeit
+
+**Als Nächstes (in dieser Reihenfolge):**
+- **Gegnerstärke und Skalierung:** Zuerst die Level-Obergrenze festlegen. Davon hängt ab, wie stark Items im Verhältnis zu den Grundwerten sein dürfen. Im Moment sind Items auf Level 1 zu stark, deshalb springen die Siegchancen zwischen Ausrüstungsstufen stark (siehe KONZEPT.md).
+- **Beute sichtbarer machen:** Nach einem Sieg erscheint ein Sieg-Fenster mit der Boss-Kiste und dem Knopf „Jetzt öffnen“. Bisher landet die Kiste unbemerkt in der Schatzkammer. Eventuell bekommen Trash-Gegner kleine eigene Drops (Gold, ab und zu ein graues oder weißes Item), damit sich auch ein gescheiterter Run lohnt.
+- Danach Schritt 4.
+
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 
 **M2 – Progression:** Gildenkurier abschalten und Kisten aus dem Händler nehmen; der Laden verkauft Verbrauchsgüter und Mats, dazu der Wanderhändler. Talente, Zerlegen und Verbessern (+1 bis +10), Klassen-Sets + Sammelbuch, Heroisch-Modus mit Permadeath + Ehrenhalle.
