@@ -81,7 +81,7 @@ In kleinen, jeweils online testbaren Schritten:
 4. **Fortschritt:** XP und Level, Verletzungen, Test-Menü (F2) für Gold, Kisten und Zeit
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 
-**M2 – Progression:** Gildenkurier abschalten (keine Gratis-Kisten mehr), Talente, Zerlegen und Verbessern (+1 bis +10), Klassen-Sets + Sammelbuch, Heroisch-Modus mit Permadeath + Ehrenhalle.
+**M2 – Progression:** Gildenkurier abschalten und Kisten aus dem Händler nehmen; der Laden verkauft Verbrauchsgüter und Mats, dazu der Wanderhändler. Talente, Zerlegen und Verbessern (+1 bis +10), Klassen-Sets + Sammelbuch, Heroisch-Modus mit Permadeath + Ehrenhalle.
 
 **M3 – Rivalen & Gildenhalle:** KI-Gilden, Rangliste, News-Ticker, Gebäude (Kaserne, Lazarett, Schmiede), Crafting.
 
