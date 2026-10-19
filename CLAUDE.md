@@ -19,6 +19,10 @@ Das Projekt ist ein Vibecoding-Übungsprojekt. Der Code soll auch für Programmi
 - **Inhalte und Zahlen stehen immer in `src/data/`**, nie in der Logik. So lassen sich Namen, Werte und Chancen ändern, ohne die Logik anzufassen.
 - Nach jeder Änderung kurz und laienverständlich erklären, was in welcher Datei passiert ist
 
+## Design-Grundsatz
+**Jede Wahlmöglichkeit im Spiel braucht Vor- und Nachteile** (Anweisungen, Taktiken, Klassen, Eigenschaften, Talente …).
+Eine Option, die immer die beste ist, ist keine Wahl. Neue Optionen deshalb per Simulation prüfen: Ist eine Option gegen alle Bosse besser als die anderen, braucht sie einen Nachteil. Details stehen in `KONZEPT.md`.
+
 ## Arbeitsweise
 - **Klein und spielbar:** Große Features in Schritte zerlegen, die jeweils einzeln spielbar sind. Nach jedem Schritt pushen. GitHub Pages veröffentlicht dann automatisch, und man kann sofort online testen.
 - **Modular, auch um Token zu sparen:** Kleine Dateien mit einer klaren Aufgabe. Für eine Änderung nur die betroffenen Dateien lesen, nicht das ganze Projekt. Die Übersicht unten zeigt, wo was liegt.

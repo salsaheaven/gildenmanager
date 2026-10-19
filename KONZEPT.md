@@ -5,6 +5,13 @@ und baut die Gildenhalle aus. Am Ende steht ein **Endboss**: Das Spiel hat ein E
 
 Stand: Konzept-Session 2 – Kampf (2026-10-19)
 
+## Design-Grundsatz: echte Entscheidungen
+**Jede Wahlmöglichkeit braucht Vor- und Nachteile.** Ist eine Option in fast jeder Lage die beste, ist sie keine Wahl mehr, sondern eine Pflicht. Dann kann man sie auch gleich weglassen.
+Das gilt für Anweisungen, Taktiken, Klassen, Eigenschaften, Talente, Ausrüstungswerte und Verbrauchsgüter.
+- Gute Optionen sind **situativ**: gegen einen Boss stark, gegen einen anderen schwach (z.B. „Eiskranz sofort“: gut gegen Grimmzahn, schlecht gegen Skarrix).
+- Oder sie haben einen **Preis**: mehr Sicherheit kostet Mana, Tempo oder Schaden, mehr Schaden kostet Sicherheit.
+- Beim Balancing für jede Wahl prüfen (im Kampf-Labor bzw. per Simulation), ob nicht eine Option alle anderen in allen Kämpfen schlägt.
+
 ## Die drei Loops
 
 **Minuten-Loop (der Kern):**
@@ -93,6 +100,11 @@ Jeder Skill hat eine Abklingzeit und kostet bei Zauberern Mana. Alle Zahlen steh
 | Support | **Hexenmeister** | Welkfluch (Boss macht −20 % Schaden) | Bruchmal (Boss nimmt +15 % Schaden) | Zehrender Griff (Schaden, heilt den Hexenmeister) | |
 
 ## Noch offen (nächste Sessions)
+- **Bekanntes Problem: „Priester heilt früh“ ist fast immer die beste Wahl.** Gegen alle drei Test-Bosse gewinnt die Gruppe damit häufiger. Mögliche Nachteile, die man ausprobieren kann:
+  - Frühes Heilen verbraucht deutlich mehr Mana, sodass der Heiler in langen Kämpfen leer läuft
+  - Frühes Heilen erzeugt mehr Aggro, sodass der Boss eher den Heiler angreift
+  - Überheilung verfällt: Heilung über das volle Leben hinaus kostet trotzdem Mana
+  Dasselbe beim Balancing für alle anderen Anweisungen prüfen.
 - **Kampf-Feinheiten:** Erste Version steht im Kampf-Labor. Werte: Leben, Mana, Angriff, Magie, Rüstung. Aggro entsteht durch Schaden (beim Tank ×3 bis ×4) und Heilung. Die Taktiken verschieben Heilschwelle und Schaden. Alle Zahlen stehen in `src/data/`. Noch offen: Krit als eigener Wert auf Items? Wie stark fallen Eigenschaften im Kampf ins Gewicht?
 - **Umfang:** Wie viele Dungeons und Raids gibt es? Wie lange dauert ein Durchlauf bis zum Endboss, in Spieltagen und in echten Stunden?
 - **KI-Gilden:** Fortschrittskurve, Namen, Persönlichkeit, Reaktionen
