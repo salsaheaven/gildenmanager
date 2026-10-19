@@ -27,7 +27,9 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
 | Dungeons | MMO-Klassiker: 5er-Gruppe aus Tank, Heiler und 3 DD. Stufen Normal → Heroisch → Raids (10 und mehr Helden). Jede Stufe hat ein empfohlenes Ausrüstungsniveau. |
 | Tempo | Aktiv mit kurzen Timern: Dungeons dauern 30 Sekunden bis wenige Minuten, dazu gibt es Pause und Speed |
 | Scheitern | Normal-Dungeons: Die Helden werden **verletzt** und fallen eine Weile aus. **Permadeath nur in Hardcore-Inhalten** (Heroisch, Raids): Das Risiko geht man freiwillig für bessere Beute ein. |
-| Erbe | Stirbt ein Held, wird für jedes seiner Ausrüstungsteile einzeln gewürfelt, ob es zurückkommt. Die Chance steht in `data/`. Gefallene bekommen einen Platz in der **Ehrenhalle**. |
+| Erbe | Stirbt ein Held, kommt seine **komplette Ausrüstung zurück ins Inventar**. Man verliert nur den Helden selbst (Level, Eigenschaften, Seltenheit), so bleibt das Spiel trotz Wipes schaffbar. Gefallene bekommen einen Platz in der **Ehrenhalle**. |
+| Aufhol-Erfahrung | Helden unter dem Level-Durchschnitt der Gilde bekommen deutlich mehr Erfahrung, damit Ersatz für Gefallene schnell einsatzbereit ist |
+| Wiederbelebung | Spät im Spiel und teuer: Ein Gebäude (z.B. ein Altar in der Gildenhalle) oder ein seltenes Item kann gelegentlich einen Gefallenen zurückholen |
 | Beute | Bosse haben feste Beutetabellen, z.B. bestimmte Set-Teile. Ihre Beute kommt in eine **Boss-Kiste**, die man mit der Öffnen-Animation öffnet. |
 | Item-Nutzen | **Zerlegen → Material → Verbessern (+1 bis +10)**, ab einer bestimmten Stufe mit Fehlschlag-Chance. Material dient auch als Zutat fürs Crafting, z.B. für Set-Teile. |
 | Spielende | **Endboss** als letzter Raid |
@@ -45,7 +47,10 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
 - **Runden-Simulation:** Ein Dungeon ist eine Kette von Begegnungen (Trash, danach der Boss). Jede Begegnung wird Runde für Runde berechnet.
 - **Siegchance:** Vor dem Start simuliert das Spiel den Kampf 200-mal und zeigt Erfolgs- und Todesrisiko genau an, z.B. „78 % Erfolg, 6 % Todesgefahr“.
 - **Taktik vor dem Start:** Vorsichtig, Ausgewogen oder Aggressiv. Die Taktik beeinflusst, wann Heilungen und Abklingzeiten eingesetzt werden.
-- **Rückzug:** Jederzeit während des Runs möglich. Es gibt dann keine Beute, aber alle, die noch stehen, überleben.
+- **Rückzug:** Jederzeit während des Runs per Hand möglich, oder automatisch über eine **Rückzugsregel**, die man vor dem Start einstellt. Damit der Tod trotzdem ein Risiko bleibt:
+  - Die Regel reagiert **nur auf Gefallene, nicht auf Lebenspunkte**. Wählbar sind „nie“, „nach 1 Gefallenen“ und „nach 2 Gefallenen“.
+  - Der Rückzug dauert **2 Runden**, in denen der Boss weiter angreift (auch mit Mechaniken). Die Helden heilen und verteidigen sich nur noch, Schaden machen sie keinen mehr. Auch beim Rückzug kann also noch jemand fallen.
+  - Es gibt keine Beute, und alle Überlebenden sind verletzt.
 - **Darstellung:** Der vorberechnete Kampf wird in Spielzeit als **Live-Ticker** abgespielt, mit Lebensbalken für Gruppe und Gegner. Danach folgt der vollständige Kampfbericht.
 - **Zwei Reihen:** Vorne stehen Tanks und Nahkämpfer, hinten Fernkämpfer, Heiler und Supporter. Manche Bossfähigkeiten treffen nur eine Reihe.
 - **Ressourcen:** Alle Skills haben Abklingzeiten. Heiler und Zauberer brauchen zusätzlich **Mana**. Geht dem Heiler das Mana aus, wird es gefährlich.
