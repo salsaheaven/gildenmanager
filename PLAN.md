@@ -69,30 +69,26 @@ src/
 - Später: Erfolge, tägliche Aufträge, Gildenrang-Stufen mit Freischaltungen
 
 ## Meilensteine
-**M0 – Fundament:** Setup, `CLAUDE.md`, Spieluhr mit Pause/Speed, Speichern/Laden, Pixel-Grundlayout.
+Das Spielkonzept, auf dem diese Reihenfolge beruht, steht in [KONZEPT.md](KONZEPT.md).
 
-**M1 – Kern-Loop spielbar (wichtigster Meilenstein):**
-- 3 Klassen (Krieger/Priester/Magier), Rekrutierung aus Bewerberpool
-- 3 Dungeons, Gruppe losschicken, Echtzeit-Fortschritt, Kampfbericht, XP und Level-Ups
-- Lootboxen mit Öffnen-Animation, alle 6 Seltenheiten, Ausrüstung anlegen
-- **Ziel:** Nach 10 Minuten Spielen will man "noch eine Kiste"
+**M0 – Fundament ✅:** Setup, Spieluhr mit Pause/Speed, Speichern/Laden, Pixel-Grundlayout, Schatzkammer mit Lootboxen und Pity, online auf GitHub Pages.
 
-**M2 – Sammeln & Progression:** Klassen-Sets + Sammelbuch, Pity-System, mehr Klassen und Dungeons, Talentpunkte.
+**M1 – Helden & erster Dungeon (wichtigster Meilenstein):**
+- 4 Klassen: Krieger (Tank), Priester (Heiler), Magier und Jäger (DD)
+- Rekrutierung mit Helden-Seltenheit und Eigenschaften
+- Ausrüstung anlegen, sodass Items endlich einen Zweck haben
+- 3 Normal-Dungeons mit Boss und Boss-Kiste, Kampfbericht, XP und Level, Verletzungen
+- **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 
-**M3 – Gildenhalle & Wirtschaft:** Gebäude ausbauen (Kaserne, Lazarett, Schmiede, Schatzkammer), Rohstoffe, Crafting.
+**M2 – Progression:** Talente, Zerlegen und Verbessern (+1 bis +10), Klassen-Sets + Sammelbuch, Heroisch-Modus mit Permadeath + Ehrenhalle.
 
-**M4 – Tiefe:** Kampftaktiken, Raids, Persönlichkeit und Moral der Helden, Erfolge und tägliche Aufträge.
+**M3 – Rivalen & Gildenhalle:** KI-Gilden, Rangliste, News-Ticker, Gebäude (Kaserne, Lazarett, Schmiede), Crafting.
 
-**M5 – Optional:** Diplomatie/Rivalengilden, Sound-Feinschliff, eigene Grafiken, Balancing.
+**M4 – Raids & Endboss:** 10er-Raids, Endboss, Endauswertung nach Spieltagen.
+
+**M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie, New Game+.
 
 Nach M1 testen wir zusammen, ob der Loop Spaß macht, und passen dann an.
-
-## Erste Umsetzungsschritte (nach Freigabe)
-1. `git init`, Vite-Projekt (Vanilla JS) anlegen, Ordnerstruktur wie oben
-2. `CLAUDE.md` mit Konzept und Regeln für Claude anlegen
-3. `GameClock.js` + `TopBar.js`: sichtbare Uhr mit Pause/1x/2x/4x
-4. `rarities.js`, `Item.js`, `LootBox.js` + `LootBoxScreen.js`: Kiste öffnen als erstes "Wow"-Erlebnis, auch ohne Dungeons testbar
-5. Danach: `Hero.js`, `heroClasses.js`, Rekrutierung → `dungeons.js`, `Expedition.js`, `CombatSimulator.js` → Kampfbericht
 
 ## Verifikation
 - `npm run test`: Tests für Loot-Chancen (z.B. 10.000 Kisten simulieren und prüfen, ob die Verteilung stimmt), Kampf mit festem Seed, Leveln, Speichern/Laden

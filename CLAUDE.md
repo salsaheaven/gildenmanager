@@ -8,7 +8,8 @@ Pixel-Art. Echtzeit mit Pause/Speed. Kämpfe werden simuliert und als Bericht an
 Klassen-Sets zum Sammeln, ein Pity-System und ständiges Feedback durch Sounds, Animationen und Fortschrittsbalken.
 Bei jedem Feature fragen: Fühlt es sich gut an?
 
-Den vollständigen Plan mit Meilensteinen beschreibt `PLAN.md`.
+Das Spielkonzept (Entscheidungen, Loops, offene Fragen) steht in `KONZEPT.md`. Technik und Meilensteine beschreibt `PLAN.md`.
+Neue Konzept-Entscheidungen immer in `KONZEPT.md` festhalten.
 
 ## Code-Stil
 Das Projekt ist ein Vibecoding-Übungsprojekt. Der Code soll auch für Programmier-Einsteiger lesbar bleiben:
