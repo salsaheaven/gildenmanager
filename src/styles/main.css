@@ -257,17 +257,51 @@ button:disabled {
   color: var(--gold);
 }
 
-.pity-label {
+.pity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 2px solid var(--border);
+  background: #120d1c;
+  color: var(--text-dim);
   font-size: 18px;
-  margin-bottom: 4px;
 }
 
-.pity-label b {
+.pity-rune {
+  font-size: 22px;
+  color: #5a4a7a;
+}
+
+/* Je höher die Stufe, desto stärker leuchtet es lila */
+.pity-level-1 .pity-rune {
   color: #a335ee;
+  animation: pity-pulse 2.4s ease-in-out infinite;
 }
 
-.pity-fill {
-  background: #a335ee;
+.pity-level-2 {
+  border-color: #6b3fa0;
+  color: var(--text);
+}
+
+.pity-level-2 .pity-rune {
+  color: #c77dff;
+  animation: pity-pulse 1.4s ease-in-out infinite;
+}
+
+.pity-level-3 {
+  border-color: #a335ee;
+  color: #e0b0ff;
+  box-shadow: 0 0 14px #a335ee;
+}
+
+.pity-level-3 .pity-rune {
+  color: #ffffff;
+  animation: pity-pulse 0.7s ease-in-out infinite;
+}
+
+@keyframes pity-pulse {
+  50% { opacity: 0.35; scale: 1.25; text-shadow: 0 0 10px #a335ee; }
 }
 
 /* ---------- Bühne ---------- */

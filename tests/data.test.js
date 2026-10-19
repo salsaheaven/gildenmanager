@@ -6,6 +6,7 @@ import { LOOT_BOXES } from '../src/data/lootBoxes.js';
 import { RARITIES } from '../src/data/rarities.js';
 import { ITEM_TEMPLATES, SLOT_NAMES, STAT_NAMES } from '../src/data/items.js';
 import { SPRITES, PALETTE } from '../src/data/sprites.js';
+import { BALANCING } from '../src/data/balancing.js';
 
 describe('Kisten-Daten', () => {
   for (const box of LOOT_BOXES) {
@@ -52,4 +53,14 @@ describe('Pixel-Art', () => {
       }
     });
   }
+});
+
+describe('Pity-Hinweise', () => {
+  it('beginnen bei 0 und sind aufsteigend sortiert', () => {
+    const hints = BALANCING.pityHints;
+    expect(hints[0].fromProgress).toBe(0);
+    for (let i = 1; i < hints.length; i++) {
+      expect(hints[i].fromProgress).toBeGreaterThan(hints[i - 1].fromProgress);
+    }
+  });
 });

@@ -138,16 +138,22 @@ export class LootBoxScreen {
     }
   }
 
-  // Zeigt, wie nah man am garantierten epischen Item ist (Vorfreude!)
+  // Deutet an, dass bald etwas Gutes kommt (Vorfreude!), aber bewusst ohne genaue Zahlen.
+  // Die Texte stehen in data/balancing.js unter pityHints.
   renderPity() {
     const pity = this.root.querySelector('.pity');
-    const progress = this.game.guild.itemsSinceEpic;
-    const goal = BALANCING.pityEpicAfterItems;
-    const remaining = Math.max(0, goal - progress);
-    pity.innerHTML = `
-      <div class="pity-label">Episch garantiert in <b>${remaining}</b> Items</div>
-      <div class="bar"><div class="bar-fill pity-fill" style="width: ${(progress / goal) * 100}%"></div></div>
-    `;
+    const progress = this.game.guild.itemsSinceEpic / BALANCING.pityEpicAfterItems;
+
+    let hint = BALANCING.pityHints[0];
+    for (const candidate of BALANCING.pityHints) {
+      if (progress >= candidate.fromProgress) {
+        hint = candidate;
+      }
+    }
+
+    pity.className = 'pity pity-level-' + hint.level;
+    pity.innerHTML = '<span class="pity-rune">✦</span><span class="pity-text"></span>';
+    pity.querySelector('.pity-text').textContent = hint.text;
   }
 
   // ---------- Bühne in der Mitte ----------

@@ -33,6 +33,8 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
 | Spielende | **Endboss** als letzter Raid |
 | Wertung | **Endauswertung in Spieltagen**: Wie viele Spieltage hat man bis zum Endboss gebraucht? Gezählt wird Spielzeit, also bringen Pause und Speed keinen Vorteil. Das Ergebnis lässt sich vergleichen („2 Tage schneller als du“). |
 | Rivalen | KI-Gilden in einer **Rangliste** mit Server-First-Rennen und Neuigkeiten-Ticker („Die Eisenfäuste besiegen als erste Gilde den Drachen!“). Legt eine KI-Gilde den Endboss zuerst, kann man trotzdem selbst noch zu Ende spielen. |
+| Kisten-Quellen | Bis M1 bringt der Gildenkurier regelmäßig Gratis-Kisten. Das ist nur eine Starthilfe zum Testen. **Ab M2 gibt es keine automatisch gelieferten Kisten mehr.** Kisten kommen dann aus Dungeons und Bossen (und vom Händler). |
+| Pity-System | Bleibt im Hintergrund exakt, wird dem Spieler aber **bewusst ungenau** angezeigt: keine Zahlen und kein Balken, nur eine Stimmung, die stärker leuchtet („Etwas Großes kündigt sich an!“) |
 | Später | New Game+ (die Endauswertung bereitet es vor), Diplomatie |
 
 ## Kampf
@@ -83,5 +85,5 @@ Jeder Skill hat eine Abklingzeit und kostet bei Zauberern Mana. Alle Zahlen steh
 - **Kampf-Feinheiten:** Werteliste (Leben, Angriff, Magie, Rüstung, Krit, Mana …), Aggro-Formel, die genaue Wirkung der Taktiken
 - **Umfang:** Wie viele Dungeons und Raids gibt es? Wie lange dauert ein Durchlauf bis zum Endboss, in Spieltagen und in echten Stunden?
 - **KI-Gilden:** Fortschrittskurve, Namen, Persönlichkeit, Reaktionen
-- **Kurier und Händler aus M0:** Vorschlag: Der Kurier ist nur eine Starthilfe, der Händler bleibt als Gold-Senke
+- **Händler:** Welche Kisten verkauft er ab M2, und zu welchen Preisen? Vorschlag: Er bleibt als Gold-Senke
 - **Wirtschaft:** Woher kommt Gold, wofür gibt man es aus?

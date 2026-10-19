@@ -19,6 +19,16 @@ export const BALANCING = {
   // ist das nächste Item garantiert mindestens episch.
   pityEpicAfterItems: 25,
 
+  // Was die Schatzkammer zum Pity-Stand anzeigt. Bewusst ungenau: keine Zahlen, nur eine Stimmung.
+  // fromProgress = ab welchem Anteil des Weges (0 = gerade Glück gehabt, 1 = gleich garantiert)
+  // level        = wie stark die Anzeige leuchtet (0 bis 3)
+  pityHints: [
+    { fromProgress: 0,   level: 0, text: 'Das Glück schlummert noch.' },
+    { fromProgress: 0.4, level: 1, text: 'Ein leises Kribbeln liegt in der Luft …' },
+    { fromProgress: 0.7, level: 2, text: 'Etwas Großes kündigt sich an!' },
+    { fromProgress: 0.9, level: 3, text: 'Das Glück ist dir ganz nah!' },
+  ],
+
   // So viele Spielminuten vergehen pro Spielsekunde (für die Uhr oben).
   gameMinutesPerSecond: 1,
 
