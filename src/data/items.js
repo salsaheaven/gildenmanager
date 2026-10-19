@@ -13,11 +13,11 @@
 
 export const ITEM_TEMPLATES = [
   { id: 'sword',  name: 'Schwert', legendaryName: 'Morgenröte',               slot: 'weapon',  sprite: 'sword',  stats: { attack: 6 } },
-  { id: 'staff',  name: 'Stab',    legendaryName: 'Stab der tausend Sterne',  slot: 'weapon',  sprite: 'staff',  stats: { magic: 7 } },
+  { id: 'staff',  name: 'Stab',    legendaryName: 'Stab der tausend Sterne',  slot: 'weapon',  sprite: 'staff',  stats: { magic: 7, mana: 15 } },
   { id: 'shield', name: 'Schild',  legendaryName: 'Bollwerk der Ewigkeit',    slot: 'offhand', sprite: 'shield', stats: { defense: 6 } },
-  { id: 'helmet', name: 'Helm',    legendaryName: 'Krone des Sturmkönigs',    slot: 'head',    sprite: 'helmet', stats: { defense: 3, health: 3 } },
-  { id: 'armor',  name: 'Harnisch', legendaryName: 'Drachenschuppenharnisch', slot: 'chest',   sprite: 'armor',  stats: { defense: 5, health: 5 } },
-  { id: 'boots',  name: 'Stiefel', legendaryName: 'Schritte des Windes',      slot: 'feet',    sprite: 'boots',  stats: { defense: 2, health: 2 } },
+  { id: 'helmet', name: 'Helm',    legendaryName: 'Krone des Sturmkönigs',    slot: 'head',    sprite: 'helmet', stats: { defense: 3, health: 12 } },
+  { id: 'armor',  name: 'Harnisch', legendaryName: 'Drachenschuppenharnisch', slot: 'chest',   sprite: 'armor',  stats: { defense: 5, health: 20 } },
+  { id: 'boots',  name: 'Stiefel', legendaryName: 'Schritte des Windes',      slot: 'feet',    sprite: 'boots',  stats: { defense: 2, health: 8 } },
   { id: 'ring',   name: 'Ring',    legendaryName: 'Siegel der Leere',         slot: 'ring',    sprite: 'ring',   stats: { magic: 3, attack: 2 } },
 ];
 
@@ -34,6 +34,17 @@ export const STAT_NAMES = {
   magic: 'Magie',
   defense: 'Rüstung',
   health: 'Leben',
+  mana: 'Mana',
+};
+
+// Wie stark ein Wert in die "Stärke" eines Items einfließt.
+// Leben und Mana haben große Zahlen, deshalb zählen sie weniger.
+export const STAT_POWER_WEIGHTS = {
+  attack: 1,
+  magic: 1,
+  defense: 1,
+  health: 0.25,
+  mana: 0.25,
 };
 
 // Anzeigenamen der Ausrüstungsplätze

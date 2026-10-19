@@ -206,7 +206,7 @@ button:disabled {
   display: grid;
   grid-template-columns: 280px 1fr 320px;
   gap: 16px;
-  min-height: calc(100vh - 110px);
+  min-height: calc(100vh - 160px);
 }
 
 @media (max-width: 1000px) {
@@ -576,4 +576,498 @@ button:disabled {
 
 @keyframes toast-in {
   from { translate: 60px 0; opacity: 0; }
+}
+
+/* ---------- Reiter ---------- */
+
+#nav-bar {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px 0;
+  background: var(--background);
+  border-bottom: 3px solid var(--border);
+}
+
+.nav-tab {
+  position: relative;
+  font-family: var(--font-title);
+  font-size: 10px;
+  padding: 10px 16px;
+  border-bottom: none;
+  box-shadow: none;
+  background: var(--panel);
+}
+
+.nav-tab.active {
+  background: var(--panel-light);
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.nav-badge {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  min-width: 18px;
+  padding: 2px 4px;
+  font-family: var(--font-text);
+  font-size: 16px;
+  line-height: 1;
+  background: #c0392b;
+  color: #fff;
+  border: 2px solid #0c0914;
+}
+
+.upgrade-arrow {
+  color: #1eff00;
+  font-size: 16px;
+  text-shadow: 0 0 4px #1eff00;
+  animation: arrow-bob 0.8s ease-in-out infinite;
+}
+
+@keyframes arrow-bob {
+  50% { translate: 0 -2px; }
+}
+
+.inventory-slot .upgrade-arrow {
+  position: absolute;
+  bottom: -2px;
+  right: 1px;
+}
+
+.detail-upgrade {
+  color: #1eff00;
+  margin-bottom: 8px;
+}
+
+h3 {
+  font-family: var(--font-title);
+  font-size: 9px;
+  color: var(--text-dim);
+  margin: 14px 0 8px;
+  text-transform: uppercase;
+}
+
+.trait-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.trait-chip {
+  padding: 1px 6px;
+  font-size: 17px;
+  background: #3b2a12;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  cursor: help;
+}
+
+/* ---------- Taverne ---------- */
+
+.tavern-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tavern-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+
+.tavern-timer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.tavern-fill {
+  background: #c98b3a;
+}
+
+.reroll-button,
+.hire-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.candidate-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.hero-card {
+  --rarity: #ffffff;
+  border-color: var(--rarity);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.hero-card.rarity-epic {
+  box-shadow: 0 0 18px var(--rarity), 0 4px 0 #0c0914;
+}
+
+.hero-card.rarity-legendary {
+  box-shadow: 0 0 28px var(--rarity), 0 4px 0 #0c0914;
+  animation: legendary-pulse 1.2s ease-in-out infinite;
+}
+
+.hero-card.card-enter {
+  animation: card-pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) backwards;
+}
+
+.hero-card-portrait {
+  padding: 8px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--rarity) 35%, transparent) 0%, transparent 70%);
+}
+
+.hero-card-name {
+  font-size: 24px;
+  color: var(--rarity);
+}
+
+.hero-card-rarity {
+  font-family: var(--font-title);
+  font-size: 8px;
+  color: var(--rarity);
+}
+
+.hero-card-class,
+.hero-card-skills {
+  color: var(--text-dim);
+  font-size: 17px;
+}
+
+.hero-card-stats {
+  font-size: 17px;
+}
+
+.hero-card .hire-button {
+  margin-top: auto;
+  color: var(--gold);
+}
+
+/* ---------- Heldenbildschirm ---------- */
+
+.hero-screen {
+  display: grid;
+  grid-template-columns: 300px 1fr 340px;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .hero-screen {
+    grid-template-columns: 1fr;
+  }
+}
+
+.roster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.roster-entry {
+  --rarity: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  padding: 6px 8px;
+  border-left: 4px solid var(--rarity);
+}
+
+.roster-entry.selected {
+  background: #3d2f5c;
+  border-color: var(--rarity);
+}
+
+.roster-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  line-height: 1.1;
+}
+
+.roster-name {
+  color: var(--rarity);
+}
+
+.roster-sub {
+  color: var(--text-dim);
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.hero-detail {
+  --rarity: #ffffff;
+}
+
+.detail-top {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.detail-portrait {
+  padding: 10px;
+  border: 3px solid var(--rarity);
+  background: radial-gradient(circle, color-mix(in srgb, var(--rarity) 30%, transparent) 0%, #120d1c 75%);
+}
+
+.detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.detail-hero-name {
+  font-size: 30px;
+  color: var(--rarity);
+  line-height: 1;
+}
+
+.detail-hero-rarity {
+  font-family: var(--font-title);
+  font-size: 9px;
+  color: var(--rarity);
+}
+
+.detail-hero-class {
+  color: var(--text-dim);
+}
+
+.detail-level {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 300px;
+}
+
+.xp-fill {
+  background: #4b5bd6;
+}
+
+.detail-columns {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 20px;
+}
+
+@media (max-width: 700px) {
+  .detail-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-table {
+  border-collapse: collapse;
+}
+
+.stat-table td {
+  padding: 1px 12px 1px 0;
+}
+
+.stat-value {
+  text-align: right;
+  font-size: 22px;
+}
+
+.stat-bonus {
+  color: #1eff00;
+}
+
+.gear-score {
+  margin-top: 6px;
+  color: var(--text-dim);
+}
+
+.gear-score b {
+  color: var(--gold);
+}
+
+.skill-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skill-list b {
+  display: block;
+  color: var(--gold);
+  font-weight: normal;
+}
+
+.skill-list span {
+  color: var(--text-dim);
+  font-size: 17px;
+}
+
+.equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 700px) {
+  .equipment-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.equipment-slot {
+  --rarity: var(--border);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  background: #120d1c;
+  border: 2px dashed var(--border);
+  cursor: pointer;
+}
+
+.equipment-slot.filled {
+  border: 2px solid var(--rarity);
+}
+
+.equipment-slot:hover {
+  background: #1d1530;
+}
+
+.slot-icon {
+  height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.slot-label {
+  font-size: 15px;
+  color: var(--text-dim);
+}
+
+.unequip-button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  padding: 0 5px;
+  font-size: 15px;
+  line-height: 1.2;
+  box-shadow: none;
+}
+
+.detail-actions {
+  margin-top: 18px;
+  text-align: right;
+}
+
+.dismiss-button.confirm {
+  background: #8b1e1e;
+  border-color: #ff6b6b;
+}
+
+.equip-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.slot-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.filter-button {
+  font-size: 16px;
+  padding: 2px 8px;
+  box-shadow: none;
+}
+
+.filter-button.active {
+  background: var(--gold);
+  color: #14101f;
+}
+
+.equip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.equip-row {
+  --rarity: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  border-left: 4px solid var(--rarity);
+}
+
+.equip-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  line-height: 1.1;
+}
+
+.equip-name {
+  color: var(--rarity);
+}
+
+.equip-stats {
+  color: var(--text-dim);
+  font-size: 16px;
+}
+
+.equip-diff {
+  font-size: 22px;
+  color: var(--text-dim);
+}
+
+.equip-diff.better {
+  color: #1eff00;
+}
+
+.equip-diff.worse {
+  color: #ff6b6b;
+}
+
+/* ---------- Test-Menü ---------- */
+
+.debug-panel {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 200;
+  border-color: #ff6b6b;
+  max-width: 320px;
+}
+
+.debug-panel h2 {
+  color: #ff6b6b;
+}
+
+.debug-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }

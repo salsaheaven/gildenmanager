@@ -44,3 +44,13 @@ export function createChestCanvas(boxType, scale, isOpen = false, glowColor = '#
     L: glowColor,
   });
 }
+
+// Bild eines Helden: Kleidung in Klassenfarbe, dazu seine Haut- und Haarfarbe
+export function createHeroCanvas(hero, scale) {
+  const heroClass = hero.getClass();
+  return createSpriteCanvas(heroClass.sprite, scale, {
+    C: heroClass.color,
+    h: hero.looks.skin,
+    H: hero.looks.hair,
+  });
+}

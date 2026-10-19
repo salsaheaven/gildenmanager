@@ -2,8 +2,14 @@
 // TOAST – kurze Nachricht, die oben rechts erscheint und wieder verschwindet
 // ============================================================
 
+// Höchstens so viele Nachrichten gleichzeitig, damit sie nichts verdecken
+const MAX_TOASTS = 4;
+
 export function showToast(text, color = '#ffd23f') {
   const container = document.getElementById('toasts');
+  while (container.children.length >= MAX_TOASTS) {
+    container.firstChild.remove();
+  }
   const toast = document.createElement('div');
   toast.className = 'toast';
   toast.style.borderColor = color;

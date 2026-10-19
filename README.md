@@ -3,11 +3,14 @@
 Ein Browser-Management-Spiel in Pixel-Art: Du führst eine MMORPG-Gilde. Du rekrutierst Helden, rüstest sie aus,
 schickst sie in Dungeons und öffnest die Beute: von Grau bis **Legendär**.
 
-## Stand: Version 0.1
-- Schatzkammer: Kisten öffnen (Holz, Silber, Gold, Episch) mit Animation, Sound und Seltenheits-Leuchten
-- 6 Seltenheiten, 7 Item-Arten, Pity-System (garantiert Episch nach einer Pechsträhne)
-- Gildenkurier bringt regelmäßig Kisten, Händler verkauft welche, Items lassen sich verkaufen
+## Stand: Version 0.2
+**Spielen:** https://salsaheaven.github.io/gildenmanager/
+
+- **Schatzkammer:** Kisten öffnen (Holz, Silber, Gold, Episch) mit Animation, Sound und Seltenheits-Leuchten, Pity-System, Händler, Gildenkurier
+- **Taverne:** Bewerber mit Seltenheit (Grün bis Orange), Eigenschaften und Klasse anheuern
+- **Helden:** 5 Klassen (Krieger, Priester, Runenwirker, Magier, Schurke), Ausrüstung anlegen mit Vergleich, „Bestes anlegen“
 - Spieluhr mit Pause (Leertaste) und 1x/2x/4x, automatisches Speichern
+- Test-Menü mit **F2** (Gold, Kisten, Bewerber, Zeit)
 
 ## Starten
 ```bash

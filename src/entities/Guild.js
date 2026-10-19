@@ -1,11 +1,12 @@
 // ============================================================
 // GUILD – die Gilde des Spielers
-// Hält Gold, Kisten, Inventar und Statistiken.
-// (Später kommen hier Helden und Gebäude dazu.)
+// Hält Gold, Kisten, Inventar, Helden, Bewerber und Statistiken.
+// (Später kommen hier Gebäude dazu.)
 // ============================================================
 
 import { Item } from './Item.js';
 import { LootBox } from './LootBox.js';
+import { Hero } from './Hero.js';
 import { BALANCING } from '../data/balancing.js';
 
 export class Guild {
@@ -15,6 +16,9 @@ export class Guild {
     this.boxes = [];     // ungeöffnete Kisten (LootBox-Objekte)
     this.inventory = []; // Items (Item-Objekte)
     this.nextItemId = 1; // fortlaufende Nummer für neue Items
+    this.heroes = [];     // Helden der Gilde (Hero-Objekte)
+    this.candidates = []; // Bewerber in der Taverne (Hero-Objekte)
+    this.nextHeroId = 1;  // fortlaufende Nummer für neue Helden
 
     // Pity-Zähler: Items seit dem letzten epischen oder legendären Item
     this.itemsSinceEpic = 0;
@@ -110,6 +114,52 @@ export class Guild {
     return null;
   }
 
+  // ---------- Helden ----------
+
+  createHeroId() {
+    const id = this.nextHeroId;
+    this.nextHeroId++;
+    return id;
+  }
+
+  hasRoomForHero() {
+    return this.heroes.length < BALANCING.maxHeroes;
+  }
+
+  findHero(heroId) {
+    for (const hero of this.heroes) {
+      if (hero.id === heroId) {
+        return hero;
+      }
+    }
+    return null;
+  }
+
+  findCandidate(heroId) {
+    for (const candidate of this.candidates) {
+      if (candidate.id === heroId) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+
+  // Sucht den Helden, für den dieses Item die größte Verbesserung wäre.
+  // Gibt { hero, value } zurück oder null, wenn es für niemanden besser ist.
+  findBestUpgrade(item) {
+    let best = null;
+    for (const hero of this.heroes) {
+      if (!hero.canEquip(item)) {
+        continue;
+      }
+      const value = hero.getUpgradeValue(item);
+      if (value > 0 && (best === null || value > best.value)) {
+        best = { hero: hero, value: value };
+      }
+    }
+    return best;
+  }
+
   // ---------- Speichern ----------
 
   toSaveData() {
@@ -121,6 +171,9 @@ export class Guild {
       nextItemId: this.nextItemId,
       itemsSinceEpic: this.itemsSinceEpic,
       stats: this.stats,
+      heroes: this.heroes.map((hero) => hero.toSaveData()),
+      candidates: this.candidates.map((candidate) => candidate.toSaveData()),
+      nextHeroId: this.nextHeroId,
     };
   }
 
@@ -133,6 +186,10 @@ export class Guild {
     guild.nextItemId = data.nextItemId;
     guild.itemsSinceEpic = data.itemsSinceEpic;
     guild.stats = data.stats;
+    // "|| []" damit auch alte Spielstände ohne Helden geladen werden können
+    guild.heroes = (data.heroes || []).map((heroData) => Hero.fromSaveData(heroData));
+    guild.candidates = (data.candidates || []).map((heroData) => Hero.fromSaveData(heroData));
+    guild.nextHeroId = data.nextHeroId || 1;
     return guild;
   }
 }

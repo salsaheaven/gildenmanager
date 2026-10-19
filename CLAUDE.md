@@ -26,11 +26,15 @@ Das Projekt ist ein Vibecoding-Übungsprojekt. Der Code soll auch für Programmi
 
 ## Aufbau
 ```
-src/core/      Spiel-Grundgerüst: Game (hält alles zusammen), GameClock, Random, SaveManager
-src/entities/  Spielobjekte als Klassen: Guild, Item, LootBox (später Hero, Expedition)
-src/systems/   Regeln/Abläufe: LootSystem (später CombatSimulator, SetBonusSystem …)
-src/data/      Reine Inhalte: rarities, items, lootBoxes, balancing, sprites (Pixel-Art als Text)
-src/ui/        Ein Bildschirm/Bauteil pro Datei. Nur die UI berührt das HTML.
+src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen), GameClock, Random, SaveManager
+src/entities/  Spielobjekte: Guild, Hero, Item, LootBox (später Expedition)
+src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem (später CombatSimulator …)
+src/data/      Reine Inhalte: rarities, items, lootBoxes, balancing, sprites (Pixel-Art als Text),
+               heroClasses, abilities, heroRarities, traits, heroNames
+src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: LootBoxScreen (Schatzkammer),
+               HeroScreen (+ HeroDetailPanel, EquipPanel), TavernScreen.
+               Leisten: TopBar, NavBar. Helfer: PixelArt, Sound, Toast, format, TraitChip.
+               DebugPanel = Test-Menü (Taste F2)
 tests/         Vitest-Tests (prüfen auch, ob die Daten gültig sind)
 ```
 - Die Logik (`core/`, `entities/`, `systems/`) kennt **keine** UI und kein `document`.

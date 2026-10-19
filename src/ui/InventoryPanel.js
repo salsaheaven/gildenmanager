@@ -91,6 +91,10 @@ export class InventoryPanel {
       dot.className = 'new-dot';
       slot.appendChild(dot);
     }
+    // Grüner Pfeil, wenn das Item für einen Helden besser wäre als seine jetzige Ausrüstung
+    if (this.game.guild.findBestUpgrade(item)) {
+      slot.insertAdjacentHTML('beforeend', '<span class="upgrade-arrow">▲</span>');
+    }
     if (item.id === this.selectedItemId) {
       slot.classList.add('selected');
     }
@@ -119,9 +123,16 @@ export class InventoryPanel {
       <div class="detail-sub">${rarity.name} · ${SLOT_NAMES[item.getSlot()]}</div>
       <ul class="detail-stats"></ul>
       <div class="detail-power">Stärke: ${item.getPower()}</div>
+      <div class="detail-upgrade"></div>
       <button class="sell-button">Verkaufen (${item.getSellValue()} Gold)</button>
     `;
     details.querySelector('.detail-name').textContent = item.name;
+
+    const upgrade = this.game.guild.findBestUpgrade(item);
+    if (upgrade) {
+      details.querySelector('.detail-upgrade').textContent =
+        '▲ Besser für ' + upgrade.hero.name + ' (+' + upgrade.value + ')';
+    }
 
     const statList = details.querySelector('.detail-stats');
     for (const statName in item.stats) {

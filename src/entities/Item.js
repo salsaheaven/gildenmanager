@@ -3,7 +3,7 @@
 // ============================================================
 
 import { getRarity, getRarityRank } from '../data/rarities.js';
-import { getItemTemplate } from '../data/items.js';
+import { getItemTemplate, STAT_POWER_WEIGHTS } from '../data/items.js';
 
 export class Item {
   // id         = eindeutige Nummer dieses Items
@@ -40,13 +40,14 @@ export class Item {
     return this.getTemplate().sprite;
   }
 
-  // Gesamtstärke: Summe aller Werte. Praktisch zum Vergleichen.
+  // Gesamtstärke: Summe aller Werte (gewichtet, siehe STAT_POWER_WEIGHTS).
+  // Praktisch zum Vergleichen von Items.
   getPower() {
     let power = 0;
     for (const statName in this.stats) {
-      power += this.stats[statName];
+      power += this.stats[statName] * STAT_POWER_WEIGHTS[statName];
     }
-    return power;
+    return Math.round(power);
   }
 
   getSellValue() {

@@ -8,6 +8,7 @@
 //   R = Seltenheitsfarbe (bei Items) bzw. Hauptfarbe (bei Kisten)
 //   D = dunkle Kistenfarbe
 //   L = Leuchten aus der offenen Kiste
+//   h = Hautfarbe, H = Haarfarbe, C = Klassenfarbe (bei Helden)
 //
 // Alle Zeilen eines Bildes müssen gleich lang sein (ein Test prüft das).
 // Tipp: Zeichne neue Bilder einfach hier im Text!
@@ -25,6 +26,10 @@ export const PALETTE = {
   R: '#ff00ff', // wird ersetzt
   D: '#800080', // wird ersetzt
   L: '#ffffff', // wird ersetzt
+  r: '#5ef2ff', // Runen-Leuchten
+  h: '#f1c39b', // Haut (wird pro Held ersetzt)
+  H: '#6b3f17', // Haare (wird pro Held ersetzt)
+  C: '#888888', // Kleidung (wird durch die Klassenfarbe ersetzt)
 };
 
 export const SPRITES = {
@@ -172,5 +177,92 @@ export const SPRITES = {
     'kggggGGk',
     '.kGGGGk.',
     '..kkkk..',
+  ],
+
+  // ---------- Helden (12 x 14 Pixel) ----------
+
+  heroWarrior: [
+    '....kkkk....',
+    '...kssssk...',
+    '..kssssssk..',
+    '..kShhhhSk..',
+    '..kSkhhkSk..',
+    '..kShhhhSk..',
+    '...kkhhkk...',
+    '..kCCCCCCk..',
+    '.ksCCCCCCsk.',
+    '.khCCCCCChk.',
+    '..kSSSSSSk..',
+    '..kSSkkSSk..',
+    '..kSk..kSk..',
+    '..kkk..kkk..',
+  ],
+
+  heroPriest: [
+    '....kkkk....',
+    '...kwwwwk...',
+    '..kwwwwwwk..',
+    '..kwhhhhwk..',
+    '..kwkhhkwk..',
+    '..kwhhhhwk..',
+    '...kwhhwk...',
+    '..kCwwwwCk..',
+    '.kCCwwwwCCk.',
+    '.khCCwwCChk.',
+    '..kCCwwCCk..',
+    '..kCCwwCCk..',
+    '..kCCCCCCk..',
+    '..kkkkkkkk..',
+  ],
+
+  heroRuneweaver: [
+    '....kkkk....',
+    '...kHHHHk...',
+    '..kHHHHHHk..',
+    '..kggggggk..',
+    '..khkhhkhk..',
+    '..khhhhhhk..',
+    '...khhhhk...',
+    '..kCCCCCCk..',
+    '.kCCCrrCCCk.',
+    '.khCCrrCChk.',
+    '..kCCCCCCk..',
+    '..kCCCCCCk..',
+    '..kCCCCCCk..',
+    '..kkkkkkkk..',
+  ],
+
+  heroMage: [
+    '.....kk.....',
+    '....kCCk....',
+    '...kCCCCk...',
+    '.kkCCCCCCkk.',
+    '..khhhhhhk..',
+    '..khkhhkhk..',
+    '..kHhhhhHk..',
+    '..kCCCCCCk..',
+    '.kCCCggCCCk.',
+    '.khCCCCCChk.',
+    '..kCCCCCCk..',
+    '..kCCCCCCk..',
+    '..kCCCCCCk..',
+    '..kkkkkkkk..',
+  ],
+
+  heroRogue: [
+    '....kkkk....',
+    '...kCCCCk...',
+    '..kCCCCCCk..',
+    '..kChhhhCk..',
+    '..kCkhhkCk..',
+    '..kCkkkkCk..',
+    '...kkkkkk...',
+    '..kCCCCCCk..',
+    '.kCCCCCCCCk.',
+    '.khCCCCCChk.',
+    '..kBBgBBBk..',
+    '..kBBkkBBk..',
+    '..kBk..kBk..',
+    '..kkk..kkk..',
   ],
 };
