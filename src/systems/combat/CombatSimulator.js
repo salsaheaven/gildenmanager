@@ -57,6 +57,8 @@ export function simulateBattle(options) {
   const battle = new Battle(heroes, boss, getTactic(options.tacticId), random, options.recordLog);
 
   const maxRounds = bossData.isDummy ? bossData.dummyRounds : COMBAT_RULES.maxRounds;
+  // Wer zu Beginn dabei ist (für die Kampfszene)
+  const startingCombatants = heroes.concat([boss]).map((combatant) => combatant.describe());
   battle.addLog('Der Kampf gegen ' + boss.name + ' beginnt!', 'info');
   battle.takeSnapshot();
 
@@ -86,7 +88,9 @@ export function simulateBattle(options) {
     battle.takeSnapshot();
   }
 
-  return createResult(battle, bossData, maxRounds);
+  const result = createResult(battle, bossData, maxRounds);
+  result.startingCombatants = startingCombatants;
+  return result;
 }
 
 function takeHeroTurn(battle, hero) {
@@ -133,7 +137,8 @@ function tickDamageOverTime(battle, target, effect, everyone) {
   if (source) {
     source.damageDone += result.damage;
   }
-  battle.addLog(effect.name + ' verletzt ' + target.name + ' um ' + result.damage + '.', 'damage');
+  battle.addLog(effect.name + ' verletzt ' + target.name + ' um ' + result.damage + '.', 'damage',
+    { hits: [target.describeHit(result.damage, 'damage')] });
   if (!target.alive) {
     battle.addLog(target.name + (target.side === 'hero' ? ' fällt!' : ' ist besiegt!'), 'death');
   }

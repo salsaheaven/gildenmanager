@@ -27,7 +27,8 @@ function createBanner(result) {
     banner.textContent = 'SIEG gegen ' + boss.name + ' nach ' + result.rounds + ' Runden';
   } else {
     banner.className = 'result-banner defeat';
-    const bossLeft = Math.round(result.bossHpPercent * 100);
+    // Aufrunden, damit ein knapp überlebender Boss nicht als "0 %" erscheint
+    const bossLeft = Math.ceil(result.bossHpPercent * 100);
     banner.textContent = 'NIEDERLAGE nach ' + result.rounds + ' Runden (' + boss.name + ' hatte noch ' + bossLeft + ' % Leben)';
   }
   return banner;

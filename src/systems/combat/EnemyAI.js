@@ -8,7 +8,8 @@ import { COMBAT_RULES } from '../../data/combatRules.js';
 
 export function takeEnemyTurn(battle, enemy) {
   if (enemy.isStunned()) {
-    battle.addLog(enemy.name + ' ist eingefroren und kann nicht handeln.', 'info');
+    battle.addLog(enemy.name + ' ist eingefroren und kann nicht handeln.', 'info',
+      { labels: [{ targetId: enemy.id, text: 'Eingefroren' }] });
     return;
   }
   if (enemy.isMinion) {
@@ -40,7 +41,8 @@ function takeBossTurn(battle, boss) {
   // Raserei
   if (bossData.enrageRound !== null && battle.round >= bossData.enrageRound && !boss.enraged) {
     boss.enraged = true;
-    battle.addLog(boss.name + ' gerät in Raserei! Der Schaden verdoppelt sich.', 'warning');
+    battle.addLog(boss.name + ' gerät in Raserei! Der Schaden verdoppelt sich.', 'warning',
+      { labels: [{ targetId: boss.id, text: 'RASEREI!' }] });
   }
 
   // Ist eine Mechanik fällig?
@@ -48,7 +50,8 @@ function takeBossTurn(battle, boss) {
     if (isMechanicDue(mechanic, battle.round)) {
       if (mechanic.castTime > 0) {
         boss.casting = mechanic;
-        battle.addLog(boss.name + ' bereitet ' + mechanic.name + ' vor!', 'warning');
+        battle.addLog(boss.name + ' bereitet ' + mechanic.name + ' vor!', 'warning',
+          { cast: { state: 'start', name: mechanic.name } });
       } else {
         resolveMechanic(battle, boss, mechanic);
       }
@@ -67,30 +70,33 @@ function resolveMechanic(battle, boss, mechanic) {
   switch (mechanic.type) {
     case 'tankBuster': {
       const target = battle.getBossTarget();
-      battle.addLog(boss.name + ': ' + mechanic.name + '!', 'mechanic');
+      battle.addLog(boss.name + ': ' + mechanic.name + '!', 'mechanic', { cast: { state: 'end' } });
       enemyHits(battle, boss, target, 'trifft mit voller Wucht', mechanic.power);
       break;
     }
     case 'groupCast':
-      battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die ganze Gruppe!', 'mechanic');
+      battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die ganze Gruppe!', 'mechanic', { cast: { state: 'end' } });
       for (const hero of battle.getLivingHeroes()) {
         enemyHits(battle, boss, hero, 'trifft', mechanic.power);
       }
       break;
     case 'frontWave': {
       const frontRow = battle.getLivingHeroes().filter((hero) => hero.row === 'front');
-      battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die vordere Reihe!', 'mechanic');
+      battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die vordere Reihe!', 'mechanic', { cast: { state: 'end' } });
       for (const hero of frontRow) {
         enemyHits(battle, boss, hero, 'trifft', mechanic.power);
       }
       break;
     }
-    case 'summon':
-      battle.addLog(boss.name + ': ' + mechanic.name + '! ' + mechanic.count + ' Diener erscheinen.', 'mechanic');
+    case 'summon': {
+      const spawned = [];
       for (let i = 0; i < mechanic.count; i++) {
-        battle.spawnMinion(mechanic.minion);
+        spawned.push(battle.spawnMinion(mechanic.minion).describe());
       }
+      battle.addLog(boss.name + ': ' + mechanic.name + '! ' + mechanic.count + ' Diener erscheinen.', 'mechanic',
+        { spawn: spawned });
       break;
+    }
     case 'curse': {
       const target = battle.random.pick(battle.getLivingHeroes());
       target.addEffect({
@@ -101,7 +107,8 @@ function resolveMechanic(battle, boss, mechanic) {
         remaining: mechanic.duration,
         isDebuff: true,
       });
-      battle.addLog(boss.name + ' belegt ' + target.name + ' mit ' + mechanic.name + '.', 'mechanic');
+      battle.addLog(boss.name + ' belegt ' + target.name + ' mit ' + mechanic.name + '.', 'mechanic',
+        { sourceId: boss.id, labels: [{ targetId: target.id, text: 'Verflucht' }] });
       break;
     }
     default:
@@ -126,7 +133,8 @@ function enemyHits(battle, enemy, target, verb, power) {
   if (result.absorbed > 0) {
     text += ' (' + result.absorbed + ' vom Schild abgefangen)';
   }
-  battle.addLog(text + '.', 'damage');
+  battle.addLog(text + '.', crit ? 'crit' : 'damage',
+    { sourceId: enemy.id, hits: [target.describeHit(result.damage, 'damage', crit, result.absorbed)] });
   if (!target.alive) {
     battle.addLog(target.name + ' fällt!', 'death');
   }

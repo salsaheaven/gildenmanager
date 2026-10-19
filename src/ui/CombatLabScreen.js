@@ -1,7 +1,7 @@
 // ============================================================
 // COMBATLABSCREEN – das Kampf-Labor (Testbildschirm)
 // Gruppe wählen (Testgruppe oder eigene Helden), Boss und Taktik wählen, dann:
-//   - "Kampf ansehen": ein einzelner Kampf mit vollständigem Bericht
+//   - "Kampf ansehen": ein einzelner Kampf als Szene, danach der vollständige Bericht
 //   - "Siegchance berechnen": viele Kämpfe, daraus Siegchance und Risiko
 // Nichts davon verändert den Spielstand.
 // ============================================================
@@ -13,6 +13,7 @@ import { estimateChances } from '../systems/combat/ChanceEstimator.js';
 import { createTestGroup } from '../systems/combat/TestGroup.js';
 import { createHeroCanvas } from './PixelArt.js';
 import { renderCombatReport } from './CombatReport.js';
+import { BattleScene } from './BattleScene.js';
 import { Sound } from './Sound.js';
 
 const MAX_GROUP_SIZE = 5;
@@ -29,6 +30,7 @@ export class CombatLabScreen {
     this.bossId = 'grimfang';
     this.tacticId = 'balanced';
     this.fightCounter = 0;             // sorgt dafür, dass jeder Kampf anders verläuft
+    this.activeScene = null;           // die gerade laufende Kampfszene
 
     this.root.innerHTML = `
       <div class="lab-screen">
@@ -207,21 +209,44 @@ export class CombatLabScreen {
 
   // ---------- Kämpfe ----------
 
+  // Kampf berechnen und als Szene abspielen. Am Ende erscheint der Bericht darunter.
   runFight() {
     this.fightCounter++;
+    const group = this.getGroup();
     const result = simulateBattle({
-      heroes: this.getGroup(),
+      heroes: group,
       bossId: this.bossId,
       tacticId: this.tacticId,
       seed: Date.now() + this.fightCounter,
       recordLog: true,
     });
-    renderCombatReport(this.root.querySelector('.report-box'), result);
-    if (result.isDummy || result.victory) {
-      Sound.itemReveal(3);
-    } else {
-      Sound.shake(0.4);
-    }
+
+    const box = this.root.querySelector('.report-box');
+    box.innerHTML = '<div class="scene-box"></div><div class="final-report"></div>';
+    const scene = new BattleScene(box.querySelector('.scene-box'), result, group, () => {
+      renderCombatReport(box.querySelector('.final-report'), result);
+      if (result.isDummy || result.victory) {
+        Sound.itemReveal(3);
+      } else {
+        Sound.shake(0.4);
+      }
+    });
+    this.activeScene = scene;
+    this.playScene(scene);
+  }
+
+  // Treibt die Szene mit echter Zeit an, bis sie fertig ist oder eine neue startet
+  playScene(scene) {
+    let lastTime = performance.now();
+    const step = (now) => {
+      if (this.activeScene !== scene || scene.finished) {
+        return;
+      }
+      scene.update(Math.min((now - lastTime) / 1000, 0.5));
+      lastTime = now;
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
 
   runEstimate() {

@@ -17,7 +17,7 @@ export class Battle {
     this.random = random;
     this.recordLog = recordLog;
     this.round = 0;
-    this.log = [];             // Einträge: { round, text, kind }
+    this.log = [];             // Einträge: { round, text, kind, ...details } (siehe addLog)
     this.snapshots = [];       // Leben aller Kämpfer am Ende jeder Runde (für den Live-Ticker)
     this.nextMinionNumber = 1;
     this.forcedTarget = null;  // Herausforderungsruf: { combatant, rounds }
@@ -25,10 +25,16 @@ export class Battle {
 
   // ---------- Bericht ----------
 
-  // kind = 'info', 'damage', 'crit', 'heal', 'shield', 'mechanic', 'warning', 'death'
-  addLog(text, kind = 'info') {
+  // kind    = 'info', 'damage', 'crit', 'heal', 'shield', 'mechanic', 'warning', 'death'
+  // details = Zusatzinfos für die Kampfszene (alle freiwillig):
+  //   sourceId = wer handelt (macht einen kleinen Ausfallschritt)
+  //   hits     = Liste von Treffern/Heilungen (siehe Combatant.describeHit)
+  //   labels   = Liste von { targetId, text } für aufploppende Wörter wie "UNTERBROCHEN!"
+  //   cast     = { state: 'start' oder 'end', name } für den Zauberbalken des Bosses
+  //   spawn    = Liste neuer Diener (siehe Combatant.describe)
+  addLog(text, kind = 'info', details = {}) {
     if (this.recordLog) {
-      this.log.push({ round: this.round, text: text, kind: kind });
+      this.log.push({ round: this.round, text: text, kind: kind, ...details });
     }
   }
 
@@ -121,6 +127,7 @@ export class Battle {
       side: 'enemy',
       stats: minionData.stats,
       isMinion: true,
+      minionId: minionId,
     });
     this.nextMinionNumber++;
     this.enemies.push(minion);

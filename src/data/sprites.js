@@ -30,6 +30,13 @@ export const PALETTE = {
   h: '#f1c39b', // Haut (wird pro Held ersetzt)
   H: '#6b3f17', // Haare (wird pro Held ersetzt)
   C: '#888888', // Kleidung (wird durch die Klassenfarbe ersetzt)
+  e: '#ff3b3b', // glühende Augen
+  P: '#5a2a8a', // Lila dunkel
+  p: '#b07ce8', // Lila hell
+  v: '#6fc25a', // Grün hell
+  V: '#2e6b2e', // Grün dunkel
+  y: '#e2c275', // Stroh hell
+  Y: '#a8873e', // Stroh dunkel
 };
 
 export const SPRITES = {
@@ -264,5 +271,92 @@ export const SPRITES = {
     '..kBBkkBBk..',
     '..kBk..kBk..',
     '..kkk..kkk..',
+  ],
+
+  // ---------- Gegner ----------
+
+  bossBear: [
+    '..kk........kk..',
+    '.kBBk......kBBk.',
+    '.kBbbkkkkkkbbBk.',
+    '..kbbbbbbbbbbk..',
+    '.kbbbbbbbbbbbbk.',
+    '.kbbkebbbbekbbk.',
+    '.kbbbbbbbbbbbbk.',
+    '.kbbbkwwwwkbbbk.',
+    '..kbbbkkkkbbbk..',
+    '.kBbbbbbbbbbbBk.',
+    'kBBbbbbbbbbbbBBk',
+    'kBbbbbbbbbbbbbBk',
+    'kBbbbbbbbbbbbbBk',
+    '.kBBbbbbbbbbBBk.',
+    '.kwkBBkkkkBBkwk.',
+    '..k.kk....kk.k..',
+  ],
+
+  bossCultist: [
+    '......kkkk......',
+    '.....kPPPPk.....',
+    '....kPPPPPPk....',
+    '...kPPkkkkPPk...',
+    '...kPkekkekPk...',
+    '...kPkkkkkkPk...',
+    '..kPPPkkkkPPPk..',
+    '..kPPPPPPPPPPk..',
+    '.kPPpPPPPPPpPPk.',
+    '.khPPpPPPPpPPhk.',
+    '.kPPPPpPPpPPPPk.',
+    '..kPPPPppPPPPk..',
+    '..kPPPPPPPPPPk..',
+    '.kPPPPPPPPPPPPk.',
+    '.kPPPPPPPPPPPPk.',
+    '.kkkkkkkkkkkkkk.',
+  ],
+
+  bossBroodmother: [
+    '....k......k....',
+    '.....k....k.....',
+    '......kkkk......',
+    '.....kvvvvk.....',
+    '....kvekkevk....',
+    '....kvvvvvvk....',
+    '..k.kVvvvvVk.k..',
+    '.k.kVVvvvvVVk.k.',
+    'k.kVVvvvvvvVVk.k',
+    '.kVVvvVvvVvvVVk.',
+    'kkVvvvVvvVvvvVkk',
+    '.kVVvvvvvvvvVVk.',
+    'k.kVVvvvvvvVVk.k',
+    '.k.kVVVVVVVVk.k.',
+    '..k.kkkkkkkk.k..',
+    '................',
+  ],
+
+  minionBroodling: [
+    '..k..k..',
+    '...kk...',
+    '..kvvk..',
+    '.kveevk.',
+    'k.kvvk.k',
+    '.kVvvVk.',
+    'k.kVVk.k',
+    '........',
+  ],
+
+  bossDummy: [
+    '....kkkk....',
+    '...kyyyyk...',
+    '...kykkyk...',
+    '...kyyyyk...',
+    '....kyyk....',
+    'kkkkkbbkkkkk',
+    'kYyyybbyyyYk',
+    'kkkkybbykkkk',
+    '...kyyyyk...',
+    '...kYyyYk...',
+    '....kbbk....',
+    '....kbbk....',
+    '...kbbbbk...',
+    '..kkkkkkkk..',
   ],
 };

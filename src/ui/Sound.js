@@ -80,6 +80,23 @@ export const Sound = {
     playTone(988, 0.1, 0.2);
   },
 
+  // Kampf: kritischer Treffer (leise, damit es bei vielen Treffern nicht nervt)
+  hit(crit) {
+    playTone(crit ? 330 : 220, 0, 0.06, 'square', crit ? 0.035 : 0.02);
+  },
+
+  // Kampf: der Boss bereitet eine Mechanik vor
+  warning() {
+    playTone(440, 0, 0.12, 'sawtooth', 0.04);
+    playTone(330, 0.13, 0.18, 'sawtooth', 0.04);
+  },
+
+  // Kampf: jemand fällt
+  fall() {
+    playTone(300, 0, 0.12, 'triangle', 0.06);
+    playTone(180, 0.12, 0.25, 'triangle', 0.06);
+  },
+
   // Rumpeln, während die Kiste wackelt. Wird zum Ende hin schneller und höher.
   shake(seconds) {
     let time = 0;

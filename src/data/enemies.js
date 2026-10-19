@@ -3,6 +3,7 @@
 //
 // Boss:
 //   name, title  = Anzeige
+//   sprite       = Pixelbild aus sprites.js
 //   stats        = health (Leben), attack (Angriff), defense (Rüstung)
 //   enrageRound  = ab dieser Runde rast der Boss (doppelter Schaden). null = nie.
 //   isDummy      = Übungspuppe: greift nicht an, nur zum Schaden-Messen
@@ -30,6 +31,7 @@ export const BOSSES = [
     id: 'trainingDummy',
     name: 'Übungspuppe',
     title: 'Schaden messen',
+    sprite: 'bossDummy',
     stats: { health: 100000, attack: 0, defense: 10 },
     enrageRound: null,
     isDummy: true,
@@ -40,6 +42,7 @@ export const BOSSES = [
     id: 'grimfang',
     name: 'Grimmzahn',
     title: 'Der Höhlenbär',
+    sprite: 'bossBear',
     stats: { health: 1250, attack: 27, defense: 10 },
     enrageRound: 25,
     mechanics: [
@@ -54,6 +57,7 @@ export const BOSSES = [
     id: 'morva',
     name: 'Schwester Morva',
     title: 'Die Schattenruferin',
+    sprite: 'bossCultist',
     stats: { health: 1250, attack: 25, defense: 5 },
     enrageRound: 30,
     mechanics: [
@@ -73,6 +77,7 @@ export const BOSSES = [
     id: 'skarrix',
     name: 'Skarrix',
     title: 'Die Brutmutter',
+    sprite: 'bossBroodmother',
     stats: { health: 1500, attack: 26, defense: 8 },
     enrageRound: 30,
     mechanics: [
@@ -94,6 +99,7 @@ export const BOSSES = [
 export const MINIONS = {
   broodling: {
     name: 'Brutling',
+    sprite: 'minionBroodling',
     stats: { health: 65, attack: 13, defense: 0 },
   },
 };

@@ -1337,3 +1337,268 @@ h3 {
 .log-mechanic { color: #ff9f43; }
 .log-warning { color: #ff6b6b; }
 .log-death { color: #ffffff; font-weight: bold; }
+
+/* ---------- Kampfszene ---------- */
+
+.battle-scene {
+  border: 3px solid var(--border);
+  background: linear-gradient(#1a1328 0%, #120d1c 70%, #2a1f17 70%, #1d150f 100%);
+}
+
+.scene-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #0c0914;
+}
+
+.scene-round {
+  font-family: var(--font-title);
+  font-size: 11px;
+  color: var(--gold);
+  flex: 1;
+}
+
+.scene-speed {
+  display: flex;
+  gap: 4px;
+}
+
+.scene-field {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  padding: 40px 24px 20px;
+  min-height: 280px;
+}
+
+.scene-heroes {
+  display: flex;
+  gap: 18px;
+  align-items: flex-end;
+}
+
+.scene-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scene-enemies {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-direction: row-reverse;
+}
+
+.scene-minions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 200px;
+  justify-content: flex-end;
+}
+
+.scene-unit {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 92px;
+  transition: opacity 0.4s, filter 0.4s;
+}
+
+.boss-unit {
+  width: 140px;
+}
+
+.unit-name {
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.unit-bars {
+  width: 100%;
+}
+
+.unit-hp,
+.unit-shield {
+  position: relative;
+  background: #0c0914;
+  border: 1px solid #0c0914;
+}
+
+.unit-hp {
+  height: 12px;
+}
+
+.unit-hp div {
+  height: 100%;
+  background: #2ecc40;
+  transition: width 0.2s;
+}
+
+.enemy-unit .unit-hp div {
+  background: #d63c3c;
+}
+
+.unit-hp span {
+  position: absolute;
+  inset: 0;
+  font-size: 12px;
+  line-height: 11px;
+  text-align: center;
+  color: #fff;
+}
+
+.unit-shield {
+  height: 4px;
+  border: none;
+  background: transparent;
+}
+
+.unit-shield div {
+  height: 100%;
+  background: #5ef2ff;
+  transition: width 0.2s;
+}
+
+.scene-unit.dead {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
+.scene-unit.dead .unit-sprite {
+  rotate: -80deg;
+  translate: 0 8px;
+  transition: rotate 0.4s, translate 0.4s;
+}
+
+.hero-unit.lunge .unit-sprite {
+  animation: lunge-right 0.25s ease-out;
+}
+
+.enemy-unit.lunge .unit-sprite {
+  animation: lunge-left 0.25s ease-out;
+}
+
+@keyframes lunge-right {
+  50% { translate: 14px 0; }
+}
+
+@keyframes lunge-left {
+  50% { translate: -18px 0; }
+}
+
+.scene-unit.hit .unit-sprite canvas {
+  animation: hit-flash 0.25s;
+}
+
+@keyframes hit-flash {
+  30% { filter: brightness(3) saturate(0); }
+}
+
+.unit-floats {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.float-text {
+  position: absolute;
+  top: -6px;
+  translate: -50% 0;
+  white-space: nowrap;
+  font-size: 22px;
+  text-shadow: 2px 2px 0 #0c0914;
+  animation: float-up 1.1s ease-out forwards;
+}
+
+.float-damage { color: #ff6b6b; }
+.float-heal { color: #2ecc40; }
+.float-shield { color: #5ef2ff; font-size: 18px; }
+
+.float-crit {
+  color: #ffd23f;
+  font-size: 32px;
+  animation: float-crit 1.1s ease-out forwards;
+}
+
+.float-label {
+  font-family: var(--font-title);
+  font-size: 9px;
+  color: #ff9f43;
+}
+
+@keyframes float-up {
+  0%   { translate: -50% 0; opacity: 0; }
+  15%  { translate: -50% -14px; opacity: 1; }
+  100% { translate: -50% -60px; opacity: 0; }
+}
+
+@keyframes float-crit {
+  0%   { translate: -50% 0; scale: 0.4; opacity: 0; }
+  20%  { translate: -50% -18px; scale: 1.4; opacity: 1; }
+  35%  { scale: 1; }
+  100% { translate: -50% -70px; opacity: 0; }
+}
+
+.cast-bar {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  translate: -50% 0;
+  width: 320px;
+  padding: 4px 8px;
+  text-align: center;
+  background: #2a0f0f;
+  border: 2px solid #ff6b6b;
+  animation: blink 0.6s steps(2) infinite;
+  z-index: 4;
+}
+
+.cast-name {
+  position: relative;
+  z-index: 1;
+  font-size: 16px;
+  color: #ffd0d0;
+}
+
+.cast-fill {
+  position: absolute;
+  inset: 0;
+  background: #8b1e1e;
+  transform-origin: left;
+  animation: cast-progress 1.2s linear forwards;
+}
+
+@keyframes cast-progress {
+  from { scale: 0 1; }
+  to   { scale: 1 1; }
+}
+
+.scene-ticker {
+  min-height: 130px;
+  padding: 8px 12px;
+  background: #0c0914;
+  font-size: 17px;
+}
+
+.final-report {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}

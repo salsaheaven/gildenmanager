@@ -11,7 +11,7 @@ export class Combatant {
   //   id, name, side ('hero' oder 'enemy'), row ('front'/'back'),
   //   stats: { health, mana, attack, magic, defense },
   //   abilityIds (Liste), basicAttack, heroId (nur Helden), classId (nur Helden),
-  //   bossData (nur Bosse), isMinion (nur Diener)
+  //   bossData (nur Bosse), isMinion + minionId (nur Diener)
   // }
   constructor(options) {
     this.id = options.id;
@@ -22,6 +22,7 @@ export class Combatant {
     this.classId = options.classId || null;
     this.bossData = options.bossData || null;
     this.isMinion = options.isMinion || false;
+    this.minionId = options.minionId || null;
 
     this.maxHp = options.stats.health;
     this.hp = this.maxHp;
@@ -58,6 +59,36 @@ export class Combatant {
 
   isBoss() {
     return this.bossData !== null;
+  }
+
+  // Steckbrief für die Kampfszene: wer ist das, wo steht er, wie viel Leben?
+  describe() {
+    return {
+      id: this.id,
+      name: this.name,
+      side: this.side,
+      row: this.row,
+      hp: this.hp,
+      maxHp: this.maxHp,
+      heroId: this.heroId,
+      classId: this.classId,
+      bossId: this.bossData ? this.bossData.id : null,
+      minionId: this.minionId,
+    };
+  }
+
+  // Beschreibt einen Treffer oder eine Heilung für die Kampfszene (aufploppende Zahl + Lebensbalken)
+  // kind = 'damage', 'heal' oder 'shield'
+  describeHit(amount, kind, crit = false, absorbed = 0) {
+    return {
+      targetId: this.id,
+      amount: amount,
+      kind: kind,
+      crit: crit,
+      absorbed: absorbed,
+      hpAfter: this.hp,
+      shieldAfter: this.shield,
+    };
   }
 
   // ---------- Effekte ----------

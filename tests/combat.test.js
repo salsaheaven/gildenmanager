@@ -8,6 +8,7 @@ import { Combatant } from '../src/systems/combat/Combatant.js';
 import { ABILITIES } from '../src/data/abilities.js';
 import { BOSSES, MINIONS } from '../src/data/enemies.js';
 import { TACTICS } from '../src/data/tactics.js';
+import { SPRITES } from '../src/data/sprites.js';
 
 const SKILL_TYPES = ['damage', 'heal', 'shield', 'buff', 'taunt', 'mana', 'cleanse', 'stun', 'interrupt', 'dot'];
 const MECHANIC_TYPES = ['tankBuster', 'groupCast', 'frontWave', 'summon', 'curse'];
@@ -26,6 +27,7 @@ describe('Kampf-Daten', () => {
 
   for (const boss of BOSSES) {
     it(`Boss ${boss.name}: Mechaniken gültig`, () => {
+      expect(SPRITES[boss.sprite], 'Pixelbild').toBeDefined();
       for (const mechanic of boss.mechanics) {
         expect(MECHANIC_TYPES).toContain(mechanic.type);
         expect(mechanic.every).toBeGreaterThan(0);
@@ -34,6 +36,12 @@ describe('Kampf-Daten', () => {
         }
       }
     });
+  }
+});
+
+it('alle Diener haben ein Pixelbild', () => {
+  for (const minionId in MINIONS) {
+    expect(SPRITES[MINIONS[minionId].sprite]).toBeDefined();
   }
 });
 

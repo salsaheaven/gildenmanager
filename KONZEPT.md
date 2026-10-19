@@ -51,7 +51,8 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
   - Die Regel reagiert **nur auf Gefallene, nicht auf Lebenspunkte**. Wählbar sind „nie“, „nach 1 Gefallenen“ und „nach 2 Gefallenen“.
   - Der Rückzug dauert **2 Runden**, in denen der Boss weiter angreift (auch mit Mechaniken). Die Helden heilen und verteidigen sich nur noch, Schaden machen sie keinen mehr. Auch beim Rückzug kann also noch jemand fallen.
   - Es gibt keine Beute, und alle Überlebenden sind verletzt.
-- **Darstellung:** Der vorberechnete Kampf wird in Spielzeit als **Live-Ticker** abgespielt, mit Lebensbalken für Gruppe und Gegner. Danach folgt der vollständige Kampfbericht.
+- **Darstellung:** Der vorberechnete Kampf wird in Spielzeit als **Kampfszene** abgespielt: Pixel-Helden gegen den Boss, Lebensbalken, aufploppende Schadens- und Heilzahlen wie im MMO, ein Zauberbalken für angekündigte Mechaniken und ein Ticker. Danach folgt der vollständige Kampfbericht. Man soll mitfiebern und sehen, wie Taktik und Gruppe wirken.
+- **Schnellkampf:** Einen Dungeon kann man erst sofort berechnen lassen, nachdem man ihn einige Male (z.B. 3-mal) erfolgreich abgeschlossen hat. Bis dahin muss man den Kampf ansehen. Zuerst lernt man also den Boss kennen, danach spart man beim Farmen Zeit.
 - **Zwei Reihen:** Vorne stehen Tanks und Nahkämpfer, hinten Fernkämpfer, Heiler und Supporter. Manche Bossfähigkeiten treffen nur eine Reihe.
 - **Ressourcen:** Alle Skills haben Abklingzeiten. Heiler und Zauberer brauchen zusätzlich **Mana**. Geht dem Heiler das Mana aus, wird es gefährlich.
 - **Tod (nur Hardcore):** Wer auf 0 Leben fällt, ist tot, auch wenn die Gruppe gewinnt. In Normal-Dungeons ist er stattdessen verletzt.
