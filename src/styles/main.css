@@ -1,0 +1,579 @@
+/* ============================================================
+   GILDENMANAGER – Aussehen
+   Pixel-Look: Pixel-Schriften, harte Kanten, keine weichen Rundungen.
+   ============================================================ */
+
+:root {
+  --background: #14101f;
+  --panel: #221a33;
+  --panel-light: #2f2447;
+  --border: #4a3b6b;
+  --text: #e8e0f5;
+  --text-dim: #9a8fb3;
+  --gold: #ffd23f;
+  --font-title: 'Press Start 2P', monospace;
+  --font-text: 'VT323', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-text);
+  font-size: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+canvas.sprite {
+  image-rendering: pixelated;
+  display: block;
+}
+
+h2 {
+  font-family: var(--font-title);
+  font-size: 11px;
+  color: var(--gold);
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+button {
+  font-family: var(--font-text);
+  font-size: 18px;
+  color: var(--text);
+  background: var(--panel-light);
+  border: 2px solid var(--border);
+  padding: 4px 10px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #0c0914;
+}
+
+button:hover:not(:disabled) {
+  background: #3d2f5c;
+  border-color: #6b58a0;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #0c0914;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.empty,
+.hint {
+  color: var(--text-dim);
+  font-size: 18px;
+  margin: 6px 0;
+}
+
+/* Fortschrittsbalken */
+.bar {
+  height: 10px;
+  background: #0c0914;
+  border: 2px solid var(--border);
+  flex: 1;
+  min-width: 60px;
+}
+
+.bar-fill {
+  height: 100%;
+  background: var(--gold);
+}
+
+.panel {
+  background: var(--panel);
+  border: 3px solid var(--border);
+  box-shadow: inset 0 0 0 2px #0c0914, 0 4px 0 #0c0914;
+  padding: 14px;
+}
+
+/* ---------- Obere Leiste ---------- */
+
+#top-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 16px;
+  background: var(--panel);
+  border-bottom: 3px solid var(--border);
+}
+
+.guild-name {
+  font-family: var(--font-title);
+  font-size: 12px;
+  color: var(--gold);
+}
+
+.gold {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 26px;
+  color: var(--gold);
+}
+
+.gold.bump {
+  animation: bump 0.3s;
+}
+
+@keyframes bump {
+  50% { transform: scale(1.25); }
+}
+
+.clock {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.clock-day {
+  color: var(--text-dim);
+}
+
+.clock-time {
+  font-size: 24px;
+}
+
+.pause-label {
+  display: none;
+  font-family: var(--font-title);
+  font-size: 10px;
+  color: #ff6b6b;
+  animation: blink 1s steps(2) infinite;
+}
+
+.clock.paused .pause-label {
+  display: inline;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.courier {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 180px;
+  color: var(--text-dim);
+}
+
+.courier-fill {
+  background: #a0652d;
+}
+
+.speed-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.speed-buttons button.active {
+  background: var(--gold);
+  color: #14101f;
+  border-color: #fff3b0;
+}
+
+.menu-buttons {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.reset-button.confirm {
+  background: #8b1e1e;
+  border-color: #ff6b6b;
+}
+
+/* ---------- Schatzkammer (Kisten) ---------- */
+
+#screen {
+  flex: 1;
+  padding: 16px;
+}
+
+.lootbox-screen {
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  gap: 16px;
+  min-height: calc(100vh - 110px);
+}
+
+@media (max-width: 1000px) {
+  .lootbox-screen {
+    grid-template-columns: 1fr;
+  }
+}
+
+.box-list,
+.shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.box-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  padding: 8px;
+}
+
+.box-entry .box-name {
+  flex: 1;
+}
+
+.box-count {
+  font-size: 24px;
+  color: var(--gold);
+}
+
+.shop-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shop-entry .box-name {
+  flex: 1;
+}
+
+.buy-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--gold);
+}
+
+.pity-label {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.pity-label b {
+  color: #a335ee;
+}
+
+.pity-fill {
+  background: #a335ee;
+}
+
+/* ---------- Bühne ---------- */
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  cursor: default;
+  --glow: #ffffff;
+  background: radial-gradient(circle at 50% 40%, #2f2447 0%, var(--panel) 70%);
+}
+
+.stage-chest {
+  position: relative;
+  z-index: 2;
+}
+
+.stage-chest.idle {
+  opacity: 0.5;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  50% { transform: translateY(-8px); }
+}
+
+/* Wackeln: wird mit der Zeit stärker */
+.stage-chest.shaking {
+  animation: shake 0.1s infinite, grow var(--shake-time) ease-in forwards;
+}
+
+@keyframes shake {
+  0%   { translate: 0 0;     rotate: 0deg; }
+  25%  { translate: -4px 1px; rotate: -4deg; }
+  50%  { translate: 3px -2px; rotate: 3deg; }
+  75%  { translate: -2px 2px; rotate: -2deg; }
+  100% { translate: 0 0;     rotate: 0deg; }
+}
+
+@keyframes grow {
+  to { scale: 1.15; }
+}
+
+/* Strahlen hinter der offenen Kiste in der Farbe der besten Seltenheit */
+.stage-rays {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 900px;
+  height: 900px;
+  margin: -450px 0 0 -450px;
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: repeating-conic-gradient(var(--glow) 0deg 8deg, transparent 8deg 24deg);
+  mask-image: radial-gradient(circle, black 0%, transparent 60%);
+  -webkit-mask-image: radial-gradient(circle, black 0%, transparent 60%);
+}
+
+.stage.opened .stage-rays {
+  opacity: 0.18;
+  animation: spin 12s linear infinite;
+}
+
+.stage.big-glow .stage-rays {
+  opacity: 0.4;
+  animation: spin 5s linear infinite;
+}
+
+@keyframes spin {
+  to { rotate: 360deg; }
+}
+
+.stage.opened .stage-chest canvas {
+  filter: drop-shadow(0 0 20px var(--glow));
+  animation: pop-open 0.3s ease-out;
+}
+
+@keyframes pop-open {
+  0%   { scale: 1.3 0.7; }
+  60%  { scale: 0.9 1.15; }
+  100% { scale: 1 1; }
+}
+
+.stage-flash {
+  position: absolute;
+  inset: 0;
+  background: #ff8000;
+  opacity: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.stage.legendary-flash .stage-flash {
+  animation: flash 0.9s ease-out;
+}
+
+@keyframes flash {
+  0%   { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+.screen-shake {
+  animation: screen-shake 0.5s;
+}
+
+@keyframes screen-shake {
+  10%, 50%, 90% { translate: -6px 3px; }
+  30%, 70%      { translate: 6px -3px; }
+}
+
+.stage-items {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  min-height: 10px;
+}
+
+.item-card {
+  --rarity: #ffffff;
+  width: 150px;
+  padding: 12px 8px;
+  background: #120d1c;
+  border: 3px solid var(--rarity);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  animation: card-pop 0.4s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+@keyframes card-pop {
+  from { scale: 0; translate: 0 -60px; opacity: 0; }
+  to   { scale: 1; translate: 0 0;     opacity: 1; }
+}
+
+.card-name {
+  color: var(--rarity);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.card-rarity {
+  font-family: var(--font-title);
+  font-size: 8px;
+  color: var(--rarity);
+  opacity: 0.8;
+}
+
+.card-stats {
+  color: var(--text-dim);
+  font-size: 17px;
+}
+
+.item-card.rarity-rare {
+  box-shadow: 0 0 10px var(--rarity);
+}
+
+.item-card.rarity-epic {
+  box-shadow: 0 0 18px var(--rarity);
+}
+
+.item-card.rarity-legendary {
+  box-shadow: 0 0 28px var(--rarity);
+  animation: card-pop 0.6s cubic-bezier(0.2, 1.6, 0.4, 1), legendary-pulse 1.2s ease-in-out 0.6s infinite;
+}
+
+@keyframes legendary-pulse {
+  50% { box-shadow: 0 0 45px var(--rarity), 0 0 12px #fff inset; }
+}
+
+.stage-hint {
+  position: relative;
+  z-index: 3;
+  color: var(--text-dim);
+}
+
+.stage-actions {
+  position: relative;
+  z-index: 3;
+}
+
+.big-button {
+  font-size: 22px;
+  padding: 10px 20px;
+  background: #3b2a12;
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ---------- Inventar ---------- */
+
+.inventory-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  gap: 6px;
+  max-height: 50vh;
+  overflow-y: auto;
+  align-content: start;
+}
+
+.inventory-slot {
+  --rarity: #ffffff;
+  position: relative;
+  aspect-ratio: 1;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #120d1c;
+  border: 2px solid var(--rarity);
+  box-shadow: none;
+}
+
+.inventory-slot.rarity-epic,
+.inventory-slot.rarity-legendary {
+  box-shadow: 0 0 8px var(--rarity);
+}
+
+.inventory-slot.selected {
+  outline: 2px solid #ffffff;
+  outline-offset: 1px;
+}
+
+.new-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  background: var(--gold);
+  border: 2px solid #120d1c;
+  animation: blink 1s steps(2) infinite;
+}
+
+.item-details {
+  min-height: 150px;
+  padding: 10px;
+  background: #120d1c;
+  border: 2px solid var(--border);
+}
+
+.detail-name {
+  font-size: 24px;
+}
+
+.detail-sub {
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.detail-stats {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 6px;
+  color: #1eff00;
+}
+
+.detail-power {
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+/* ---------- Benachrichtigungen ---------- */
+
+#toasts {
+  position: fixed;
+  top: 70px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--panel);
+  border: 3px solid var(--gold);
+  padding: 8px 14px;
+  font-size: 20px;
+  box-shadow: 0 4px 0 #0c0914;
+  animation: toast-in 0.3s ease-out;
+  transition: opacity 0.5s, translate 0.5s;
+}
+
+.toast-hide {
+  opacity: 0;
+  translate: 40px 0;
+}
+
+@keyframes toast-in {
+  from { translate: 60px 0; opacity: 0; }
+}
