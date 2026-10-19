@@ -91,6 +91,13 @@ export class EquipPanel {
       return;
     }
 
+    // Wer im Dungeon ist, hat seine Ausrüstung dabei und kann sie nicht wechseln
+    if (this.game.guild.isHeroBusy(this.hero.id)) {
+      bestButton.disabled = true;
+      list.innerHTML = '<p class="empty">' + this.hero.name + ' ist gerade in einem Dungeon unterwegs.</p>';
+      return;
+    }
+
     const items = this.getMatchingItems();
     bestButton.disabled = !items.some((item) => this.hero.getUpgradeValue(item) > 0);
 

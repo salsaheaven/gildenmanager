@@ -12,22 +12,21 @@
 import { getBoss, MINIONS } from '../data/enemies.js';
 import { createHeroCanvas, createSpriteCanvas } from './PixelArt.js';
 import { playEffect } from './BattleEffects.js';
+import { computeEncounterTimeline } from '../systems/combat/BattleTimeline.js';
+import { COMBAT_RULES } from '../data/combatRules.js';
 import { Sound } from './Sound.js';
 
-// Zeitplan in Spielsekunden (bei Spieluhr 1x also echte Sekunden)
-const START_DELAY = 0.4;      // kurze Pause vor dem ersten Ereignis
-const ACTION_LEAD = 0.14;     // Zeit zwischen Aktion (Animation startet) und Wirkung (Zahl ploppt auf)
-const EFFECT_TIME = 0.08;     // Abstand nach einer Wirkung (Treffer, Heilung …)
-const INFO_TIME = 0.05;       // Abstand nach reinen Textzeilen
-const ROUND_PAUSE = 0.3;      // Pause zwischen zwei Runden
-const END_DELAY = 0.6;        // Pause vor dem Ergebnis
 const TICKER_LINES = 6;       // so viele Zeilen zeigt der Ticker
+
+// Springt die Zeit weiter als das (z.B. beim späten Zuschauen), wird ohne Animationen nachgeholt
+const CATCH_UP_SECONDS = 1.5;
 
 export class BattleScene {
   // result     = Ergebnis von simulateBattle (mit recordLog: true)
   // heroes     = die Hero-Objekte der Gruppe (für Aussehen der Pixelbilder)
   // onFinished = wird am Ende aufgerufen (auch nach "Überspringen")
-  constructor(container, result, heroes, onFinished) {
+  // showSkip   = Knopf "Überspringen" anzeigen (im Labor ja, in Dungeons nicht)
+  constructor(container, result, heroes, onFinished, showSkip = true) {
     this.container = container;
     this.result = result;
     this.onFinished = onFinished;
@@ -43,6 +42,7 @@ export class BattleScene {
     this.units = {}; // Kämpfer-id → Elemente der Figur
 
     this.buildLayout();
+    this.container.querySelector('.scene-skip').hidden = !showSkip;
     for (const info of result.startingCombatants) {
       this.addUnit(info);
     }
@@ -120,7 +120,8 @@ export class BattleScene {
     if (info.bossId) {
       return createSpriteCanvas(getBoss(info.bossId).sprite, 6);
     }
-    return createSpriteCanvas(MINIONS[info.minionId].sprite, 5);
+    const minion = MINIONS[info.minionId];
+    return createSpriteCanvas(minion.sprite, 5, minion.colors || {});
   }
 
   setBars(unitId, hp, shield) {
@@ -144,26 +145,11 @@ export class BattleScene {
     unit.element.querySelector('.unit-mana div').style.width = Math.max(0, mana / unit.maxMana) * 100 + '%';
   }
 
-  // Jedes Ereignis bekommt einen Zeitpunkt
+  // Jedes Ereignis bekommt einen Zeitpunkt (dieselbe Rechnung wie für die Dauer eines Runs)
   scheduleEntries() {
-    this.entryTimes = [];
-    let time = START_DELAY;
-    let currentRound = 0;
-    for (const entry of this.result.log) {
-      if (entry.round !== currentRound) {
-        currentRound = entry.round;
-        time += ROUND_PAUSE;
-      }
-      this.entryTimes.push(time);
-      if (entry.kind === 'action') {
-        time += ACTION_LEAD;
-      } else if (entry.hits || entry.labels || entry.spawn || entry.cast) {
-        time += EFFECT_TIME;
-      } else {
-        time += INFO_TIME;
-      }
-    }
-    this.endTime = time + END_DELAY;
+    const timeline = computeEncounterTimeline(this.result.log);
+    this.entryTimes = timeline.times;
+    this.endTime = timeline.duration;
   }
 
   // ---------- Abspielen ----------
@@ -172,14 +158,21 @@ export class BattleScene {
   // (0, wenn das Spiel pausiert ist). isPaused blendet den Pause-Hinweis ein.
   // speed = Geschwindigkeit der Spieluhr, damit Animationen bei 4x auch schneller sind.
   update(gameSeconds, isPaused = false, speed = 1) {
+    this.syncTo(this.time + gameSeconds, isPaused, speed);
+  }
+
+  // Springt zu einem Zeitpunkt im Kampf (Spielsekunden seit Kampfbeginn).
+  // Kleine Schritte werden mit Animationen abgespielt, große Sprünge still nachgeholt.
+  syncTo(targetTime, isPaused = false, speed = 1) {
     if (this.finished) {
       return;
     }
     this.speed = speed;
     this.container.querySelector('.battle-scene').classList.toggle('paused', isPaused);
-    this.time += gameSeconds;
+    const quiet = targetTime - this.time > CATCH_UP_SECONDS;
+    this.time = targetTime;
     while (this.entryIndex < this.result.log.length && this.entryTimes[this.entryIndex] <= this.time) {
-      this.playEntry(this.result.log[this.entryIndex], false);
+      this.playEntry(this.result.log[this.entryIndex], quiet);
       this.entryIndex++;
     }
     if (this.entryIndex >= this.result.log.length && this.time >= this.endTime) {
@@ -262,7 +255,7 @@ export class BattleScene {
       }
     }
     // Das Geschoss soll ungefähr dann ankommen, wenn die Zahl aufploppt
-    const flightMilliseconds = (ACTION_LEAD * 1000 * 0.9) / Math.max(1, this.speed);
+    const flightMilliseconds = (COMBAT_RULES.pacing.actionLead * 1000 * 0.9) / Math.max(1, this.speed);
     playEffect(field, action.fx, sourceSprite, targetSprites, flightMilliseconds);
   }
 

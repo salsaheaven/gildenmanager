@@ -1,6 +1,7 @@
 // ============================================================
 // BATTLE – der Zustand eines laufenden Kampfes
 // Kennt alle Kämpfer, die Runde, den Zufall, die Taktik und den Kampfbericht.
+// Der Boss ist freiwillig: Bei Trash-Gruppen gibt es keinen (boss = null).
 // Bietet Hilfsfragen an wie "Wen greift der Boss an?" oder "Wer ist am verletztesten?".
 // ============================================================
 
@@ -9,10 +10,11 @@ import { MINIONS } from '../../data/enemies.js';
 
 export class Battle {
   // recordLog = false spart Zeit, wenn nur das Ergebnis zählt (z.B. bei 200 Simulationen)
-  constructor(heroes, boss, tactic, random, recordLog) {
+  // enemyStrength = Faktor auf Leben und Angriff der Gegner (siehe dungeons.js)
+  constructor(heroes, boss, tactic, random, recordLog, enemyStrength = 1) {
     this.heroes = heroes;      // Combatant-Liste der Helden
-    this.enemies = [boss];     // Combatant-Liste der Gegner (Boss + Diener)
-    this.boss = boss;
+    this.enemies = boss ? [boss] : []; // Combatant-Liste der Gegner (Boss + Diener/Trash)
+    this.boss = boss;                  // null bei Trash-Gruppen
     this.tactic = tactic;
     this.random = random;
     this.recordLog = recordLog;
@@ -20,7 +22,13 @@ export class Battle {
     this.log = [];             // Einträge: { round, text, kind, ...details } (siehe addLog)
     this.snapshots = [];       // Leben aller Kämpfer am Ende jeder Runde (für den Live-Ticker)
     this.nextMinionNumber = 1;
+    this.enemyStrength = enemyStrength;
     this.forcedTarget = null;  // Herausforderungsruf: { combatant, rounds }
+
+    // Rückzug: läuft gerade? wie viele Runden noch? geschafft?
+    this.retreating = false;
+    this.retreatRoundsLeft = 0;
+    this.retreatFinished = false;
   }
 
   // ---------- Bericht ----------
@@ -79,9 +87,29 @@ export class Battle {
     return this.enemies.filter((enemy) => enemy.alive && enemy.isMinion);
   }
 
-  // Der Kampf endet, wenn alle Helden gefallen sind oder der Boss besiegt ist
+  // Der Kampf endet, wenn alle Helden gefallen sind, der Rückzug geschafft ist
+  // oder der Boss besiegt ist (bei Trash-Gruppen: alle Gegner besiegt)
   isOver() {
-    return this.getLivingHeroes().length === 0 || !this.boss.alive;
+    if (this.retreatFinished || this.getLivingHeroes().length === 0) {
+      return true;
+    }
+    return this.isWon();
+  }
+
+  isWon() {
+    if (this.boss) {
+      return !this.boss.alive;
+    }
+    return this.getLivingEnemies().length === 0;
+  }
+
+  // Was der Boss gerade vorbereitet (null, wenn nichts oder kein Boss da ist)
+  getCasting() {
+    return this.boss && this.boss.alive ? this.boss.casting : null;
+  }
+
+  isDummyFight() {
+    return this.boss !== null && Boolean(this.boss.bossData.isDummy);
   }
 
   // ---------- Ziele ----------
@@ -103,7 +131,7 @@ export class Battle {
   // Ziel für Schadens-Skills: erst Diener (mit wenig Leben zuerst), dann der Boss.
   // Hat der Held die Anweisung "Boss zuerst", nimmt er den Boss, solange der lebt.
   getFocusTarget(attacker = null) {
-    if (attacker && attacker.orderSettings.targetPriority === 'boss' && this.boss.alive) {
+    if (attacker && attacker.orderSettings.targetPriority === 'boss' && this.boss && this.boss.alive) {
       return this.boss;
     }
     const minions = this.getLivingMinions();
@@ -111,7 +139,7 @@ export class Battle {
       minions.sort((a, b) => a.hp - b.hp);
       return minions[0];
     }
-    return this.boss.alive ? this.boss : null;
+    return this.boss && this.boss.alive ? this.boss : null;
   }
 
   // Der Held mit dem prozentual wenigsten Leben
@@ -139,13 +167,14 @@ export class Battle {
 
   // ---------- Diener ----------
 
+  // Erzeugt einen Diener oder Trash-Gegner und stellt ihn in den Kampf
   spawnMinion(minionId) {
     const minionData = MINIONS[minionId];
     const minion = new Combatant({
       id: 'minion-' + this.nextMinionNumber,
       name: minionData.name + ' ' + this.nextMinionNumber,
       side: 'enemy',
-      stats: minionData.stats,
+      stats: scaleEnemyStats(minionData.stats, this.enemyStrength),
       isMinion: true,
       minionId: minionId,
     });
@@ -153,4 +182,13 @@ export class Battle {
     this.enemies.push(minion);
     return minion;
   }
+}
+
+// Gegnerwerte mit der Stärke des Dungeons verrechnen (Rüstung bleibt gleich)
+export function scaleEnemyStats(stats, strength) {
+  return {
+    health: Math.round(stats.health * strength),
+    attack: stats.attack * strength,
+    defense: stats.defense,
+  };
 }

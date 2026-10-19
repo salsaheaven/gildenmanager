@@ -1396,10 +1396,13 @@ h3 {
 }
 
 .scene-column {
-  display: flex;
-  flex-direction: column;
+  /* Höchstens 3 Figuren übereinander, danach eine neue Spalte */
+  display: grid;
+  grid-template-rows: repeat(3, auto);
+  grid-auto-flow: column;
+  align-content: end;
   /* Platz für aufploppende Skill-Namen zwischen den Figuren */
-  gap: 26px;
+  gap: 26px 14px;
 }
 
 .scene-enemies {
@@ -1928,4 +1931,200 @@ h3 {
 .order-row select:focus {
   outline: none;
   border-color: var(--gold);
+}
+
+/* ---------- Dungeons ---------- */
+
+.dungeon-screen {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.run-panel {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 1000px) {
+  .dungeon-screen {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dungeon-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dungeon-card {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 8px 10px;
+  line-height: 1.15;
+}
+
+.dungeon-card.selected {
+  border-color: var(--gold);
+  background: #3d2f5c;
+}
+
+.dungeon-card.locked {
+  opacity: 0.55;
+}
+
+.dungeon-name {
+  color: var(--gold);
+}
+
+.dungeon-sub {
+  font-size: 16px;
+  color: var(--text-dim);
+}
+
+.encounter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.encounter-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px;
+  background: #120d1c;
+  border: 2px solid var(--border);
+}
+
+.encounter-icons {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  min-width: 90px;
+}
+
+.encounter-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 17px;
+  line-height: 1.15;
+}
+
+.encounter-text b {
+  font-weight: normal;
+  color: var(--text);
+}
+
+.encounter-text span {
+  color: var(--text-dim);
+}
+
+.reward-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gold);
+}
+
+.group-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 4px;
+}
+
+.group-check {
+  margin-top: 6px;
+}
+
+.gear-check.good { color: #1eff00; }
+.gear-check.bad { color: #ff9f43; }
+
+.group-warning {
+  color: #ff6b6b;
+}
+
+.run-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.run-row {
+  padding: 8px 10px;
+  background: #120d1c;
+  border: 2px solid var(--border);
+}
+
+.run-row.watched {
+  border-color: var(--gold);
+}
+
+.run-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.run-name {
+  font-weight: normal;
+  color: var(--gold);
+}
+
+.run-status {
+  color: var(--text-dim);
+}
+
+.run-fill {
+  background: #c98b3a;
+}
+
+.run-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.retreat-button.confirm {
+  background: #8b1e1e;
+  border-color: #ff6b6b;
+}
+
+.travel-note {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-dim);
+  border: 3px solid var(--border);
+  background: #120d1c;
+  animation: blink 1.4s steps(2) infinite;
+}
+
+.report-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.report-row {
+  text-align: left;
+  font-size: 17px;
+  box-shadow: none;
+}
+
+.report-row.outcome-success { border-left: 4px solid #1eff00; }
+.report-row.outcome-retreat { border-left: 4px solid var(--gold); }
+.report-row.outcome-defeat,
+.report-row.outcome-timeout { border-left: 4px solid #ff6b6b; }
+
+/* Unterwegs: Ausrüstung kann nicht abgelegt werden */
+.equipment-slot.busy .unequip-button {
+  display: none;
 }

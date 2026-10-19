@@ -133,6 +133,7 @@ export class HeroDetailPanel {
 
       if (item) {
         slotElement.style.setProperty('--rarity', item.getRarity().color);
+        slotElement.classList.toggle('busy', this.game.guild.isHeroBusy(this.hero.id));
         slotElement.classList.add('filled');
         slotElement.title = item.name;
         slotElement.querySelector('.slot-icon').appendChild(createItemCanvas(item, 3));
@@ -160,6 +161,11 @@ export class HeroDetailPanel {
   // Zweimal klicken, damit man nicht aus Versehen einen Helden verliert
   setupDismissButton() {
     const button = this.root.querySelector('.dismiss-button');
+    if (this.game.guild.isHeroBusy(this.hero.id)) {
+      button.disabled = true;
+      button.textContent = 'Unterwegs';
+      return;
+    }
     button.addEventListener('click', () => {
       if (button.classList.contains('confirm')) {
         const name = this.hero.name;

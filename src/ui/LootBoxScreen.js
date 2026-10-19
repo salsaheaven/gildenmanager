@@ -116,6 +116,10 @@ export class LootBoxScreen {
     list.innerHTML = '';
 
     for (const boxType of LOOT_BOXES) {
+      // Boss-Kisten gibt es nur aus Dungeons
+      if (boxType.price === null) {
+        continue;
+      }
       const row = document.createElement('div');
       row.className = 'shop-entry';
       row.appendChild(createChestCanvas(boxType, 2));

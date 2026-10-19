@@ -5,12 +5,14 @@
 //
 // id          = interner Name
 // name        = Anzeigename
-// price       = Kaufpreis in Gold
+// price       = Kaufpreis in Gold (null = nicht kaufbar, z.B. Boss-Kisten)
 // itemCount   = wie viele Items darin sind
 // mainColor   = Hauptfarbe der Kiste (Pixelbild)
 // darkColor   = dunkle Farbe für Schatten und Beschläge
 // shakeTime   = wie lange die Kiste vor dem Öffnen wackelt (Sekunden), mehr = spannender
 // chances     = Prozent-Chance pro Seltenheit
+// bossLoot    = nur Boss-Kisten: besondere Items des Bosses. Eines davon ist garantiert in der Kiste,
+//               mindestens in der Seltenheit minRarity. { templateId, name, minRarity }
 // ============================================================
 
 export const LOOT_BOXES = [
@@ -53,6 +55,53 @@ export const LOOT_BOXES = [
     darkColor: '#5a1fa8',
     shakeTime: 1.8,
     chances: { poor: 0, common: 0, uncommon: 20, rare: 45, epic: 28, legendary: 7 },
+  },
+
+  // ---------- Boss-Kisten (nur aus Dungeons, nicht kaufbar) ----------
+  {
+    id: 'chestGrimfang',
+    name: 'Grimmzahns Beute',
+    price: null,
+    itemCount: 3,
+    mainColor: '#8b5a2b',
+    darkColor: '#4a2a10',
+    shakeTime: 1.3,
+    chances: { poor: 10, common: 30, uncommon: 35, rare: 19, epic: 5, legendary: 1 },
+    bossLoot: [
+      { templateId: 'ring', name: 'Grimmzahns Fangzahn', minRarity: 'rare' },
+      { templateId: 'armor', name: 'Bärenfell-Harnisch', minRarity: 'rare' },
+      { templateId: 'helmet', name: 'Prankenhelm', minRarity: 'rare' },
+    ],
+  },
+  {
+    id: 'chestMorva',
+    name: 'Morvas Reliquien',
+    price: null,
+    itemCount: 3,
+    mainColor: '#5a2a8a',
+    darkColor: '#2a1040',
+    shakeTime: 1.5,
+    chances: { poor: 5, common: 25, uncommon: 35, rare: 25, epic: 8, legendary: 2 },
+    bossLoot: [
+      { templateId: 'staff', name: 'Stab der Schattenruferin', minRarity: 'rare' },
+      { templateId: 'helmet', name: 'Kapuze der Schwester', minRarity: 'rare' },
+      { templateId: 'ring', name: 'Gebetsring der Kapelle', minRarity: 'rare' },
+    ],
+  },
+  {
+    id: 'chestSkarrix',
+    name: 'Skarrix’ Brutschatz',
+    price: null,
+    itemCount: 4,
+    mainColor: '#3f8a3a',
+    darkColor: '#1d4a1a',
+    shakeTime: 1.7,
+    chances: { poor: 0, common: 20, uncommon: 35, rare: 30, epic: 12, legendary: 3 },
+    bossLoot: [
+      { templateId: 'shield', name: 'Chitinschild', minRarity: 'rare' },
+      { templateId: 'sword', name: 'Brutklinge', minRarity: 'rare' },
+      { templateId: 'boots', name: 'Säurestiefel', minRarity: 'rare' },
+    ],
   },
 ];
 

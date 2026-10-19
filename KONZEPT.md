@@ -113,4 +113,5 @@ Jeder Skill hat eine Abklingzeit und kostet bei Zauberern Mana. Alle Zahlen steh
 - **KI-Gilden:** Fortschrittskurve, Namen, Persönlichkeit, Reaktionen
 - **Verbrauchsgüter:** Welche Tränke, Fläschchen und Proviant gibt es, und was bewirken sie genau?
 - **Wirtschaft:** Woher kommt Gold, wofür gibt man es aus?
+- **Items im Verhältnis zu den Helden:** Auf Level 1 sind Items sehr stark. Ein grünes Schwert (+8 Angriff) verdoppelt fast den Angriff eines Helden, und schon 2 grüne Items pro Held machen die Kapelle leicht. Die Dungeons gleichen das vorläufig über eine **Gegnerstärke** aus (1,0 / 1,5 / 2,0). Die Erfolgschance springt deshalb zwischen Ausrüstungsstufen noch stark. Wie Item-Werte mit dem Level wachsen (z.B. über eine Item-Stufe), gehört zur Entscheidung über die Level-Obergrenze.
 - **Level-Obergrenze:** Wie hoch geht das Heldenlevel? Davon hängt ein großer Teil der Skalierung ab (Wachstum pro Level, Boss- und Item-Werte, Dungeon-Stufen, Spieldauer). Bis zur Entscheidung sind alle Zahlen vorläufig.

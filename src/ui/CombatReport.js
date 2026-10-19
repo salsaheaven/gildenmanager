@@ -7,7 +7,6 @@
 // ============================================================
 
 import { getHeroClass } from '../data/heroClasses.js';
-import { getBoss } from '../data/enemies.js';
 
 export function renderCombatReport(container, result) {
   container.innerHTML = '';
@@ -18,18 +17,21 @@ export function renderCombatReport(container, result) {
 
 function createBanner(result) {
   const banner = document.createElement('div');
-  const boss = getBoss(result.bossId);
+  const name = result.encounterName;
   if (result.isDummy) {
     banner.className = 'result-banner neutral';
     banner.textContent = 'Messung beendet: ' + result.rounds + ' Runden';
-  } else if (result.victory) {
+  } else if (result.outcome === 'victory') {
     banner.className = 'result-banner victory';
-    banner.textContent = 'SIEG gegen ' + boss.name + ' nach ' + result.rounds + ' Runden';
+    banner.textContent = 'SIEG gegen ' + name + ' nach ' + result.rounds + ' Runden';
+  } else if (result.outcome === 'retreat') {
+    banner.className = 'result-banner neutral';
+    banner.textContent = 'RÜCKZUG nach ' + result.rounds + ' Runden';
   } else {
     banner.className = 'result-banner defeat';
-    // Aufrunden, damit ein knapp überlebender Boss nicht als "0 %" erscheint
-    const bossLeft = Math.ceil(result.bossHpPercent * 100);
-    banner.textContent = 'NIEDERLAGE nach ' + result.rounds + ' Runden (' + boss.name + ' hatte noch ' + bossLeft + ' % Leben)';
+    // Aufrunden, damit ein knapp überlebender Gegner nicht als "0 %" erscheint
+    const enemyLeft = Math.ceil(result.bossHpPercent * 100);
+    banner.textContent = 'NIEDERLAGE nach ' + result.rounds + ' Runden (' + name + ' hatte noch ' + enemyLeft + ' % Leben)';
   }
   return banner;
 }

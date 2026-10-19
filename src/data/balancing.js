@@ -48,4 +48,15 @@ export const BALANCING = {
 
   // Gold, um sofort neue Bewerber zu rufen
   candidateRerollCost: 20,
+
+  // ---------- Dungeons ----------
+
+  // So viele Spielsekunden braucht die Gruppe von einer Begegnung zur nächsten
+  travelSeconds: 5,
+
+  // Nach so vielen Erfolgen in einem Dungeon kann man laufende Runs sofort beenden (Schnellkampf)
+  quickFinishAfterClears: 3,
+
+  // So viele Berichte über abgeschlossene Runs werden aufgehoben
+  keptReports: 10,
 };

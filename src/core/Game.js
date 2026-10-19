@@ -7,6 +7,7 @@
 //   'changed'              → irgendetwas am Spielstand hat sich geändert
 //   'boxArrived'           → der Kurier hat eine Kiste gebracht (Daten: Kistenart-id)
 //   'candidatesRefreshed'  → neue Bewerber in der Taverne (Daten: Liste der Bewerber)
+//   'expeditionFinished'   → ein Dungeon-Run ist vorbei (Daten: der Bericht, siehe finishExpedition)
 // ============================================================
 
 import { GameClock } from './GameClock.js';
@@ -16,6 +17,8 @@ import { LootSystem } from '../systems/LootSystem.js';
 import { RecruitmentSystem } from '../systems/RecruitmentSystem.js';
 import { BALANCING } from '../data/balancing.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
+import { getDungeon } from '../data/dungeons.js';
+import { Expedition } from '../entities/Expedition.js';
 
 export class Game {
   constructor(seed = Date.now()) {
@@ -64,6 +67,7 @@ export class Game {
   advanceTime(gameSeconds) {
     this.updateCourier(gameSeconds);
     this.updateCandidates(gameSeconds);
+    this.updateExpeditions(gameSeconds);
   }
 
   updateCourier(gameSeconds) {
@@ -149,6 +153,123 @@ export class Game {
     return gold;
   }
 
+  // ---------- Dungeons ----------
+
+  updateExpeditions(gameSeconds) {
+    // Kopie der Liste, weil fertige Runs während der Schleife entfernt werden
+    for (const expedition of this.guild.expeditions.slice()) {
+      expedition.update(gameSeconds);
+      if (expedition.isFinished()) {
+        this.finishExpedition(expedition);
+      }
+    }
+  }
+
+  // Ist der Dungeon freigeschaltet? (der erste immer, die anderen nach dem vorigen)
+  isDungeonUnlocked(dungeonId) {
+    const dungeon = getDungeon(dungeonId);
+    return dungeon.unlockAfter === null || this.guild.getClears(dungeon.unlockAfter) > 0;
+  }
+
+  // Darf man laufende Runs in diesem Dungeon sofort beenden? (nach einigen Erfolgen)
+  canQuickFinish(dungeonId) {
+    return this.guild.getClears(dungeonId) >= BALANCING.quickFinishAfterClears;
+  }
+
+  // Schickt eine Gruppe los. Gibt 'ok' oder einen Grund zurück:
+  // 'locked' (Dungeon gesperrt), 'noHeroes', 'tooMany', 'busy' (ein Held ist schon unterwegs)
+  startExpedition(dungeonId, heroIds, tacticId, retreatRuleId) {
+    if (!this.isDungeonUnlocked(dungeonId)) {
+      return 'locked';
+    }
+    if (heroIds.length === 0) {
+      return 'noHeroes';
+    }
+    if (heroIds.length > 5) {
+      return 'tooMany';
+    }
+    const heroes = [];
+    for (const heroId of heroIds) {
+      const hero = this.guild.findHero(heroId);
+      if (!hero || this.guild.isHeroBusy(heroId)) {
+        return 'busy';
+      }
+      heroes.push(hero);
+    }
+
+    const seed = Math.floor(this.random.next() * 2147483647);
+    const expedition = new Expedition(
+      this.guild.nextExpeditionId,
+      dungeonId,
+      heroes.map((hero) => hero.toSaveData()),
+      tacticId,
+      retreatRuleId,
+      seed,
+    );
+    this.guild.nextExpeditionId++;
+    this.guild.expeditions.push(expedition);
+    this.emit('changed');
+    return 'ok';
+  }
+
+  orderRetreat(expeditionId) {
+    const expedition = this.guild.findExpedition(expeditionId);
+    if (!expedition || !expedition.orderRetreat()) {
+      return false;
+    }
+    this.emit('changed');
+    return true;
+  }
+
+  finishExpeditionNow(expeditionId) {
+    const expedition = this.guild.findExpedition(expeditionId);
+    if (!expedition || !this.canQuickFinish(expedition.dungeonId)) {
+      return false;
+    }
+    expedition.finishNow();
+    this.finishExpedition(expedition);
+    return true;
+  }
+
+  // Run vorbei: Belohnung verteilen, Bericht schreiben, Helden sind wieder frei
+  finishExpedition(expedition) {
+    const result = expedition.getResult();
+    const dungeon = getDungeon(expedition.dungeonId);
+    const success = result.outcome === 'success';
+
+    const report = {
+      expeditionId: expedition.id,
+      dungeonId: dungeon.id,
+      outcome: result.outcome,
+      day: this.clock.getDay(),
+      time: this.clock.getTimeText(),
+      heroNames: result.heroes.map((hero) => hero.name),
+      fallenNames: result.heroes.filter((hero) => !hero.alive).map((hero) => hero.name),
+      gold: 0,
+      chest: null,
+      firstClear: false,
+      expedition: expedition.toSaveData(), // zum erneuten Ansehen
+    };
+
+    this.guild.dungeonAttempts[dungeon.id] = this.guild.getAttempts(dungeon.id) + 1;
+    if (success) {
+      report.gold = dungeon.rewards.gold;
+      report.chest = dungeon.rewards.chest;
+      report.firstClear = this.guild.getClears(dungeon.id) === 0;
+      this.guild.addGold(dungeon.rewards.gold);
+      this.guild.addBox(dungeon.rewards.chest);
+      this.guild.dungeonClears[dungeon.id] = this.guild.getClears(dungeon.id) + 1;
+    }
+
+    this.guild.expeditions = this.guild.expeditions.filter((e) => e.id !== expedition.id);
+    this.guild.reports.unshift(report);
+    this.guild.reports = this.guild.reports.slice(0, BALANCING.keptReports);
+
+    this.emit('expeditionFinished', report);
+    this.emit('changed');
+    return report;
+  }
+
   // ---------- Aktionen: Helden ----------
 
   // Sofort neue Bewerber rufen (kostet Gold)
@@ -183,7 +304,7 @@ export class Game {
   // Entlässt einen Helden. Seine Ausrüstung kommt zurück ins Inventar.
   dismissHero(heroId) {
     const hero = this.guild.findHero(heroId);
-    if (!hero) {
+    if (!hero || this.guild.isHeroBusy(heroId)) {
       return false;
     }
     for (const slot in hero.equipment) {
@@ -201,7 +322,7 @@ export class Game {
   equipItem(heroId, itemId) {
     const hero = this.guild.findHero(heroId);
     const item = this.guild.findItem(itemId);
-    if (!hero || !item || !hero.canEquip(item)) {
+    if (!hero || !item || !hero.canEquip(item) || this.guild.isHeroBusy(heroId)) {
       return false;
     }
     this.guild.removeItem(itemId);
@@ -217,7 +338,7 @@ export class Game {
   // Gibt zurück, wie viele Items angelegt wurden.
   equipBestItems(heroId) {
     const hero = this.guild.findHero(heroId);
-    if (!hero) {
+    if (!hero || this.guild.isHeroBusy(heroId)) {
       return 0;
     }
     let count = 0;
@@ -256,7 +377,7 @@ export class Game {
   // Nimmt ein Item ab und legt es ins Inventar
   unequipItem(heroId, slot) {
     const hero = this.guild.findHero(heroId);
-    if (!hero) {
+    if (!hero || this.guild.isHeroBusy(heroId)) {
       return false;
     }
     const item = hero.unequip(slot);

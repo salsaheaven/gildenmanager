@@ -3,10 +3,11 @@
 // - Seltenheit nach den Chancen der Kiste
 // - Pity-System: Nach zu viel Pech gibt es garantiert ein episches Item
 // - Item-Vorlage, Name und Werte
+// - Boss-Kisten: ein garantiertes Boss-Item (fester Name, Mindest-Seltenheit)
 // ============================================================
 
 import { Item } from '../entities/Item.js';
-import { ITEM_TEMPLATES, ITEM_SUFFIXES } from '../data/items.js';
+import { ITEM_TEMPLATES, ITEM_SUFFIXES, getItemTemplate } from '../data/items.js';
 import { getRarity, getRarityRank } from '../data/rarities.js';
 import { BALANCING } from '../data/balancing.js';
 
@@ -19,7 +20,17 @@ export class LootSystem {
   // und gibt sie sortiert zurück (das seltenste zuletzt, für die Spannung!).
   rollBoxContents(boxType, guild) {
     const items = [];
-    for (let i = 0; i < boxType.itemCount; i++) {
+    let normalCount = boxType.itemCount;
+
+    // Boss-Kiste: ein Item aus der Beutetabelle des Bosses ist garantiert
+    if (boxType.bossLoot) {
+      const bossItem = this.rollBossItem(boxType, guild);
+      items.push(bossItem);
+      guild.addItem(bossItem);
+      normalCount--;
+    }
+
+    for (let i = 0; i < normalCount; i++) {
       const rarityId = this.rollRarity(boxType.chances, guild);
       const item = this.createItem(rarityId, guild.createItemId());
       items.push(item);
@@ -58,9 +69,22 @@ export class LootSystem {
     return rarityId;
   }
 
+  // Ein besonderes Item des Bosses, mindestens in seiner Mindest-Seltenheit
+  rollBossItem(boxType, guild) {
+    const entry = this.random.pick(boxType.bossLoot);
+    let rarityId = this.rollRarity(boxType.chances, guild);
+    if (getRarityRank(rarityId) < getRarityRank(entry.minRarity)) {
+      rarityId = entry.minRarity;
+    }
+    return this.createItem(rarityId, guild.createItemId(), getItemTemplate(entry.templateId), entry.name);
+  }
+
   // Baut ein fertiges Item: zufällige Vorlage, passender Name, Werte mit leichter Streuung.
-  createItem(rarityId, itemId) {
-    const template = this.random.pick(ITEM_TEMPLATES);
+  // template und fixedName sind freiwillig (für Boss-Items mit festem Namen).
+  createItem(rarityId, itemId, template = null, fixedName = null) {
+    if (template === null) {
+      template = this.random.pick(ITEM_TEMPLATES);
+    }
     const rarity = getRarity(rarityId);
 
     const stats = {};
@@ -71,7 +95,8 @@ export class LootSystem {
       stats[statName] = Math.max(1, Math.round(baseValue * rarity.statMultiplier * variation));
     }
 
-    return new Item(itemId, template.id, rarityId, this.createItemName(template, rarityId), stats);
+    const name = fixedName || this.createItemName(template, rarityId);
+    return new Item(itemId, template.id, rarityId, name, stats);
   }
 
   createItemName(template, rarityId) {

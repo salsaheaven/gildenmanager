@@ -1,19 +1,24 @@
 // ============================================================
-// COMBATSIMULATOR – spielt einen ganzen Kampf Runde für Runde durch
+// COMBATSIMULATOR – spielt Kämpfe Runde für Runde durch
 //
 // Ablauf jeder Runde:
-//   1. Rundenanfang: Abklingzeiten, Mana, Gift/Flüche, Effekte laufen ab
+//   1. Rundenanfang: Abklingzeiten, Mana, Gift/Flüche, Effekte laufen ab, evtl. Rückzug beginnen
 //   2. Alle Helden handeln (in der Reihenfolge der Gruppe)
-//   3. Alle Gegner handeln (Diener, dann Boss)
-// Der Kampf endet, wenn der Boss fällt, alle Helden gefallen sind
-// oder die maximale Rundenzahl erreicht ist.
+//   3. Alle Gegner handeln (Diener/Trash, dann Boss)
+// Ein Kampf endet, wenn die Gegner besiegt sind, alle Helden gefallen sind,
+// der Rückzug geschafft ist oder die maximale Rundenzahl erreicht ist.
+//
+// Drei Einstiege:
+//   simulateBattle   = ein einzelner Bosskampf mit frischen Helden (Kampf-Labor)
+//   simulateRun      = ein ganzer Dungeon-Run: Begegnungen nacheinander, Leben und Mana gehen mit
+//   runEncounter     = eine Begegnung mit bereits vorhandenen Kämpfern (wird von beiden benutzt)
 //
 // Gleicher Seed = gleicher Kampf. So lassen sich Kämpfe wiederholen und testen.
 // ============================================================
 
 import { Random } from '../../core/Random.js';
 import { Combatant } from './Combatant.js';
-import { Battle } from './Battle.js';
+import { Battle, scaleEnemyStats } from './Battle.js';
 import { chooseAbility } from './HeroAI.js';
 import { takeEnemyTurn } from './EnemyAI.js';
 import { useAbility, useBasicAttack } from './AbilityEffects.js';
@@ -21,6 +26,8 @@ import { ABILITIES } from '../../data/abilities.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
 import { getBoss } from '../../data/enemies.js';
 import { getTactic } from '../../data/tactics.js';
+import { getDungeon } from '../../data/dungeons.js';
+import { getRetreatRule } from '../../data/retreatRules.js';
 
 // Macht aus einem Helden (entities/Hero.js) einen Kämpfer
 export function createHeroCombatant(hero) {
@@ -39,33 +46,113 @@ export function createHeroCombatant(hero) {
   });
 }
 
-export function createBossCombatant(bossData) {
+export function createBossCombatant(bossData, strength = 1) {
   return new Combatant({
     id: 'boss',
     name: bossData.name,
     side: 'enemy',
-    stats: bossData.stats,
+    stats: scaleEnemyStats(bossData.stats, strength),
     bossData: bossData,
   });
 }
 
-// options = { heroes: Hero-Liste, bossId, tacticId, seed, recordLog }
+// ---------- Einstiege ----------
+
+// Ein einzelner Bosskampf. options = { heroes: Hero-Liste, bossId, tacticId, seed, recordLog }
 export function simulateBattle(options) {
-  const bossData = getBoss(options.bossId);
   const random = new Random(options.seed);
   const heroes = options.heroes.map((hero) => createHeroCombatant(hero));
-  const boss = createBossCombatant(bossData);
-  const battle = new Battle(heroes, boss, getTactic(options.tacticId), random, options.recordLog);
+  return runEncounter(heroes, { type: 'boss', bossId: options.bossId }, getTactic(options.tacticId), random, options.recordLog, {});
+}
 
-  const maxRounds = bossData.isDummy ? bossData.dummyRounds : COMBAT_RULES.maxRounds;
-  // Wer zu Beginn dabei ist (für die Kampfszene)
-  const startingCombatants = heroes.concat([boss]).map((combatant) => combatant.describe());
-  battle.addLog('Der Kampf gegen ' + boss.name + ' beginnt!', 'info');
+// Ein ganzer Dungeon-Run.
+// options = { heroes, dungeonId, tacticId, retreatRuleId, seed, recordLog,
+//             manualRetreat: { encounterIndex, round } oder null (Rückzug per Hand, siehe Expedition) }
+// Gibt { dungeonId, outcome, encounters, heroes } zurück.
+//   outcome = 'success', 'defeat', 'retreat' oder 'timeout'
+export function simulateRun(options) {
+  const dungeon = getDungeon(options.dungeonId);
+  const tactic = getTactic(options.tacticId);
+  const retreatRule = getRetreatRule(options.retreatRuleId || 'never');
+  const random = new Random(options.seed);
+  const heroes = options.heroes.map((hero) => createHeroCombatant(hero));
+  const manualRetreat = options.manualRetreat || null;
+
+  const encounters = [];
+  let outcome = 'success';
+
+  for (let i = 0; i < dungeon.encounters.length; i++) {
+    // Rückzug zwischen zwei Begegnungen: sicher, es wird nicht mehr gekämpft
+    const manualHere = manualRetreat && manualRetreat.encounterIndex === i;
+    if (i > 0 && (shouldRetreatByRule(heroes, retreatRule) || (manualHere && manualRetreat.round <= 0))) {
+      outcome = 'retreat';
+      break;
+    }
+    if (i > 0) {
+      restBetweenEncounters(heroes);
+    }
+
+    const retreatOptions = {
+      rule: retreatRule,
+      atRound: manualHere ? manualRetreat.round : null,
+    };
+    const result = runEncounter(heroes, dungeon.encounters[i], tactic, random, options.recordLog, retreatOptions,
+      dungeon.enemyStrength);
+    encounters.push(result);
+
+    if (result.outcome !== 'victory') {
+      outcome = result.outcome;
+      break;
+    }
+    // Rückzug befohlen, aber die Gegner fielen vorher: Die Gruppe geht trotzdem nach Hause.
+    // War das schon die letzte Begegnung, ist der Run einfach geschafft.
+    const isLast = i === dungeon.encounters.length - 1;
+    if (manualHere && !isLast) {
+      outcome = 'retreat';
+      break;
+    }
+  }
+
+  return {
+    dungeonId: dungeon.id,
+    outcome: outcome,
+    encounters: encounters,
+    heroes: heroes.map((hero) => ({ heroId: hero.heroId, name: hero.name, alive: hero.alive, hp: hero.hp, maxHp: hero.maxHp })),
+  };
+}
+
+// Eine Begegnung (Trash-Gruppe oder Boss) mit vorhandenen Helden-Kämpfern.
+// encounter = { type: 'boss', bossId } oder { type: 'trash', name, enemies: [...] }
+// retreatOptions = { rule (aus retreatRules.js), atRound (Rückzug per Hand ab dieser Runde) }
+// strength       = Gegnerstärke des Dungeons (1 = normal)
+export function runEncounter(heroes, encounter, tactic, random, recordLog, retreatOptions, strength = 1) {
+  // Die Statistik (Schadensmesser) zählt pro Begegnung neu
+  for (const hero of heroes) {
+    hero.damageDone = 0;
+    hero.healingDone = 0;
+    hero.damageTaken = 0;
+  }
+
+  const bossData = encounter.type === 'boss' ? getBoss(encounter.bossId) : null;
+  const boss = bossData ? createBossCombatant(bossData, strength) : null;
+  const battle = new Battle(heroes, boss, tactic, random, recordLog, strength);
+  if (encounter.type === 'trash') {
+    for (const enemyId of encounter.enemies) {
+      battle.spawnMinion(enemyId);
+    }
+  }
+
+  const encounterName = bossData ? bossData.name : encounter.name;
+  const maxRounds = bossData && bossData.isDummy ? bossData.dummyRounds : COMBAT_RULES.maxRounds;
+  // Wer zu Beginn dabei ist (für die Kampfszene), mit dem aktuellen Leben aus vorigen Begegnungen
+  const startingCombatants = heroes.concat(battle.enemies).map((combatant) => combatant.describe());
+  battle.addLog('Der Kampf gegen ' + encounterName + ' beginnt!', 'info');
   battle.takeSnapshot();
 
   while (!battle.isOver() && battle.round < maxRounds) {
     battle.round++;
     startRound(battle);
+    checkRetreat(battle, retreatOptions);
 
     for (const hero of battle.heroes) {
       if (battle.isOver()) {
@@ -86,20 +173,24 @@ export function simulateBattle(options) {
       }
     }
 
+    advanceRetreat(battle);
     battle.takeSnapshot();
   }
 
-  const result = createResult(battle, bossData, maxRounds);
+  const result = createResult(battle, encounter, encounterName, bossData, maxRounds);
   result.startingCombatants = startingCombatants;
   return result;
 }
+
+// ---------- Züge ----------
 
 function takeHeroTurn(battle, hero) {
   warnIfOutOfMana(battle, hero);
   const abilityId = chooseAbility(battle, hero);
   if (abilityId) {
     useAbility(battle, hero, abilityId, ABILITIES[abilityId]);
-  } else {
+  } else if (!battle.retreating) {
+    // Beim Rückzug wird nicht angegriffen
     useBasicAttack(battle, hero);
   }
 }
@@ -119,7 +210,62 @@ function warnIfOutOfMana(battle, hero) {
   }
 }
 
-// Rundenanfang: Abklingzeiten, Mana, Gift und Flüche, auslaufende Effekte
+// ---------- Rückzug ----------
+
+function countFallen(heroes) {
+  return heroes.filter((hero) => !hero.alive).length;
+}
+
+function shouldRetreatByRule(heroes, rule) {
+  return rule.afterFallen !== null && countFallen(heroes) >= rule.afterFallen;
+}
+
+// Am Rundenanfang: Soll der Rückzug beginnen (Regel oder Befehl per Hand)?
+function checkRetreat(battle, retreatOptions) {
+  if (battle.retreating || !retreatOptions) {
+    return;
+  }
+  const byHand = retreatOptions.atRound !== null && retreatOptions.atRound !== undefined && battle.round >= retreatOptions.atRound;
+  const byRule = retreatOptions.rule && shouldRetreatByRule(battle.heroes, retreatOptions.rule);
+  if (!byHand && !byRule) {
+    return;
+  }
+  battle.retreating = true;
+  battle.retreatRoundsLeft = COMBAT_RULES.retreatRounds;
+  const labels = battle.getLivingHeroes().map((hero) => ({ targetId: hero.id, text: 'Rückzug!' }));
+  battle.addLog('RÜCKZUG! Die Gruppe kämpft sich zum Ausgang durch.', 'warning', { labels: labels });
+}
+
+// Am Rundenende: Rückzug eine Runde weiter, evtl. geschafft
+function advanceRetreat(battle) {
+  if (!battle.retreating || battle.getLivingHeroes().length === 0) {
+    return;
+  }
+  battle.retreatRoundsLeft--;
+  if (battle.retreatRoundsLeft <= 0) {
+    battle.retreatFinished = true;
+  }
+}
+
+// Zwischen zwei Begegnungen: etwas Leben und Mana zurück, alle Effekte enden. Gefallene bleiben gefallen.
+function restBetweenEncounters(heroes) {
+  for (const hero of heroes) {
+    if (!hero.alive) {
+      continue;
+    }
+    hero.heal(hero.maxHp * COMBAT_RULES.restHealthRegain);
+    hero.mana = Math.min(hero.maxMana, hero.mana + hero.maxMana * COMBAT_RULES.restManaRegain);
+    hero.shield = 0;
+    hero.threat = 0;
+    hero.effects = [];
+    hero.cooldowns = {};
+    hero.warnedLowMana = false;
+  }
+}
+
+// ---------- Rundenanfang ----------
+
+// Abklingzeiten, Mana, Gift und Flüche, auslaufende Effekte
 function startRound(battle) {
   if (battle.forcedTarget) {
     battle.forcedTarget.rounds--;
@@ -161,27 +307,56 @@ function tickDamageOverTime(battle, target, effect, everyone) {
   }
 }
 
-function createResult(battle, bossData, maxRounds) {
-  const victory = !battle.boss.alive;
-  const timedOut = !victory && battle.getLivingHeroes().length > 0;
+// ---------- Ergebnis ----------
 
-  if (bossData.isDummy) {
+// Wie viel Leben haben die Gegner noch? (Boss: sein Leben, Trash: alle zusammen)
+function getEnemyHpPercent(battle) {
+  if (battle.boss) {
+    return battle.boss.getHpPercent();
+  }
+  let hp = 0;
+  let maxHp = 0;
+  for (const enemy of battle.enemies) {
+    hp += enemy.hp;
+    maxHp += enemy.maxHp;
+  }
+  return maxHp > 0 ? hp / maxHp : 0;
+}
+
+function createResult(battle, encounter, encounterName, bossData, maxRounds) {
+  let outcome;
+  if (battle.isWon()) {
+    outcome = 'victory';
+  } else if (battle.retreatFinished) {
+    outcome = 'retreat';
+  } else if (battle.getLivingHeroes().length === 0) {
+    outcome = 'defeat';
+  } else {
+    outcome = 'timeout';
+  }
+
+  if (bossData && bossData.isDummy) {
     battle.addLog('Die Zeit ist um. Gemessen wurde der Schaden über ' + maxRounds + ' Runden.', 'info');
-  } else if (victory) {
-    battle.addLog(battle.boss.name + ' ist besiegt! Sieg!', 'death');
-  } else if (timedOut) {
+  } else if (outcome === 'victory') {
+    battle.addLog(encounterName + (bossData ? ' ist besiegt! Sieg!' : ': alle Gegner besiegt!'), 'death');
+  } else if (outcome === 'retreat') {
+    battle.addLog('Die Gruppe hat sich in Sicherheit gebracht.', 'warning');
+  } else if (outcome === 'timeout') {
     battle.addLog('Die Gruppe ist erschöpft und muss sich zurückziehen. Niederlage.', 'warning');
   } else {
     battle.addLog('Die ganze Gruppe ist gefallen. Niederlage.', 'warning');
   }
 
   return {
-    bossId: bossData.id,
-    isDummy: bossData.isDummy || false,
-    victory: victory,
-    timedOut: timedOut,
+    encounterType: encounter.type,
+    encounterName: encounterName,
+    bossId: bossData ? bossData.id : null,
+    isDummy: Boolean(bossData && bossData.isDummy),
+    outcome: outcome,
+    victory: outcome === 'victory',
+    timedOut: outcome === 'timeout',
     rounds: battle.round,
-    bossHpPercent: battle.boss.getHpPercent(),
+    bossHpPercent: getEnemyHpPercent(battle),
     heroes: battle.heroes.map((hero) => ({
       combatantId: hero.id,
       heroId: hero.heroId,

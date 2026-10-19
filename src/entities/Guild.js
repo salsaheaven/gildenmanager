@@ -7,6 +7,7 @@
 import { Item } from './Item.js';
 import { LootBox } from './LootBox.js';
 import { Hero } from './Hero.js';
+import { Expedition } from './Expedition.js';
 import { BALANCING } from '../data/balancing.js';
 
 export class Guild {
@@ -19,6 +20,13 @@ export class Guild {
     this.heroes = [];     // Helden der Gilde (Hero-Objekte)
     this.candidates = []; // Bewerber in der Taverne (Hero-Objekte)
     this.nextHeroId = 1;  // fortlaufende Nummer für neue Helden
+
+    // Dungeons
+    this.expeditions = [];     // laufende Runs (Expedition-Objekte)
+    this.nextExpeditionId = 1;
+    this.dungeonClears = {};   // Dungeon-id → wie oft geschafft
+    this.dungeonAttempts = {}; // Dungeon-id → wie oft versucht (egal wie es ausging)
+    this.reports = [];         // Berichte über abgeschlossene Runs (neueste zuerst)
 
     // Pity-Zähler: Items seit dem letzten epischen oder legendären Item
     this.itemsSinceEpic = 0;
@@ -160,6 +168,25 @@ export class Guild {
     return best;
   }
 
+  // Ist der Held gerade in einem Dungeon unterwegs?
+  isHeroBusy(heroId) {
+    return this.expeditions.some((expedition) => expedition.getHeroIds().includes(heroId));
+  }
+
+  // ---------- Dungeons ----------
+
+  getClears(dungeonId) {
+    return this.dungeonClears[dungeonId] || 0;
+  }
+
+  getAttempts(dungeonId) {
+    return this.dungeonAttempts[dungeonId] || 0;
+  }
+
+  findExpedition(expeditionId) {
+    return this.expeditions.find((expedition) => expedition.id === expeditionId) || null;
+  }
+
   // ---------- Speichern ----------
 
   toSaveData() {
@@ -174,6 +201,11 @@ export class Guild {
       heroes: this.heroes.map((hero) => hero.toSaveData()),
       candidates: this.candidates.map((candidate) => candidate.toSaveData()),
       nextHeroId: this.nextHeroId,
+      expeditions: this.expeditions.map((expedition) => expedition.toSaveData()),
+      nextExpeditionId: this.nextExpeditionId,
+      dungeonClears: this.dungeonClears,
+      dungeonAttempts: this.dungeonAttempts,
+      reports: this.reports,
     };
   }
 
@@ -190,6 +222,11 @@ export class Guild {
     guild.heroes = (data.heroes || []).map((heroData) => Hero.fromSaveData(heroData));
     guild.candidates = (data.candidates || []).map((heroData) => Hero.fromSaveData(heroData));
     guild.nextHeroId = data.nextHeroId || 1;
+    guild.expeditions = (data.expeditions || []).map((expeditionData) => Expedition.fromSaveData(expeditionData));
+    guild.nextExpeditionId = data.nextExpeditionId || 1;
+    guild.dungeonClears = data.dungeonClears || {};
+    guild.dungeonAttempts = data.dungeonAttempts || {};
+    guild.reports = data.reports || [];
     return guild;
   }
 }

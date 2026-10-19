@@ -10,6 +10,9 @@
 
 import { ABILITIES } from '../../data/abilities.js';
 
+// Beim Rückzug machen die Helden keinen Schaden mehr, sie heilen und schützen sich nur
+const RETREAT_SKILL_TYPES = ['heal', 'shield', 'buff', 'mana', 'cleanse'];
+
 // Gibt die id des gewählten Skills zurück, oder null für einen normalen Angriff
 export function chooseAbility(battle, hero) {
   const abilityIds = hero.abilityIds.slice();
@@ -18,6 +21,9 @@ export function chooseAbility(battle, hero) {
   for (const abilityId of abilityIds) {
     const ability = ABILITIES[abilityId];
     if (!hero.isReady(abilityId)) {
+      continue;
+    }
+    if (battle.retreating && !RETREAT_SKILL_TYPES.includes(ability.type)) {
       continue;
     }
     if (hero.mana < ability.manaCost) {
@@ -46,7 +52,8 @@ function breaksManaReserve(hero, ability) {
 // Alle Bedingungen, die in data/abilities.js unter "when" (oder in Anweisungen) stehen können
 function isConditionMet(battle, hero, condition, ability) {
   const tactic = battle.tactic;
-  const boss = battle.boss;
+  const casting = battle.getCasting();
+  const enemiesThere = battle.getLivingEnemies().length > 0 && !battle.isDummyFight();
   const bossTarget = battle.getBossTarget();
   const lowestAlly = battle.getLowestAlly();
   // Eine Anweisung "Heilen ab …" ersetzt die Heilschwelle der Taktik
@@ -64,19 +71,19 @@ function isConditionMet(battle, hero, condition, ability) {
     case 'never':
       return false;
 
-    // Der Boss greift gerade jemand anderen an
+    // Die Gegner greifen gerade jemand anderen an
     case 'notTanking':
-      return boss.alive && !boss.bossData.isDummy && bossTarget !== hero;
+      return enemiesThere && bossTarget !== hero;
 
     // Ein Tank-Buster auf mich wird vorbereitet, oder ich habe wenig Leben
     case 'busterIncomingOrSelfLow': {
-      const busterComing = boss.casting && boss.casting.type === 'tankBuster' && bossTarget === hero;
+      const busterComing = casting !== null && casting.type === 'tankBuster' && bossTarget === hero;
       return busterComing || hero.getHpPercent() < tactic.selfDefenseThreshold;
     }
 
     // Nur wenn ein Tank-Buster angekündigt ist (bei Selbst-Skills: nur, wenn er mich trifft)
     case 'busterIncoming': {
-      const busterComing = boss.casting !== null && boss.casting.type === 'tankBuster';
+      const busterComing = casting !== null && casting.type === 'tankBuster';
       return busterComing && (ability.target !== 'self' || bossTarget === hero);
     }
 
@@ -92,19 +99,19 @@ function isConditionMet(battle, hero, condition, ability) {
     case 'halfMana':
       return hero.getManaPercent() < 0.5;
 
-    // Der, den der Boss angreift, hat keinen Schild
+    // Der, den die Gegner angreifen, hat keinen Schild
     case 'targetUnshielded':
-      return boss.alive && !boss.bossData.isDummy && bossTarget !== null && bossTarget.shield <= 0;
+      return enemiesThere && bossTarget !== null && bossTarget.shield <= 0;
 
     // Gruppenschaden wird vorbereitet, oder die Gruppe ist schon angeschlagen
     case 'groupThreatened': {
-      const groupHitComing = boss.casting && (boss.casting.type === 'groupCast' || boss.casting.type === 'frontWave');
+      const groupHitComing = casting !== null && (casting.type === 'groupCast' || casting.type === 'frontWave');
       return groupHitComing || battle.getAverageHeroHpPercent() < healThreshold;
     }
 
     // Nur wenn Gruppenschaden angekündigt ist
     case 'groupHitIncoming':
-      return boss.casting !== null && (boss.casting.type === 'groupCast' || boss.casting.type === 'frontWave');
+      return casting !== null && (casting.type === 'groupCast' || casting.type === 'frontWave');
 
     case 'allyDebuffed':
       return battle.getLivingHeroes().some((ally) => ally.hasDebuff());
@@ -116,10 +123,10 @@ function isConditionMet(battle, hero, condition, ability) {
       return battle.getLivingEnemies().length >= 3;
 
     case 'bossCasting':
-      return boss.casting !== null;
+      return casting !== null;
 
     case 'bossCastingInterruptible':
-      return boss.casting !== null && boss.casting.interruptible;
+      return casting !== null && casting.interruptible;
 
     // Das Ziel hat noch kein Gift von mir
     case 'targetWithoutPoison': {

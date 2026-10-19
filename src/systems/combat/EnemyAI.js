@@ -1,7 +1,7 @@
 // ============================================================
 // ENEMYAI – was Boss und Diener in ihrem Zug tun
 // Boss: Mechaniken nach Zeitplan (mit Ankündigung), Raserei, sonst normaler Angriff.
-// Diener: greifen einen zufälligen Helden an.
+// Diener und Trash: greifen je nach "targeting" den mit der meisten Aggro oder einen zufälligen Helden an.
 // ============================================================
 
 import { COMBAT_RULES } from '../../data/combatRules.js';
@@ -21,9 +21,15 @@ export function takeEnemyTurn(battle, enemy) {
 }
 
 function minionAttack(battle, minion) {
-  const target = battle.random.pick(battle.getLivingHeroes());
-  battle.logAction(minion, null, MINIONS[minion.minionId].attackFx, [target], false);
-  enemyHits(battle, minion, target, 'beißt', 1.0);
+  const minionData = MINIONS[minion.minionId];
+  let target;
+  if (minionData.targeting === 'threat') {
+    target = battle.getBossTarget();
+  } else {
+    target = battle.random.pick(battle.getLivingHeroes());
+  }
+  battle.logAction(minion, null, minionData.attackFx, [target], false);
+  enemyHits(battle, minion, target, 'greift an', 1.0);
 }
 
 function takeBossTurn(battle, boss) {

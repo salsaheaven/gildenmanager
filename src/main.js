@@ -13,6 +13,8 @@ import { LootBoxScreen } from './ui/LootBoxScreen.js';
 import { HeroScreen } from './ui/HeroScreen.js';
 import { TavernScreen } from './ui/TavernScreen.js';
 import { CombatLabScreen } from './ui/CombatLabScreen.js';
+import { DungeonScreen, outcomeText } from './ui/DungeonScreen.js';
+import { getDungeon } from './data/dungeons.js';
 import { DebugPanel } from './ui/DebugPanel.js';
 import { Sound } from './ui/Sound.js';
 import { showToast } from './ui/Toast.js';
@@ -25,6 +27,7 @@ const TABS = [
   { id: 'treasury', name: 'Schatzkammer' },
   { id: 'heroes', name: 'Helden' },
   { id: 'tavern', name: 'Taverne' },
+  { id: 'dungeons', name: 'Dungeons' },
   { id: 'lab', name: 'Kampf-Labor' },
 ];
 
@@ -64,10 +67,12 @@ new LootBoxScreen(screenElements.treasury, game);
 new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'));
 const tavernScreen = new TavernScreen(screenElements.tavern, game);
 const combatLabScreen = new CombatLabScreen(screenElements.lab, game);
+const dungeonScreen = new DungeonScreen(screenElements.dungeons, game);
 new DebugPanel(game);
 
 let currentScreen = null;
 let tavernHasNews = false;
+let dungeonHasNews = false;
 
 function showScreen(screenId) {
   currentScreen = screenId;
@@ -77,6 +82,9 @@ function showScreen(screenId) {
   navBar.setActive(screenId);
   if (screenId === 'tavern') {
     tavernHasNews = false;
+  }
+  if (screenId === 'dungeons') {
+    dungeonHasNews = false;
   }
   updateBadges();
 }
@@ -95,6 +103,8 @@ function updateBadges() {
   }
   navBar.setBadge('heroes', heroesWithUpgrade > 0 ? '▲' + heroesWithUpgrade : '');
   navBar.setBadge('tavern', tavernHasNews ? '!' : '');
+  const running = guild.expeditions.length;
+  navBar.setBadge('dungeons', dungeonHasNews ? '!' : (running > 0 ? String(running) : ''));
 }
 
 game.on('changed', updateBadges);
@@ -102,6 +112,21 @@ game.on('changed', updateBadges);
 game.on('candidatesRefreshed', () => {
   if (currentScreen !== 'tavern') {
     tavernHasNews = true;
+    updateBadges();
+  }
+});
+
+game.on('expeditionFinished', (report) => {
+  const dungeon = getDungeon(report.dungeonId);
+  if (report.outcome === 'success') {
+    Sound.itemReveal(report.firstClear ? 4 : 3);
+    showToast(dungeon.name + ': Erfolg! Die Beute wartet in der Schatzkammer.', '#1eff00');
+  } else {
+    Sound.fall();
+    showToast(dungeon.name + ': ' + outcomeText(report.outcome), '#ff6b6b');
+  }
+  if (currentScreen !== 'dungeons') {
+    dungeonHasNews = true;
     updateBadges();
   }
 });
@@ -129,6 +154,7 @@ function gameLoop(now) {
   topBar.update();
   tavernScreen.update();
   combatLabScreen.update(gameSeconds);
+  dungeonScreen.update();
 
   secondsSinceSave += realSeconds;
   if (secondsSinceSave >= AUTOSAVE_SECONDS) {

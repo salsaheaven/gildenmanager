@@ -56,7 +56,8 @@ function getTargets(battle, caster, ability) {
       targets = [battle.getFocusTarget(caster)];
       break;
     case 'boss':
-      targets = [battle.boss];
+      // Ohne Boss (Trash-Gruppe) trifft der Skill das normale Ziel
+      targets = [battle.boss || battle.getFocusTarget(caster)];
       break;
     case 'allEnemies':
       targets = battle.getLivingEnemies();
@@ -132,7 +133,7 @@ export function useAbility(battle, caster, abilityId, ability) {
       applyStun(battle, caster, ability, targets);
       break;
     case 'interrupt':
-      applyInterrupt(battle, caster, ability);
+      applyInterrupt(battle, caster, ability, targets[0]);
       break;
     default:
       throw new Error('Unbekannter Skill-Typ: ' + ability.type);
@@ -202,12 +203,13 @@ function applyStun(battle, caster, ability, targets) {
 }
 
 // Unterbrechen: bricht einen unterbrechbaren Boss-Zauber ab
-function applyInterrupt(battle, caster, ability) {
+function applyInterrupt(battle, caster, ability, target) {
   const boss = battle.boss;
-  if (boss.casting && boss.casting.interruptible) {
-    battle.addLog(caster.name + ': ' + ability.name + ' unterbricht ' + boss.casting.name + '!', 'mechanic',
+  const casting = battle.getCasting();
+  if (casting && casting.interruptible) {
+    battle.addLog(caster.name + ': ' + ability.name + ' unterbricht ' + casting.name + '!', 'mechanic',
       { labels: [{ targetId: boss.id, text: 'UNTERBROCHEN!' }], cast: { state: 'end' } });
     boss.casting = null;
   }
-  heroDealsDamage(battle, caster, boss, ability.name, ability.scaling, ability.power, ability);
+  heroDealsDamage(battle, caster, target, ability.name, ability.scaling, ability.power, ability);
 }

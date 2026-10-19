@@ -101,13 +101,51 @@ export const BOSSES = [
   },
 ];
 
-// Diener, die Bosse herbeirufen können
+// Gegner ohne Boss-Mechaniken: Diener (vom Boss gerufen) und Trash (Gegnergruppen vor dem Boss)
+//   name, sprite = Anzeige (colors = andere Farben für dasselbe Pixelbild, z.B. rote Kultisten)
+//   stats        = health, attack, defense
+//   attackFx     = Animation des Angriffs
+//   targeting    = 'threat': greift den mit der meisten Aggro an (der Tank kann ihn halten)
+//                  'random': greift zufällig an (der Tank kann ihn nicht abfangen)
 export const MINIONS = {
   broodling: {
     name: 'Brutling',
     sprite: 'minionBroodling',
     attackFx: 'bite',
+    targeting: 'random',
     stats: { health: 65, attack: 13, defense: 0 },
+  },
+  caveWolf: {
+    name: 'Höhlenwolf',
+    sprite: 'trashWolf',
+    colors: { B: '#6b6b7b' },
+    attackFx: 'bite',
+    targeting: 'threat',
+    stats: { health: 90, attack: 13, defense: 4 },
+  },
+  cultist: {
+    name: 'Kultist',
+    sprite: 'bossCultist',
+    colors: { P: '#7a2020', p: '#d06060' },
+    attackFx: 'shadowBolt',
+    targeting: 'random',
+    stats: { health: 80, attack: 12, defense: 2 },
+  },
+  ghoul: {
+    name: 'Ghul',
+    sprite: 'trashGhoul',
+    colors: { v: '#8fa38a' },
+    attackFx: 'claw',
+    targeting: 'threat',
+    stats: { health: 140, attack: 16, defense: 6 },
+  },
+  armoredBeetle: {
+    name: 'Panzerkäfer',
+    sprite: 'minionBroodling',
+    colors: { v: '#5a5a6e', V: '#2a2a38' },
+    attackFx: 'bite',
+    targeting: 'threat',
+    stats: { health: 120, attack: 12, defense: 30 },
   },
 };
 
