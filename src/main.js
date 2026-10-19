@@ -63,7 +63,7 @@ const navBar = new NavBar(document.getElementById('nav-bar'), TABS, showScreen);
 new LootBoxScreen(screenElements.treasury, game);
 new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'));
 const tavernScreen = new TavernScreen(screenElements.tavern, game);
-new CombatLabScreen(screenElements.lab, game);
+const combatLabScreen = new CombatLabScreen(screenElements.lab, game);
 new DebugPanel(game);
 
 let currentScreen = null;
@@ -125,9 +125,10 @@ function gameLoop(now) {
   const realSeconds = Math.min((now - lastFrameTime) / 1000, 1);
   lastFrameTime = now;
 
-  game.update(realSeconds);
+  const gameSeconds = game.update(realSeconds);
   topBar.update();
   tavernScreen.update();
+  combatLabScreen.update(gameSeconds);
 
   secondsSinceSave += realSeconds;
   if (secondsSinceSave >= AUTOSAVE_SECONDS) {

@@ -5,22 +5,21 @@
 //   - Zauberbalken über dem Boss, wenn er eine Mechanik vorbereitet
 //   - Ticker mit den letzten Ereignissen
 //
-// Die Szene läuft nicht von selbst: Wer sie benutzt, ruft regelmäßig update(sekunden) auf.
-// Im Kampf-Labor ist das die echte Zeit, in Dungeons später die Spielzeit.
+// Die Szene läuft nicht von selbst: Wer sie benutzt, ruft regelmäßig update(spielsekunden) auf.
+// Sie läuft im Takt der Spieluhr: Pause hält den Kampf an, 2x und 4x beschleunigen ihn.
 // ============================================================
 
 import { getBoss, MINIONS } from '../data/enemies.js';
 import { createHeroCanvas, createSpriteCanvas } from './PixelArt.js';
 import { Sound } from './Sound.js';
 
-// Zeitplan (Sekunden bei Geschwindigkeit 1x)
-const START_DELAY = 0.5;      // kurze Pause vor dem ersten Ereignis
-const ACTION_TIME = 0.22;     // Abstand zwischen zwei Aktionen
-const INFO_TIME = 0.1;        // Abstand nach reinen Textzeilen
-const ROUND_PAUSE = 0.35;     // Pause zwischen zwei Runden
-const END_DELAY = 0.8;        // Pause vor dem Ergebnis
+// Zeitplan in Spielsekunden (bei Spieluhr 1x also echte Sekunden)
+const START_DELAY = 0.3;      // kurze Pause vor dem ersten Ereignis
+const ACTION_TIME = 0.12;     // Abstand zwischen zwei Aktionen
+const INFO_TIME = 0.05;       // Abstand nach reinen Textzeilen
+const ROUND_PAUSE = 0.2;      // Pause zwischen zwei Runden
+const END_DELAY = 0.5;        // Pause vor dem Ergebnis
 const TICKER_LINES = 6;       // so viele Zeilen zeigt der Ticker
-const SPEEDS = [1, 2, 4];
 
 export class BattleScene {
   // result     = Ergebnis von simulateBattle (mit recordLog: true)
@@ -36,7 +35,6 @@ export class BattleScene {
     }
 
     this.time = 0;
-    this.speed = 2;
     this.entryIndex = 0;
     this.finished = false;
     this.units = {}; // Kämpfer-id → Elemente der Figur
@@ -55,7 +53,7 @@ export class BattleScene {
       <div class="battle-scene">
         <div class="scene-top">
           <span class="scene-round">Bereit …</span>
-          <div class="scene-speed"></div>
+          <span class="scene-paused">PAUSE</span>
           <button class="scene-skip">Überspringen</button>
         </div>
         <div class="scene-field">
@@ -73,20 +71,6 @@ export class BattleScene {
       </div>
     `;
 
-    const speedContainer = this.container.querySelector('.scene-speed');
-    for (const speed of SPEEDS) {
-      const button = document.createElement('button');
-      button.className = 'filter-button';
-      button.textContent = speed + 'x';
-      button.classList.toggle('active', speed === this.speed);
-      button.addEventListener('click', () => {
-        this.speed = speed;
-        for (const other of speedContainer.children) {
-          other.classList.toggle('active', other === button);
-        }
-      });
-      speedContainer.appendChild(button);
-    }
     this.container.querySelector('.scene-skip').addEventListener('click', () => this.skip());
   }
 
@@ -163,12 +147,14 @@ export class BattleScene {
 
   // ---------- Abspielen ----------
 
-  // Wird regelmäßig aufgerufen. realSeconds = vergangene Zeit seit dem letzten Aufruf.
-  update(realSeconds) {
+  // Wird regelmäßig aufgerufen. gameSeconds = vergangene Spielzeit seit dem letzten Aufruf
+  // (0, wenn das Spiel pausiert ist). isPaused blendet den Pause-Hinweis ein.
+  update(gameSeconds, isPaused = false) {
     if (this.finished) {
       return;
     }
-    this.time += realSeconds * this.speed;
+    this.container.querySelector('.battle-scene').classList.toggle('paused', isPaused);
+    this.time += gameSeconds;
     while (this.entryIndex < this.result.log.length && this.entryTimes[this.entryIndex] <= this.time) {
       this.playEntry(this.result.log[this.entryIndex], false);
       this.entryIndex++;

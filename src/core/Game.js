@@ -49,13 +49,15 @@ export class Game {
 
   // ---------- Spielschleife ----------
 
-  // Wird in jedem Bild aufgerufen (etwa 60-mal pro Sekunde)
+  // Wird in jedem Bild aufgerufen (etwa 60-mal pro Sekunde).
+  // Gibt zurück, wie viele Spielsekunden vergangen sind (0 in der Pause),
+  // damit auch die Oberfläche (z.B. Kampfszenen) im Takt der Spieluhr läuft.
   update(realSeconds) {
     const gameSeconds = this.clock.update(realSeconds);
-    if (gameSeconds === 0) {
-      return;
+    if (gameSeconds > 0) {
+      this.advanceTime(gameSeconds);
     }
-    this.advanceTime(gameSeconds);
+    return gameSeconds;
   }
 
   // Lässt alle zeitabhängigen Dinge um so viele Spielsekunden weiterlaufen

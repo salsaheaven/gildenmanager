@@ -232,21 +232,13 @@ export class CombatLabScreen {
       }
     });
     this.activeScene = scene;
-    this.playScene(scene);
   }
 
-  // Treibt die Szene mit echter Zeit an, bis sie fertig ist oder eine neue startet
-  playScene(scene) {
-    let lastTime = performance.now();
-    const step = (now) => {
-      if (this.activeScene !== scene || scene.finished) {
-        return;
-      }
-      scene.update(Math.min((now - lastTime) / 1000, 0.5));
-      lastTime = now;
-      requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
+  // Wird in jedem Bild aus main.js aufgerufen: Die Szene läuft im Takt der Spieluhr
+  update(gameSeconds) {
+    if (this.activeScene) {
+      this.activeScene.update(gameSeconds, this.game.clock.paused);
+    }
   }
 
   runEstimate() {

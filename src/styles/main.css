@@ -1360,9 +1360,23 @@ h3 {
   flex: 1;
 }
 
-.scene-speed {
-  display: flex;
-  gap: 4px;
+.scene-paused {
+  display: none;
+  font-family: var(--font-title);
+  font-size: 10px;
+  color: #ff6b6b;
+  animation: blink 1s steps(2) infinite;
+}
+
+.battle-scene.paused .scene-paused {
+  display: inline;
+}
+
+/* In der Pause stehen auch die aufploppenden Zahlen still */
+.battle-scene.paused .float-text,
+.battle-scene.paused .cast-bar,
+.battle-scene.paused .cast-fill {
+  animation-play-state: paused;
 }
 
 .scene-field {
