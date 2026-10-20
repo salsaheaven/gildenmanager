@@ -4,6 +4,7 @@
 
 import { createSpriteCanvas } from './PixelArt.js';
 import { Sound } from './Sound.js';
+import { getDayPlan } from '../systems/DayPlan.js';
 
 export class TopBar {
   // onReset = Funktion, die aufgerufen wird, wenn ein neues Spiel gestartet werden soll
@@ -83,10 +84,14 @@ export class TopBar {
       this.root.querySelector('.day-counter').textContent = 'Tag ' + this.game.day;
     }
 
-    // Unter dem Knopf: was heute noch passiert
+    // Unter dem Knopf: was heute noch passiert (und wie viele Helden nichts zu tun haben)
     const runs = guild.expeditions.length;
-    this.root.querySelector('.end-day-plan').textContent =
-      runs === 0 ? 'Keine Gruppe eingeplant' : (runs === 1 ? '1 Gruppe zieht los' : runs + ' Gruppen ziehen los');
+    const freeHeroes = getDayPlan(guild).counts.rest;
+    let planText = runs === 0 ? 'Keine Gruppe eingeplant' : (runs === 1 ? '1 Gruppe zieht los' : runs + ' Gruppen ziehen los');
+    if (freeHeroes > 0) {
+      planText += ' · ' + freeHeroes + ' frei';
+    }
+    this.root.querySelector('.end-day-plan').textContent = planText;
     this.root.querySelector('.end-day-button').classList.toggle('has-runs', runs > 0);
 
     this.root.querySelector('.mute-button').textContent = Sound.isMuted() ? 'Ton: aus' : 'Ton: an';

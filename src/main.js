@@ -14,6 +14,7 @@ import { HeroScreen } from './ui/HeroScreen.js';
 import { TavernScreen } from './ui/TavernScreen.js';
 import { CombatLabScreen } from './ui/CombatLabScreen.js';
 import { DungeonScreen } from './ui/DungeonScreen.js';
+import { DayPlanScreen } from './ui/DayPlanScreen.js';
 import { DayEndOverlay } from './ui/DayEndOverlay.js';
 import { DebugPanel } from './ui/DebugPanel.js';
 import { InventoryOverlay } from './ui/InventoryOverlay.js';
@@ -26,6 +27,7 @@ const AUTOSAVE_SECONDS = 5;
 
 // Die Reiter des Spiels
 const TABS = [
+  { id: 'plan', name: 'Tagesplan' },
   { id: 'treasury', name: 'Schatzkammer' },
   { id: 'heroes', name: 'Helden' },
   { id: 'tavern', name: 'Taverne' },
@@ -78,6 +80,7 @@ new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'));
 new TavernScreen(screenElements.tavern, game);
 const combatLabScreen = new CombatLabScreen(screenElements.lab, game);
 new DungeonScreen(screenElements.dungeons, game);
+new DayPlanScreen(screenElements.plan, game, showScreen);
 new DebugPanel(game);
 
 let currentScreen = null;
@@ -168,7 +171,7 @@ game.on('dayEnded', (data) => {
   saveManager.save(game);
 });
 
-showScreen('treasury');
+showScreen('plan');
 
 // ---------- Bild-Schleife ----------
 // Läuft etwa 60-mal pro Sekunde. Sie treibt nur Animationen an (Kampfszenen im Labor und am Tagesende)

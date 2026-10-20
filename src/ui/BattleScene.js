@@ -5,6 +5,7 @@
 //   - Zauberbalken über dem Boss, wenn er eine Mechanik vorbereitet
 //   - Ticker mit den letzten Ereignissen
 //   - großer Skill-Name über dem, der handelt; Handelnder und Ziele leuchten kurz auf
+//   - Maus über einem Helden (Handy: antippen) zeigt seine Skills und Abklingzeiten (SkillTooltip)
 //
 // Die Szene läuft nicht von selbst: Wer sie benutzt, ruft in jedem Bild update(sekunden) auf.
 // Mit den Knöpfen 1x / 2x / 4x läuft sie schneller. Die Wahl wird im Browser gemerkt.
@@ -16,6 +17,7 @@ import { playEffect } from './BattleEffects.js';
 import { computeEncounterTimeline } from '../systems/combat/BattleTimeline.js';
 import { COMBAT_RULES } from '../data/combatRules.js';
 import { Sound } from './Sound.js';
+import { SkillTooltip } from './SkillTooltip.js';
 
 const TICKER_LINES = 6;       // so viele Zeilen zeigt der Ticker
 
@@ -44,9 +46,11 @@ export class BattleScene {
     this.entryIndex = 0;
     this.finished = false;
     this.units = {}; // Kämpfer-id → Elemente der Figur
+    this.round = 0;  // aktuelle Kampfrunde (für die Abklingzeiten im Skill-Fenster)
 
     this.buildLayout();
     this.renderSpeedButtons();
+    this.tooltip = new SkillTooltip(this.container.querySelector('.scene-field'));
     this.container.querySelector('.scene-skip').hidden = !showSkip;
     for (const info of result.startingCombatants) {
       this.addUnit(info);
@@ -144,9 +148,51 @@ export class BattleScene {
     }
     parent.appendChild(unit);
 
-    this.units[info.id] = { element: unit, maxHp: info.maxHp, maxMana: info.maxMana, isMinion: Boolean(info.minionId) };
+    // usedRounds = Skill-id → Runde, in der er zuletzt benutzt wurde
+    this.units[info.id] = {
+      element: unit, maxHp: info.maxHp, maxMana: info.maxMana, isMinion: Boolean(info.minionId),
+      name: info.name, classId: info.classId, mana: info.mana, usedRounds: {},
+    };
+    if (info.side === 'hero') {
+      this.addTooltipEvents(info.id, unit);
+    }
     this.setBars(info.id, info.hp, 0);
     this.setMana(info.id, info.mana);
+  }
+
+  // Skill-Fenster: Am PC per Maus darüber, auf dem Handy per Antippen (noch mal tippen schließt es)
+  addTooltipEvents(unitId, unitElement) {
+    unitElement.addEventListener('pointerenter', (event) => {
+      if (event.pointerType === 'mouse') {
+        this.showTooltip(unitId);
+      }
+    });
+    unitElement.addEventListener('pointerleave', (event) => {
+      if (event.pointerType === 'mouse') {
+        this.tooltip.hide();
+      }
+    });
+    unitElement.addEventListener('click', (event) => {
+      if (event.pointerType === 'mouse') {
+        return;
+      }
+      if (this.tooltip.isOpenFor(unitId)) {
+        this.tooltip.hide();
+      } else {
+        this.showTooltip(unitId);
+      }
+    });
+  }
+
+  showTooltip(unitId) {
+    this.tooltip.show(unitId, this.units[unitId].element, this.getTooltipState(unitId));
+  }
+
+  // Was das Skill-Fenster über einen Helden wissen muss
+  getTooltipState(unitId) {
+    const unit = this.units[unitId];
+    return { name: unit.name, classId: unit.classId, mana: unit.maxMana > 0 ? unit.mana : null,
+      round: this.round, usedRounds: unit.usedRounds };
   }
 
   createUnitCanvas(info) {
@@ -178,6 +224,7 @@ export class BattleScene {
     if (!unit || !unit.maxMana || mana === null || mana === undefined) {
       return;
     }
+    unit.mana = mana;
     unit.element.querySelector('.unit-mana div').style.width = Math.max(0, mana / unit.maxMana) * 100 + '%';
   }
 
@@ -235,6 +282,7 @@ export class BattleScene {
   // quiet = true: nur Balken aktualisieren, keine Animationen und Töne (beim Überspringen)
   playEntry(entry, quiet) {
     if (entry.round > 0) {
+      this.round = entry.round;
       this.container.querySelector('.scene-round').textContent = 'Runde ' + entry.round;
     }
     if (entry.kind === 'action') {
@@ -270,6 +318,13 @@ export class BattleScene {
   playAction(action, quiet) {
     this.setMana(action.sourceId, action.manaAfter);
     const source = this.units[action.sourceId];
+    // Abklingzeit merken und ein offenes Skill-Fenster auffrischen (auch beim Überspringen)
+    if (source && action.abilityId) {
+      source.usedRounds[action.abilityId] = this.round;
+    }
+    if (this.tooltip.unitId !== null) {
+      this.tooltip.refresh(this.getTooltipState(this.tooltip.unitId));
+    }
     if (quiet || !source) {
       return;
     }

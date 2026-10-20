@@ -93,7 +93,7 @@ export function useAbility(battle, caster, abilityId, ability) {
   if (targets.length === 0) {
     return;
   }
-  battle.logAction(caster, ability.name, ability.fx, targets, true);
+  battle.logAction(caster, ability.name, ability.fx, targets, true, abilityId);
 
   switch (ability.type) {
     case 'damage':

@@ -33,7 +33,8 @@ Eine Option, die immer die beste ist, ist keine Wahl. Neue Optionen deshalb per 
 ```
 src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen, Tageszähler, endDay), Random, SaveManager
 src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft)
-src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem (EP, Aufhol-Erfahrung, Verletzungen nach einem Run)
+src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem (EP, Aufhol-Erfahrung, Verletzungen nach einem Run),
+               DayPlan (welcher Held hat heute welche Aufgabe)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
                simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug),
                BattleTimeline (wann passiert was → Dauer eines Runs), Battle (Zustand + Zielwahl),
@@ -45,8 +46,9 @@ src/data/      Reine Inhalte: rarities, items, lootBoxes, balancing, sprites (Pi
                enemies (Bosse + Diener/Trash), combatRules, heroOrders (Kampf-Anweisungen pro Klasse),
                dungeons (Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),
-               experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen)
-src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: LootBoxScreen (Schatzkammer),
+               experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),
+               heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus)
+src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tagesplan, Startseite), LootBoxScreen (Schatzkammer),
                HeroScreen (+ HeroDetailPanel, EquipPanel), TavernScreen, CombatLabScreen,
                DungeonScreen (+ RunViewer = Bericht eines beendeten Runs zeigen).
                DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe als Szene, danach Zusammenfassung mit Beute.
@@ -54,6 +56,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: LootBoxScreen (Sch
                InventoryOverlay = Inventar als Vollbild-Fenster mit Kategorien (Knopf „Inventar“ in der Reiterleiste).
                CombatReport = Ergebnis, Schadensmesser und Kampfbericht (wiederverwendbar).
                BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken, großer Skill-Name, Tempo 1x/2x/4x); läuft über update(sekunden).
+               SkillTooltip = Fenster mit Skills und Abklingzeiten, wenn die Maus über einem Helden der Szene steht (Handy: antippen).
                Tempo der Szene: `pacing`, `sceneSpeeds` und `sceneAnimationRate` in `combatRules.js`.
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
                OrdersPanel = Auswahllisten für Anweisungen (Labor + Heldenbildschirm).

@@ -49,7 +49,8 @@ export class Battle {
 
   // Meldet eine Aktion für die Kampfszene (Animation + Skill-Name), ohne Text im Kampfbericht.
   // showName = true: der Name ploppt klein über dem Handelnden auf (bei Skills, nicht bei normalen Angriffen)
-  logAction(source, name, fx, targets, showName) {
+  // abilityId = welcher Skill benutzt wurde (damit die Szene die Abklingzeit anzeigen kann), sonst null
+  logAction(source, name, fx, targets, showName, abilityId = null) {
     this.addLog('', 'action', {
       action: {
         sourceId: source.id,
@@ -57,6 +58,7 @@ export class Battle {
         fx: fx,
         targetIds: targets.map((target) => target.id),
         showName: showName,
+        abilityId: abilityId,
         manaAfter: source.maxMana > 0 ? Math.round(source.mana) : null,
       },
     });

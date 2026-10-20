@@ -1417,6 +1417,73 @@ h3 {
 .log-warning { color: #ff6b6b; }
 .log-death { color: #ffffff; font-weight: bold; }
 
+/* ---------- Tagesplan ---------- */
+
+.day-plan-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.day-plan-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.day-plan-hint {
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.day-plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.go-dungeons-button.glow {
+  border-color: var(--gold);
+  animation: end-day-glow 1.6s ease-in-out infinite;
+}
+
+.day-plan-runs,
+.day-plan-others,
+.day-plan-heroes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.day-plan-run {
+  border-color: var(--gold);
+}
+
+.day-plan-hero {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px;
+  background: #120d1c;
+}
+
+.day-plan-hero-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.task-chip {
+  padding: 2px 8px;
+  border: 2px solid var(--task-color);
+  color: var(--task-color);
+  background: rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
 /* ---------- Kampfszene ---------- */
 
 .battle-scene {
@@ -1711,6 +1778,63 @@ h3 {
 }
 
 /* Großer Skill-Name über dem Handelnden (siehe BattleScene.showSkillCallout) */
+/* Skill-Fenster: Maus über einem Helden (Handy: antippen) */
+.hero-unit {
+  cursor: help;
+}
+
+.skill-tooltip {
+  position: absolute;
+  z-index: 9;
+  width: 250px;
+  padding: 8px 10px;
+  background: rgba(12, 9, 20, 0.96);
+  border: 2px solid var(--gold);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  font-size: 13px;
+}
+
+.tooltip-title {
+  font-family: var(--font-title);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.tooltip-skill {
+  padding: 4px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tooltip-skill-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tooltip-skill.ready .tooltip-status {
+  color: #1eff00;
+}
+
+.tooltip-skill.waiting .tooltip-status {
+  color: #ff9f43;
+}
+
+.tooltip-skill.waiting b {
+  opacity: 0.6;
+}
+
+.tooltip-desc {
+  color: #c9c2d8;
+}
+
+.tooltip-costs {
+  color: #8f86a3;
+  font-size: 12px;
+}
+
 .skill-callout {
   position: absolute;
   left: 50%;
@@ -2440,6 +2564,19 @@ h3 {
 
   .skill-callout.enemy-callout {
     font-size: 17px;
+  }
+
+  .skill-tooltip {
+    width: 300px;
+    font-size: 17px;
+  }
+
+  .tooltip-title {
+    font-size: 13px;
+  }
+
+  .tooltip-costs {
+    font-size: 15px;
   }
 
   .scene-ticker {

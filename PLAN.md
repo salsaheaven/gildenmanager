@@ -83,11 +83,12 @@ In kleinen, jeweils online testbaren Schritten:
 **Als Nächstes (in dieser Reihenfolge):**
 - ✅ **Skalierung, Teil A:** Level 30 als Obergrenze, Item-Level nach Herkunft, Dungeon-Stufen (1 / 3 / 5), Gegner wachsen mit der Stufe, alle Formeln in `src/data/scaling.js`. Per Simulation geprüft: Mit Ausrüstung aus dem vorherigen Dungeon gelingt der Einstieg auf jeder Stufe (bis 30) zu etwa 75–85 %. Test-Knopf „+1 Level“ im Test-Menü.
 - ✅ **Skalierung, Teil B = Schritt 4** (siehe oben)
-- **Umbau auf Runden** (Entscheidung vom 2026-10-20, Details in `KONZEPT.md`). Kampf, Beute, EP, Skalierung und Inventar bleiben unverändert. In drei Schritten, jeder einzeln spielbar:
+- **Umbau auf Runden** (Entscheidung vom 2026-10-20, Details in `KONZEPT.md`). Kampf, Beute, EP, Skalierung und Inventar bleiben unverändert. In vier Schritten, jeder einzeln spielbar:
   1. ✅ **Tageszähler statt Spieluhr:** Knopf „Tag beenden“ statt Pause und Tempo. Ein Dungeon wird für heute eingeplant (absagen möglich) und erst beim Tagesende ausgekämpft, mit der Ausrüstung, die die Helden dann tragen. Verletzungen dauern Tage. Bewerber wechseln täglich. Rückzug per Hand, Schnellkampf und Gildenkurier sind entfernt. Alte Spielstände werden umgerechnet.
   2. ✅ **Tagesabschluss (= Beute sichtbarer machen):** Beim Tagesende laufen die Kämpfe nacheinander als Szene (einzeln oder alle überspringbar), mit großem Ergebnis am Ende jedes Runs. Danach kommt eine Zusammenfassung mit Gold, EP, Level-Ups und den Boss-Kisten samt Knopf „Jetzt öffnen“. Die Level-Up-Banner warten bis zur Zusammenfassung. Jede besiegte Trash-Gruppe bringt etwas Gold (`trashGold` in `dungeons.js`), auch wenn der Run danach scheitert. Noch offen: kleine Item-Drops von Trash (grau/weiß).
   3. ✅ **Kampfszene spannender:** Etwa 2,5-mal langsamer (rund 4 Sekunden pro Runde bei 1x). Großer Skill-Name im Kasten über dem Handelnden. Der Handelnde leuchtet, Ziele bekommen einen roten (Angriff) bzw. grünen (Hilfe) Rahmen. Effekte sind größer und laufen langsamer. Tempo 1x / 2x / 4x wird im Browser gemerkt. Der neueste Ticker-Eintrag ist hervorgehoben. (Rückzug per Hand war schon in Schritt 1 entfallen.)
-  4. **Tagesplan:** Übersicht, welcher Held heute was macht (Dungeon oder Ausruhen). Hier kommen später weitere Aufgaben dazu, z.B. Farmen oder Kräuter sammeln.
+  4. ✅ **Tagesplan:** Neuer Reiter „Tagesplan“ (Startseite): welcher Held heute was macht (Dungeon, Kuriert sich aus, Ruht sich aus), Hinweis auf freie Helden, Gruppen absagen, „Tag beenden“. Die Leiste oben zeigt, wie viele Helden frei sind. Aufgaben stehen in `heroTasks.js`, dort kommen später Farmen oder Kräuter sammeln dazu.
+  - ✅ Dazu: **Skill-Fenster in der Kampfszene.** Maus über einem Helden (Handy: antippen) zeigt seine Skills mit Beschreibung, Mana, Abklingzeit und ob sie gerade bereit sind (läuft im Kampf mit).
 
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 
