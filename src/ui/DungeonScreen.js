@@ -55,9 +55,10 @@ export class DungeonScreen {
   }
 
   render() {
-    // Gewählte Helden, die inzwischen unterwegs oder weg sind, abwählen
+    // Gewählte Helden, die inzwischen unterwegs, verletzt oder weg sind, abwählen
     for (const heroId of this.selectedHeroIds) {
-      if (!this.game.guild.findHero(heroId) || this.game.guild.isHeroBusy(heroId)) {
+      const hero = this.game.guild.findHero(heroId);
+      if (!hero || this.game.guild.isHeroBusy(heroId) || hero.isInjured()) {
         this.selectedHeroIds.delete(heroId);
       }
     }
@@ -209,15 +210,16 @@ export class DungeonScreen {
     }
     for (const hero of heroes) {
       const busy = this.game.guild.isHeroBusy(hero.id);
+      const injured = hero.isInjured();
       const button = document.createElement('button');
       button.className = 'lab-hero-toggle';
       button.style.setProperty('--rarity', hero.getRarity().color);
       button.classList.toggle('selected', this.selectedHeroIds.has(hero.id));
-      button.disabled = busy;
+      button.disabled = busy || injured;
       button.appendChild(createHeroCanvas(hero, 2));
       button.insertAdjacentHTML('beforeend', '<span></span>');
       button.querySelector('span').textContent = hero.name + ' (' + hero.getClass().name + ', Lv ' + hero.level + ', AW ' + hero.getGearScore() + ')' +
-        (busy ? ' – unterwegs' : '');
+        (busy ? ' – unterwegs' : '') + (injured ? ' – verletzt bis ' + this.getHealTime(hero) : '');
       button.addEventListener('click', () => {
         Sound.click();
         if (this.selectedHeroIds.has(hero.id)) {
@@ -229,6 +231,12 @@ export class DungeonScreen {
       });
       container.appendChild(button);
     }
+  }
+
+  // Uhrzeit, zu der ein verletzter Held wieder fit ist
+  getHealTime(hero) {
+    const clock = this.game.clock;
+    return clock.getTimeTextAt(clock.totalGameSeconds + hero.injurySeconds);
   }
 
   getSelectedHeroes() {
@@ -390,6 +398,15 @@ export class DungeonScreen {
       }
       if (report.fallenNames.length > 0) {
         text += ' · gefallen: ' + report.fallenNames.join(', ');
+      }
+      // Erfahrung (ältere Berichte haben noch keine)
+      if (report.heroResults && report.heroResults.length > 0) {
+        const xpValues = report.heroResults.map((heroResult) => heroResult.xp);
+        const levelUps = report.heroResults.filter((heroResult) => heroResult.levelsGained > 0).length;
+        text += ' · +' + Math.max(...xpValues) + ' EP';
+        if (levelUps > 0) {
+          text += ' · ' + levelUps + '× Level-Up!';
+        }
       }
       row.textContent = text;
       row.addEventListener('click', () => {

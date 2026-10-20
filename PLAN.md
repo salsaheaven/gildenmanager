@@ -78,11 +78,11 @@ In kleinen, jeweils online testbaren Schritten:
 1. ✅ **Helden:** 5 Klassen (Krieger, Priester, Runenwirker, Magier, Schurke), Rekrutierung mit Helden-Seltenheit und Eigenschaften, Ausrüstung anlegen
 2. ✅ **Kampf-Labor:** Testbildschirm, auf dem eine Gruppe gegen einen Boss antritt. Er zeigt Kampfbericht und Siegchance aus 200 Simulationen und dient zum Testen und Balancen.
 3. ✅ **Dungeons:** 3 Normal-Dungeons mit Boss-Mechaniken, Taktikwahl, Live-Ticker mit Lebensbalken, Rückzug, Boss-Kiste
-4. **Fortschritt:** XP und Level, Verletzungen, Test-Menü (F2) für Gold, Kisten und Zeit
+4. ✅ **Fortschritt:** Erfahrung pro Begegnung, Level-Up mit Banner und Fanfare, Aufhol-Erfahrung, Verletzungen, Test-Menü (F2)
 
 **Als Nächstes (in dieser Reihenfolge):**
 - ✅ **Skalierung, Teil A:** Level 30 als Obergrenze, Item-Level nach Herkunft, Dungeon-Stufen (1 / 3 / 5), Gegner wachsen mit der Stufe, alle Formeln in `src/data/scaling.js`. Per Simulation geprüft: Mit Ausrüstung aus dem vorherigen Dungeon gelingt der Einstieg auf jeder Stufe (bis 30) zu etwa 75–85 %. Test-Knopf „+1 Level“ im Test-Menü.
-- **Skalierung, Teil B = Schritt 4:** Erfahrung, Level-Up mit Animation, Aufhol-Erfahrung, Verletzungen.
+- ✅ **Skalierung, Teil B = Schritt 4** (siehe oben)
 - **Beute sichtbarer machen:** Nach einem Sieg erscheint ein Sieg-Fenster mit der Boss-Kiste und dem Knopf „Jetzt öffnen“. Bisher landet die Kiste unbemerkt in der Schatzkammer. Eventuell bekommen Trash-Gegner kleine eigene Drops (Gold, ab und zu ein graues oder weißes Item), damit sich auch ein gescheiterter Run lohnt.
 
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“

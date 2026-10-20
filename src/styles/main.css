@@ -994,6 +994,19 @@ h3 {
   background: #4b5bd6;
 }
 
+.detail-xp {
+  font-size: 16px;
+  color: var(--text-dim);
+}
+
+.detail-injury {
+  color: #ff6b6b;
+}
+
+.detail-injury:empty {
+  display: none;
+}
+
 .detail-columns {
   display: grid;
   grid-template-columns: 1fr 1.4fr;
@@ -2273,4 +2286,73 @@ h3 {
     max-height: 36vh;
     overflow-y: auto;
   }
+}
+
+/* ---------- Level-Up-Banner ---------- */
+
+.level-up-banner {
+  --rarity: #ffd23f;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.level-up-banner[hidden] {
+  display: none;
+}
+
+.level-up-rays {
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  max-width: 160vw;
+  max-height: 160vw;
+  background: repeating-conic-gradient(rgba(255, 210, 63, 0.18) 0deg 12deg, transparent 12deg 30deg);
+  border-radius: 50%;
+  mask-image: radial-gradient(circle, black 30%, transparent 70%);
+  animation: level-up-spin 6s linear infinite;
+}
+
+.level-up-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 28px;
+  background: var(--panel);
+  border: 4px solid var(--gold);
+  box-shadow: 0 0 0 3px #0c0914, 0 0 30px var(--gold);
+  animation: level-up-pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1);
+  text-align: center;
+}
+
+.level-up-portrait canvas {
+  border: 3px solid var(--rarity);
+  background: #120d1c;
+}
+
+.level-up-title {
+  font-family: var(--font-title);
+  font-size: 22px;
+  color: var(--gold);
+  text-shadow: 3px 3px 0 #0c0914;
+  animation: blink 0.5s steps(2) 3;
+}
+
+.level-up-text {
+  font-size: 22px;
+}
+
+@keyframes level-up-pop {
+  from { transform: scale(0.3); opacity: 0; }
+}
+
+@keyframes level-up-spin {
+  to { rotate: 360deg; }
 }

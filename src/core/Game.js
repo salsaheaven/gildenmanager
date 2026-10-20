@@ -8,6 +8,8 @@
 //   'boxArrived'           → der Kurier hat eine Kiste gebracht (Daten: Kistenart-id)
 //   'candidatesRefreshed'  → neue Bewerber in der Taverne (Daten: Liste der Bewerber)
 //   'expeditionFinished'   → ein Dungeon-Run ist vorbei (Daten: der Bericht, siehe finishExpedition)
+//   'heroLevelUp'          → ein Held ist aufgestiegen (Daten: { hero, newLevel })
+//   'heroHealed'           → ein verletzter Held ist wieder fit (Daten: der Held)
 // ============================================================
 
 import { GameClock } from './GameClock.js';
@@ -19,6 +21,7 @@ import { BALANCING } from '../data/balancing.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
 import { getDungeon } from '../data/dungeons.js';
 import { Expedition } from '../entities/Expedition.js';
+import { applyRunResults } from '../systems/ExperienceSystem.js';
 
 export class Game {
   constructor(seed = Date.now()) {
@@ -68,6 +71,17 @@ export class Game {
     this.updateCourier(gameSeconds);
     this.updateCandidates(gameSeconds);
     this.updateExpeditions(gameSeconds);
+    this.updateInjuries(gameSeconds);
+  }
+
+  // Verletzungen heilen mit der Zeit
+  updateInjuries(gameSeconds) {
+    for (const hero of this.guild.heroes) {
+      if (hero.healOverTime(gameSeconds)) {
+        this.emit('heroHealed', hero);
+        this.emit('changed');
+      }
+    }
   }
 
   updateCourier(gameSeconds) {
@@ -177,7 +191,8 @@ export class Game {
   }
 
   // Schickt eine Gruppe los. Gibt 'ok' oder einen Grund zurück:
-  // 'locked' (Dungeon gesperrt), 'noHeroes', 'tooMany', 'busy' (ein Held ist schon unterwegs)
+  // 'locked' (Dungeon gesperrt), 'noHeroes', 'tooMany', 'busy' (ein Held ist schon unterwegs),
+  // 'injured' (ein Held ist verletzt)
   startExpedition(dungeonId, heroIds, tacticId, retreatRuleId) {
     if (!this.isDungeonUnlocked(dungeonId)) {
       return 'locked';
@@ -193,6 +208,9 @@ export class Game {
       const hero = this.guild.findHero(heroId);
       if (!hero || this.guild.isHeroBusy(heroId)) {
         return 'busy';
+      }
+      if (hero.isInjured()) {
+        return 'injured';
       }
       heroes.push(hero);
     }
@@ -261,11 +279,19 @@ export class Game {
       this.guild.dungeonClears[dungeon.id] = this.guild.getClears(dungeon.id) + 1;
     }
 
+    // Erfahrung für alle gewonnenen Begegnungen, Verletzungen für Gefallene
+    report.heroResults = applyRunResults(this.guild, result, dungeon);
+
     this.guild.expeditions = this.guild.expeditions.filter((e) => e.id !== expedition.id);
     this.guild.reports.unshift(report);
     this.guild.reports = this.guild.reports.slice(0, BALANCING.keptReports);
 
     this.emit('expeditionFinished', report);
+    for (const heroResult of report.heroResults) {
+      if (heroResult.levelsGained > 0) {
+        this.emit('heroLevelUp', { hero: this.guild.findHero(heroResult.heroId), newLevel: heroResult.newLevel });
+      }
+    }
     this.emit('changed');
     return report;
   }

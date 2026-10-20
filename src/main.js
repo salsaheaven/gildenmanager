@@ -17,6 +17,7 @@ import { DungeonScreen, outcomeText } from './ui/DungeonScreen.js';
 import { getDungeon } from './data/dungeons.js';
 import { DebugPanel } from './ui/DebugPanel.js';
 import { InventoryOverlay } from './ui/InventoryOverlay.js';
+import { LevelUpBanner } from './ui/LevelUpBanner.js';
 import { Sound } from './ui/Sound.js';
 import { showToast } from './ui/Toast.js';
 
@@ -138,6 +139,16 @@ game.on('expeditionFinished', (report) => {
     dungeonHasNews = true;
     updateBadges();
   }
+});
+
+// Level-Up: großes Banner mit Fanfare
+const levelUpBanner = new LevelUpBanner();
+game.on('heroLevelUp', (data) => {
+  levelUpBanner.show(data.hero, data.newLevel);
+});
+
+game.on('heroHealed', (hero) => {
+  showToast(hero.name + ' ist wieder fit!', '#1eff00');
 });
 
 game.on('boxArrived', (boxTypeId) => {

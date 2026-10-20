@@ -46,8 +46,10 @@ export class HeroDetailPanel {
           <div class="detail-hero-class">${heroClass.name} · ${ROLE_NAMES[heroClass.role]} · steht ${ROW_NAMES[heroClass.row]}</div>
           <div class="detail-level">
             <span>Level ${hero.level}</span>
-            <div class="bar" title="Erfahrung gibt es ab den Dungeons"><div class="bar-fill xp-fill" style="width: 0%"></div></div>
+            <div class="bar" title="Erfahrung gibt es für gewonnene Begegnungen in Dungeons"><div class="bar-fill xp-fill" style="width: ${Math.round(hero.getXpProgress() * 100)}%"></div></div>
           </div>
+          <div class="detail-xp">${hero.isMaxLevel() ? 'Höchstes Level erreicht!' : hero.xp + ' / ' + hero.getXpForNextLevel() + ' EP'}</div>
+          <div class="detail-injury"></div>
           <div class="trait-list"></div>
         </div>
       </div>
@@ -77,6 +79,11 @@ export class HeroDetailPanel {
 
     this.root.querySelector('.detail-portrait').appendChild(createHeroCanvas(hero, 9));
     this.root.querySelector('.detail-hero-name').textContent = hero.name;
+    if (hero.isInjured()) {
+      const clock = this.game.clock;
+      this.root.querySelector('.detail-injury').textContent =
+        'Verletzt bis ' + clock.getTimeTextAt(clock.totalGameSeconds + hero.injurySeconds) + ' Uhr – kann nicht in Dungeons';
+    }
 
     const traitList = this.root.querySelector('.trait-list');
     for (const trait of hero.getTraits()) {

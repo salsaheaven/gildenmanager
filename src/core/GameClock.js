@@ -40,7 +40,12 @@ export class GameClock {
 
   // Uhrzeit als Text, z.B. "08:30". Der erste Tag beginnt um 08:00.
   getTimeText() {
-    const totalMinutes = 8 * 60 + this.totalGameSeconds * BALANCING.gameMinutesPerSecond;
+    return this.getTimeTextAt(this.totalGameSeconds);
+  }
+
+  // Uhrzeit zu einem anderen Zeitpunkt (in Spielsekunden seit Spielbeginn), z.B. "Wann ist er wieder fit?"
+  getTimeTextAt(gameSeconds) {
+    const totalMinutes = 8 * 60 + gameSeconds * BALANCING.gameMinutesPerSecond;
     const minutesToday = Math.floor(totalMinutes) % (24 * 60);
     const hours = Math.floor(minutesToday / 60);
     const minutes = minutesToday % 60;

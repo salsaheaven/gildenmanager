@@ -97,6 +97,17 @@ export const Sound = {
     playTone(180, 0.12, 0.25, 'triangle', 0.06);
   },
 
+  // Level-Up: aufsteigende Fanfare mit Schlussakkord
+  levelUp() {
+    const melody = [0, 2, 4, 5];
+    for (let i = 0; i < melody.length; i++) {
+      playTone(NOTES[melody[i]], i * 0.09, 0.14, 'square', 0.05);
+    }
+    playTone(NOTES[5], 0.38, 0.6, 'triangle', 0.07);
+    playTone(NOTES[7], 0.38, 0.6, 'triangle', 0.05);
+    playTone(NOTES[9], 0.38, 0.6, 'square', 0.03);
+  },
+
   // Rumpeln, während die Kiste wackelt. Wird zum Ende hin schneller und höher.
   shake(seconds) {
     let time = 0;

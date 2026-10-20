@@ -11,6 +11,8 @@ import { getRarity, getRarityRank } from '../data/rarities.js';
 import { getTrait } from '../data/traits.js';
 import { SLOT_NAMES } from '../data/items.js';
 import { getOrdersForClass } from '../data/heroOrders.js';
+import { getXpForNextLevel } from '../data/experience.js';
+import { SCALING } from '../data/scaling.js';
 
 // Alle Ausrüstungsplätze, z.B. ['weapon', 'offhand', 'head', …]
 export const EQUIPMENT_SLOTS = Object.keys(SLOT_NAMES);
@@ -30,7 +32,8 @@ export class Hero {
     this.traitIds = traitIds;
     this.looks = looks;
     this.level = 1;
-    this.xp = 0;
+    this.xp = 0;              // gesammelte EP auf dem aktuellen Level
+    this.injurySeconds = 0;   // > 0 = verletzt, noch so viele Spielsekunden (kann nicht in Dungeons)
 
     // Anweisungen für den Kampf: Anweisungs-id → gewählte Option (siehe data/heroOrders.js).
     // Fehlt eine Anweisung, gilt die Standard-Option.
@@ -62,6 +65,55 @@ export class Hero {
 
   getHireCost() {
     return getHeroRarity(this.rarityId).hireCost;
+  }
+
+  // ---------- Erfahrung & Verletzung ----------
+
+  isMaxLevel() {
+    return this.level >= SCALING.maxLevel;
+  }
+
+  // EP, die für das nächste Level nötig sind
+  getXpForNextLevel() {
+    return getXpForNextLevel(this.level);
+  }
+
+  // 0 bis 1: Fortschritt zum nächsten Level (für den Balken)
+  getXpProgress() {
+    if (this.isMaxLevel()) {
+      return 1;
+    }
+    return this.xp / this.getXpForNextLevel();
+  }
+
+  // Gibt EP. Reichen sie, steigt der Held auf (auch mehrere Level auf einmal).
+  // Gibt zurück, wie viele Level er aufgestiegen ist.
+  addXp(amount) {
+    let levelsGained = 0;
+    this.xp += amount;
+    while (!this.isMaxLevel() && this.xp >= this.getXpForNextLevel()) {
+      this.xp -= this.getXpForNextLevel();
+      this.level++;
+      levelsGained++;
+    }
+    // Auf dem Höchstlevel sammelt man keine EP mehr
+    if (this.isMaxLevel()) {
+      this.xp = 0;
+    }
+    return levelsGained;
+  }
+
+  isInjured() {
+    return this.injurySeconds > 0;
+  }
+
+  // Lässt die Verletzung heilen. Gibt true zurück, wenn der Held gerade wieder fit geworden ist.
+  healOverTime(gameSeconds) {
+    if (!this.isInjured()) {
+      return false;
+    }
+    this.injurySeconds = Math.max(0, this.injurySeconds - gameSeconds);
+    return this.injurySeconds === 0;
   }
 
   // ---------- Werte ----------
@@ -197,6 +249,7 @@ export class Hero {
       looks: this.looks,
       level: this.level,
       xp: this.xp,
+      injurySeconds: this.injurySeconds,
       equipment: equipment,
       orders: this.orders,
     };
@@ -206,6 +259,7 @@ export class Hero {
     const hero = new Hero(data.id, data.name, data.classId, data.rarityId, data.traitIds, data.looks);
     hero.level = data.level;
     hero.xp = data.xp;
+    hero.injurySeconds = data.injurySeconds || 0;
     hero.orders = data.orders || {};
     for (const slot of EQUIPMENT_SLOTS) {
       const itemData = data.equipment[slot];

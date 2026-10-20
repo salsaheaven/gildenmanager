@@ -111,7 +111,12 @@ Jeder Skill hat eine Abklingzeit und kostet bei Zauberern Mana. Alle Zahlen steh
 | Gewicht der Ausrüstung | Am Ende macht die Ausrüstung **etwa die Hälfte** der Stärke eines Helden aus. Am Anfang ist es deutlich weniger (etwa ein Drittel), weil Item-Werte schneller mit dem Item-Level wachsen als die Grundwerte mit dem Helden-Level. |
 | Gegner | Gegner wachsen mit der Stufe des Dungeons statt über eine feste Gegnerstärke |
 
-Alle Formeln und Zahlen dafür stehen in `src/data/` und werden per Simulation eingestellt.
+| Erfahrung | EP gibt es **pro gewonnener Begegnung** (Boss mehr als Trash, höhere Dungeon-Stufe mehr). Scheitert ein Run am Boss, zählen die geschafften Trash-Gruppen trotzdem. Wer mehr als 1 Level über der Stufe des Dungeons liegt, bekommt weniger EP (bis runter auf 10 %), damit sich ewiges Wiederholen des ersten Dungeons nicht lohnt. |
+| Aufhol-Erfahrung | Doppelte EP für Helden, die mindestens 2 Level unter dem Durchschnitt der 5 besten Helden der Gilde liegen |
+| Tempo am Anfang | Die ersten Level dauern 1 bis 4 Runs, später deutlich mehr. Die Kurve wird endgültig eingestellt, wenn klar ist, wie viele Dungeons es gibt. |
+| Verletzungen | Wer im Run fällt, ist danach **2 Spielstunden verletzt** und kann nicht in Dungeons (Ausrüsten geht). Später verkürzen Lazarett (M3) und Verbrauchsgüter (M2) die Heilung. |
+
+Alle Formeln und Zahlen dafür stehen in `src/data/` (`scaling.js`, `experience.js`) und werden per Simulation eingestellt.
 
 ## Noch offen (nächste Sessions)
 - **Bekanntes Problem: „Priester heilt früh“ ist fast immer die beste Wahl.** Gegen alle drei Test-Bosse gewinnt die Gruppe damit häufiger. Mögliche Nachteile, die man ausprobieren kann:
