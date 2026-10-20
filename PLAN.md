@@ -4,7 +4,7 @@
 "Gildenmanager" (Arbeitstitel) ist ein Management-Spiel: Man führt eine typische MMORPG-Gilde, spielt aber nicht selbst in Dungeons. Man rekrutiert Helden, levelt, skillt und rüstet sie aus und schickt sie los. Währenddessen baut man die Gildenhalle aus, craftet und später vielleicht Diplomatie.
 Festgelegt:
 - **Browser-Spiel** mit **Pixel-Art**
-- **Echtzeit mit Pause/Speed**, Kämpfe **simuliert + Kampfbericht**
+- **Rundenbasiert** (1 Runde = 1 Tag, ein Held = eine Aufgabe pro Tag), Kämpfe **simuliert + Kampfszene + Kampfbericht**. Bis M1 lief das Spiel in Echtzeit mit Pause/Speed, siehe „Umbau auf Runden“.
 - **Übungsprojekt fürs Vibecoding:** Der Code muss für Programmier-Einsteiger einfach lesbar und stark modular sein, mit einer Datei pro Konzept wie bei Java-Klassen.
 - **Pflicht: ein extrem motivierender Kern-Loop** (Dopamin), also Lootboxen, Seltenheitsstufen, Klassen-Sets zum Sammeln.
 
@@ -64,8 +64,8 @@ src/
 - **Pity-System:** Nach X Kisten ohne Lila gibt es garantiert eins, damit Pechsträhnen nicht frustrieren
 - **Klassen-Sets** (z.B. 6 Teile pro Klasse) mit 2/4/6-Teile-Boni, dazu ein **Sammelbuch**, das fehlende Teile als Silhouette zeigt
 - **Ständiges Feedback:** Level-Up-Fanfare, aufsteigende Zahlen, Fortschrittsbalken überall (XP, Set-Sammlung, Gildenrang)
-- **Kurze Anfangstimer** (Sekunden), die später auf Minuten wachsen, damit es schnell die ersten Erfolge gibt
-- **Mehrere parallele Ziele:** Während eine Gruppe im Dungeon ist, laufen Bau und Crafting, dazu kommt die nächste Kiste. Es gibt immer etwas zu tun.
+- **Schnelle erste Erfolge:** Schon die ersten Tage bringen Kisten und Level-Ups
+- **Mehrere Ziele pro Tag:** Gruppen im Dungeon, andere Helden farmen oder sammeln, dazu Bau und Crafting. Der Tagesabschluss bringt alles auf einmal.
 - Später: Erfolge, tägliche Aufträge, Gildenrang-Stufen mit Freischaltungen
 
 ## Meilensteine
@@ -83,7 +83,10 @@ In kleinen, jeweils online testbaren Schritten:
 **Als Nächstes (in dieser Reihenfolge):**
 - ✅ **Skalierung, Teil A:** Level 30 als Obergrenze, Item-Level nach Herkunft, Dungeon-Stufen (1 / 3 / 5), Gegner wachsen mit der Stufe, alle Formeln in `src/data/scaling.js`. Per Simulation geprüft: Mit Ausrüstung aus dem vorherigen Dungeon gelingt der Einstieg auf jeder Stufe (bis 30) zu etwa 75–85 %. Test-Knopf „+1 Level“ im Test-Menü.
 - ✅ **Skalierung, Teil B = Schritt 4** (siehe oben)
-- **Beute sichtbarer machen:** Nach einem Sieg erscheint ein Sieg-Fenster mit der Boss-Kiste und dem Knopf „Jetzt öffnen“. Bisher landet die Kiste unbemerkt in der Schatzkammer. Eventuell bekommen Trash-Gegner kleine eigene Drops (Gold, ab und zu ein graues oder weißes Item), damit sich auch ein gescheiterter Run lohnt.
+- **Umbau auf Runden** (Entscheidung vom 2026-10-20, Details in `KONZEPT.md`). Kampf, Beute, EP, Skalierung und Inventar bleiben unverändert. In drei Schritten, jeder einzeln spielbar:
+  1. **Tageszähler statt Spieluhr:** Knopf „Tag beenden“ statt Pause und Tempo. Ein Dungeon wird für heute eingeplant und erst beim Tagesende ausgekämpft. Verletzungen dauern Tage. Händler und Bewerber wechseln täglich.
+  2. **Tagesabschluss (= Beute sichtbarer machen):** Beim Tagesende laufen die Kämpfe nacheinander als Szene (überspringbar). Danach kommt ein Fenster mit Beute, EP, Level-Ups und den Boss-Kisten samt Knopf „Jetzt öffnen“. Eventuell bekommen Trash-Gegner kleine eigene Drops (Gold, ab und zu ein graues oder weißes Item), damit sich auch ein gescheiterter Run lohnt.
+  3. **Tagesplan:** Übersicht, welcher Held heute was macht (Dungeon oder Ausruhen). Hier kommen später weitere Aufgaben dazu, z.B. Farmen oder Kräuter sammeln.
 
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 

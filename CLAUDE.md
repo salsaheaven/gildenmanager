@@ -2,7 +2,8 @@
 
 Browser-Management-Spiel (Arbeitstitel): Man managt eine MMORPG-Gilde, kämpft aber nicht selbst.
 Man rekrutiert, levelt, skillt und rüstet Helden aus, schickt sie in Dungeons, baut die Gildenhalle aus und craftet.
-Pixel-Art. Echtzeit mit Pause/Speed. Kämpfe werden simuliert und als Bericht angezeigt.
+Pixel-Art. Rundenbasiert: 1 Runde = 1 Tag, jeder Held hat eine Aufgabe pro Tag. Kämpfe werden simuliert, als Szene abgespielt und als Bericht angezeigt.
+(Der Umbau von Echtzeit auf Runden läuft, siehe `PLAN.md`. Bis dahin enthält der Code noch Spieluhr und Timer.)
 
 **Oberstes Ziel: ein extrem motivierender Kern-Loop.** Dazu gehören Lootboxen, die Seltenheiten Grau → Weiß → Grün → Blau → Lila → Orange,
 Klassen-Sets zum Sammeln, ein Pity-System und ständiges Feedback durch Sounds, Animationen und Fortschrittsbalken.

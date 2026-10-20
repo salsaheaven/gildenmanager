@@ -3,7 +3,7 @@
 Man führt eine MMORPG-Gilde, kämpft aber nicht selbst. Man rekrutiert Helden, rüstet sie aus, schickt sie in Dungeons und Raids
 und baut die Gildenhalle aus. Am Ende steht ein **Endboss**: Das Spiel hat ein Ende und eine Wertung.
 
-Stand: Konzept-Session 2 – Kampf (2026-10-19)
+Stand: Konzept-Session 2 – Kampf (2026-10-19), Umstellung auf Runden (2026-10-20)
 
 ## Design-Grundsatz: echte Entscheidungen
 **Jede Wahlmöglichkeit braucht Vor- und Nachteile.** Ist eine Option in fast jeder Lage die beste, ist sie keine Wahl mehr, sondern eine Pflicht. Dann kann man sie auch gleich weglassen.
@@ -14,8 +14,8 @@ Das gilt für Anweisungen, Taktiken, Klassen, Eigenschaften, Talente, Ausrüstun
 
 ## Die drei Loops
 
-**Minuten-Loop (der Kern):**
-Gruppe zusammenstellen → Dungeon (Fortschrittsbalken, Live-Ticker) → **Boss-Kiste öffnen** → zerlegen, verbessern, ausrüsten → nächster Run
+**Tages-Loop (der Kern):**
+Tag planen (jedem Helden eine Aufgabe geben, Gruppen zusammenstellen) → **„Tag beenden“** → Kämpfe laufen als Szene ab → Tagesabschluss mit Beute, EP und Level-Ups → **Boss-Kisten öffnen** → zerlegen, verbessern, ausrüsten → nächster Tag
 
 **Stunden-Loop:**
 Helden leveln und Talente vergeben · Klassen-Sets vervollständigen (2/4/6-Boni, Sammelbuch) · Gildenhalle ausbauen ·
@@ -35,7 +35,9 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
 | Aufbau eines Dungeons | Immer **mindestens eine Trash-Gruppe und ein Boss**. Spätere Dungeons haben mehrere Trash-Gruppen und 2 bis 3 Bosse. Leben und Mana werden zwischen den Begegnungen nur teilweise aufgefüllt. Man muss also mit seinen Kräften haushalten. |
 | Raids | Ein eigenes Kapitel, wird später gesondert geplant (10 und mehr Helden) |
 | Siegchance in Dungeons | Noch offen, ob sie dort überhaupt angezeigt wird. Idee: Man muss einen **klugen Kopf (Strategen) im Spiel bezahlen** oder ein **Gebäude bauen** (z.B. einen Kartenraum), das Kämpfe vorab simuliert. **Je höher die Ausbaustufe, desto genauer die Vorhersage**, etwa eine grobe Spanne auf Stufe 1 und ein genauer Wert auf der höchsten Stufe. Bis dahin zeigt der Dungeon nur das empfohlene Ausrüstungsniveau und Warnungen wie „Kein Heiler in der Gruppe!“. |
-| Tempo | Aktiv mit kurzen Timern: Dungeons dauern 30 Sekunden bis wenige Minuten, dazu gibt es Pause und Speed |
+| Spielablauf | **Rundenbasiert: 1 Runde = 1 Tag.** Es gibt keine Echtzeit, keine Timer und keine Pause- oder Tempo-Knöpfe. Man plant den Tag und drückt „Tag beenden“, dann wird alles aufgelöst. So kann man jederzeit aufhören, und auf dem Handy wartet nichts. |
+| Aufgaben | **Jeder Held hat genau eine Aufgabe pro Tag.** Zuerst gibt es nur „Dungeon“ und „Ausruhen“ (wer nichts zu tun hat, ruht sich aus). Später kommen weitere Aufgaben dazu, z.B. Farmen, Kräuter sammeln, Training oder Hilfe beim Crafting. Dadurch ist Zeit knapp: Jeder Held, der in den Dungeon geht, fehlt an diesem Tag woanders. Mehrere Gruppen können am selben Tag in verschiedene Dungeons. |
+| Rundenende | „Tag beenden“ löst alles nacheinander auf: Die Kämpfe laufen als Szene ab (überspringbar), danach kommt ein **Tagesabschluss** mit Beute, EP, Level-Ups und Kisten („Jetzt öffnen“). Das ist der „nur noch ein Tag“-Moment. Danach wechseln Händler-Angebot und Bewerber. |
 | Scheitern | Normal-Dungeons: Die Helden werden **verletzt** und fallen eine Weile aus. **Permadeath nur in Hardcore-Inhalten** (Heroisch, Raids): Das Risiko geht man freiwillig für bessere Beute ein. |
 | Erbe | Stirbt ein Held, kommt seine **komplette Ausrüstung zurück ins Inventar**. Man verliert nur den Helden selbst (Level, Eigenschaften, Seltenheit), so bleibt das Spiel trotz Wipes schaffbar. Gefallene bekommen einen Platz in der **Ehrenhalle**. |
 | Aufhol-Erfahrung | Helden unter dem Level-Durchschnitt der Gilde bekommen deutlich mehr Erfahrung, damit Ersatz für Gefallene schnell einsatzbereit ist |
@@ -43,7 +45,7 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
 | Beute | Bosse haben feste Beutetabellen, z.B. bestimmte Set-Teile. Ihre Beute kommt in eine **Boss-Kiste**, die man mit der Öffnen-Animation öffnet. |
 | Item-Nutzen | **Zerlegen → Material → Verbessern (+1 bis +10)**, ab einer bestimmten Stufe mit Fehlschlag-Chance. Material dient auch als Zutat fürs Crafting, z.B. für Set-Teile. |
 | Spielende | **Endboss** als letzter Raid |
-| Wertung | **Endauswertung in Spieltagen**: Wie viele Spieltage hat man bis zum Endboss gebraucht? Gezählt wird Spielzeit, also bringen Pause und Speed keinen Vorteil. Das Ergebnis lässt sich vergleichen („2 Tage schneller als du“). |
+| Wertung | **Endauswertung in Spieltagen**: Wie viele Tage (Runden) hat man bis zum Endboss gebraucht? Wie lange man über einen Tag nachdenkt, spielt keine Rolle. Das Ergebnis lässt sich vergleichen („2 Tage schneller als du“). |
 | Rivalen | KI-Gilden in einer **Rangliste** mit Server-First-Rennen und Neuigkeiten-Ticker („Die Eisenfäuste besiegen als erste Gilde den Drachen!“). Legt eine KI-Gilde den Endboss zuerst, kann man trotzdem selbst noch zu Ende spielen. |
 | Kisten-Quellen | Bis M1 bringt der Gildenkurier regelmäßig Gratis-Kisten. Das ist nur eine Starthilfe zum Testen. **Ab M2 gibt es keine automatisch gelieferten Kisten mehr.** Kisten kommen dann nur noch aus Dungeons und Bossen. |
 | Händler und Gold | **Ab M2 sind Kisten und Ausrüstung nicht mehr kaufbar.** Ausrüstung gibt es nur aus Dungeons und durchs Crafting. Mit Gold kauft man Verbrauchsgüter (Tränke, Fläschchen und Proviant als Buffs für einen Run, z.B. Feuerresistenz gegen den Drachen) und Crafting-Materialien. Außerdem kosten Gold: Helden anheuern, Bewerber neu rufen, Heilen, Verbessern, **Umskillen** (Talente neu verteilen), Gebäude. |
@@ -64,8 +66,8 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
   - Die Regel reagiert **nur auf Gefallene, nicht auf Lebenspunkte**. Wählbar sind „nie“, „nach 1 Gefallenen“ und „nach 2 Gefallenen“.
   - Der Rückzug dauert **2 Runden**, in denen der Boss weiter angreift (auch mit Mechaniken). Die Helden heilen und verteidigen sich nur noch, Schaden machen sie keinen mehr. Auch beim Rückzug kann also noch jemand fallen.
   - Es gibt keine Beute, und alle Überlebenden sind verletzt.
-- **Darstellung:** Der vorberechnete Kampf wird in Spielzeit als **Kampfszene** abgespielt: Pixel-Helden gegen den Boss, Lebensbalken, aufploppende Schadens- und Heilzahlen wie im MMO, ein Zauberbalken für angekündigte Mechaniken und ein Ticker. Danach folgt der vollständige Kampfbericht. Man soll mitfiebern und sehen, wie Taktik und Gruppe wirken.
-- **Schnellkampf:** Ein Run läuft immer in Spielzeit, egal ob man zuschaut. Erst nachdem man einen Dungeon einige Male (z.B. 3-mal) geschafft hat, kann man einen laufenden Run **sofort beenden** und spart damit Spieltage. Zuerst lernt man also den Dungeon kennen, danach farmt man ihn schneller.
+- **Darstellung:** Der vorberechnete Kampf wird am Tagesende als **Kampfszene** abgespielt: Pixel-Helden gegen den Boss, Lebensbalken, aufploppende Schadens- und Heilzahlen wie im MMO, ein Zauberbalken für angekündigte Mechaniken und ein Ticker. Danach folgt der vollständige Kampfbericht. Man soll mitfiebern und sehen, wie Taktik und Gruppe wirken.
+- **Überspringen:** Seit der Umstellung auf Runden kostet Zuschauen keine Spielzeit mehr. Die Szene lässt sich deshalb jederzeit überspringen, dann gilt die Rückzugsregel. Den Rückzug per Hand gibt es nur, wenn man zuschaut. (Die alte Idee „Schnellkampf nach 3 Erfolgen“ fällt weg.)
 - **Zwei Reihen:** Vorne stehen Tanks und Nahkämpfer, hinten Fernkämpfer, Heiler und Supporter. Manche Bossfähigkeiten treffen nur eine Reihe.
 - **Ressourcen:** Alle Skills haben Abklingzeiten. Heiler und Zauberer brauchen zusätzlich **Mana**. Geht dem Heiler das Mana aus, wird es gefährlich.
 - **Tod (nur Hardcore):** Wer auf 0 Leben fällt, ist tot, auch wenn die Gruppe gewinnt. In Normal-Dungeons ist er stattdessen verletzt.
@@ -114,7 +116,7 @@ Jeder Skill hat eine Abklingzeit und kostet bei Zauberern Mana. Alle Zahlen steh
 | Erfahrung | EP gibt es **pro gewonnener Begegnung** (Boss mehr als Trash, höhere Dungeon-Stufe mehr). Scheitert ein Run am Boss, zählen die geschafften Trash-Gruppen trotzdem. Wer mehr als 1 Level über der Stufe des Dungeons liegt, bekommt weniger EP (bis runter auf 10 %), damit sich ewiges Wiederholen des ersten Dungeons nicht lohnt. |
 | Aufhol-Erfahrung | Doppelte EP für Helden, die mindestens 2 Level unter dem Durchschnitt der 5 besten Helden der Gilde liegen |
 | Tempo am Anfang | Die ersten Level dauern 1 bis 4 Runs, später deutlich mehr. Die Kurve wird endgültig eingestellt, wenn klar ist, wie viele Dungeons es gibt. |
-| Verletzungen | Wer im Run fällt, ist danach **2 Spielstunden verletzt** und kann nicht in Dungeons (Ausrüsten geht). Später verkürzen Lazarett (M3) und Verbrauchsgüter (M2) die Heilung. |
+| Verletzungen | Wer im Run fällt, ist danach **verletzt** und kann den nächsten Tag nicht in Dungeons (Ausrüsten geht). Die Dauer in Tagen steht in `experience.js`. Später verkürzen Lazarett (M3) und Verbrauchsgüter (M2) die Heilung. |
 
 Alle Formeln und Zahlen dafür stehen in `src/data/` (`scaling.js`, `experience.js`) und werden per Simulation eingestellt.
 
