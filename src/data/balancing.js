@@ -4,8 +4,10 @@
 // ============================================================
 
 export const BALANCING = {
-  // Gold zu Beginn eines neuen Spiels
-  startGold: 150,
+  // Gold zu Beginn eines neuen Spiels.
+  // Reicht für eine Gruppe aus 5 grünen Helden (5 × 40) plus ein paar Mal neue Bewerber rufen,
+  // oder für 4 grüne und einen blauen Helden.
+  startGold: 350,
 
   // Kisten zu Beginn eines neuen Spiels (damit man sofort etwas öffnen kann)
   startBoxes: ['wood', 'wood', 'silver'],

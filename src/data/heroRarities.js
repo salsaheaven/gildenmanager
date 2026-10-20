@@ -11,10 +11,12 @@
 // ============================================================
 
 export const HERO_RARITIES = {
-  uncommon:  { statMultiplier: 1.0,  growthMultiplier: 1.0,  traitCount: 1, recruitChance: 62, hireCost: 40 },
-  rare:      { statMultiplier: 1.05, growthMultiplier: 1.15, traitCount: 1, recruitChance: 27, hireCost: 100 },
-  epic:      { statMultiplier: 1.1,  growthMultiplier: 1.3,  traitCount: 2, recruitChance: 9,  hireCost: 250 },
-  legendary: { statMultiplier: 1.2,  growthMultiplier: 1.5,  traitCount: 3, recruitChance: 2,  hireCost: 600 },
+  // Bei 4 Bewerbern pro Tag heißt das ungefähr: an jedem zweiten Tag ein blauer,
+  // etwa jede Woche ein epischer und nur alle 50 Tage ein legendärer Bewerber.
+  uncommon:  { statMultiplier: 1.0,  growthMultiplier: 1.0,  traitCount: 1, recruitChance: 80,  hireCost: 40 },
+  rare:      { statMultiplier: 1.05, growthMultiplier: 1.15, traitCount: 1, recruitChance: 16,  hireCost: 100 },
+  epic:      { statMultiplier: 1.1,  growthMultiplier: 1.3,  traitCount: 2, recruitChance: 3.5, hireCost: 250 },
+  legendary: { statMultiplier: 1.2,  growthMultiplier: 1.5,  traitCount: 3, recruitChance: 0.5, hireCost: 600 },
 };
 
 export function getHeroRarity(rarityId) {
