@@ -46,10 +46,10 @@ describe('Level-Ups', () => {
   it('EP und Verletzung werden gespeichert', () => {
     const hero = makeHero(1, 4);
     hero.xp = 33;
-    hero.injurySeconds = 50;
+    hero.injuryDays = 2;
     const loaded = Hero.fromSaveData(JSON.parse(JSON.stringify(hero.toSaveData())));
     expect(loaded.xp).toBe(33);
-    expect(loaded.injurySeconds).toBe(50);
+    expect(loaded.injuryDays).toBe(2);
   });
 });
 
@@ -96,7 +96,7 @@ describe('Nach dem Run', () => {
     game.startExpedition('bearCave', heroIds, 'never');
     const levelUps = [];
     game.on('heroLevelUp', (data) => levelUps.push(data));
-    game.advanceTime(game.guild.expeditions[0].getTotalTime() + 1);
+    game.endDay();
     const report = game.guild.reports[0];
     expect(report.heroResults.length).toBe(5);
     if (report.outcome === 'success') {
@@ -106,7 +106,7 @@ describe('Nach dem Run', () => {
     }
   });
 
-  it('Gefallene sind verletzt, können nicht los und heilen mit der Zeit', () => {
+  it('Gefallene sind verletzt, fallen den nächsten Tag aus und sind danach wieder fit', () => {
     const guild = new Guild();
     const hero = makeHero(1, 3);
     guild.heroes.push(hero);
@@ -114,14 +114,16 @@ describe('Nach dem Run', () => {
     const outcomes = applyRunResults(guild, result, DUNGEONS[0]);
     expect(outcomes[0].injured).toBe(true);
     expect(hero.isInjured()).toBe(true);
-    expect(hero.injurySeconds).toBe(INJURIES.injurySeconds);
+    expect(hero.injuryDays).toBe(INJURIES.injuryDays);
 
+    // Der verletzte Held kann am nächsten Tag nicht los
     const game = new Game(3);
     game.guild.heroes.push(hero);
     expect(game.startExpedition('bearCave', [1], 'never')).toBe('injured');
     const healed = [];
     game.on('heroHealed', (healedHero) => healed.push(healedHero));
-    game.advanceTime(INJURIES.injurySeconds + 1);
+    // Am Ende dieses Tages heilt er, am Tag danach ist er wieder fit
+    game.endDay();
     expect(hero.isInjured()).toBe(false);
     expect(healed.length).toBe(1);
     expect(game.startExpedition('bearCave', [1], 'never')).toBe('ok');

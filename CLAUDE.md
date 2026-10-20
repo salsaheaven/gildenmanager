@@ -3,7 +3,7 @@
 Browser-Management-Spiel (Arbeitstitel): Man managt eine MMORPG-Gilde, kämpft aber nicht selbst.
 Man rekrutiert, levelt, skillt und rüstet Helden aus, schickt sie in Dungeons, baut die Gildenhalle aus und craftet.
 Pixel-Art. Rundenbasiert: 1 Runde = 1 Tag, jeder Held hat eine Aufgabe pro Tag. Kämpfe werden simuliert, als Szene abgespielt und als Bericht angezeigt.
-(Der Umbau von Echtzeit auf Runden läuft, siehe `PLAN.md`. Bis dahin enthält der Code noch Spieluhr und Timer.)
+Es gibt keine Spieluhr: Alles, was Zeit braucht, passiert in `Game.endDay()` (Knopf „Tag beenden“). Die Bild-Schleife in `main.js` treibt nur Animationen an.
 
 **Oberstes Ziel: ein extrem motivierender Kern-Loop.** Dazu gehören Lootboxen, die Seltenheiten Grau → Weiß → Grün → Blau → Lila → Orange,
 Klassen-Sets zum Sammeln, ein Pity-System und ständiges Feedback durch Sounds, Animationen und Fortschrittsbalken.
@@ -31,8 +31,8 @@ Eine Option, die immer die beste ist, ist keine Wahl. Neue Optionen deshalb per 
 
 ## Aufbau
 ```
-src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen), GameClock, Random, SaveManager
-src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, Expedition (laufender Dungeon-Run)
+src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen, Tageszähler, endDay), Random, SaveManager
+src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft)
 src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem (EP, Aufhol-Erfahrung, Verletzungen nach einem Run)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
                simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug),
@@ -48,11 +48,11 @@ src/data/      Reine Inhalte: rarities, items, lootBoxes, balancing, sprites (Pi
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: LootBoxScreen (Schatzkammer),
                HeroScreen (+ HeroDetailPanel, EquipPanel), TavernScreen, CombatLabScreen,
-               DungeonScreen (+ RunViewer = laufenden Run als Szene zeigen).
+               DungeonScreen (+ RunViewer = Bericht eines beendeten Runs zeigen).
                LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden).
                InventoryOverlay = Inventar als Vollbild-Fenster mit Kategorien (Knopf „Inventar“ in der Reiterleiste).
                CombatReport = Ergebnis, Schadensmesser und Kampfbericht (wiederverwendbar).
-               BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken); läuft im Takt der Spieluhr.
+               BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken); läuft über update(sekunden).
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
                OrdersPanel = Auswahllisten für Anweisungen (Labor + Heldenbildschirm).
                Leisten: TopBar, NavBar. Helfer: PixelArt, Sound, Toast, format, TraitChip.

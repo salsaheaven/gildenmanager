@@ -1,6 +1,6 @@
 // ============================================================
 // DEBUGPANEL – Test-Menü (Taste F2)
-// Zum schnellen Ausprobieren: Gold, Kisten, Bewerber, Level und Zeit.
+// Zum schnellen Ausprobieren: Gold, Kisten, Bewerber und Level.
 // Gehört nicht zum eigentlichen Spiel.
 // ============================================================
 
@@ -29,7 +29,6 @@ export class DebugPanel {
       }
     });
     this.addButton('Neue Bewerber (gratis)', () => {
-      game.candidateTimer = 0;
       game.refreshCandidates();
     });
     for (const rarityId in HERO_RARITIES) {
@@ -43,10 +42,6 @@ export class DebugPanel {
       for (const hero of game.guild.heroes) {
         hero.level = Math.min(SCALING.maxLevel, hero.level + 1);
       }
-    });
-    this.addButton('+10 Minuten Spielzeit', () => {
-      game.clock.totalGameSeconds += 600;
-      game.advanceTime(600);
     });
 
     document.addEventListener('keydown', (event) => {

@@ -1,15 +1,15 @@
-// Tests für Dungeons: Runs, Trash, Rückzug, Expeditionen, Belohnungen, Speichern.
+// Tests für Dungeons: Runs, Trash, Rückzug, Tagesplanung, Belohnungen, Speichern.
 
 import { describe, it, expect } from 'vitest';
 import { simulateRun } from '../src/systems/combat/CombatSimulator.js';
-import { computeRunTimeline } from '../src/systems/combat/BattleTimeline.js';
 import { createTestGroup } from '../src/systems/combat/TestGroup.js';
 import { DUNGEONS } from '../src/data/dungeons.js';
 import { MINIONS, getBoss } from '../src/data/enemies.js';
 import { getLootBoxType } from '../src/data/lootBoxes.js';
 import { getRarityRank } from '../src/data/rarities.js';
-import { BALANCING } from '../src/data/balancing.js';
 import { Game } from '../src/core/Game.js';
+import { Expedition } from '../src/entities/Expedition.js';
+import { getItemTemplate } from '../src/data/items.js';
 import { Guild } from '../src/entities/Guild.js';
 import { LootSystem } from '../src/systems/LootSystem.js';
 import { Random } from '../src/core/Random.js';
@@ -85,87 +85,80 @@ describe('simulateRun', () => {
     expect(retreats).toBeGreaterThan(0);
   });
 
-  it('Rückzug per Hand: bis zur Rückzugsrunde verläuft der Run genau gleich', () => {
-    const base = { heroes: createTestGroup(1), dungeonId: 'bearCave', seed: 9, recordLog: true };
-    const normal = simulateRun(base);
-    const retreated = simulateRun({ ...base, manualRetreat: { encounterIndex: 1, round: 6 } });
-    const before = (run) => run.encounters[1].log.filter((entry) => entry.round < 6);
-    expect(before(retreated)).toEqual(before(normal));
-    expect(retreated.outcome === 'retreat' || retreated.outcome === 'defeat').toBe(true);
-  });
 });
 
-describe('Expeditionen', () => {
-  it('Run starten, Zeit laufen lassen, Belohnung bekommen', () => {
+describe('Expeditionen (Tagesplanung)', () => {
+  it('Run einplanen, Tag beenden, Belohnung bekommen', () => {
     const { game, heroIds } = gameWithGroup(10);
     const goldBefore = game.guild.gold;
     expect(game.startExpedition('bearCave', heroIds, 'never')).toBe('ok');
     expect(game.guild.isHeroBusy(heroIds[0])).toBe(true);
+    // Eingeplant heißt noch nicht gekämpft: Erst das Tagesende bringt das Ergebnis
+    expect(game.guild.reports.length).toBe(0);
 
-    const reports = [];
-    game.on('expeditionFinished', (report) => reports.push(report));
-    const total = game.guild.expeditions[0].getTotalTime();
-    game.advanceTime(total + 1);
+    const reports = game.endDay();
 
     expect(reports.length).toBe(1);
     expect(reports[0].outcome).toBe('success');
+    expect(reports[0].day).toBe(1);
     expect(game.guild.gold).toBe(goldBefore + DUNGEONS[0].rewards.gold);
     expect(game.guild.countBoxes('chestGrimfang')).toBe(1);
     expect(game.guild.getClears('bearCave')).toBe(1);
     expect(game.guild.isHeroBusy(heroIds[0])).toBe(false);
   });
 
-  it('gesperrte Dungeons und beschäftigte Helden', () => {
+  it('gesperrte Dungeons und Helden, die heute schon eingeplant sind', () => {
     const { game, heroIds } = gameWithGroup(10);
     expect(game.startExpedition('ruinedChapel', heroIds, 'never')).toBe('locked');
     game.startExpedition('bearCave', heroIds, 'never');
+    // Ein Held = eine Aufgabe pro Tag
     expect(game.startExpedition('bearCave', heroIds, 'never')).toBe('busy');
-    // Wer unterwegs ist, kann nicht umgerüstet oder entlassen werden
+    // Eingeplante Helden kann man nicht entlassen
     expect(game.dismissHero(heroIds[0])).toBe(false);
   });
 
-  it('nach dem ersten Erfolg ist der nächste Dungeon frei, nach 3 Erfolgen gibt es Schnellkampf', () => {
-    const { game, heroIds } = gameWithGroup(10);
-    for (let i = 0; i < BALANCING.quickFinishAfterClears; i++) {
-      game.startExpedition('bearCave', heroIds, 'never');
-      game.advanceTime(10000);
-    }
-    expect(game.isDungeonUnlocked('ruinedChapel')).toBe(true);
-    expect(game.canQuickFinish('bearCave')).toBe(true);
-    game.startExpedition('bearCave', heroIds, 'never');
-    expect(game.finishExpeditionNow(game.guild.expeditions[0].id)).toBe(true);
-    expect(game.guild.expeditions.length).toBe(0);
-  });
-
-  it('ein Run mittendrin speichern und laden verläuft genau gleich', () => {
+  it('eingeplante Helden kämpfen mit der Ausrüstung, die sie am Tagesende tragen', () => {
     const { game, heroIds } = gameWithGroup(1);
     game.startExpedition('bearCave', heroIds, 'never');
-    game.advanceTime(12);
-    const original = game.guild.expeditions[0];
-    const loaded = Game.fromSaveData(JSON.parse(JSON.stringify(game.toSaveData())));
-    const copy = loaded.guild.expeditions[0];
-    expect(copy.elapsed).toBe(original.elapsed);
-    expect(copy.getResult().outcome).toBe(original.getResult().outcome);
-    expect(copy.getTotalTime()).toBe(original.getTotalTime());
+    // Nach dem Einplanen bekommt der Krieger noch ein Schwert
+    const sword = game.lootSystem.createItem('rare', game.guild.createItemId(), 1, getItemTemplate('sword'));
+    game.guild.addItem(sword);
+    expect(game.equipItem(heroIds[0], sword.id)).toBe(true);
+    const reports = game.endDay();
+    const snapshot = reports[0].expedition.heroSnapshots.find((data) => data.id === heroIds[0]);
+    expect(snapshot.equipment.weapon.id).toBe(sword.id);
   });
 
-  it('Rückzug befehlen beendet den Run ohne Beute', () => {
+  it('einen geplanten Run absagen', () => {
     const { game, heroIds } = gameWithGroup(10);
     game.startExpedition('bearCave', heroIds, 'never');
-    game.advanceTime(3);
-    expect(game.orderRetreat(game.guild.expeditions[0].id)).toBe(true);
-    const reports = [];
-    game.on('expeditionFinished', (report) => reports.push(report));
-    game.advanceTime(10000);
-    expect(reports[0].outcome).toBe('retreat');
-    expect(game.guild.countBoxes('chestGrimfang')).toBe(0);
+    expect(game.cancelExpedition(game.guild.expeditions[0].id)).toBe(true);
+    expect(game.guild.isHeroBusy(heroIds[0])).toBe(false);
+    expect(game.endDay().length).toBe(0);
   });
 
-  it('die Dauer eines Runs ergibt sich aus der Zeitleiste', () => {
-    const run = simulateRun({ heroes: createTestGroup(5), dungeonId: 'bearCave', seed: 2, recordLog: true });
-    const timeline = computeRunTimeline(run, BALANCING.travelSeconds);
-    expect(timeline.segments.length).toBe(run.encounters.length);
-    expect(timeline.totalTime).toBeGreaterThan(BALANCING.travelSeconds);
+  it('nach dem ersten Erfolg ist der nächste Dungeon frei', () => {
+    const { game, heroIds } = gameWithGroup(10);
+    game.startExpedition('bearCave', heroIds, 'never');
+    game.endDay();
+    expect(game.isDungeonUnlocked('ruinedChapel')).toBe(true);
+  });
+
+  it('ein geplanter Run übersteht Speichern und Laden', () => {
+    const { game, heroIds } = gameWithGroup(1);
+    game.startExpedition('bearCave', heroIds, 'never');
+    const loaded = Game.fromSaveData(JSON.parse(JSON.stringify(game.toSaveData())));
+    expect(loaded.guild.expeditions[0].getHeroIds()).toEqual(heroIds);
+    // Beide kämpfen mit demselben Zufall: gleiches Ergebnis
+    expect(loaded.endDay()[0].outcome).toBe(game.endDay()[0].outcome);
+  });
+
+  it('der Bericht lässt sich nach dem Laden genau gleich ansehen', () => {
+    const { game, heroIds } = gameWithGroup(1);
+    game.startExpedition('bearCave', heroIds, 'never');
+    const report = game.endDay()[0];
+    const copy = Expedition.fromSaveData(JSON.parse(JSON.stringify(report.expedition)));
+    expect(copy.getResult().outcome).toBe(report.outcome);
   });
 });
 

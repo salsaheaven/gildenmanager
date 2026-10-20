@@ -80,9 +80,8 @@ export class HeroDetailPanel {
     this.root.querySelector('.detail-portrait').appendChild(createHeroCanvas(hero, 9));
     this.root.querySelector('.detail-hero-name').textContent = hero.name;
     if (hero.isInjured()) {
-      const clock = this.game.clock;
-      this.root.querySelector('.detail-injury').textContent =
-        'Verletzt bis ' + clock.getTimeTextAt(clock.totalGameSeconds + hero.injurySeconds) + ' Uhr – kann nicht in Dungeons';
+      const days = hero.injuryDays === 1 ? '1 Tag' : hero.injuryDays + ' Tage';
+      this.root.querySelector('.detail-injury').textContent = 'Verletzt, noch ' + days + ' – kann nicht in Dungeons';
     }
 
     const traitList = this.root.querySelector('.trait-list');
@@ -140,7 +139,6 @@ export class HeroDetailPanel {
 
       if (item) {
         slotElement.style.setProperty('--rarity', item.getRarity().color);
-        slotElement.classList.toggle('busy', this.game.guild.isHeroBusy(this.hero.id));
         slotElement.classList.add('filled');
         slotElement.title = item.name;
         slotElement.querySelector('.slot-icon').appendChild(createItemCanvas(item, 3));
@@ -170,7 +168,7 @@ export class HeroDetailPanel {
     const button = this.root.querySelector('.dismiss-button');
     if (this.game.guild.isHeroBusy(this.hero.id)) {
       button.disabled = true;
-      button.textContent = 'Unterwegs';
+      button.textContent = 'Heute eingeplant';
       return;
     }
     button.addEventListener('click', () => {

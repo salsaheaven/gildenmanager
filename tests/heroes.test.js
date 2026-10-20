@@ -189,14 +189,6 @@ describe('Game: Helden', () => {
     expect(game.guild.findItem(sword.id)).toBe(sword);
   });
 
-  it('nach Ablauf der Zeit kommen neue Bewerber', () => {
-    const game = new Game(1);
-    const oldIds = game.guild.candidates.map((c) => c.id);
-    game.advanceTime(BALANCING.candidateRefreshSeconds);
-    const newIds = game.guild.candidates.map((c) => c.id);
-    expect(newIds).not.toEqual(oldIds);
-  });
-
   it('Helden mit Ausrüstung werden gespeichert und geladen', () => {
     const game = new Game(5);
     game.guild.gold = 10000;
@@ -216,7 +208,6 @@ describe('Game: Helden', () => {
     delete data.guild.heroes;
     delete data.guild.candidates;
     delete data.guild.nextHeroId;
-    delete data.candidateTimer;
     const loaded = Game.fromSaveData(data);
     expect(loaded.guild.heroes.length).toBe(0);
     expect(loaded.guild.candidates.length).toBe(BALANCING.candidateCount);

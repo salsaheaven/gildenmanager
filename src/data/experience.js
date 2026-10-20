@@ -34,9 +34,9 @@ export const EXPERIENCE = {
 };
 
 export const INJURIES = {
-  // Wer in einem Run fällt (0 Leben), ist danach so viele Spielsekunden verletzt
-  // und kann nicht in Dungeons. 1 Spielsekunde = 1 Spielminute auf der Uhr, 120 = 2 Spielstunden.
-  injurySeconds: 120,
+  // Wer in einem Run fällt (0 Leben), ist danach so viele Tage verletzt
+  // und kann nicht in Dungeons. 1 = er fällt den nächsten Tag aus und ist am Tag danach wieder fit.
+  injuryDays: 1,
 };
 
 // EP, die ein Held auf diesem Level für das nächste Level braucht

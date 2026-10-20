@@ -68,8 +68,7 @@ export function simulateBattle(options) {
 }
 
 // Ein ganzer Dungeon-Run.
-// options = { heroes, dungeonId, retreatRuleId, seed, recordLog,
-//             manualRetreat: { encounterIndex, round } oder null (Rückzug per Hand, siehe Expedition) }
+// options = { heroes, dungeonId, retreatRuleId, seed, recordLog }
 // Gibt { dungeonId, outcome, encounters, heroes } zurück.
 //   outcome = 'success', 'defeat', 'retreat' oder 'timeout'
 export function simulateRun(options) {
@@ -77,15 +76,13 @@ export function simulateRun(options) {
   const retreatRule = getRetreatRule(options.retreatRuleId || 'never');
   const random = new Random(options.seed);
   const heroes = options.heroes.map((hero) => createHeroCombatant(hero));
-  const manualRetreat = options.manualRetreat || null;
 
   const encounters = [];
   let outcome = 'success';
 
   for (let i = 0; i < dungeon.encounters.length; i++) {
     // Rückzug zwischen zwei Begegnungen: sicher, es wird nicht mehr gekämpft
-    const manualHere = manualRetreat && manualRetreat.encounterIndex === i;
-    if (i > 0 && (shouldRetreatByRule(heroes, retreatRule) || (manualHere && manualRetreat.round <= 0))) {
+    if (i > 0 && shouldRetreatByRule(heroes, retreatRule)) {
       outcome = 'retreat';
       break;
     }
@@ -93,23 +90,13 @@ export function simulateRun(options) {
       restBetweenEncounters(heroes);
     }
 
-    const retreatOptions = {
-      rule: retreatRule,
-      atRound: manualHere ? manualRetreat.round : null,
-    };
+    const retreatOptions = { rule: retreatRule };
     const result = runEncounter(heroes, dungeon.encounters[i], random, options.recordLog, retreatOptions,
       dungeon.level);
     encounters.push(result);
 
     if (result.outcome !== 'victory') {
       outcome = result.outcome;
-      break;
-    }
-    // Rückzug befohlen, aber die Gegner fielen vorher: Die Gruppe geht trotzdem nach Hause.
-    // War das schon die letzte Begegnung, ist der Run einfach geschafft.
-    const isLast = i === dungeon.encounters.length - 1;
-    if (manualHere && !isLast) {
-      outcome = 'retreat';
       break;
     }
   }
@@ -124,7 +111,7 @@ export function simulateRun(options) {
 
 // Eine Begegnung (Trash-Gruppe oder Boss) mit vorhandenen Helden-Kämpfern.
 // encounter = { type: 'boss', bossId } oder { type: 'trash', name, enemies: [...] }
-// retreatOptions = { rule (aus retreatRules.js), atRound (Rückzug per Hand ab dieser Runde) }
+// retreatOptions = { rule (aus retreatRules.js) }
 // level          = Stufe der Gegner (Stufe des Dungeons, siehe data/scaling.js)
 export function runEncounter(heroes, encounter, random, recordLog, retreatOptions, level = 1) {
   // Die Statistik (Schadensmesser) zählt pro Begegnung neu
@@ -228,14 +215,13 @@ function shouldRetreatByRule(heroes, rule) {
   return rule.afterFallen !== null && countFallen(heroes) >= rule.afterFallen;
 }
 
-// Am Rundenanfang: Soll der Rückzug beginnen (Regel oder Befehl per Hand)?
+// Am Rundenanfang: Soll der Rückzug beginnen (laut Rückzugsregel)?
 function checkRetreat(battle, retreatOptions) {
   if (battle.retreating || !retreatOptions) {
     return;
   }
-  const byHand = retreatOptions.atRound !== null && retreatOptions.atRound !== undefined && battle.round >= retreatOptions.atRound;
   const byRule = retreatOptions.rule && shouldRetreatByRule(battle.heroes, retreatOptions.rule);
-  if (!byHand && !byRule) {
+  if (!byRule) {
     return;
   }
   battle.retreating = true;

@@ -5,8 +5,8 @@
 //   - Zauberbalken über dem Boss, wenn er eine Mechanik vorbereitet
 //   - Ticker mit den letzten Ereignissen
 //
-// Die Szene läuft nicht von selbst: Wer sie benutzt, ruft regelmäßig update(spielsekunden) auf.
-// Sie läuft im Takt der Spieluhr: Pause hält den Kampf an, 2x und 4x beschleunigen ihn.
+// Die Szene läuft nicht von selbst: Wer sie benutzt, ruft in jedem Bild update(sekunden) auf.
+// Pause hält den Kampf an, eine höhere Geschwindigkeit (2x, 4x) beschleunigt ihn.
 // ============================================================
 
 import { getBoss, MINIONS } from '../data/enemies.js';
@@ -36,7 +36,7 @@ export class BattleScene {
     }
 
     this.time = 0;
-    this.speed = 1;  // aktuelle Geschwindigkeit der Spieluhr (für die Dauer der Animationen)
+    this.speed = 1;  // aktuelle Abspiel-Geschwindigkeit (für die Dauer der Animationen)
     this.entryIndex = 0;
     this.finished = false;
     this.units = {}; // Kämpfer-id → Elemente der Figur
@@ -156,7 +156,7 @@ export class BattleScene {
 
   // Wird regelmäßig aufgerufen. gameSeconds = vergangene Spielzeit seit dem letzten Aufruf
   // (0, wenn das Spiel pausiert ist). isPaused blendet den Pause-Hinweis ein.
-  // speed = Geschwindigkeit der Spieluhr, damit Animationen bei 4x auch schneller sind.
+  // speed = Abspiel-Geschwindigkeit, damit Animationen bei 4x auch schneller sind.
   update(gameSeconds, isPaused = false, speed = 1) {
     this.syncTo(this.time + gameSeconds, isPaused, speed);
   }

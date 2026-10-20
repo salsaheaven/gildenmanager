@@ -1,18 +1,20 @@
 // ============================================================
 // GAME – das Herz des Spiels
-// Hält alle Teile zusammen (Uhr, Gilde, Systeme) und bietet die Aktionen an,
-// die die Oberfläche auslösen kann (Kiste kaufen, öffnen, Item verkaufen …).
+// Hält alle Teile zusammen (Tag, Gilde, Systeme) und bietet die Aktionen an,
+// die die Oberfläche auslösen kann (Kiste kaufen, öffnen, Item verkaufen, Tag beenden …).
+//
+// Das Spiel ist rundenbasiert: 1 Runde = 1 Tag. Jeder Held hat pro Tag eine Aufgabe
+// (zurzeit: Dungeon oder Ausruhen). Erst bei "Tag beenden" (endDay) wird alles ausgekämpft.
 //
 // Ereignisse (Events): Die Oberfläche kann mit game.on('name', funktion) zuhören.
 //   'changed'              → irgendetwas am Spielstand hat sich geändert
-//   'boxArrived'           → der Kurier hat eine Kiste gebracht (Daten: Kistenart-id)
 //   'candidatesRefreshed'  → neue Bewerber in der Taverne (Daten: Liste der Bewerber)
-//   'expeditionFinished'   → ein Dungeon-Run ist vorbei (Daten: der Bericht, siehe finishExpedition)
+//   'expeditionFinished'   → ein Dungeon-Run ist ausgekämpft (Daten: der Bericht, siehe finishExpedition)
+//   'dayEnded'             → ein Tag ist vorbei (Daten: { day, reports })
 //   'heroLevelUp'          → ein Held ist aufgestiegen (Daten: { hero, newLevel })
 //   'heroHealed'           → ein verletzter Held ist wieder fit (Daten: der Held)
 // ============================================================
 
-import { GameClock } from './GameClock.js';
 import { Random } from './Random.js';
 import { Guild } from '../entities/Guild.js';
 import { LootSystem } from '../systems/LootSystem.js';
@@ -25,13 +27,11 @@ import { applyRunResults } from '../systems/ExperienceSystem.js';
 
 export class Game {
   constructor(seed = Date.now()) {
-    this.clock = new GameClock();
+    this.day = 1;            // der aktuelle Tag (beginnt bei 1). Zählt auch für die Endwertung.
     this.random = new Random(seed);
     this.guild = new Guild();
     this.lootSystem = new LootSystem(this.random);
     this.recruitmentSystem = new RecruitmentSystem(this.random);
-    this.courierTimer = 0;   // Spielsekunden seit der letzten Kurier-Lieferung
-    this.candidateTimer = 0; // Spielsekunden seit den letzten neuen Bewerbern
     this.listeners = {};
 
     this.recruitmentSystem.refreshCandidates(this.guild);
@@ -53,67 +53,35 @@ export class Game {
     }
   }
 
-  // ---------- Spielschleife ----------
+  // ---------- Runden (1 Runde = 1 Tag) ----------
 
-  // Wird in jedem Bild aufgerufen (etwa 60-mal pro Sekunde).
-  // Gibt zurück, wie viele Spielsekunden vergangen sind (0 in der Pause),
-  // damit auch die Oberfläche (z.B. Kampfszenen) im Takt der Spieluhr läuft.
-  update(realSeconds) {
-    const gameSeconds = this.clock.update(realSeconds);
-    if (gameSeconds > 0) {
-      this.advanceTime(gameSeconds);
-    }
-    return gameSeconds;
-  }
+  // Beendet den Tag: Alle geplanten Runs werden ausgekämpft, Verletzte heilen,
+  // es kommen neue Bewerber, und der nächste Tag beginnt.
+  // Gibt die Berichte der heutigen Runs zurück (in der Reihenfolge, in der sie geplant wurden).
+  endDay() {
+    const endedDay = this.day;
 
-  // Lässt alle zeitabhängigen Dinge um so viele Spielsekunden weiterlaufen
-  advanceTime(gameSeconds) {
-    this.updateCourier(gameSeconds);
-    this.updateCandidates(gameSeconds);
-    this.updateExpeditions(gameSeconds);
-    this.updateInjuries(gameSeconds);
-  }
-
-  // Verletzungen heilen mit der Zeit
-  updateInjuries(gameSeconds) {
+    // 1. Wer schon verletzt war, heilt einen Tag lang.
+    //    (Zuerst, damit Helden, die heute fallen, morgen noch verletzt sind.)
     for (const hero of this.guild.heroes) {
-      if (hero.healOverTime(gameSeconds)) {
+      if (hero.healOneDay()) {
         this.emit('heroHealed', hero);
-        this.emit('changed');
       }
     }
-  }
 
-  updateCourier(gameSeconds) {
-    if (!BALANCING.courierEnabled) {
-      return;
+    // 2. Alle Runs von heute auskämpfen
+    const reports = [];
+    for (const expedition of this.guild.expeditions.slice()) {
+      reports.push(this.finishExpedition(expedition));
     }
-    this.courierTimer += gameSeconds;
-    // "while" statt "if": Bei hoher Geschwindigkeit könnten mehrere Lieferungen fällig sein
-    while (this.courierTimer >= BALANCING.courierIntervalSeconds) {
-      this.courierTimer -= BALANCING.courierIntervalSeconds;
-      this.guild.addBox(BALANCING.courierBoxType);
-      this.emit('boxArrived', BALANCING.courierBoxType);
-      this.emit('changed');
-    }
-  }
 
-  // Fortschritt bis zur nächsten Lieferung: 0 (gerade geliefert) bis 1 (gleich da)
-  getCourierProgress() {
-    return this.courierTimer / BALANCING.courierIntervalSeconds;
-  }
+    // 3. Der nächste Tag beginnt: neue Bewerber in der Taverne
+    this.day++;
+    this.refreshCandidates();
 
-  updateCandidates(gameSeconds) {
-    this.candidateTimer += gameSeconds;
-    if (this.candidateTimer >= BALANCING.candidateRefreshSeconds) {
-      this.candidateTimer = 0;
-      this.refreshCandidates();
-    }
-  }
-
-  // Fortschritt bis zu neuen Bewerbern: 0 bis 1
-  getCandidateProgress() {
-    return this.candidateTimer / BALANCING.candidateRefreshSeconds;
+    this.emit('dayEnded', { day: endedDay, reports: reports });
+    this.emit('changed');
+    return reports;
   }
 
   refreshCandidates() {
@@ -172,29 +140,15 @@ export class Game {
 
   // ---------- Dungeons ----------
 
-  updateExpeditions(gameSeconds) {
-    // Kopie der Liste, weil fertige Runs während der Schleife entfernt werden
-    for (const expedition of this.guild.expeditions.slice()) {
-      expedition.update(gameSeconds);
-      if (expedition.isFinished()) {
-        this.finishExpedition(expedition);
-      }
-    }
-  }
-
   // Ist der Dungeon freigeschaltet? (der erste immer, die anderen nach dem vorigen)
   isDungeonUnlocked(dungeonId) {
     const dungeon = getDungeon(dungeonId);
     return dungeon.unlockAfter === null || this.guild.getClears(dungeon.unlockAfter) > 0;
   }
 
-  // Darf man laufende Runs in diesem Dungeon sofort beenden? (nach einigen Erfolgen)
-  canQuickFinish(dungeonId) {
-    return this.guild.getClears(dungeonId) >= BALANCING.quickFinishAfterClears;
-  }
-
-  // Schickt eine Gruppe los. Gibt 'ok' oder einen Grund zurück:
-  // 'locked' (Dungeon gesperrt), 'noHeroes', 'tooMany', 'busy' (ein Held ist schon unterwegs),
+  // Plant einen Run für heute. Ausgekämpft wird er erst bei "Tag beenden".
+  // Gibt 'ok' oder einen Grund zurück:
+  // 'locked' (Dungeon gesperrt), 'noHeroes', 'tooMany', 'busy' (ein Held ist heute schon eingeplant),
   // 'injured' (ein Held ist verletzt)
   startExpedition(dungeonId, heroIds, retreatRuleId) {
     if (!this.isDungeonUnlocked(dungeonId)) {
@@ -206,7 +160,6 @@ export class Game {
     if (heroIds.length > 5) {
       return 'tooMany';
     }
-    const heroes = [];
     for (const heroId of heroIds) {
       const hero = this.guild.findHero(heroId);
       if (!hero || this.guild.isHeroBusy(heroId)) {
@@ -215,45 +168,32 @@ export class Game {
       if (hero.isInjured()) {
         return 'injured';
       }
-      heroes.push(hero);
     }
 
     const seed = Math.floor(this.random.next() * 2147483647);
-    const expedition = new Expedition(
-      this.guild.nextExpeditionId,
-      dungeonId,
-      heroes.map((hero) => hero.toSaveData()),
-      retreatRuleId,
-      seed,
-    );
+    const expedition = new Expedition(this.guild.nextExpeditionId, dungeonId, heroIds.slice(), retreatRuleId, seed);
     this.guild.nextExpeditionId++;
     this.guild.expeditions.push(expedition);
     this.emit('changed');
     return 'ok';
   }
 
-  orderRetreat(expeditionId) {
+  // Nimmt einen geplanten Run wieder aus dem Tagesplan. Die Helden sind dann wieder frei.
+  cancelExpedition(expeditionId) {
     const expedition = this.guild.findExpedition(expeditionId);
-    if (!expedition || !expedition.orderRetreat()) {
+    if (!expedition) {
       return false;
     }
+    this.guild.expeditions = this.guild.expeditions.filter((e) => e.id !== expeditionId);
     this.emit('changed');
     return true;
   }
 
-  finishExpeditionNow(expeditionId) {
-    const expedition = this.guild.findExpedition(expeditionId);
-    if (!expedition || !this.canQuickFinish(expedition.dungeonId)) {
-      return false;
-    }
-    expedition.finishNow();
-    this.finishExpedition(expedition);
-    return true;
-  }
-
-  // Run vorbei: Belohnung verteilen, Bericht schreiben, Helden sind wieder frei
+  // Kämpft einen geplanten Run aus (beim Tagesende): Belohnung verteilen, Bericht schreiben.
+  // Die Helden kämpfen so, wie sie jetzt ausgerüstet sind.
   finishExpedition(expedition) {
-    const result = expedition.getResult();
+    const heroes = expedition.getHeroIds().map((heroId) => this.guild.findHero(heroId)).filter((hero) => hero);
+    const result = expedition.resolve(heroes);
     const dungeon = getDungeon(expedition.dungeonId);
     const success = result.outcome === 'success';
 
@@ -261,8 +201,7 @@ export class Game {
       expeditionId: expedition.id,
       dungeonId: dungeon.id,
       outcome: result.outcome,
-      day: this.clock.getDay(),
-      time: this.clock.getTimeText(),
+      day: this.day,
       heroNames: result.heroes.map((hero) => hero.name),
       fallenNames: result.heroes.filter((hero) => !hero.alive).map((hero) => hero.name),
       gold: 0,
@@ -305,7 +244,6 @@ export class Game {
     if (!this.guild.spendGold(BALANCING.candidateRerollCost)) {
       return false;
     }
-    this.candidateTimer = 0;
     this.refreshCandidates();
     return true;
   }
@@ -350,7 +288,7 @@ export class Game {
   equipItem(heroId, itemId) {
     const hero = this.guild.findHero(heroId);
     const item = this.guild.findItem(itemId);
-    if (!hero || !item || !hero.canEquip(item) || this.guild.isHeroBusy(heroId)) {
+    if (!hero || !item || !hero.canEquip(item)) {
       return false;
     }
     this.guild.removeItem(itemId);
@@ -366,7 +304,7 @@ export class Game {
   // Gibt zurück, wie viele Items angelegt wurden.
   equipBestItems(heroId) {
     const hero = this.guild.findHero(heroId);
-    if (!hero || this.guild.isHeroBusy(heroId)) {
+    if (!hero) {
       return 0;
     }
     let count = 0;
@@ -405,7 +343,7 @@ export class Game {
   // Nimmt ein Item ab und legt es ins Inventar
   unequipItem(heroId, slot) {
     const hero = this.guild.findHero(heroId);
-    if (!hero || this.guild.isHeroBusy(heroId)) {
+    if (!hero) {
       return false;
     }
     const item = hero.unequip(slot);
@@ -421,25 +359,30 @@ export class Game {
 
   toSaveData() {
     return {
-      clock: this.clock.toSaveData(),
+      day: this.day,
       randomState: this.random.state,
       guild: this.guild.toSaveData(),
-      courierTimer: this.courierTimer,
-      candidateTimer: this.candidateTimer,
     };
   }
 
   static fromSaveData(data) {
     const game = new Game();
-    game.clock = GameClock.fromSaveData(data.clock);
+    game.day = data.day || getDayFromOldClock(data.clock);
     game.random.state = data.randomState;
     game.guild = Guild.fromSaveData(data.guild);
-    game.courierTimer = data.courierTimer;
-    game.candidateTimer = data.candidateTimer || 0;
     // Alte Spielstände haben noch keine Bewerber
     if (game.guild.candidates.length === 0) {
       game.recruitmentSystem.refreshCandidates(game.guild);
     }
     return game;
   }
+}
+
+// Alte Spielstände (Echtzeit) hatten eine Spieluhr statt eines Tageszählers.
+// 1 Spielsekunde war 1 Spielminute, ein Tag also 1440 Spielsekunden.
+function getDayFromOldClock(clockData) {
+  if (!clockData) {
+    return 1;
+  }
+  return Math.floor(clockData.totalGameSeconds / 1440) + 1;
 }

@@ -84,14 +84,14 @@ In kleinen, jeweils online testbaren Schritten:
 - ✅ **Skalierung, Teil A:** Level 30 als Obergrenze, Item-Level nach Herkunft, Dungeon-Stufen (1 / 3 / 5), Gegner wachsen mit der Stufe, alle Formeln in `src/data/scaling.js`. Per Simulation geprüft: Mit Ausrüstung aus dem vorherigen Dungeon gelingt der Einstieg auf jeder Stufe (bis 30) zu etwa 75–85 %. Test-Knopf „+1 Level“ im Test-Menü.
 - ✅ **Skalierung, Teil B = Schritt 4** (siehe oben)
 - **Umbau auf Runden** (Entscheidung vom 2026-10-20, Details in `KONZEPT.md`). Kampf, Beute, EP, Skalierung und Inventar bleiben unverändert. In drei Schritten, jeder einzeln spielbar:
-  1. **Tageszähler statt Spieluhr:** Knopf „Tag beenden“ statt Pause und Tempo. Ein Dungeon wird für heute eingeplant und erst beim Tagesende ausgekämpft. Verletzungen dauern Tage. Händler und Bewerber wechseln täglich.
+  1. ✅ **Tageszähler statt Spieluhr:** Knopf „Tag beenden“ statt Pause und Tempo. Ein Dungeon wird für heute eingeplant (absagen möglich) und erst beim Tagesende ausgekämpft, mit der Ausrüstung, die die Helden dann tragen. Verletzungen dauern Tage. Bewerber wechseln täglich. Rückzug per Hand, Schnellkampf und Gildenkurier sind entfernt. Alte Spielstände werden umgerechnet.
   2. **Tagesabschluss (= Beute sichtbarer machen):** Beim Tagesende laufen die Kämpfe nacheinander als Szene (überspringbar). Danach kommt ein Fenster mit Beute, EP, Level-Ups und den Boss-Kisten samt Knopf „Jetzt öffnen“. Eventuell bekommen Trash-Gegner kleine eigene Drops (Gold, ab und zu ein graues oder weißes Item), damit sich auch ein gescheiterter Run lohnt.
   3. **Kampfszene spannender:** Langsamer abspielen, Skill-Namen gut lesbar, deutlichere Effekte. Tempo 1x / 2x / 4x und „Überspringen“. Rückzug per Hand fällt weg (nur noch die Rückzugsregel).
   4. **Tagesplan:** Übersicht, welcher Held heute was macht (Dungeon oder Ausruhen). Hier kommen später weitere Aufgaben dazu, z.B. Farmen oder Kräuter sammeln.
 
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 
-**M2 – Progression:** ~~Gildenkurier abschalten~~ (✅ schon erledigt, Schalter `courierEnabled` in `balancing.js`), Kisten aus dem Händler nehmen; der Laden verkauft Verbrauchsgüter und Mats, dazu der Wanderhändler. Talente, Zerlegen und Verbessern (+1 bis +10), Klassen-Sets + Sammelbuch, Heroisch-Modus mit Permadeath + Ehrenhalle.
+**M2 – Progression:** ~~Gildenkurier abschalten~~ (✅ schon erledigt und beim Umbau auf Runden ganz entfernt), Kisten aus dem Händler nehmen; der Laden verkauft Verbrauchsgüter und Mats, dazu der Wanderhändler. Talente, Zerlegen und Verbessern (+1 bis +10), Klassen-Sets + Sammelbuch, Heroisch-Modus mit Permadeath + Ehrenhalle.
 
 **M3 – Rivalen & Gildenhalle:** KI-Gilden, Rangliste, News-Ticker, Gebäude (Kaserne, Lazarett, Schmiede), Crafting.
 

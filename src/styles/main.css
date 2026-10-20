@@ -160,57 +160,52 @@ button:disabled {
   50% { transform: scale(1.25); }
 }
 
-.clock {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-}
-
-.clock-day {
-  color: var(--text-dim);
-}
-
-.clock-time {
-  font-size: 24px;
-}
-
-.pause-label {
-  display: none;
+.day-counter {
   font-family: var(--font-title);
-  font-size: 10px;
-  color: #ff6b6b;
-  animation: blink 1s steps(2) infinite;
+  font-size: 14px;
+  color: var(--text);
 }
 
-.clock.paused .pause-label {
-  display: inline;
+.day-counter.bump {
+  animation: bump 0.4s;
 }
 
 @keyframes blink {
   50% { opacity: 0; }
 }
 
-.courier {
+/* Der wichtigste Knopf des Spiels: beendet den Tag */
+.end-day-button {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  min-width: 180px;
+  gap: 2px;
+  padding: 6px 16px;
+  background: #3a2a12;
+  border-color: var(--gold);
+}
+
+.end-day-label {
+  font-family: var(--font-title);
+  font-size: 11px;
+  color: var(--gold);
+}
+
+.end-day-plan {
+  font-size: 15px;
   color: var(--text-dim);
 }
 
-.courier-fill {
-  background: #a0652d;
+.end-day-button.has-runs {
+  animation: end-day-glow 1.6s ease-in-out infinite;
 }
 
-.speed-buttons {
-  display: flex;
-  gap: 4px;
+.end-day-button.has-runs .end-day-plan {
+  color: #1eff00;
 }
 
-.speed-buttons button.active {
-  background: var(--gold);
-  color: #14101f;
-  border-color: #fff3b0;
+@keyframes end-day-glow {
+  50% { box-shadow: 0 0 12px var(--gold); }
 }
 
 .menu-buttons {
@@ -818,15 +813,9 @@ h3 {
 }
 
 .tavern-timer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   flex: 1;
   min-width: 220px;
-}
-
-.tavern-fill {
-  background: #c98b3a;
+  color: var(--text-dim);
 }
 
 .reroll-button,
@@ -2152,10 +2141,6 @@ h3 {
   border: 2px solid var(--border);
 }
 
-.run-row.watched {
-  border-color: var(--gold);
-}
-
 .run-head {
   display: flex;
   flex-wrap: wrap;
@@ -2172,29 +2157,11 @@ h3 {
   color: var(--text-dim);
 }
 
-.run-fill {
-  background: #c98b3a;
-}
-
 .run-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 6px;
-}
-
-.retreat-button.confirm {
-  background: #8b1e1e;
-  border-color: #ff6b6b;
-}
-
-.travel-note {
-  padding: 40px;
-  text-align: center;
-  color: var(--text-dim);
-  border: 3px solid var(--border);
-  background: #120d1c;
-  animation: blink 1.4s steps(2) infinite;
 }
 
 .report-list {
@@ -2213,11 +2180,6 @@ h3 {
 .report-row.outcome-retreat { border-left: 4px solid var(--gold); }
 .report-row.outcome-defeat,
 .report-row.outcome-timeout { border-left: 4px solid #ff6b6b; }
-
-/* Unterwegs: Ausrüstung kann nicht abgelegt werden */
-.equipment-slot.busy .unequip-button {
-  display: none;
-}
 
 /* ============================================================
    HANDY (schmale Bildschirme)

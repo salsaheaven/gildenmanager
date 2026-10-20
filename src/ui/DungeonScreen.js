@@ -1,15 +1,15 @@
 // ============================================================
-// DUNGEONSCREEN – Dungeons auswählen, Gruppe losschicken, Runs verfolgen
+// DUNGEONSCREEN – Dungeons auswählen, Gruppen für heute einplanen, Berichte ansehen
 //   Links:  alle Dungeons (gesperrte grau)
-//   Rechts: der gewählte Dungeon mit Begegnungen, Gruppe, Rückzugsregel, Anweisungen
-//   Unten:  laufende Runs (Fortschritt, Zuschauen, Rückzug) und Berichte
+//   Mitte:  der gewählte Dungeon mit Begegnungen, Gruppe, Rückzugsregel, Anweisungen
+//   Rechts: die für heute geplanten Runs (absagen möglich) und die Berichte
+// Ausgekämpft wird erst bei "Tag beenden" (oben in der Leiste).
 // ============================================================
 
 import { DUNGEONS, getDungeon } from '../data/dungeons.js';
 import { getBoss, MINIONS } from '../data/enemies.js';
 import { RETREAT_RULES } from '../data/retreatRules.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
-import { BALANCING } from '../data/balancing.js';
 import { COMBAT_RULES } from '../data/combatRules.js';
 import { createHeroCanvas, createSpriteCanvas, createChestCanvas } from './PixelArt.js';
 import { renderOrders } from './OrdersPanel.js';
@@ -32,11 +32,11 @@ export class DungeonScreen {
         <section class="panel dungeon-list"><h2>Dungeons</h2><div class="dungeon-cards"></div></section>
         <section class="panel dungeon-setup"></section>
         <section class="panel run-panel">
-          <h2>Unterwegs</h2>
+          <h2>Heute geplant</h2>
           <div class="run-list"></div>
-          <div class="run-viewer"></div>
           <h2>Berichte</h2>
           <div class="report-list"></div>
+          <div class="run-viewer"></div>
         </section>
       </div>
     `;
@@ -44,16 +44,11 @@ export class DungeonScreen {
     this.viewer = new RunViewer(this.root.querySelector('.run-viewer'), game);
 
     game.on('changed', () => this.render());
-    game.on('expeditionFinished', (report) => {
-      if (this.viewer.isWatching(report.expeditionId)) {
-        this.viewer.showReport(report);
-      }
-    });
     this.render();
   }
 
   render() {
-    // Gewählte Helden, die inzwischen unterwegs, verletzt oder weg sind, abwählen
+    // Gewählte Helden, die inzwischen eingeplant, verletzt oder weg sind, abwählen
     for (const heroId of this.selectedHeroIds) {
       const hero = this.game.guild.findHero(heroId);
       if (!hero || this.game.guild.isHeroBusy(heroId) || hero.isInjured()) {
@@ -64,18 +59,6 @@ export class DungeonScreen {
     this.renderSetup();
     this.renderRuns();
     this.renderReports();
-  }
-
-  // Wird in jedem Bild aufgerufen: Fortschrittsbalken und Zuschauer
-  update() {
-    for (const expedition of this.game.guild.expeditions) {
-      const row = this.root.querySelector('.run-row[data-id="' + expedition.id + '"]');
-      if (row) {
-        row.querySelector('.run-fill').style.width = expedition.getProgress() * 100 + '%';
-        row.querySelector('.run-status').textContent = this.describePosition(expedition);
-      }
-    }
-    this.viewer.update();
   }
 
   // ---------- Dungeon-Liste ----------
@@ -126,7 +109,8 @@ export class DungeonScreen {
       <p class="hint">Der Rückzug dauert ${COMBAT_RULES.retreatRounds} Runden, in denen der Gegner weiter angreift. Danach gibt es keine Beute.</p>
       <h3>Anweisungen</h3>
       <div class="orders-list"></div>
-      <div class="lab-actions"><button class="big-button start-button">Losziehen!</button></div>
+      <div class="lab-actions"><button class="big-button start-button">Für heute einplanen</button></div>
+      <p class="hint">Die Gruppe kämpft, wenn du oben „Tag beenden“ drückst. Bis dahin kannst du sie noch umrüsten.</p>
     `;
     panel.querySelector('h2').textContent = dungeon.name;
     panel.querySelector('.dungeon-description').textContent = dungeon.description;
@@ -213,7 +197,7 @@ export class DungeonScreen {
       button.appendChild(createHeroCanvas(hero, 2));
       button.insertAdjacentHTML('beforeend', '<span></span>');
       button.querySelector('span').textContent = hero.name + ' (' + hero.getClass().name + ', Lv ' + hero.level + ', AW ' + hero.getGearScore() + ')' +
-        (busy ? ' – unterwegs' : '') + (injured ? ' – verletzt bis ' + this.getHealTime(hero) : '');
+        (busy ? ' – heute schon eingeplant' : '') + (injured ? ' – ' + describeInjury(hero) : '');
       button.addEventListener('click', () => {
         Sound.click();
         if (this.selectedHeroIds.has(hero.id)) {
@@ -225,12 +209,6 @@ export class DungeonScreen {
       });
       container.appendChild(button);
     }
-  }
-
-  // Uhrzeit, zu der ein verletzter Held wieder fit ist
-  getHealTime(hero) {
-    const clock = this.game.clock;
-    return clock.getTimeTextAt(clock.totalGameSeconds + hero.injurySeconds);
   }
 
   getSelectedHeroes() {
@@ -293,83 +271,45 @@ export class DungeonScreen {
       return;
     }
     Sound.boxArrived();
-    showToast('Die Gruppe zieht los: ' + getDungeon(this.dungeonId).name + '!', '#ffd23f');
-    const newest = this.game.guild.expeditions[this.game.guild.expeditions.length - 1];
+    showToast('Eingeplant: ' + getDungeon(this.dungeonId).name + '. Die Gruppe kämpft am Ende des Tages.', '#ffd23f');
     this.selectedHeroIds.clear();
     this.render();
-    this.viewer.watch(newest.id);
   }
 
-  // ---------- Laufende Runs ----------
-
-  describePosition(expedition) {
-    const position = expedition.getPosition();
-    const dungeon = getDungeon(expedition.dungeonId);
-    const encounterCount = dungeon.encounters.length;
-    const retreat = expedition.manualRetreat ? ' (Rückzug befohlen)' : '';
-    if (position.traveling) {
-      return 'Unterwegs zu Begegnung ' + (position.encounterIndex + 1) + ' von ' + encounterCount + retreat;
-    }
-    const encounterResult = expedition.getResult().encounters[position.encounterIndex];
-    const round = Number.isFinite(position.round) ? ' – Runde ' + position.round : '';
-    return 'Begegnung ' + (position.encounterIndex + 1) + '/' + encounterCount + ': ' + encounterResult.encounterName + round + retreat;
-  }
+  // ---------- Geplante Runs ----------
 
   renderRuns() {
     const list = this.root.querySelector('.run-list');
     list.innerHTML = '';
     if (this.game.guild.expeditions.length === 0) {
-      list.innerHTML = '<p class="empty">Gerade ist keine Gruppe unterwegs.</p>';
+      list.innerHTML = '<p class="empty">Heute ist noch keine Gruppe eingeplant. Wer nichts zu tun hat, ruht sich aus.</p>';
     }
     for (const expedition of this.game.guild.expeditions) {
       const dungeon = getDungeon(expedition.dungeonId);
+      const heroNames = expedition.getHeroIds()
+        .map((heroId) => this.game.guild.findHero(heroId))
+        .filter((hero) => hero)
+        .map((hero) => hero.name);
+      const retreatRule = RETREAT_RULES.find((rule) => rule.id === expedition.retreatRuleId);
+
       const row = document.createElement('div');
       row.className = 'run-row';
-      row.dataset.id = expedition.id;
-      row.classList.toggle('watched', this.viewer.isWatching(expedition.id));
       row.innerHTML = `
         <div class="run-head">
           <b class="run-name"></b>
           <span class="run-status"></span>
         </div>
-        <div class="bar"><div class="bar-fill run-fill"></div></div>
         <div class="run-buttons">
-          <button class="watch-button">Zuschauen</button>
-          <button class="retreat-button">Rückzug!</button>
-          <button class="quick-button">Sofort beenden</button>
+          <button class="cancel-button">Absagen</button>
         </div>
       `;
       row.querySelector('.run-name').textContent = dungeon.name;
-      row.querySelector('.run-status').textContent = this.describePosition(expedition);
-
-      row.querySelector('.watch-button').addEventListener('click', () => {
+      row.querySelector('.run-status').textContent = heroNames.join(', ') +
+        (retreatRule ? ' · Rückzug: ' + retreatRule.name : '');
+      row.querySelector('.cancel-button').addEventListener('click', () => {
         Sound.click();
-        this.viewer.watch(expedition.id);
-        this.renderRuns();
+        this.game.cancelExpedition(expedition.id);
       });
-
-      // Rückzug: zweimal klicken
-      const retreatButton = row.querySelector('.retreat-button');
-      retreatButton.disabled = expedition.manualRetreat !== null;
-      retreatButton.addEventListener('click', () => {
-        if (!retreatButton.classList.contains('confirm')) {
-          retreatButton.classList.add('confirm');
-          retreatButton.textContent = 'Wirklich zurückziehen?';
-          return;
-        }
-        if (this.game.orderRetreat(expedition.id)) {
-          Sound.warning();
-          showToast('Rückzug befohlen!', '#ff6b6b');
-        }
-      });
-
-      const quickButton = row.querySelector('.quick-button');
-      const canQuick = this.game.canQuickFinish(expedition.dungeonId);
-      quickButton.disabled = !canQuick;
-      quickButton.title = canQuick ? 'Kampf nicht ansehen, sofort das Ergebnis'
-        : 'Erst nach ' + BALANCING.quickFinishAfterClears + ' Erfolgen in diesem Dungeon';
-      quickButton.addEventListener('click', () => this.game.finishExpeditionNow(expedition.id));
-
       list.appendChild(row);
     }
   }
@@ -386,7 +326,7 @@ export class DungeonScreen {
       const dungeon = getDungeon(report.dungeonId);
       const row = document.createElement('button');
       row.className = 'report-row outcome-' + report.outcome;
-      let text = 'Tag ' + report.day + ', ' + report.time + ' – ' + dungeon.name + ': ' + outcomeText(report.outcome);
+      let text = 'Tag ' + report.day + ' – ' + dungeon.name + ': ' + outcomeText(report.outcome);
       if (report.outcome === 'success') {
         text += ' +' + report.gold + ' Gold, ' + getLootBoxType(report.chest).name;
       }
@@ -406,7 +346,6 @@ export class DungeonScreen {
       row.addEventListener('click', () => {
         Sound.click();
         this.viewer.showReport(report);
-        this.renderRuns();
       });
       list.appendChild(row);
     }
@@ -421,4 +360,9 @@ export function outcomeText(outcome) {
     return 'Rückzug';
   }
   return 'Gescheitert';
+}
+
+// "verletzt (noch 1 Tag)" bzw. "verletzt (noch 3 Tage)"
+export function describeInjury(hero) {
+  return 'verletzt (noch ' + hero.injuryDays + (hero.injuryDays === 1 ? ' Tag)' : ' Tage)');
 }

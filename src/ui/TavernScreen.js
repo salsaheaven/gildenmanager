@@ -1,6 +1,6 @@
 // ============================================================
 // TAVERNSCREEN – die Taverne: hier warten Bewerber darauf, angeheuert zu werden.
-// Neue Bewerber kommen regelmäßig oder sofort gegen Gold.
+// Neue Bewerber kommen jeden Morgen (nach "Tag beenden") oder sofort gegen Gold.
 // Seltene Bewerber werden mit Sound und Leuchten angekündigt.
 // ============================================================
 
@@ -8,7 +8,7 @@ import { BALANCING } from '../data/balancing.js';
 import { ROLE_NAMES, ROW_NAMES } from '../data/heroClasses.js';
 import { ABILITIES } from '../data/abilities.js';
 import { createHeroCanvas, createSpriteCanvas } from './PixelArt.js';
-import { formatStats, formatTime } from './format.js';
+import { formatStats } from './format.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 import { createTraitChip } from './TraitChip.js';
@@ -24,10 +24,7 @@ export class TavernScreen {
           <h2>Taverne „Zum durstigen Greif“</h2>
           <div class="tavern-info">
             <span class="hero-count"></span>
-            <div class="tavern-timer">
-              <span>Neue Bewerber in <b class="timer-text"></b></span>
-              <div class="bar"><div class="bar-fill tavern-fill"></div></div>
-            </div>
+            <div class="tavern-timer">Neue Bewerber kommen jeden Morgen.</div>
             <button class="reroll-button"></button>
           </div>
         </section>
@@ -47,13 +44,6 @@ export class TavernScreen {
     game.on('changed', () => this.render(false));
     game.on('candidatesRefreshed', (candidates) => this.announce(candidates));
     this.render(false);
-  }
-
-  // Wird in jedem Bild aufgerufen: nur der Timer läuft mit
-  update() {
-    const remaining = BALANCING.candidateRefreshSeconds * (1 - this.game.getCandidateProgress());
-    this.root.querySelector('.timer-text').textContent = formatTime(remaining);
-    this.root.querySelector('.tavern-fill').style.width = this.game.getCandidateProgress() * 100 + '%';
   }
 
   // Neue Bewerber: Karten springen nacheinander herein, seltene mit Fanfare

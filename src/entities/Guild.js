@@ -22,7 +22,7 @@ export class Guild {
     this.nextHeroId = 1;  // fortlaufende Nummer für neue Helden
 
     // Dungeons
-    this.expeditions = [];     // laufende Runs (Expedition-Objekte)
+    this.expeditions = [];     // für heute geplante Runs (Expedition-Objekte)
     this.nextExpeditionId = 1;
     this.dungeonClears = {};   // Dungeon-id → wie oft geschafft
     this.dungeonAttempts = {}; // Dungeon-id → wie oft versucht (egal wie es ausging)
@@ -169,7 +169,7 @@ export class Guild {
     return best;
   }
 
-  // Ist der Held gerade in einem Dungeon unterwegs?
+  // Ist der Held heute schon für einen Dungeon eingeplant? (ein Held = eine Aufgabe pro Tag)
   isHeroBusy(heroId) {
     return this.expeditions.some((expedition) => expedition.getHeroIds().includes(heroId));
   }

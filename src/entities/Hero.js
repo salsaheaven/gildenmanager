@@ -33,7 +33,7 @@ export class Hero {
     this.looks = looks;
     this.level = 1;
     this.xp = 0;              // gesammelte EP auf dem aktuellen Level
-    this.injurySeconds = 0;   // > 0 = verletzt, noch so viele Spielsekunden (kann nicht in Dungeons)
+    this.injuryDays = 0;      // > 0 = verletzt, noch so viele Tage (kann nicht in Dungeons)
 
     // Anweisungen für den Kampf: Anweisungs-id → gewählte Option (siehe data/heroOrders.js).
     // Fehlt eine Anweisung, gilt die Standard-Option.
@@ -104,16 +104,16 @@ export class Hero {
   }
 
   isInjured() {
-    return this.injurySeconds > 0;
+    return this.injuryDays > 0;
   }
 
-  // Lässt die Verletzung heilen. Gibt true zurück, wenn der Held gerade wieder fit geworden ist.
-  healOverTime(gameSeconds) {
+  // Ein Tag Heilung (am Ende jedes Tages). Gibt true zurück, wenn der Held gerade wieder fit geworden ist.
+  healOneDay() {
     if (!this.isInjured()) {
       return false;
     }
-    this.injurySeconds = Math.max(0, this.injurySeconds - gameSeconds);
-    return this.injurySeconds === 0;
+    this.injuryDays--;
+    return this.injuryDays === 0;
   }
 
   // ---------- Werte ----------
@@ -249,7 +249,7 @@ export class Hero {
       looks: this.looks,
       level: this.level,
       xp: this.xp,
-      injurySeconds: this.injurySeconds,
+      injuryDays: this.injuryDays,
       equipment: equipment,
       orders: this.orders,
     };
@@ -259,7 +259,11 @@ export class Hero {
     const hero = new Hero(data.id, data.name, data.classId, data.rarityId, data.traitIds, data.looks);
     hero.level = data.level;
     hero.xp = data.xp;
-    hero.injurySeconds = data.injurySeconds || 0;
+    hero.injuryDays = data.injuryDays || 0;
+    // Alte Spielstände (Echtzeit) zählten die Verletzung in Spielsekunden: noch verletzt = 1 Tag
+    if (data.injuryDays === undefined && data.injurySeconds > 0) {
+      hero.injuryDays = 1;
+    }
     hero.orders = data.orders || {};
     for (const slot of EQUIPMENT_SLOTS) {
       const itemData = data.equipment[slot];

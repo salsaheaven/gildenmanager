@@ -1,8 +1,7 @@
-// Tests für die Spiellogik: Zufall, Uhr, Lootsystem, Spiel-Aktionen, Speichern.
+// Tests für die Spiellogik: Zufall, Lootsystem, Spiel-Aktionen, Tage, Speichern.
 
 import { describe, it, expect } from 'vitest';
 import { Random } from '../src/core/Random.js';
-import { GameClock } from '../src/core/GameClock.js';
 import { Game } from '../src/core/Game.js';
 import { SaveManager } from '../src/core/SaveManager.js';
 import { Guild } from '../src/entities/Guild.js';
@@ -48,25 +47,39 @@ describe('Random', () => {
   });
 });
 
-describe('GameClock', () => {
-  it('Geschwindigkeit multipliziert die Zeit', () => {
-    const clock = new GameClock();
-    clock.setSpeed(4);
-    expect(clock.update(1)).toBe(4);
-    expect(clock.totalGameSeconds).toBe(4);
+describe('Tage (Runden)', () => {
+  it('das Spiel startet an Tag 1, "Tag beenden" zählt weiter', () => {
+    const game = new Game(1);
+    expect(game.day).toBe(1);
+    const ended = [];
+    game.on('dayEnded', (data) => ended.push(data));
+    game.endDay();
+    game.endDay();
+    expect(game.day).toBe(3);
+    expect(ended.map((data) => data.day)).toEqual([1, 2]);
   });
 
-  it('in der Pause vergeht keine Zeit', () => {
-    const clock = new GameClock();
-    clock.togglePause();
-    expect(clock.update(10)).toBe(0);
-    expect(clock.totalGameSeconds).toBe(0);
+  it('ohne Aktionen kommen keine Kisten von allein (kein Kurier)', () => {
+    const game = new Game(1);
+    const boxesBefore = game.guild.boxes.length;
+    for (let i = 0; i < 10; i++) {
+      game.endDay();
+    }
+    expect(game.guild.boxes.length).toBe(boxesBefore);
   });
 
-  it('startet an Tag 1 um 08:00', () => {
-    const clock = new GameClock();
-    expect(clock.getDay()).toBe(1);
-    expect(clock.getTimeText()).toBe('08:00');
+  it('jeden Morgen kommen neue Bewerber', () => {
+    const game = new Game(1);
+    const oldIds = game.guild.candidates.map((c) => c.id);
+    game.endDay();
+    expect(game.guild.candidates.map((c) => c.id)).not.toEqual(oldIds);
+  });
+
+  it('alte Spielstände mit Spieluhr bekommen den passenden Tag', () => {
+    const data = new Game(1).toSaveData();
+    delete data.day;
+    data.clock = { speed: 1, totalGameSeconds: 1440 * 2 + 100 };
+    expect(Game.fromSaveData(data).day).toBe(3);
   });
 });
 
@@ -115,28 +128,6 @@ describe('LootSystem', () => {
 });
 
 describe('Game', () => {
-  it('der Kurier ist abgeschaltet und bringt keine Kisten', () => {
-    const game = new Game(1);
-    const boxesBefore = game.guild.boxes.length;
-    game.update(BALANCING.courierIntervalSeconds * 10);
-    expect(game.guild.boxes.length).toBe(boxesBefore);
-  });
-
-  it('eingeschaltet bringt der Kurier nach Ablauf der Zeit eine Kiste', () => {
-    BALANCING.courierEnabled = true;
-    const game = new Game(1);
-    const boxesBefore = game.guild.boxes.length;
-    let arrived = 0;
-    game.on('boxArrived', () => arrived++);
-
-    game.update(BALANCING.courierIntervalSeconds - 1);
-    expect(arrived).toBe(0);
-    game.update(1);
-    expect(arrived).toBe(1);
-    expect(game.guild.boxes.length).toBe(boxesBefore + 1);
-    BALANCING.courierEnabled = false;
-  });
-
   it('Kiste kaufen kostet Gold und klappt nicht ohne Gold', () => {
     const game = new Game(1);
     game.guild.gold = 30;
@@ -167,8 +158,7 @@ describe('Speichern und Laden', () => {
   it('ein gespeichertes Spiel wird genauso wieder geladen', () => {
     const game = new Game(99);
     game.openBox('wood');
-    game.update(12);
-    game.clock.setSpeed(2);
+    game.endDay();
 
     const saveManager = new SaveManager(createMemoryStorage());
     saveManager.save(game);

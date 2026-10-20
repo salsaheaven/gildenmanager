@@ -243,10 +243,10 @@ export class CombatLabScreen {
     this.activeScene = scene;
   }
 
-  // Wird in jedem Bild aus main.js aufgerufen: Die Szene läuft im Takt der Spieluhr
-  update(gameSeconds) {
+  // Wird in jedem Bild aus main.js aufgerufen (seconds = vergangene echte Zeit), damit die Szene läuft
+  update(seconds) {
     if (this.activeScene) {
-      this.activeScene.update(gameSeconds, this.game.clock.paused, this.game.clock.speed);
+      this.activeScene.update(seconds);
     }
   }
 

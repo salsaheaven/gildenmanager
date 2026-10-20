@@ -48,7 +48,7 @@ export const COMBAT_RULES = {
   restHealthRegain: 0.4,
   restManaRegain: 0.6,
 
-  // Tempo der Kampfszene in Spielsekunden. Bestimmt auch, wie lange ein Dungeon-Run dauert.
+  // Tempo der Kampfszene in Sekunden (bei 1x)
   pacing: {
     startDelay: 0.4,   // kurze Pause vor dem ersten Ereignis
     actionLead: 0.14,  // Zeit zwischen Aktion (Animation startet) und Wirkung (Zahl ploppt auf)

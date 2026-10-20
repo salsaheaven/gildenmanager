@@ -1,42 +1,47 @@
 // ============================================================
-// EXPEDITION – ein laufender Dungeon-Run einer Gruppe
+// EXPEDITION – ein Dungeon-Run, der für heute geplant ist
 //
-// Beim Start wird der ganze Run mit einem festen Seed vorberechnet (simulateRun).
-// Danach läuft nur noch die Zeit: elapsed zählt Spielsekunden, bis der Run vorbei ist.
-// Ob jemand zuschaut, ist egal. Die Kampfszene zeigt nur an, was gerade passiert.
+// Ablauf (rundenbasiert, 1 Runde = 1 Tag):
+//   1. Tagsüber plant man den Run: Dungeon, Helden, Rückzugsregel.
+//      Bis zum Tagesende darf man die Helden noch umrüsten und ihre Anweisungen ändern.
+//   2. Bei "Tag beenden" wird der Run ausgekämpft (resolve): Die Helden werden so,
+//      wie sie gerade sind, als Abbild festgehalten, und der Run wird mit festem Seed berechnet.
 //
-// Rückzug per Hand: Der Run wird mit demselben Seed neu berechnet, mit Rückzug ab der nächsten Runde.
-// Bis dahin verläuft er also genau gleich, danach folgt der Rückzug.
-//
-// Damit der Run auch nach dem Neuladen genau gleich verläuft, speichert die Expedition
-// ein Abbild der Helden vom Start (Werte, Ausrüstung, Anweisungen).
+// Das Abbild (heroSnapshots) wird mitgespeichert. So lässt sich ein beendeter Run
+// später genau gleich noch einmal ansehen (Bericht, Kampfszene).
 // ============================================================
 
 import { Hero } from './Hero.js';
 import { simulateRun } from '../systems/combat/CombatSimulator.js';
-import { computeRunTimeline, findRunPosition } from '../systems/combat/BattleTimeline.js';
-import { BALANCING } from '../data/balancing.js';
 
 export class Expedition {
-  // heroSnapshots = Speicherdaten der Helden beim Start (Hero.toSaveData)
-  constructor(id, dungeonId, heroSnapshots, retreatRuleId, seed) {
+  // heroIds = die Helden der Gruppe, seed = fester Zufall für diesen Run
+  constructor(id, dungeonId, heroIds, retreatRuleId, seed) {
     this.id = id;
     this.dungeonId = dungeonId;
-    this.heroSnapshots = heroSnapshots;
+    this.heroIds = heroIds;
     this.retreatRuleId = retreatRuleId;
     this.seed = seed;
-    this.elapsed = 0;            // vergangene Spielsekunden seit dem Start
-    this.manualRetreat = null;   // { encounterIndex, round } wenn per Hand zurückgezogen
-    this.result = null;          // berechnetes Ergebnis (wird nicht gespeichert, sondern neu berechnet)
-    this.timeline = null;
+    this.heroSnapshots = null; // Abbild der Helden beim Auskämpfen (null = noch nicht ausgekämpft)
+    this.result = null;        // berechnetes Ergebnis (wird nicht gespeichert, sondern neu berechnet)
   }
 
   getHeroIds() {
-    return this.heroSnapshots.map((snapshot) => snapshot.id);
+    return this.heroIds;
   }
 
-  // Berechnet den Run (nur beim ersten Mal, danach aus dem Zwischenspeicher)
+  // Kämpft den Run aus. heroes = die echten Hero-Objekte der Gruppe.
+  resolve(heroes) {
+    this.heroSnapshots = heroes.map((hero) => hero.toSaveData());
+    this.result = null;
+    return this.getResult();
+  }
+
+  // Ergebnis des Runs (nur beim ersten Mal berechnen, danach aus dem Zwischenspeicher)
   getResult() {
+    if (this.heroSnapshots === null) {
+      throw new Error('Der Run wurde noch nicht ausgekämpft');
+    }
     if (this.result === null) {
       this.result = simulateRun({
         heroes: this.heroSnapshots.map((snapshot) => Hero.fromSaveData(snapshot)),
@@ -44,81 +49,29 @@ export class Expedition {
         retreatRuleId: this.retreatRuleId,
         seed: this.seed,
         recordLog: true,
-        manualRetreat: this.manualRetreat,
       });
-      this.timeline = computeRunTimeline(this.result, BALANCING.travelSeconds);
     }
     return this.result;
-  }
-
-  getTimeline() {
-    this.getResult();
-    return this.timeline;
-  }
-
-  getTotalTime() {
-    return this.getTimeline().totalTime;
-  }
-
-  // 0 (gerade gestartet) bis 1 (fertig)
-  getProgress() {
-    return Math.min(1, this.elapsed / this.getTotalTime());
-  }
-
-  isFinished() {
-    return this.elapsed >= this.getTotalTime();
-  }
-
-  // Wo steht die Gruppe gerade? (siehe findRunPosition)
-  getPosition() {
-    return findRunPosition(this.getResult(), this.getTimeline(), this.elapsed);
-  }
-
-  update(gameSeconds) {
-    this.elapsed += gameSeconds;
-  }
-
-  // Rückzug per Hand ab der nächsten Runde. Gibt false zurück, wenn es nichts mehr zu retten gibt.
-  orderRetreat() {
-    if (this.manualRetreat !== null || this.isFinished()) {
-      return false;
-    }
-    const position = this.getPosition();
-    if (position.traveling) {
-      // Auf dem Weg: die nächste Begegnung findet einfach nicht mehr statt
-      this.manualRetreat = { encounterIndex: position.encounterIndex, round: 0 };
-    } else {
-      this.manualRetreat = { encounterIndex: position.encounterIndex, round: position.round + 1 };
-    }
-    // Neu berechnen. Bis zum Rückzug bleibt alles gleich, elapsed läuft einfach weiter.
-    this.result = null;
-    this.timeline = null;
-    // Ist der Run dadurch kürzer geworden, als schon vergangen ist, endet er jetzt
-    this.elapsed = Math.min(this.elapsed, this.getTotalTime());
-    return true;
-  }
-
-  // Sofort beenden (Schnellkampf, wenn freigeschaltet)
-  finishNow() {
-    this.elapsed = this.getTotalTime();
   }
 
   toSaveData() {
     return {
       id: this.id,
       dungeonId: this.dungeonId,
-      heroSnapshots: this.heroSnapshots,
+      heroIds: this.heroIds,
       retreatRuleId: this.retreatRuleId,
       seed: this.seed,
-      elapsed: this.elapsed,
-      manualRetreat: this.manualRetreat,
+      heroSnapshots: this.heroSnapshots,
     };
   }
 
   static fromSaveData(data) {
-    const expedition = new Expedition(data.id, data.dungeonId, data.heroSnapshots, data.retreatRuleId, data.seed);
-    expedition.elapsed = data.elapsed;
-    expedition.manualRetreat = data.manualRetreat;
+    // Alte Spielstände (Echtzeit) hatten nur das Abbild vom Start, aber keine heroIds
+    const heroIds = data.heroIds || data.heroSnapshots.map((snapshot) => snapshot.id);
+    const expedition = new Expedition(data.id, data.dungeonId, heroIds, data.retreatRuleId, data.seed);
+    // Ein alter, noch laufender Run steht jetzt einfach in der Planung und wird am Tagesende
+    // neu ausgekämpft (resolve). Alte Berichte behalten ihr Abbild, damit man sie weiter ansehen kann.
+    expedition.heroSnapshots = data.heroSnapshots || null;
     return expedition;
   }
 }

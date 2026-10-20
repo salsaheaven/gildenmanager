@@ -15,14 +15,6 @@ export function formatStats(stats) {
   return parts.join('  ');
 }
 
-// 83 → "1:23"
-export function formatTime(seconds) {
-  const wholeSeconds = Math.max(0, Math.ceil(seconds));
-  const minutes = Math.floor(wholeSeconds / 60);
-  const rest = wholeSeconds % 60;
-  return minutes + ':' + String(rest).padStart(2, '0');
-}
-
 // 5 → "+5", -3 → "−3", 0 → "±0"
 export function formatDifference(value) {
   if (value > 0) {

@@ -1,8 +1,7 @@
 // ============================================================
-// TOPBAR – die Leiste oben: Gildenname, Gold, Uhr, Kurier, Geschwindigkeit
+// TOPBAR – die Leiste oben: Gildenname, Gold, aktueller Tag, Knopf "Tag beenden"
 // ============================================================
 
-import { BALANCING } from '../data/balancing.js';
 import { createSpriteCanvas } from './PixelArt.js';
 import { Sound } from './Sound.js';
 
@@ -13,20 +12,16 @@ export class TopBar {
     this.game = game;
     this.onReset = onReset;
     this.shownGold = null;
+    this.shownDay = null;
 
     this.root.innerHTML = `
       <div class="guild-name"></div>
       <div class="gold"><span class="gold-icon"></span><span class="gold-amount"></span></div>
-      <div class="clock">
-        <span class="clock-day"></span>
-        <span class="clock-time"></span>
-        <span class="pause-label">PAUSE</span>
-      </div>
-      <div class="courier" title="Der Gildenkurier bringt regelmäßig eine Kiste">
-        <span>Kurier</span>
-        <div class="bar"><div class="bar-fill courier-fill"></div></div>
-      </div>
-      <div class="speed-buttons"></div>
+      <div class="day-counter"></div>
+      <button class="end-day-button">
+        <span class="end-day-label">Tag beenden ▶</span>
+        <span class="end-day-plan"></span>
+      </button>
       <div class="menu-buttons">
         <button class="mute-button"></button>
         <button class="reset-button">Neu</button>
@@ -36,58 +31,14 @@ export class TopBar {
     this.root.querySelector('.gold-icon').appendChild(createSpriteCanvas('coin', 3));
     this.root.querySelector('.guild-name').textContent = game.guild.name;
 
-    this.createSpeedButtons();
+    this.root.querySelector('.end-day-button').addEventListener('click', () => {
+      Sound.click();
+      this.game.endDay();
+    });
     this.setupMenuButtons();
 
-    // Leertaste = Pause. preventDefault verhindert, dass die Leertaste
-    // zusätzlich den zuletzt geklickten Knopf noch einmal drückt.
-    document.addEventListener('keydown', (event) => {
-      // In Auswahllisten und Eingabefeldern bleibt die Leertaste normal
-      if (event.target.closest('select, input, textarea')) {
-        return;
-      }
-      if (event.code === 'Space') {
-        event.preventDefault();
-        if (!event.repeat) {
-          this.game.clock.togglePause();
-          this.update();
-        }
-      }
-    });
-    document.addEventListener('keyup', (event) => {
-      if (event.code === 'Space' && !event.target.closest('select, input, textarea')) {
-        event.preventDefault();
-      }
-    });
-
+    game.on('changed', () => this.update());
     this.update();
-  }
-
-  createSpeedButtons() {
-    const container = this.root.querySelector('.speed-buttons');
-
-    const pauseButton = document.createElement('button');
-    pauseButton.textContent = 'II';
-    pauseButton.title = 'Pause (Leertaste)';
-    pauseButton.dataset.speed = 'pause';
-    pauseButton.addEventListener('click', () => {
-      Sound.click();
-      this.game.clock.togglePause();
-      this.update();
-    });
-    container.appendChild(pauseButton);
-
-    for (const speed of BALANCING.speeds) {
-      const button = document.createElement('button');
-      button.textContent = speed + 'x';
-      button.dataset.speed = String(speed);
-      button.addEventListener('click', () => {
-        Sound.click();
-        this.game.clock.setSpeed(speed);
-        this.update();
-      });
-      container.appendChild(button);
-    }
   }
 
   setupMenuButtons() {
@@ -114,40 +65,40 @@ export class TopBar {
     });
   }
 
-  // Wird in jedem Bild aufgerufen und aktualisiert die Anzeigen
+  // Aktualisiert die Anzeigen (bei jeder Änderung am Spielstand)
   update() {
-    const clock = this.game.clock;
     const guild = this.game.guild;
 
     // Gold: kurz "hüpfen", wenn sich der Betrag ändert
     if (guild.gold !== this.shownGold) {
-      const goldElement = this.root.querySelector('.gold');
-      if (this.shownGold !== null) {
-        goldElement.classList.remove('bump');
-        void goldElement.offsetWidth; // Trick, damit die Animation neu startet
-        goldElement.classList.add('bump');
-      }
+      this.bump(this.root.querySelector('.gold'), this.shownGold !== null);
       this.shownGold = guild.gold;
       this.root.querySelector('.gold-amount').textContent = guild.gold;
     }
 
-    this.root.querySelector('.clock-day').textContent = 'Tag ' + clock.getDay();
-    this.root.querySelector('.clock-time').textContent = clock.getTimeText();
-    this.root.querySelector('.clock').classList.toggle('paused', clock.paused);
-    this.root.querySelector('.courier').hidden = !BALANCING.courierEnabled;
-    this.root.querySelector('.courier-fill').style.width = this.game.getCourierProgress() * 100 + '%';
-
-    // Aktiven Geschwindigkeits-Knopf hervorheben
-    for (const button of this.root.querySelectorAll('.speed-buttons button')) {
-      let isActive;
-      if (button.dataset.speed === 'pause') {
-        isActive = clock.paused;
-      } else {
-        isActive = !clock.paused && Number(button.dataset.speed) === clock.speed;
-      }
-      button.classList.toggle('active', isActive);
+    // Tag: hüpft ebenfalls, wenn ein neuer Tag beginnt
+    if (this.game.day !== this.shownDay) {
+      this.bump(this.root.querySelector('.day-counter'), this.shownDay !== null);
+      this.shownDay = this.game.day;
+      this.root.querySelector('.day-counter').textContent = 'Tag ' + this.game.day;
     }
 
+    // Unter dem Knopf: was heute noch passiert
+    const runs = guild.expeditions.length;
+    this.root.querySelector('.end-day-plan').textContent =
+      runs === 0 ? 'Keine Gruppe eingeplant' : (runs === 1 ? '1 Gruppe zieht los' : runs + ' Gruppen ziehen los');
+    this.root.querySelector('.end-day-button').classList.toggle('has-runs', runs > 0);
+
     this.root.querySelector('.mute-button').textContent = Sound.isMuted() ? 'Ton: aus' : 'Ton: an';
+  }
+
+  // Kleine Hüpf-Animation (nicht beim allerersten Anzeigen)
+  bump(element, animate) {
+    if (!animate) {
+      return;
+    }
+    element.classList.remove('bump');
+    void element.offsetWidth; // Trick, damit die Animation neu startet
+    element.classList.add('bump');
   }
 }

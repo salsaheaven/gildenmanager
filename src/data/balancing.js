@@ -10,13 +10,6 @@ export const BALANCING = {
   // Kisten zu Beginn eines neuen Spiels (damit man sofort etwas öffnen kann)
   startBoxes: ['wood', 'wood', 'silver'],
 
-  // Der Gildenkurier bringt regelmäßig eine Kiste.
-  // Abgeschaltet: Kisten gibt es aus Dungeons (und vorerst noch beim Händler). true = wieder einschalten.
-  // Zeit in Spielsekunden. Bei 4x-Geschwindigkeit geht es also 4-mal so schnell.
-  courierEnabled: false,
-  courierIntervalSeconds: 30,
-  courierBoxType: 'wood',
-
   // Pity-System: Nach so vielen Items ohne Episch oder Legendär
   // ist das nächste Item garantiert mindestens episch.
   pityEpicAfterItems: 25,
@@ -31,12 +24,6 @@ export const BALANCING = {
     { fromProgress: 0.9, level: 3, text: 'Das Glück ist dir ganz nah!' },
   ],
 
-  // So viele Spielminuten vergehen pro Spielsekunde (für die Uhr oben).
-  gameMinutesPerSecond: 1,
-
-  // Auswahl der Spielgeschwindigkeiten
-  speeds: [1, 2, 4],
-
   // ---------- Helden & Taverne ----------
 
   // Wie viele Helden die Gilde höchstens haben kann (später erweiterbar durch die Kaserne)
@@ -45,19 +32,11 @@ export const BALANCING = {
   // Wie viele Bewerber gleichzeitig in der Taverne warten
   candidateCount: 4,
 
-  // Alle so viele Spielsekunden kommen neue Bewerber
-  candidateRefreshSeconds: 120,
-
+  // Neue Bewerber kommen jeden Morgen (nach "Tag beenden").
   // Gold, um sofort neue Bewerber zu rufen
   candidateRerollCost: 20,
 
   // ---------- Dungeons ----------
-
-  // So viele Spielsekunden braucht die Gruppe von einer Begegnung zur nächsten
-  travelSeconds: 5,
-
-  // Nach so vielen Erfolgen in einem Dungeon kann man laufende Runs sofort beenden (Schnellkampf)
-  quickFinishAfterClears: 3,
 
   // So viele Berichte über abgeschlossene Runs werden aufgehoben
   keptReports: 10,

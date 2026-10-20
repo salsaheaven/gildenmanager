@@ -1,12 +1,12 @@
 // ============================================================
 // MAIN – der Startpunkt
 // Lädt den Spielstand (oder startet neu), baut die Oberfläche auf
-// und startet die Spielschleife.
+// und startet die Bild-Schleife (für Animationen wie die Kampfszene im Labor).
+// Das Spiel selbst ist rundenbasiert: Es geht erst weiter, wenn man "Tag beenden" drückt.
 // ============================================================
 
 import { Game } from './core/Game.js';
 import { SaveManager } from './core/SaveManager.js';
-import { getLootBoxType } from './data/lootBoxes.js';
 import { TopBar } from './ui/TopBar.js';
 import { NavBar } from './ui/NavBar.js';
 import { LootBoxScreen } from './ui/LootBoxScreen.js';
@@ -48,7 +48,7 @@ if (savedData) {
 
 let isResetting = false;
 
-const topBar = new TopBar(document.getElementById('top-bar'), game, () => {
+new TopBar(document.getElementById('top-bar'), game, () => {
   isResetting = true;
   saveManager.deleteSave();
   location.reload();
@@ -75,9 +75,9 @@ navBar.addExtraButton('inventory', 'Inventar', () => inventory.toggle());
 
 new LootBoxScreen(screenElements.treasury, game, inventory);
 new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'));
-const tavernScreen = new TavernScreen(screenElements.tavern, game);
+new TavernScreen(screenElements.tavern, game);
 const combatLabScreen = new CombatLabScreen(screenElements.lab, game);
-const dungeonScreen = new DungeonScreen(screenElements.dungeons, game);
+new DungeonScreen(screenElements.dungeons, game);
 new DebugPanel(game);
 
 let currentScreen = null;
@@ -113,8 +113,8 @@ function updateBadges() {
   }
   navBar.setBadge('heroes', heroesWithUpgrade > 0 ? '▲' + heroesWithUpgrade : '');
   navBar.setBadge('tavern', tavernHasNews ? '!' : '');
-  const running = guild.expeditions.length;
-  navBar.setBadge('dungeons', dungeonHasNews ? '!' : (running > 0 ? String(running) : ''));
+  const planned = guild.expeditions.length;
+  navBar.setBadge('dungeons', dungeonHasNews ? '!' : (planned > 0 ? String(planned) : ''));
 }
 
 game.on('changed', updateBadges);
@@ -151,30 +151,31 @@ game.on('heroHealed', (hero) => {
   showToast(hero.name + ' ist wieder fit!', '#1eff00');
 });
 
-game.on('boxArrived', (boxTypeId) => {
-  const boxType = getLootBoxType(boxTypeId);
-  Sound.boxArrived();
-  showToast('Der Kurier bringt: ' + boxType.name + '!', boxType.mainColor);
+// Ein neuer Tag beginnt
+game.on('dayEnded', (data) => {
+  if (data.reports.length === 0) {
+    Sound.click();
+    showToast('Ein ruhiger Tag. Tag ' + game.day + ' beginnt.', '#ffd23f');
+  }
+  saveManager.save(game);
 });
 
 showScreen('treasury');
 
-// ---------- Spielschleife ----------
+// ---------- Bild-Schleife ----------
+// Läuft etwa 60-mal pro Sekunde. Sie treibt nur Animationen an (Kampfszene im Labor)
+// und speichert regelmäßig. Spielzeit vergeht dabei keine.
 
 let lastFrameTime = performance.now();
 let secondsSinceSave = 0;
 
-function gameLoop(now) {
+function frameLoop(now) {
   // Vergangene echte Zeit seit dem letzten Bild (höchstens 1 Sekunde,
   // falls der Browser-Tab zwischendurch im Hintergrund war)
   const realSeconds = Math.min((now - lastFrameTime) / 1000, 1);
   lastFrameTime = now;
 
-  const gameSeconds = game.update(realSeconds);
-  topBar.update();
-  tavernScreen.update();
-  combatLabScreen.update(gameSeconds);
-  dungeonScreen.update();
+  combatLabScreen.update(realSeconds);
 
   secondsSinceSave += realSeconds;
   if (secondsSinceSave >= AUTOSAVE_SECONDS) {
@@ -182,9 +183,9 @@ function gameLoop(now) {
     saveManager.save(game);
   }
 
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(frameLoop);
 }
-requestAnimationFrame(gameLoop);
+requestAnimationFrame(frameLoop);
 
 // Beim Schließen oder Wechseln des Tabs speichern
 window.addEventListener('beforeunload', () => {

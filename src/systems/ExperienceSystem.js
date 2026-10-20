@@ -72,7 +72,7 @@ export function applyRunResults(guild, result, dungeon) {
 
     const injured = !heroResult.alive;
     if (injured) {
-      hero.injurySeconds = INJURIES.injurySeconds;
+      hero.injuryDays = INJURIES.injuryDays;
     }
 
     outcomes.push({
