@@ -85,6 +85,9 @@ export class Game {
   }
 
   updateCourier(gameSeconds) {
+    if (!BALANCING.courierEnabled) {
+      return;
+    }
     this.courierTimer += gameSeconds;
     // "while" statt "if": Bei hoher Geschwindigkeit könnten mehrere Lieferungen fällig sein
     while (this.courierTimer >= BALANCING.courierIntervalSeconds) {

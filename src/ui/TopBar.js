@@ -134,6 +134,7 @@ export class TopBar {
     this.root.querySelector('.clock-day').textContent = 'Tag ' + clock.getDay();
     this.root.querySelector('.clock-time').textContent = clock.getTimeText();
     this.root.querySelector('.clock').classList.toggle('paused', clock.paused);
+    this.root.querySelector('.courier').hidden = !BALANCING.courierEnabled;
     this.root.querySelector('.courier-fill').style.width = this.game.getCourierProgress() * 100 + '%';
 
     // Aktiven Geschwindigkeits-Knopf hervorheben

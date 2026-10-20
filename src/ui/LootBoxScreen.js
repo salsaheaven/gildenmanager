@@ -105,7 +105,7 @@ export class LootBoxScreen {
     }
 
     if (list.children.length === 0) {
-      list.innerHTML = '<p class="empty">Keine Kisten. Warte auf den Kurier oder kaufe welche!</p>';
+      list.innerHTML = '<p class="empty">Keine Kisten. Schaffe einen Dungeon für eine Boss-Kiste oder kaufe welche beim Händler!</p>';
     }
   }
 

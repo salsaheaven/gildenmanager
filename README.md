@@ -6,7 +6,7 @@ schickst sie in Dungeons und öffnest die Beute: von Grau bis **Legendär**.
 ## Stand: Version 0.6
 **Spielen:** https://salsaheaven.github.io/gildenmanager/
 
-- **Schatzkammer:** Kisten öffnen (Holz, Silber, Gold, Episch) mit Animation, Sound und Seltenheits-Leuchten, Pity-System, Händler, Gildenkurier
+- **Schatzkammer:** Kisten öffnen (Holz, Silber, Gold, Episch) mit Animation, Sound und Seltenheits-Leuchten, Pity-System, Händler (der Gildenkurier ist abgeschaltet)
 - **Taverne:** Bewerber mit Seltenheit (Grün bis Orange), Eigenschaften und Klasse anheuern
 - **Helden:** 5 Klassen (Krieger, Priester, Runenwirker, Magier, Schurke), Ausrüstung anlegen mit Vergleich, „Bestes anlegen“
 - **Dungeons:** Bärenhöhle, Verfallene Kapelle, Brutnester. Trash-Gruppen und Boss, Gruppe aus 5 Helden, Taktik, Rückzugsregel, Anweisungen. Der Run läuft als Kampfszene in Spielzeit, auch mehrere Gruppen gleichzeitig. Belohnung: Gold und Boss-Kiste mit garantiertem Boss-Item

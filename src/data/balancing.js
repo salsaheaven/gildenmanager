@@ -11,7 +11,9 @@ export const BALANCING = {
   startBoxes: ['wood', 'wood', 'silver'],
 
   // Der Gildenkurier bringt regelmäßig eine Kiste.
+  // Abgeschaltet: Kisten gibt es aus Dungeons (und vorerst noch beim Händler). true = wieder einschalten.
   // Zeit in Spielsekunden. Bei 4x-Geschwindigkeit geht es also 4-mal so schnell.
+  courierEnabled: false,
   courierIntervalSeconds: 30,
   courierBoxType: 'wood',
 

@@ -115,7 +115,15 @@ describe('LootSystem', () => {
 });
 
 describe('Game', () => {
-  it('der Kurier bringt nach Ablauf der Zeit eine Kiste', () => {
+  it('der Kurier ist abgeschaltet und bringt keine Kisten', () => {
+    const game = new Game(1);
+    const boxesBefore = game.guild.boxes.length;
+    game.update(BALANCING.courierIntervalSeconds * 10);
+    expect(game.guild.boxes.length).toBe(boxesBefore);
+  });
+
+  it('eingeschaltet bringt der Kurier nach Ablauf der Zeit eine Kiste', () => {
+    BALANCING.courierEnabled = true;
     const game = new Game(1);
     const boxesBefore = game.guild.boxes.length;
     let arrived = 0;
@@ -126,6 +134,7 @@ describe('Game', () => {
     game.update(1);
     expect(arrived).toBe(1);
     expect(game.guild.boxes.length).toBe(boxesBefore + 1);
+    BALANCING.courierEnabled = false;
   });
 
   it('Kiste kaufen kostet Gold und klappt nicht ohne Gold', () => {
