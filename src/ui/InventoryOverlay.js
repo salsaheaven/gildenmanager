@@ -185,6 +185,8 @@ export class InventoryOverlay {
     slot.style.setProperty('--rarity', item.getRarity().color);
     slot.title = item.name;
     slot.appendChild(createItemCanvas(item, 3));
+    // Kleine Zahl unten links: die Stufe (Item-Level)
+    slot.insertAdjacentHTML('beforeend', '<span class="item-level">' + item.itemLevel + '</span>');
 
     if (this.newItemIds.has(item.id)) {
       const dot = document.createElement('span');
@@ -220,7 +222,7 @@ export class InventoryOverlay {
     const rarity = item.getRarity();
     details.innerHTML = `
       <div class="detail-name" style="color: ${rarity.color}"></div>
-      <div class="detail-sub">${rarity.name} · ${SLOT_NAMES[item.getSlot()]}</div>
+      <div class="detail-sub">${rarity.name} · ${SLOT_NAMES[item.getSlot()]} · Stufe ${item.itemLevel}</div>
       <ul class="detail-stats"></ul>
       <div class="detail-power">Stärke: ${item.getPower()}</div>
       <div class="detail-upgrade"></div>

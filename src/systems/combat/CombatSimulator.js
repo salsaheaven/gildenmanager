@@ -16,6 +16,7 @@
 // Gleicher Seed = gleicher Kampf. So lassen sich Kämpfe wiederholen und testen.
 // ============================================================
 
+import { getDefenseConstant } from '../../data/scaling.js';
 import { Random } from '../../core/Random.js';
 import { Combatant } from './Combatant.js';
 import { Battle, scaleEnemyStats } from './Battle.js';
@@ -46,23 +47,25 @@ export function createHeroCombatant(hero) {
   });
 }
 
-export function createBossCombatant(bossData, strength = 1) {
+export function createBossCombatant(bossData, level = 1) {
   return new Combatant({
     id: 'boss',
     name: bossData.name,
     side: 'enemy',
-    stats: scaleEnemyStats(bossData.stats, strength),
+    stats: scaleEnemyStats(bossData.stats, level),
     bossData: bossData,
   });
 }
 
 // ---------- Einstiege ----------
 
-// Ein einzelner Bosskampf. options = { heroes: Hero-Liste, bossId, tacticId, seed, recordLog }
+// Ein einzelner Bosskampf. options = { heroes: Hero-Liste, bossId, tacticId, seed, recordLog,
+//                                      enemyLevel (Stufe des Bosses, Standard 1) }
 export function simulateBattle(options) {
   const random = new Random(options.seed);
   const heroes = options.heroes.map((hero) => createHeroCombatant(hero));
-  return runEncounter(heroes, { type: 'boss', bossId: options.bossId }, getTactic(options.tacticId), random, options.recordLog, {});
+  return runEncounter(heroes, { type: 'boss', bossId: options.bossId }, getTactic(options.tacticId), random, options.recordLog, {},
+    options.enemyLevel || 1);
 }
 
 // Ein ganzer Dungeon-Run.
@@ -97,7 +100,7 @@ export function simulateRun(options) {
       atRound: manualHere ? manualRetreat.round : null,
     };
     const result = runEncounter(heroes, dungeon.encounters[i], tactic, random, options.recordLog, retreatOptions,
-      dungeon.enemyStrength);
+      dungeon.level);
     encounters.push(result);
 
     if (result.outcome !== 'victory') {
@@ -124,8 +127,8 @@ export function simulateRun(options) {
 // Eine Begegnung (Trash-Gruppe oder Boss) mit vorhandenen Helden-Kämpfern.
 // encounter = { type: 'boss', bossId } oder { type: 'trash', name, enemies: [...] }
 // retreatOptions = { rule (aus retreatRules.js), atRound (Rückzug per Hand ab dieser Runde) }
-// strength       = Gegnerstärke des Dungeons (1 = normal)
-export function runEncounter(heroes, encounter, tactic, random, recordLog, retreatOptions, strength = 1) {
+// level          = Stufe der Gegner (Stufe des Dungeons, siehe data/scaling.js)
+export function runEncounter(heroes, encounter, tactic, random, recordLog, retreatOptions, level = 1) {
   // Die Statistik (Schadensmesser) zählt pro Begegnung neu
   for (const hero of heroes) {
     hero.damageDone = 0;
@@ -134,8 +137,15 @@ export function runEncounter(heroes, encounter, tactic, random, recordLog, retre
   }
 
   const bossData = encounter.type === 'boss' ? getBoss(encounter.bossId) : null;
-  const boss = bossData ? createBossCombatant(bossData, strength) : null;
-  const battle = new Battle(heroes, boss, tactic, random, recordLog, strength);
+  // Rüstung wirkt je nach Stufe des Kampfs unterschiedlich stark
+  for (const hero of heroes) {
+    hero.defenseConstant = getDefenseConstant(level);
+  }
+  const boss = bossData ? createBossCombatant(bossData, level) : null;
+  if (boss) {
+    boss.defenseConstant = getDefenseConstant(level);
+  }
+  const battle = new Battle(heroes, boss, tactic, random, recordLog, level);
   if (encounter.type === 'trash') {
     for (const enemyId of encounter.enemies) {
       battle.spawnMinion(enemyId);

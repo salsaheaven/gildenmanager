@@ -1,12 +1,13 @@
 // ============================================================
 // DEBUGPANEL – Test-Menü (Taste F2)
-// Zum schnellen Ausprobieren: Gold, Kisten, Bewerber und Zeit.
+// Zum schnellen Ausprobieren: Gold, Kisten, Bewerber, Level und Zeit.
 // Gehört nicht zum eigentlichen Spiel.
 // ============================================================
 
 import { LOOT_BOXES } from '../data/lootBoxes.js';
 import { HERO_RARITIES } from '../data/heroRarities.js';
 import { getRarity } from '../data/rarities.js';
+import { SCALING } from '../data/scaling.js';
 import { showToast } from './Toast.js';
 
 export class DebugPanel {
@@ -37,6 +38,12 @@ export class DebugPanel {
         game.guild.candidates.push(candidate);
       });
     }
+    // Vorläufig, bis es Erfahrung gibt: alle Helden ein Level höher (höchstens bis zum Maximum)
+    this.addButton('+1 Level (alle Helden)', () => {
+      for (const hero of game.guild.heroes) {
+        hero.level = Math.min(SCALING.maxLevel, hero.level + 1);
+      }
+    });
     this.addButton('+10 Minuten Spielzeit', () => {
       game.clock.totalGameSeconds += 600;
       game.advanceTime(600);

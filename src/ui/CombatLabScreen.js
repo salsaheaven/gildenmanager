@@ -7,6 +7,8 @@
 // ============================================================
 
 import { BOSSES, getBoss } from '../data/enemies.js';
+import { getBossLevel } from '../data/dungeons.js';
+import { scaleEnemyStats } from '../systems/combat/Battle.js';
 import { TACTICS } from '../data/tactics.js';
 import { simulateBattle } from '../systems/combat/CombatSimulator.js';
 import { estimateChances } from '../systems/combat/ChanceEstimator.js';
@@ -18,7 +20,7 @@ import { renderOrders } from './OrdersPanel.js';
 import { Sound } from './Sound.js';
 
 const MAX_GROUP_SIZE = 5;
-const TEST_LEVELS = [1, 5, 10];
+const TEST_LEVELS = [1, 3, 5, 10, 20, 30];
 
 export class CombatLabScreen {
   constructor(rootElement, game) {
@@ -196,8 +198,11 @@ export class CombatLabScreen {
     const boss = getBoss(this.bossId);
     const info = this.root.querySelector('.boss-info');
     info.innerHTML = '<div class="boss-title"></div><ul class="mechanic-list"></ul>';
+    // Der Boss kämpft auf der Stufe seines Dungeons
+    const level = getBossLevel(boss.id);
+    const health = scaleEnemyStats(boss.stats, level).health;
     info.querySelector('.boss-title').textContent = boss.name + ' – ' + boss.title +
-      ' (' + boss.stats.health + ' Leben' + (boss.enrageRound ? ', Raserei ab Runde ' + boss.enrageRound : '') + ')';
+      ' (Stufe ' + level + ', ' + health + ' Leben' + (boss.enrageRound ? ', Raserei ab Runde ' + boss.enrageRound : '') + ')';
     for (const mechanic of boss.mechanics) {
       const line = document.createElement('li');
       line.innerHTML = '<b></b><span></span>';
@@ -239,6 +244,7 @@ export class CombatLabScreen {
       heroes: group,
       bossId: this.bossId,
       tacticId: this.tacticId,
+      enemyLevel: getBossLevel(this.bossId),
       seed: Date.now() + this.fightCounter,
       recordLog: true,
     });
@@ -269,6 +275,7 @@ export class CombatLabScreen {
       heroes: group,
       bossId: this.bossId,
       tacticId: this.tacticId,
+      enemyLevel: getBossLevel(this.bossId),
       seed: Date.now(),
     });
     Sound.click();

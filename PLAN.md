@@ -81,9 +81,9 @@ In kleinen, jeweils online testbaren Schritten:
 4. **Fortschritt:** XP und Level, Verletzungen, Test-Menü (F2) für Gold, Kisten und Zeit
 
 **Als Nächstes (in dieser Reihenfolge):**
-- **Gegnerstärke und Skalierung:** Zuerst die Level-Obergrenze festlegen. Davon hängt ab, wie stark Items im Verhältnis zu den Grundwerten sein dürfen. Im Moment sind Items auf Level 1 zu stark, deshalb springen die Siegchancen zwischen Ausrüstungsstufen stark (siehe KONZEPT.md).
+- ✅ **Skalierung, Teil A:** Level 30 als Obergrenze, Item-Level nach Herkunft, Dungeon-Stufen (1 / 3 / 5), Gegner wachsen mit der Stufe, alle Formeln in `src/data/scaling.js`. Per Simulation geprüft: Mit Ausrüstung aus dem vorherigen Dungeon gelingt der Einstieg auf jeder Stufe (bis 30) zu etwa 75–85 %. Test-Knopf „+1 Level“ im Test-Menü.
+- **Skalierung, Teil B = Schritt 4:** Erfahrung, Level-Up mit Animation, Aufhol-Erfahrung, Verletzungen.
 - **Beute sichtbarer machen:** Nach einem Sieg erscheint ein Sieg-Fenster mit der Boss-Kiste und dem Knopf „Jetzt öffnen“. Bisher landet die Kiste unbemerkt in der Schatzkammer. Eventuell bekommen Trash-Gegner kleine eigene Drops (Gold, ab und zu ein graues oder weißes Item), damit sich auch ein gescheiterter Run lohnt.
-- Danach Schritt 4.
 
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 

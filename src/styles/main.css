@@ -755,6 +755,14 @@ body.overlay-open {
   50% { translate: 0 -2px; }
 }
 
+.inventory-slot .item-level {
+  position: absolute;
+  bottom: 0;
+  left: 3px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
 .inventory-slot .upgrade-arrow {
   position: absolute;
   bottom: -2px;

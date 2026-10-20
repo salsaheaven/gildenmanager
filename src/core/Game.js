@@ -257,7 +257,7 @@ export class Game {
       report.chest = dungeon.rewards.chest;
       report.firstClear = this.guild.getClears(dungeon.id) === 0;
       this.guild.addGold(dungeon.rewards.gold);
-      this.guild.addBox(dungeon.rewards.chest);
+      this.guild.addBox(dungeon.rewards.chest, dungeon.level); // Items in der Stufe des Dungeons
       this.guild.dungeonClears[dungeon.id] = this.guild.getClears(dungeon.id) + 1;
     }
 

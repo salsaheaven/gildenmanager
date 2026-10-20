@@ -42,7 +42,8 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
 src/data/      Reine Inhalte: rarities, items, lootBoxes, balancing, sprites (Pixel-Art als Text),
                heroClasses, abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
                enemies (Bosse + Diener/Trash), tactics, combatRules, heroOrders (Kampf-Anweisungen pro Klasse),
-               dungeons (Begegnungen, Gegnerstärke, Belohnung), retreatRules
+               dungeons (Begegnungen, Stufe, Belohnung), retreatRules,
+               scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: LootBoxScreen (Schatzkammer),
                HeroScreen (+ HeroDetailPanel, EquipPanel), TavernScreen, CombatLabScreen,
                DungeonScreen (+ RunViewer = laufenden Run als Szene zeigen).
@@ -60,7 +61,8 @@ tests/         Vitest-Tests (prüfen auch, ob die Daten gültig sind)
 - Jede Klasse, die gespeichert wird, hat `toSaveData()` und `static fromSaveData()`.
 - Zufall läuft immer über `Random`, nie direkt über `Math.random()`. So bleibt er testbar und wird mitgespeichert.
 - Balancing des Kampfs: Im Kampf-Labor ausprobieren, oder per Node-Skript mit `estimateChances` viele Varianten durchrechnen.
-  Zielwerte für eine Level-1-Gruppe ohne Ausrüstung: Grimmzahn ~90 %, Morva ~70 %, Skarrix ~50 %.
+  Zielwerte (ganzer Dungeon): Bärenhöhle mit nackter Level-1-Gruppe ~90 %. Für jeden weiteren Dungeon gilt:
+  Gruppe auf der Stufe des Dungeons mit grüner Ausrüstung aus dem vorherigen Dungeon ~75–85 %, mit Ausrüstung der eigenen Stufe ~95 %.
 - Die Oberfläche muss auch auf dem Handy funktionieren (Breite ~390 px). Handy-Regeln stehen am Ende von `main.css` (`@media (max-width: 700px)`).
 - Pixel-Art steht als Text-Raster in `src/data/sprites.js`. Ein Zeichen ist ein Pixel, die Farben stehen in `PALETTE`.
 

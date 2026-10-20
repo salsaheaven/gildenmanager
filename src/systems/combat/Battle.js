@@ -5,13 +5,14 @@
 // Bietet Hilfsfragen an wie "Wen greift der Boss an?" oder "Wer ist am verletztesten?".
 // ============================================================
 
+import { getEnemyLevelFactors, getDefenseConstant } from '../../data/scaling.js';
 import { Combatant } from './Combatant.js';
 import { MINIONS } from '../../data/enemies.js';
 
 export class Battle {
   // recordLog = false spart Zeit, wenn nur das Ergebnis zählt (z.B. bei 200 Simulationen)
-  // enemyStrength = Faktor auf Leben und Angriff der Gegner (siehe dungeons.js)
-  constructor(heroes, boss, tactic, random, recordLog, enemyStrength = 1) {
+  // enemyLevel = Stufe der Gegner (Stufe des Dungeons, siehe data/scaling.js)
+  constructor(heroes, boss, tactic, random, recordLog, enemyLevel = 1) {
     this.heroes = heroes;      // Combatant-Liste der Helden
     this.enemies = boss ? [boss] : []; // Combatant-Liste der Gegner (Boss + Diener/Trash)
     this.boss = boss;                  // null bei Trash-Gruppen
@@ -22,7 +23,7 @@ export class Battle {
     this.log = [];             // Einträge: { round, text, kind, ...details } (siehe addLog)
     this.snapshots = [];       // Leben aller Kämpfer am Ende jeder Runde (für den Live-Ticker)
     this.nextMinionNumber = 1;
-    this.enemyStrength = enemyStrength;
+    this.enemyLevel = enemyLevel;
     this.forcedTarget = null;  // Herausforderungsruf: { combatant, rounds }
 
     // Rückzug: läuft gerade? wie viele Runden noch? geschafft?
@@ -174,21 +175,23 @@ export class Battle {
       id: 'minion-' + this.nextMinionNumber,
       name: minionData.name + ' ' + this.nextMinionNumber,
       side: 'enemy',
-      stats: scaleEnemyStats(minionData.stats, this.enemyStrength),
+      stats: scaleEnemyStats(minionData.stats, this.enemyLevel),
       isMinion: true,
       minionId: minionId,
     });
+    minion.defenseConstant = getDefenseConstant(this.enemyLevel);
     this.nextMinionNumber++;
     this.enemies.push(minion);
     return minion;
   }
 }
 
-// Gegnerwerte mit der Stärke des Dungeons verrechnen (Rüstung bleibt gleich)
-export function scaleEnemyStats(stats, strength) {
+// Gegnerwerte an die Stufe anpassen (Faktoren siehe data/scaling.js)
+export function scaleEnemyStats(stats, level) {
+  const factors = getEnemyLevelFactors(level);
   return {
-    health: Math.round(stats.health * strength),
-    attack: stats.attack * strength,
-    defense: stats.defense,
+    health: Math.round(stats.health * factors.health),
+    attack: stats.attack * factors.attack,
+    defense: stats.defense * factors.defense,
   };
 }

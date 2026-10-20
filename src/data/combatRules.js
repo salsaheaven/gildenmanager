@@ -10,9 +10,7 @@ export const COMBAT_RULES = {
   baseCritChance: 0.05,
   critMultiplier: 1.5,
 
-  // Rüstung verringert Schaden: Anteil = Rüstung / (Rüstung + defenseConstant).
-  // Bei 60: 30 Rüstung = −33 % Schaden, 60 Rüstung = −50 %.
-  defenseConstant: 60,
+  // Wie stark Rüstung wirkt, steht in scaling.js (wächst mit der Gegnerstufe)
 
   // So viel Mana (Anteil vom Maximum) kommt jede Runde zurück
   manaRegenPerRound: 0.04,

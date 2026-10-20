@@ -4,8 +4,9 @@
 //
 // id, name, description = Anzeige
 // recommendedGearScore  = empfohlener Ø-Ausrüstungswert der Gruppe (Hinweis für den Spieler)
-// enemyStrength         = Faktor auf Leben und Angriff aller Gegner im Dungeon (1.2 = 20 % stärker).
-//                         Damit lassen sich dieselben Gegner für schwerere Dungeons wiederverwenden.
+// level                 = Stufe des Dungeons: So stark sind die Gegner (siehe scaling.js),
+//                         und Items aus seiner Boss-Kiste haben dieses Item-Level.
+//                         Eine Gruppe auf diesem Heldenlevel passt zum Dungeon.
 // unlockAfter           = dieser Dungeon wird freigeschaltet, wenn jener einmal geschafft ist (null = von Anfang an)
 // encounters            = Begegnungen in Reihenfolge:
 //                         { type: 'trash', name, enemies: [Gegner-ids aus MINIONS in enemies.js] }
@@ -19,7 +20,7 @@ export const DUNGEONS = [
     name: 'Die Bärenhöhle',
     description: 'Ein Rudel Höhlenwölfe bewacht den Bau des gewaltigen Grimmzahn.',
     recommendedGearScore: 0,
-    enemyStrength: 1.0,
+    level: 1,
     unlockAfter: null,
     encounters: [
       { type: 'trash', name: 'Wolfsrudel', enemies: ['caveWolf', 'caveWolf', 'caveWolf'] },
@@ -31,8 +32,8 @@ export const DUNGEONS = [
     id: 'ruinedChapel',
     name: 'Die verfallene Kapelle',
     description: 'Kultisten und Ghule dienen Schwester Morva bei ihren finsteren Ritualen.',
-    recommendedGearScore: 25,
-    enemyStrength: 1.5,
+    recommendedGearScore: 12,
+    level: 3,
     unlockAfter: 'bearCave',
     encounters: [
       { type: 'trash', name: 'Kultisten am Tor', enemies: ['cultist', 'cultist', 'ghoul'] },
@@ -44,8 +45,8 @@ export const DUNGEONS = [
     id: 'broodNests',
     name: 'Die Brutnester',
     description: 'Tief unter der Erde wimmelt es von Käfern. In der Mitte lauert die Brutmutter Skarrix.',
-    recommendedGearScore: 45,
-    enemyStrength: 2.0,
+    recommendedGearScore: 34,
+    level: 5,
     unlockAfter: 'ruinedChapel',
     encounters: [
       { type: 'trash', name: 'Brutkammer', enemies: ['broodling', 'broodling', 'broodling', 'broodling'] },
@@ -63,4 +64,16 @@ export function getDungeon(dungeonId) {
     }
   }
   throw new Error('Unbekannter Dungeon: ' + dungeonId);
+}
+
+// Auf welcher Stufe kämpft dieser Boss? (Stufe des Dungeons, in dem er wohnt, sonst 1)
+export function getBossLevel(bossId) {
+  for (const dungeon of DUNGEONS) {
+    for (const encounter of dungeon.encounters) {
+      if (encounter.type === 'boss' && encounter.bossId === bossId) {
+        return dungeon.level;
+      }
+    }
+  }
+  return 1;
 }

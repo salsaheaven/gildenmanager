@@ -259,7 +259,7 @@ export class LootBoxScreen {
 
     const rarityLabel = document.createElement('div');
     rarityLabel.className = 'card-rarity';
-    rarityLabel.textContent = rarity.name;
+    rarityLabel.textContent = rarity.name + ' · Stufe ' + item.itemLevel;
     card.appendChild(rarityLabel);
 
     const stats = document.createElement('div');

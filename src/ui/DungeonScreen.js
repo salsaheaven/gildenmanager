@@ -97,7 +97,7 @@ export class DungeonScreen {
       `;
       card.querySelector('.dungeon-name').textContent = dungeon.name;
       card.querySelector('.dungeon-sub').textContent = unlocked
-        ? 'Empf. AW ' + dungeon.recommendedGearScore + (clears > 0 ? ' · geschafft: ' + clears + '×' : ' · noch nie geschafft')
+        ? 'Stufe ' + dungeon.level + ' · Empf. AW ' + dungeon.recommendedGearScore + (clears > 0 ? ' · geschafft: ' + clears + '×' : ' · noch nie geschafft')
         : 'Gesperrt: erst ' + getDungeon(dungeon.unlockAfter).name + ' schaffen';
       card.addEventListener('click', () => {
         Sound.click();
@@ -197,7 +197,7 @@ export class DungeonScreen {
     container.insertAdjacentHTML('beforeend', '<span>' + dungeon.rewards.gold + '</span>');
     container.appendChild(createChestCanvas(chest, 2));
     const name = document.createElement('span');
-    name.textContent = chest.name;
+    name.textContent = chest.name + ' (Items der Stufe ' + dungeon.level + ')';
     container.appendChild(name);
   }
 
@@ -216,7 +216,7 @@ export class DungeonScreen {
       button.disabled = busy;
       button.appendChild(createHeroCanvas(hero, 2));
       button.insertAdjacentHTML('beforeend', '<span></span>');
-      button.querySelector('span').textContent = hero.name + ' (' + hero.getClass().name + ', AW ' + hero.getGearScore() + ')' +
+      button.querySelector('span').textContent = hero.name + ' (' + hero.getClass().name + ', Lv ' + hero.level + ', AW ' + hero.getGearScore() + ')' +
         (busy ? ' – unterwegs' : '');
       button.addEventListener('click', () => {
         Sound.click();
@@ -235,7 +235,7 @@ export class DungeonScreen {
     return this.game.guild.heroes.filter((hero) => this.selectedHeroIds.has(hero.id));
   }
 
-  // Hinweise statt Siegchance: Ausrüstungswert und fehlende Rollen
+  // Hinweise statt Siegchance: Level, Ausrüstungswert und fehlende Rollen
   renderGroupCheck(container, dungeon) {
     const group = this.getSelectedHeroes();
     if (group.length === 0) {
@@ -243,6 +243,7 @@ export class DungeonScreen {
       return;
     }
     const averageGear = Math.round(group.reduce((sum, hero) => sum + hero.getGearScore(), 0) / group.length);
+    const averageLevel = Math.round(group.reduce((sum, hero) => sum + hero.level, 0) / group.length * 10) / 10;
     const roles = group.map((hero) => hero.getClass().role);
     const warnings = [];
     if (!roles.includes('tank')) {
@@ -255,8 +256,11 @@ export class DungeonScreen {
       warnings.push('Nur ' + group.length + ' von ' + GROUP_SIZE + ' Helden.');
     }
 
+    const levelClass = averageLevel >= dungeon.level ? 'good' : 'bad';
     const gearClass = averageGear >= dungeon.recommendedGearScore ? 'good' : 'bad';
-    container.innerHTML = '<div class="gear-check ' + gearClass + '">Ø Ausrüstungswert: ' + averageGear +
+    container.innerHTML =
+      '<div class="gear-check ' + levelClass + '">Ø Level: ' + averageLevel + ' (Stufe des Dungeons: ' + dungeon.level + ')</div>' +
+      '<div class="gear-check ' + gearClass + '">Ø Ausrüstungswert: ' + averageGear +
       ' (empfohlen: ' + dungeon.recommendedGearScore + ')</div>';
     for (const warning of warnings) {
       container.insertAdjacentHTML('beforeend', '<div class="group-warning">⚠ ' + warning + '</div>');

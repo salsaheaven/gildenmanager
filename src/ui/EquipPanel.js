@@ -125,7 +125,7 @@ export class EquipPanel {
       <span class="equip-diff"></span>
     `);
     row.querySelector('.equip-name').textContent = item.name;
-    row.querySelector('.equip-stats').textContent = SLOT_NAMES[item.getSlot()] + ' · ' + formatStats(item.stats);
+    row.querySelector('.equip-stats').textContent = SLOT_NAMES[item.getSlot()] + ' · Stufe ' + item.itemLevel + ' · ' + formatStats(item.stats);
 
     const diffElement = row.querySelector('.equip-diff');
     diffElement.textContent = formatDifference(difference);

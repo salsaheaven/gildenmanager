@@ -4,6 +4,7 @@
 // Wird für jeden Kampf neu erstellt, der Held selbst wird dabei nicht verändert.
 // ============================================================
 
+import { getDefenseConstant } from '../../data/scaling.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
 
 export class Combatant {
@@ -33,6 +34,8 @@ export class Combatant {
     this.attack = options.stats.attack || 0;
     this.magic = options.stats.magic || 0;
     this.defense = options.stats.defense || 0;
+    // Wie stark Rüstung wirkt. Hängt von der Stufe des Kampfs ab und wird von der Begegnung gesetzt.
+    this.defenseConstant = getDefenseConstant(1);
 
     this.abilityIds = options.abilityIds || [];
     this.basicAttack = options.basicAttack || null;
@@ -132,7 +135,7 @@ export class Combatant {
   takeDamage(rawAmount, ignoreDefense = false) {
     let amount = rawAmount * this.getDamageTakenFactor();
     if (!ignoreDefense) {
-      const reduction = this.defense / (this.defense + COMBAT_RULES.defenseConstant);
+      const reduction = this.defense / (this.defense + this.defenseConstant);
       amount = amount * (1 - reduction);
     }
     amount = Math.max(1, Math.round(amount));
