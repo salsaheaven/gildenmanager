@@ -86,7 +86,8 @@ In kleinen, jeweils online testbaren Schritten:
 - **Umbau auf Runden** (Entscheidung vom 2026-10-20, Details in `KONZEPT.md`). Kampf, Beute, EP, Skalierung und Inventar bleiben unverändert. In drei Schritten, jeder einzeln spielbar:
   1. **Tageszähler statt Spieluhr:** Knopf „Tag beenden“ statt Pause und Tempo. Ein Dungeon wird für heute eingeplant und erst beim Tagesende ausgekämpft. Verletzungen dauern Tage. Händler und Bewerber wechseln täglich.
   2. **Tagesabschluss (= Beute sichtbarer machen):** Beim Tagesende laufen die Kämpfe nacheinander als Szene (überspringbar). Danach kommt ein Fenster mit Beute, EP, Level-Ups und den Boss-Kisten samt Knopf „Jetzt öffnen“. Eventuell bekommen Trash-Gegner kleine eigene Drops (Gold, ab und zu ein graues oder weißes Item), damit sich auch ein gescheiterter Run lohnt.
-  3. **Tagesplan:** Übersicht, welcher Held heute was macht (Dungeon oder Ausruhen). Hier kommen später weitere Aufgaben dazu, z.B. Farmen oder Kräuter sammeln.
+  3. **Kampfszene spannender:** Langsamer abspielen, Skill-Namen gut lesbar, deutlichere Effekte. Tempo 1x / 2x / 4x und „Überspringen“. Rückzug per Hand fällt weg (nur noch die Rückzugsregel).
+  4. **Tagesplan:** Übersicht, welcher Held heute was macht (Dungeon oder Ausruhen). Hier kommen später weitere Aufgaben dazu, z.B. Farmen oder Kräuter sammeln.
 
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 

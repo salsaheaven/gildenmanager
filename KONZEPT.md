@@ -58,16 +58,16 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
 ### Grundprinzip
 - **Runden-Simulation:** Ein Dungeon ist eine Kette von Begegnungen (Trash, danach der Boss). Jede Begegnung wird Runde für Runde berechnet.
 - **Siegchance:** Vor dem Start simuliert das Spiel den Kampf 200-mal und zeigt Erfolgs- und Todesrisiko genau an, z.B. „78 % Erfolg, 6 % Todesgefahr“.
-- **Kein Eingreifen im Kampf:** Man ist Gildenmeister, nicht Spieler. Im Kampf schaut man zu (einzige Ausnahme: der Rückzug). Die ganze Tiefe steckt in der **Vorbereitung**.
+- **Kein Eingreifen im Kampf:** Man ist Gildenmeister, nicht Spieler. Im Kampf schaut man zu (auch der Rückzug läuft nur über die vorher eingestellte Regel). Die ganze Tiefe steckt in der **Vorbereitung**.
 - **Taktik vor dem Start:** Vorsichtig, Ausgewogen oder Aggressiv. Die Taktik gilt für die ganze Gruppe und beeinflusst, wann geheilt wird und wie viel Schaden die Gruppe macht.
 - **Anweisungen pro Held:** Jede Klasse hat 2 bis 3 Anweisungen mit Auswahl, z.B. „Heilen ab 80 %“, „Diener zuerst“, „Runenpanzer nur vor großen Schlägen“ oder „30 % Mana aufheben“. Die Helden merken sich ihre Anweisungen. Im Kampf sieht man, ob sie aufgehen. Später können Talente neue Anweisungen freischalten.
-- **Technik für den Rückzug per Hand:** Der Kampf ist vorberechnet. Befiehlt man in Runde X den Rückzug, wird der Kampf mit demselben Zufall neu berechnet. Bis Runde X läuft er gleich, danach folgt der Rückzug.
-- **Rückzug:** Jederzeit während des Runs per Hand möglich, oder automatisch über eine **Rückzugsregel**, die man vor dem Start einstellt. Damit der Tod trotzdem ein Risiko bleibt:
+- **Rückzug:** Nur automatisch über eine **Rückzugsregel**, die man vor dem Start einstellt. Einen Rückzug per Hand gibt es nicht (entschieden am 2026-10-20). Damit der Tod trotzdem ein Risiko bleibt:
   - Die Regel reagiert **nur auf Gefallene, nicht auf Lebenspunkte**. Wählbar sind „nie“, „nach 1 Gefallenen“ und „nach 2 Gefallenen“.
   - Der Rückzug dauert **2 Runden**, in denen der Boss weiter angreift (auch mit Mechaniken). Die Helden heilen und verteidigen sich nur noch, Schaden machen sie keinen mehr. Auch beim Rückzug kann also noch jemand fallen.
   - Es gibt keine Beute, und alle Überlebenden sind verletzt.
 - **Darstellung:** Der vorberechnete Kampf wird am Tagesende als **Kampfszene** abgespielt: Pixel-Helden gegen den Boss, Lebensbalken, aufploppende Schadens- und Heilzahlen wie im MMO, ein Zauberbalken für angekündigte Mechaniken und ein Ticker. Danach folgt der vollständige Kampfbericht. Man soll mitfiebern und sehen, wie Taktik und Gruppe wirken.
-- **Überspringen:** Seit der Umstellung auf Runden kostet Zuschauen keine Spielzeit mehr. Die Szene lässt sich deshalb jederzeit überspringen, dann gilt die Rückzugsregel. Den Rückzug per Hand gibt es nur, wenn man zuschaut. (Die alte Idee „Schnellkampf nach 3 Erfolgen“ fällt weg.)
+- **Lesbarkeit der Szene:** Bisher macht Zuschauen zu wenig Spaß. Die Szene läuft deshalb **langsamer**, damit man den Kampf verfolgen und die Skill-Namen lesen kann. Skills bekommen **deutlichere Effekte**: Name groß über dem Helden, kräftigere Animationen, klar erkennbar, wer wen trifft oder heilt. Wer es eilig hat, schaltet auf **2x oder 4x** Tempo.
+- **Überspringen:** Seit der Umstellung auf Runden kostet Zuschauen keine Spielzeit mehr. Die Szene lässt sich deshalb jederzeit überspringen, das Ergebnis bleibt dasselbe. (Die alte Idee „Schnellkampf nach 3 Erfolgen“ fällt weg.)
 - **Zwei Reihen:** Vorne stehen Tanks und Nahkämpfer, hinten Fernkämpfer, Heiler und Supporter. Manche Bossfähigkeiten treffen nur eine Reihe.
 - **Ressourcen:** Alle Skills haben Abklingzeiten. Heiler und Zauberer brauchen zusätzlich **Mana**. Geht dem Heiler das Mana aus, wird es gefährlich.
 - **Tod (nur Hardcore):** Wer auf 0 Leben fällt, ist tot, auch wenn die Gruppe gewinnt. In Normal-Dungeons ist er stattdessen verletzt.
