@@ -102,6 +102,17 @@ Jeder Skill hat eine Abklingzeit und kostet bei Zauberern Mana. Alle Zahlen steh
 | Support | **Schamane** | Bärenpfahl (+Angriff für die vordere Reihe) | Quellpfahl (Mana für alle Heiler und Zauberer) | Felsenpfahl (−Flächenschaden für die Gruppe) | |
 | Support | **Hexenmeister** | Welkfluch (Boss macht −20 % Schaden) | Bruchmal (Boss nimmt +15 % Schaden) | Zehrender Griff (Schaden, heilt den Hexenmeister) | |
 
+## Skalierung
+| Thema | Entscheidung |
+|---|---|
+| Level-Obergrenze | **Level 30** für die erste Version. Jedes Level zählt spürbar, und es gibt weniger Balancing-Arbeit. Eine spätere Erweiterung (z.B. auf 40 oder 60) ist möglich, weil alle Formeln in `src/data/` stehen. |
+| Tempo | Die ersten Helden erreichen Level 30 **etwa zur Hälfte des Spiels**. Danach zählen Ausrüstung, Sets, Verbessern und Heroisch (Endgame). |
+| Item-Level | Jedes Item hat ein **Item-Level nach Herkunft**: Jeder Dungeon hat eine Stufe und lässt Items dieser Stufe fallen. Ein grünes Item aus einem späteren Dungeon schlägt ein blaues aus einem frühen. Neue Dungeons lohnen sich so immer, und alte Ausrüstung wird ersetzt. |
+| Gewicht der Ausrüstung | Am Ende macht die Ausrüstung **etwa die Hälfte** der Stärke eines Helden aus. Am Anfang ist es deutlich weniger (etwa ein Drittel), weil Item-Werte schneller mit dem Item-Level wachsen als die Grundwerte mit dem Helden-Level. |
+| Gegner | Gegner wachsen mit der Stufe des Dungeons statt über eine feste Gegnerstärke |
+
+Alle Formeln und Zahlen dafür stehen in `src/data/` und werden per Simulation eingestellt.
+
 ## Noch offen (nächste Sessions)
 - **Bekanntes Problem: „Priester heilt früh“ ist fast immer die beste Wahl.** Gegen alle drei Test-Bosse gewinnt die Gruppe damit häufiger. Mögliche Nachteile, die man ausprobieren kann:
   - Frühes Heilen verbraucht deutlich mehr Mana, sodass der Heiler in langen Kämpfen leer läuft
@@ -113,5 +124,3 @@ Jeder Skill hat eine Abklingzeit und kostet bei Zauberern Mana. Alle Zahlen steh
 - **KI-Gilden:** Fortschrittskurve, Namen, Persönlichkeit, Reaktionen
 - **Verbrauchsgüter:** Welche Tränke, Fläschchen und Proviant gibt es, und was bewirken sie genau?
 - **Wirtschaft:** Woher kommt Gold, wofür gibt man es aus?
-- **Items im Verhältnis zu den Helden:** Auf Level 1 sind Items sehr stark. Ein grünes Schwert (+8 Angriff) verdoppelt fast den Angriff eines Helden, und schon 2 grüne Items pro Held machen die Kapelle leicht. Die Dungeons gleichen das vorläufig über eine **Gegnerstärke** aus (1,0 / 1,5 / 2,0). Die Erfolgschance springt deshalb zwischen Ausrüstungsstufen noch stark. Wie Item-Werte mit dem Level wachsen (z.B. über eine Item-Stufe), gehört zur Entscheidung über die Level-Obergrenze.
-- **Level-Obergrenze:** Wie hoch geht das Heldenlevel? Davon hängt ein großer Teil der Skalierung ab (Wachstum pro Level, Boss- und Item-Werte, Dungeon-Stufen, Spieldauer). Bis zur Entscheidung sind alle Zahlen vorläufig.
