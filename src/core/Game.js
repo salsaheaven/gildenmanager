@@ -10,6 +10,7 @@
 //   'changed'              → irgendetwas am Spielstand hat sich geändert
 //   'candidatesRefreshed'  → neue Bewerber in der Taverne (Daten: Liste der Bewerber)
 //   'expeditionFinished'   → ein Dungeon-Run ist ausgekämpft (Daten: der Bericht, siehe finishExpedition)
+//   'dayEnding'            → gleich wird der Tag ausgewertet (z.B. um Level-Up-Banner zurückzuhalten)
 //   'dayEnded'             → ein Tag ist vorbei (Daten: { day, reports })
 //   'heroLevelUp'          → ein Held ist aufgestiegen (Daten: { hero, newLevel })
 //   'heroHealed'           → ein verletzter Held ist wieder fit (Daten: der Held)
@@ -60,6 +61,7 @@ export class Game {
   // Gibt die Berichte der heutigen Runs zurück (in der Reihenfolge, in der sie geplant wurden).
   endDay() {
     const endedDay = this.day;
+    this.emit('dayEnding');
 
     // 1. Wer schon verletzt war, heilt einen Tag lang.
     //    (Zuerst, damit Helden, die heute fallen, morgen noch verletzt sind.)
@@ -205,12 +207,21 @@ export class Game {
       heroNames: result.heroes.map((hero) => hero.name),
       fallenNames: result.heroes.filter((hero) => !hero.alive).map((hero) => hero.name),
       gold: 0,
+      trashGold: 0,
       chest: null,
       firstClear: false,
       expedition: expedition.toSaveData(), // zum erneuten Ansehen
     };
 
     this.guild.dungeonAttempts[dungeon.id] = this.guild.getAttempts(dungeon.id) + 1;
+
+    // Kleines Gold für jede besiegte Trash-Gruppe, damit sich auch ein gescheiterter Run lohnt
+    for (let i = 0; i < result.encounters.length; i++) {
+      if (dungeon.encounters[i].type === 'trash' && result.encounters[i].outcome === 'victory') {
+        report.trashGold += dungeon.rewards.trashGold || 0;
+      }
+    }
+    this.guild.addGold(report.trashGold);
     if (success) {
       report.gold = dungeon.rewards.gold;
       report.chest = dungeon.rewards.chest;

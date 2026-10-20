@@ -42,7 +42,7 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
 | Erbe | Stirbt ein Held, kommt seine **komplette Ausrüstung zurück ins Inventar**. Man verliert nur den Helden selbst (Level, Eigenschaften, Seltenheit), so bleibt das Spiel trotz Wipes schaffbar. Gefallene bekommen einen Platz in der **Ehrenhalle**. |
 | Aufhol-Erfahrung | Helden unter dem Level-Durchschnitt der Gilde bekommen deutlich mehr Erfahrung, damit Ersatz für Gefallene schnell einsatzbereit ist |
 | Wiederbelebung | Spät im Spiel und teuer: Ein Gebäude (z.B. ein Altar in der Gildenhalle) oder ein seltenes Item kann gelegentlich einen Gefallenen zurückholen |
-| Beute | Bosse haben feste Beutetabellen, z.B. bestimmte Set-Teile. Ihre Beute kommt in eine **Boss-Kiste**, die man mit der Öffnen-Animation öffnet. |
+| Beute | Bosse haben feste Beutetabellen, z.B. bestimmte Set-Teile. Ihre Beute kommt in eine **Boss-Kiste**, die man mit der Öffnen-Animation öffnet (direkt aus dem Tagesabschluss mit „Jetzt öffnen“). Jede besiegte Trash-Gruppe bringt etwas Gold, auch wenn der Run danach scheitert. |
 | Item-Nutzen | **Zerlegen → Material → Verbessern (+1 bis +10)**, ab einer bestimmten Stufe mit Fehlschlag-Chance. Material dient auch als Zutat fürs Crafting, z.B. für Set-Teile. |
 | Spielende | **Endboss** als letzter Raid |
 | Wertung | **Endauswertung in Spieltagen**: Wie viele Tage (Runden) hat man bis zum Endboss gebraucht? Wie lange man über einen Tag nachdenkt, spielt keine Rolle. Das Ergebnis lässt sich vergleichen („2 Tage schneller als du“). |

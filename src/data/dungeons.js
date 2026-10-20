@@ -11,7 +11,8 @@
 // encounters            = Begegnungen in Reihenfolge:
 //                         { type: 'trash', name, enemies: [Gegner-ids aus MINIONS in enemies.js] }
 //                         { type: 'boss', bossId }
-// rewards               = gold: Gold bei Erfolg, chest: Boss-Kiste (aus lootBoxes.js)
+// rewards               = gold: Gold bei Erfolg, chest: Boss-Kiste (aus lootBoxes.js),
+//                         trashGold: Gold pro besiegter Trash-Gruppe (gibt es auch, wenn der Run danach scheitert)
 // ============================================================
 
 export const DUNGEONS = [
@@ -26,7 +27,7 @@ export const DUNGEONS = [
       { type: 'trash', name: 'Wolfsrudel', enemies: ['caveWolf', 'caveWolf', 'caveWolf'] },
       { type: 'boss', bossId: 'grimfang' },
     ],
-    rewards: { gold: 40, chest: 'chestGrimfang' },
+    rewards: { gold: 40, chest: 'chestGrimfang', trashGold: 8 },
   },
   {
     id: 'ruinedChapel',
@@ -39,7 +40,7 @@ export const DUNGEONS = [
       { type: 'trash', name: 'Kultisten am Tor', enemies: ['cultist', 'cultist', 'ghoul'] },
       { type: 'boss', bossId: 'morva' },
     ],
-    rewards: { gold: 70, chest: 'chestMorva' },
+    rewards: { gold: 70, chest: 'chestMorva', trashGold: 12 },
   },
   {
     id: 'broodNests',
@@ -53,7 +54,7 @@ export const DUNGEONS = [
       { type: 'trash', name: 'Panzerwache', enemies: ['armoredBeetle', 'armoredBeetle'] },
       { type: 'boss', bossId: 'skarrix' },
     ],
-    rewards: { gold: 110, chest: 'chestSkarrix' },
+    rewards: { gold: 110, chest: 'chestSkarrix', trashGold: 15 },
   },
 ];
 

@@ -49,7 +49,8 @@ src/data/      Reine Inhalte: rarities, items, lootBoxes, balancing, sprites (Pi
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: LootBoxScreen (Schatzkammer),
                HeroScreen (+ HeroDetailPanel, EquipPanel), TavernScreen, CombatLabScreen,
                DungeonScreen (+ RunViewer = Bericht eines beendeten Runs zeigen).
-               LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden).
+               DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe als Szene, danach Zusammenfassung mit Beute.
+               LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden, während des Tagesabschlusses zurückgehalten).
                InventoryOverlay = Inventar als Vollbild-Fenster mit Kategorien (Knopf „Inventar“ in der Reiterleiste).
                CombatReport = Ergebnis, Schadensmesser und Kampfbericht (wiederverwendbar).
                BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken); läuft über update(sekunden).

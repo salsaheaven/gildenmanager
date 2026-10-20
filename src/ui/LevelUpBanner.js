@@ -2,6 +2,7 @@
 // LEVELUPBANNER – großes "LEVEL UP!" in der Mitte des Bildschirms
 // Steigen mehrere Helden auf einmal auf, kommen die Banner nacheinander.
 // Ein Klick auf das Banner zeigt sofort das nächste.
+// hold() hält Banner zurück (z.B. während der Tagesabschluss die Kämpfe zeigt), release() zeigt sie dann.
 // ============================================================
 
 import { createHeroCanvas } from './PixelArt.js';
@@ -14,6 +15,7 @@ export class LevelUpBanner {
   constructor() {
     this.queue = [];     // wartende Level-Ups: { hero, newLevel }
     this.isShowing = false;
+    this.isHeld = false;
     this.timer = null;
 
     this.root = document.createElement('div');
@@ -27,6 +29,19 @@ export class LevelUpBanner {
   // Ein Level-Up anzeigen (oder hinten anstellen, wenn gerade eins läuft)
   show(hero, newLevel) {
     this.queue.push({ hero, newLevel });
+    if (!this.isShowing && !this.isHeld) {
+      this.showNext();
+    }
+  }
+
+  // Banner vorerst nur sammeln, nicht zeigen
+  hold() {
+    this.isHeld = true;
+  }
+
+  // Gesammelte Banner jetzt zeigen
+  release() {
+    this.isHeld = false;
     if (!this.isShowing) {
       this.showNext();
     }

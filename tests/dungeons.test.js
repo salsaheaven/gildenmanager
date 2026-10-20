@@ -101,7 +101,9 @@ describe('Expeditionen (Tagesplanung)', () => {
     expect(reports.length).toBe(1);
     expect(reports[0].outcome).toBe('success');
     expect(reports[0].day).toBe(1);
-    expect(game.guild.gold).toBe(goldBefore + DUNGEONS[0].rewards.gold);
+    // Boss-Gold plus Gold für die besiegte Trash-Gruppe
+    expect(reports[0].trashGold).toBe(DUNGEONS[0].rewards.trashGold);
+    expect(game.guild.gold).toBe(goldBefore + DUNGEONS[0].rewards.gold + DUNGEONS[0].rewards.trashGold);
     expect(game.guild.countBoxes('chestGrimfang')).toBe(1);
     expect(game.guild.getClears('bearCave')).toBe(1);
     expect(game.guild.isHeroBusy(heroIds[0])).toBe(false);
@@ -127,6 +129,27 @@ describe('Expeditionen (Tagesplanung)', () => {
     const reports = game.endDay();
     const snapshot = reports[0].expedition.heroSnapshots.find((data) => data.id === heroIds[0]);
     expect(snapshot.equipment.weapon.id).toBe(sword.id);
+  });
+
+  it('scheitert ein Run am Boss, gibt es trotzdem Gold für den Trash', () => {
+    // Level 1 ohne Ausrüstung in der Kapelle (Stufe 3): Der Trash fällt, der Boss nicht
+    const { game, heroIds } = gameWithGroup(1);
+    game.guild.dungeonClears = { bearCave: 1 };
+    let found = false;
+    for (let day = 0; day < 20 && !found; day++) {
+      game.startExpedition('ruinedChapel', heroIds, 'never');
+      const goldBefore = game.guild.gold;
+      const report = game.endDay()[0];
+      for (const hero of game.guild.heroes) {
+        hero.injuryDays = 0;
+      }
+      if (report.outcome !== 'success' && report.trashGold > 0) {
+        expect(game.guild.gold).toBe(goldBefore + report.trashGold);
+        expect(game.guild.countBoxes('chestMorva')).toBe(0);
+        found = true;
+      }
+    }
+    expect(found).toBe(true);
   });
 
   it('einen geplanten Run absagen', () => {

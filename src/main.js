@@ -13,8 +13,8 @@ import { LootBoxScreen } from './ui/LootBoxScreen.js';
 import { HeroScreen } from './ui/HeroScreen.js';
 import { TavernScreen } from './ui/TavernScreen.js';
 import { CombatLabScreen } from './ui/CombatLabScreen.js';
-import { DungeonScreen, outcomeText } from './ui/DungeonScreen.js';
-import { getDungeon } from './data/dungeons.js';
+import { DungeonScreen } from './ui/DungeonScreen.js';
+import { DayEndOverlay } from './ui/DayEndOverlay.js';
 import { DebugPanel } from './ui/DebugPanel.js';
 import { InventoryOverlay } from './ui/InventoryOverlay.js';
 import { LevelUpBanner } from './ui/LevelUpBanner.js';
@@ -73,7 +73,7 @@ const inventory = new InventoryOverlay(game, (newItemCount) => {
 });
 navBar.addExtraButton('inventory', 'Inventar', () => inventory.toggle());
 
-new LootBoxScreen(screenElements.treasury, game, inventory);
+const lootBoxScreen = new LootBoxScreen(screenElements.treasury, game, inventory);
 new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'));
 new TavernScreen(screenElements.tavern, game);
 const combatLabScreen = new CombatLabScreen(screenElements.lab, game);
@@ -126,15 +126,8 @@ game.on('candidatesRefreshed', () => {
   }
 });
 
-game.on('expeditionFinished', (report) => {
-  const dungeon = getDungeon(report.dungeonId);
-  if (report.outcome === 'success') {
-    Sound.itemReveal(report.firstClear ? 4 : 3);
-    showToast(dungeon.name + ': Erfolg! Die Beute wartet in der Schatzkammer.', '#1eff00');
-  } else {
-    Sound.fall();
-    showToast(dungeon.name + ': ' + outcomeText(report.outcome), '#ff6b6b');
-  }
+// Ergebnisse zeigt der Tagesabschluss. Hier nur das Abzeichen für neue Berichte.
+game.on('expeditionFinished', () => {
   if (currentScreen !== 'dungeons') {
     dungeonHasNews = true;
     updateBadges();
@@ -151,11 +144,26 @@ game.on('heroHealed', (hero) => {
   showToast(hero.name + ' ist wieder fit!', '#1eff00');
 });
 
-// Ein neuer Tag beginnt
+// Tagesabschluss: Kämpfe als Szene, danach Zusammenfassung mit Beute
+const dayEndOverlay = new DayEndOverlay(game, {
+  // Erst in der Zusammenfassung kommen die Level-Up-Banner (sonst verraten sie das Ergebnis)
+  onSummaryShown: () => levelUpBanner.release(),
+  onOpenChest: (boxTypeId) => {
+    showScreen('treasury');
+    lootBoxScreen.startOpening(boxTypeId);
+  },
+  onClosed: () => levelUpBanner.release(),
+});
+
+game.on('dayEnding', () => levelUpBanner.hold());
+
 game.on('dayEnded', (data) => {
   if (data.reports.length === 0) {
     Sound.click();
     showToast('Ein ruhiger Tag. Tag ' + game.day + ' beginnt.', '#ffd23f');
+    levelUpBanner.release();
+  } else {
+    dayEndOverlay.start(data.day, data.reports);
   }
   saveManager.save(game);
 });
@@ -163,7 +171,7 @@ game.on('dayEnded', (data) => {
 showScreen('treasury');
 
 // ---------- Bild-Schleife ----------
-// Läuft etwa 60-mal pro Sekunde. Sie treibt nur Animationen an (Kampfszene im Labor)
+// Läuft etwa 60-mal pro Sekunde. Sie treibt nur Animationen an (Kampfszenen im Labor und am Tagesende)
 // und speichert regelmäßig. Spielzeit vergeht dabei keine.
 
 let lastFrameTime = performance.now();
@@ -176,6 +184,7 @@ function frameLoop(now) {
   lastFrameTime = now;
 
   combatLabScreen.update(realSeconds);
+  dayEndOverlay.update(realSeconds);
 
   secondsSinceSave += realSeconds;
   if (secondsSinceSave >= AUTOSAVE_SECONDS) {

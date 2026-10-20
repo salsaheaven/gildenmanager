@@ -2181,6 +2181,172 @@ h3 {
 .report-row.outcome-defeat,
 .report-row.outcome-timeout { border-left: 4px solid #ff6b6b; }
 
+/* ---------- Tagesabschluss (Vollbild nach "Tag beenden") ---------- */
+
+.day-end-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  overflow-y: auto;
+  background: var(--background);
+}
+
+.day-end-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.day-end-title {
+  margin: 0;
+  color: var(--gold);
+}
+
+.day-end-sub {
+  color: var(--text-dim);
+}
+
+.day-end-body {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Großes Ergebnis über der Szene, wenn ein Run zu Ende ist */
+.run-result-flash {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 14px 28px;
+  font-family: var(--font-title);
+  font-size: 22px;
+  background: rgba(12, 9, 20, 0.92);
+  border: 3px solid currentColor;
+  animation: flash-pop 0.4s ease-out;
+  pointer-events: none;
+}
+
+.run-result-flash.outcome-success { color: #1eff00; }
+.run-result-flash.outcome-retreat { color: var(--gold); }
+.run-result-flash.outcome-defeat,
+.run-result-flash.outcome-timeout { color: #ff6b6b; }
+
+@keyframes flash-pop {
+  from { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.day-end-travel {
+  margin-top: 8px;
+  text-align: center;
+  color: var(--text-dim);
+  animation: blink 1s steps(2) infinite;
+}
+
+.day-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.day-run-card {
+  padding: 12px;
+  background: var(--panel);
+  border: 3px solid var(--border);
+  animation: card-in 0.4s ease-out backwards;
+}
+
+.day-run-card:nth-child(2) { animation-delay: 0.15s; }
+.day-run-card:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes card-in {
+  from { transform: translateY(16px); opacity: 0; }
+}
+
+.day-run-card.outcome-success { border-color: #1eff00; }
+.day-run-card.outcome-retreat { border-color: var(--gold); }
+.day-run-card.outcome-defeat,
+.day-run-card.outcome-timeout { border-color: #ff6b6b; }
+
+.day-run-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.day-run-name {
+  font-weight: normal;
+  color: var(--gold);
+  font-size: 22px;
+}
+
+.outcome-success .day-run-outcome { color: #1eff00; }
+.outcome-retreat .day-run-outcome { color: var(--gold); }
+.outcome-defeat .day-run-outcome,
+.outcome-timeout .day-run-outcome { color: #ff6b6b; }
+
+.day-run-rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.day-reward {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gold);
+}
+
+.day-chest {
+  padding: 4px 8px;
+  border: 2px solid var(--rarity);
+  box-shadow: 0 0 10px var(--rarity);
+}
+
+.open-chest-button {
+  background: #3a2a12;
+  border-color: var(--gold);
+  color: var(--gold);
+  animation: end-day-glow 1.4s ease-in-out infinite;
+}
+
+.day-run-heroes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.day-hero-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.day-level-up {
+  font-family: var(--font-title);
+  font-size: 10px;
+  color: var(--gold);
+}
+
+.day-injured {
+  color: #ff6b6b;
+}
+
 /* ============================================================
    HANDY (schmale Bildschirme)
    ============================================================ */
