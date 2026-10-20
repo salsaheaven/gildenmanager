@@ -48,15 +48,23 @@ export const COMBAT_RULES = {
   restHealthRegain: 0.4,
   restManaRegain: 0.6,
 
-  // Tempo der Kampfszene in Sekunden (bei 1x)
+  // Tempo der Kampfszene in Sekunden (bei 1x). Langsam genug, um Skill-Namen zu lesen:
+  // etwa 4 Sekunden pro Runde, ein Kampf dauert bei 1x rund eine Minute.
   pacing: {
-    startDelay: 0.4,   // kurze Pause vor dem ersten Ereignis
-    actionLead: 0.14,  // Zeit zwischen Aktion (Animation startet) und Wirkung (Zahl ploppt auf)
-    effectTime: 0.08,  // Abstand nach einer Wirkung (Treffer, Heilung …)
-    infoTime: 0.05,    // Abstand nach reinen Textzeilen
-    roundPause: 0.3,   // Pause zwischen zwei Runden
-    endDelay: 0.6,     // Pause am Ende eines Kampfes
+    startDelay: 0.8,   // kurze Pause vor dem ersten Ereignis
+    actionLead: 0.4,   // Zeit zwischen Aktion (Skill-Name, Animation startet) und Wirkung (Zahl ploppt auf)
+    effectTime: 0.18,  // Abstand nach einer Wirkung (Treffer, Heilung …)
+    infoTime: 0.1,     // Abstand nach reinen Textzeilen
+    roundPause: 0.6,   // Pause zwischen zwei Runden
+    endDelay: 1.2,     // Pause am Ende eines Kampfes
   },
+
+  // Wählbare Geschwindigkeiten der Kampfszene (Knöpfe über der Szene)
+  sceneSpeeds: [1, 2, 4],
+
+  // Wie viel langsamer Effekte und aufploppende Zahlen bei 1x laufen als in main.css angegeben
+  // (0.6 = sie dauern 1/0.6 ≈ 1,7-mal so lange). Bei 2x und 4x werden sie entsprechend schneller.
+  sceneAnimationRate: 0.6,
 
   // So viele Kämpfe simuliert das Spiel, um die Siegchance zu berechnen
   simulationCount: 200,

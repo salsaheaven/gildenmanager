@@ -52,26 +52,30 @@ const SHAKING_EFFECTS = ['bigImpact', 'shadowWave', 'acidWave'];
 // sourceElement  = Bild des Handelnden
 // targetElements = Bilder der Ziele
 // duration       = wie lange ein Geschoss fliegt (Millisekunden)
-export function playEffect(field, fx, sourceElement, targetElements, duration) {
+// rate           = Abspielrate der Effekt-Animationen (1 = wie in main.css, 0.5 = halb so schnell)
+export function playEffect(field, fx, sourceElement, targetElements, duration, rate = 1) {
   if (!fx) {
     return;
   }
   if (PROJECTILES[fx]) {
     for (const target of targetElements) {
-      shootProjectile(field, PROJECTILES[fx], sourceElement, target, duration);
+      shootProjectile(field, PROJECTILES[fx], sourceElement, target, duration, rate);
     }
   } else if (TARGET_EFFECTS[fx]) {
     for (const target of targetElements) {
-      showEffectAt(field, TARGET_EFFECTS[fx], target);
+      showEffectAt(field, TARGET_EFFECTS[fx], target, rate);
     }
   } else if (SELF_EFFECTS[fx]) {
-    showEffectAt(field, SELF_EFFECTS[fx], sourceElement);
+    showEffectAt(field, SELF_EFFECTS[fx], sourceElement, rate);
   }
 
   if (SHAKING_EFFECTS.includes(fx)) {
     field.classList.remove('field-shake');
     void field.offsetWidth; // Animation neu starten
     field.classList.add('field-shake');
+    for (const animation of field.getAnimations()) {
+      animation.playbackRate = rate;
+    }
   }
 }
 
@@ -85,7 +89,7 @@ function getCenter(field, element) {
   };
 }
 
-function shootProjectile(field, cssClass, sourceElement, targetElement, duration) {
+function shootProjectile(field, cssClass, sourceElement, targetElement, duration, rate) {
   const from = getCenter(field, sourceElement);
   const to = getCenter(field, targetElement);
 
@@ -104,16 +108,19 @@ function shootProjectile(field, cssClass, sourceElement, targetElement, duration
   );
   flight.onfinish = () => {
     projectile.remove();
-    showEffectAt(field, cssClass + '-burst', targetElement);
+    showEffectAt(field, cssClass + '-burst', targetElement, rate);
   };
 }
 
-function showEffectAt(field, cssClass, element) {
+function showEffectAt(field, cssClass, element, rate) {
   const center = getCenter(field, element);
   const effect = document.createElement('div');
   effect.className = 'fx-effect ' + cssClass;
   effect.style.left = center.x + 'px';
   effect.style.top = center.y + 'px';
   field.appendChild(effect);
-  setTimeout(() => effect.remove(), 900);
+  for (const animation of effect.getAnimations()) {
+    animation.playbackRate = rate;
+  }
+  setTimeout(() => effect.remove(), 900 / rate);
 }

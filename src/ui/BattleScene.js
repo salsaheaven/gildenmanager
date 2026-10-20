@@ -4,9 +4,10 @@
 //   - Lebensbalken, Schildanzeige, aufploppende Zahlen wie im MMO
 //   - Zauberbalken über dem Boss, wenn er eine Mechanik vorbereitet
 //   - Ticker mit den letzten Ereignissen
+//   - großer Skill-Name über dem, der handelt; Handelnder und Ziele leuchten kurz auf
 //
 // Die Szene läuft nicht von selbst: Wer sie benutzt, ruft in jedem Bild update(sekunden) auf.
-// Pause hält den Kampf an, eine höhere Geschwindigkeit (2x, 4x) beschleunigt ihn.
+// Mit den Knöpfen 1x / 2x / 4x läuft sie schneller. Die Wahl wird im Browser gemerkt.
 // ============================================================
 
 import { getBoss, MINIONS } from '../data/enemies.js';
@@ -18,14 +19,17 @@ import { Sound } from './Sound.js';
 
 const TICKER_LINES = 6;       // so viele Zeilen zeigt der Ticker
 
-// Springt die Zeit weiter als das (z.B. beim späten Zuschauen), wird ohne Animationen nachgeholt
+// Springt die Zeit weiter als das (z.B. wenn der Browser-Tab im Hintergrund war), wird ohne Animationen nachgeholt
 const CATCH_UP_SECONDS = 1.5;
+
+// Unter diesem Namen merkt sich der Browser die gewählte Geschwindigkeit
+const SPEED_STORAGE_KEY = 'gildenmanager-scene-speed';
 
 export class BattleScene {
   // result     = Ergebnis von simulateBattle (mit recordLog: true)
   // heroes     = die Hero-Objekte der Gruppe (für Aussehen der Pixelbilder)
   // onFinished = wird am Ende aufgerufen (auch nach "Überspringen")
-  // showSkip   = Knopf "Überspringen" anzeigen (im Labor ja, in Dungeons nicht)
+  // showSkip   = Knopf "Überspringen" anzeigen
   constructor(container, result, heroes, onFinished, showSkip = true) {
     this.container = container;
     this.result = result;
@@ -36,12 +40,13 @@ export class BattleScene {
     }
 
     this.time = 0;
-    this.speed = 1;  // aktuelle Abspiel-Geschwindigkeit (für die Dauer der Animationen)
+    this.speed = loadSpeed();  // Abspiel-Geschwindigkeit (1, 2 oder 4)
     this.entryIndex = 0;
     this.finished = false;
     this.units = {}; // Kämpfer-id → Elemente der Figur
 
     this.buildLayout();
+    this.renderSpeedButtons();
     this.container.querySelector('.scene-skip').hidden = !showSkip;
     for (const info of result.startingCombatants) {
       this.addUnit(info);
@@ -56,7 +61,7 @@ export class BattleScene {
       <div class="battle-scene">
         <div class="scene-top">
           <span class="scene-round">Bereit …</span>
-          <span class="scene-paused">PAUSE</span>
+          <span class="scene-speeds"></span>
           <button class="scene-skip">Überspringen</button>
         </div>
         <div class="scene-field">
@@ -75,6 +80,37 @@ export class BattleScene {
     `;
 
     this.container.querySelector('.scene-skip').addEventListener('click', () => this.skip());
+  }
+
+  // Knöpfe 1x / 2x / 4x
+  renderSpeedButtons() {
+    const container = this.container.querySelector('.scene-speeds');
+    container.innerHTML = '';
+    for (const speed of COMBAT_RULES.sceneSpeeds) {
+      const button = document.createElement('button');
+      button.textContent = speed + 'x';
+      button.classList.toggle('active', speed === this.speed);
+      button.addEventListener('click', () => {
+        Sound.click();
+        this.speed = speed;
+        saveSpeed(speed);
+        this.renderSpeedButtons();
+      });
+      container.appendChild(button);
+    }
+  }
+
+  // Wie schnell CSS-Animationen (Effekte, Zahlen) gerade laufen sollen
+  getAnimationRate() {
+    return COMBAT_RULES.sceneAnimationRate * this.speed;
+  }
+
+  // Alle laufenden CSS-Animationen eines Elements an das Tempo anpassen
+  applyAnimationRate(element) {
+    const rate = this.getAnimationRate();
+    for (const animation of element.getAnimations({ subtree: true })) {
+      animation.playbackRate = rate;
+    }
   }
 
   // Eine Figur (Held, Boss oder Diener) mit Bild, Name und Balken
@@ -154,22 +190,19 @@ export class BattleScene {
 
   // ---------- Abspielen ----------
 
-  // Wird regelmäßig aufgerufen. gameSeconds = vergangene Spielzeit seit dem letzten Aufruf
-  // (0, wenn das Spiel pausiert ist). isPaused blendet den Pause-Hinweis ein.
-  // speed = Abspiel-Geschwindigkeit, damit Animationen bei 4x auch schneller sind.
-  update(gameSeconds, isPaused = false, speed = 1) {
-    this.syncTo(this.time + gameSeconds, isPaused, speed);
+  // Wird in jedem Bild aufgerufen. seconds = vergangene echte Zeit seit dem letzten Aufruf.
+  // Bei 2x vergeht in der Szene doppelt so viel Zeit.
+  update(seconds) {
+    this.syncTo(this.time + seconds * this.speed);
   }
 
-  // Springt zu einem Zeitpunkt im Kampf (Spielsekunden seit Kampfbeginn).
+  // Springt zu einem Zeitpunkt im Kampf (Sekunden seit Kampfbeginn, bei 1x gemessen).
   // Kleine Schritte werden mit Animationen abgespielt, große Sprünge still nachgeholt.
-  syncTo(targetTime, isPaused = false, speed = 1) {
+  syncTo(targetTime) {
     if (this.finished) {
       return;
     }
-    this.speed = speed;
-    this.container.querySelector('.battle-scene').classList.toggle('paused', isPaused);
-    const quiet = targetTime - this.time > CATCH_UP_SECONDS;
+    const quiet = targetTime - this.time > CATCH_UP_SECONDS * this.speed;
     this.time = targetTime;
     while (this.entryIndex < this.result.log.length && this.entryTimes[this.entryIndex] <= this.time) {
       this.playEntry(this.result.log[this.entryIndex], quiet);
@@ -233,7 +266,7 @@ export class BattleScene {
     }
   }
 
-  // Eine Aktion beginnt: Mana anpassen, Ausfallschritt, Skill-Name und Animation
+  // Eine Aktion beginnt: Mana anpassen, Ausfallschritt, Skill-Name, Hervorhebung und Animation
   playAction(action, quiet) {
     this.setMana(action.sourceId, action.manaAfter);
     const source = this.units[action.sourceId];
@@ -242,9 +275,9 @@ export class BattleScene {
     }
     this.lunge(action.sourceId);
     if (action.showName && action.name) {
-      const cssClass = source.element.classList.contains('hero-unit') ? 'float-skill' : 'float-skill enemy-skill';
-      this.showFloat(action.sourceId, action.name, cssClass);
+      this.showSkillCallout(source, action.name);
     }
+    this.highlightAction(action);
 
     const field = this.container.querySelector('.scene-field');
     const sourceSprite = source.element.querySelector('.unit-sprite');
@@ -255,8 +288,64 @@ export class BattleScene {
       }
     }
     // Das Geschoss soll ungefähr dann ankommen, wenn die Zahl aufploppt
-    const flightMilliseconds = (COMBAT_RULES.pacing.actionLead * 1000 * 0.9) / Math.max(1, this.speed);
-    playEffect(field, action.fx, sourceSprite, targetSprites, flightMilliseconds);
+    const flightMilliseconds = (COMBAT_RULES.pacing.actionLead * 1000 * 0.9) / this.speed;
+    playEffect(field, action.fx, sourceSprite, targetSprites, flightMilliseconds, this.getAnimationRate());
+  }
+
+  // Großer Skill-Name über dem Handelnden (Helden goldgelb, Gegner orange-rot)
+  showSkillCallout(source, name) {
+    const callout = document.createElement('div');
+    callout.className = 'skill-callout' + (source.element.classList.contains('hero-unit') ? '' : ' enemy-callout');
+    callout.textContent = name;
+    source.element.querySelector('.unit-floats').appendChild(callout);
+    this.keepInsideField(callout);
+    // Bei 1x etwa 1,6 Sekunden sichtbar, bei 4x entsprechend kürzer
+    for (const animation of callout.getAnimations()) {
+      animation.playbackRate = this.speed;
+    }
+    setTimeout(() => callout.remove(), 1600 / this.speed);
+  }
+
+  // Ragt ein Skill-Name links oder rechts aus dem Kampffeld heraus, wird er hineingeschoben
+  keepInsideField(element) {
+    // Gemessen wird ohne Animation (sonst ist der Name gerade noch klein gezoomt)
+    element.style.animation = 'none';
+    const field = this.container.querySelector('.scene-field').getBoundingClientRect();
+    const box = element.getBoundingClientRect();
+    // Auf dem Handy ist die Szene verkleinert: Bildschirm-Pixel in CSS-Pixel umrechnen
+    const zoom = element.offsetWidth > 0 ? box.width / element.offsetWidth : 1;
+    const margin = 4;
+    if (box.left < field.left + margin) {
+      element.style.marginLeft = (field.left + margin - box.left) / zoom + 'px';
+    } else if (box.right > field.right - margin) {
+      element.style.marginLeft = (field.right - margin - box.right) / zoom + 'px';
+    }
+    element.style.animation = '';
+  }
+
+  // Der Handelnde leuchtet auf, seine Ziele bekommen einen Rahmen:
+  // grün, wenn er Verbündeten hilft, rot, wenn er Gegner angreift
+  highlightAction(action) {
+    const source = this.units[action.sourceId];
+    const sourceIsHero = source.element.classList.contains('hero-unit');
+    const marked = [{ element: source.element, cssClass: 'acting' }];
+    for (const targetId of action.targetIds) {
+      const target = this.units[targetId];
+      if (!target || targetId === action.sourceId) {
+        continue;
+      }
+      const targetIsHero = target.element.classList.contains('hero-unit');
+      marked.push({ element: target.element, cssClass: sourceIsHero === targetIsHero ? 'targeted-friend' : 'targeted-foe' });
+    }
+    for (const mark of marked) {
+      mark.element.classList.add(mark.cssClass);
+    }
+    const milliseconds = (COMBAT_RULES.pacing.actionLead + COMBAT_RULES.pacing.effectTime) * 1000 / this.speed + 150;
+    setTimeout(() => {
+      for (const mark of marked) {
+        mark.element.classList.remove(mark.cssClass);
+      }
+    }, milliseconds);
   }
 
   addTickerLine(entry) {
@@ -297,6 +386,7 @@ export class BattleScene {
     unit.element.classList.remove('lunge');
     void unit.element.offsetWidth;
     unit.element.classList.add('lunge');
+    this.applyAnimationRate(unit.element);
   }
 
   showHit(hit, quiet) {
@@ -321,6 +411,7 @@ export class BattleScene {
         unit.element.classList.remove('hit');
         void unit.element.offsetWidth;
         unit.element.classList.add('hit');
+        this.applyAnimationRate(unit.element);
       }
       if (hit.absorbed > 0) {
         this.showFloat(hit.targetId, '(' + hit.absorbed + ')', 'float-shield');
@@ -361,6 +452,30 @@ export class BattleScene {
     // leicht versetzt, damit sich mehrere Zahlen nicht genau überdecken
     float.style.left = 30 + Math.random() * 40 + '%';
     unit.element.querySelector('.unit-floats').appendChild(float);
-    setTimeout(() => float.remove(), 1100);
+    this.applyAnimationRate(float);
+    setTimeout(() => float.remove(), 1100 / this.getAnimationRate());
+  }
+}
+
+// ---------- Gemerkte Geschwindigkeit ----------
+// Liegt nur im Browser des Spielers (kein Teil des Spielstands). Kann blockiert sein, daher try/catch.
+
+function loadSpeed() {
+  try {
+    const saved = Number(localStorage.getItem(SPEED_STORAGE_KEY));
+    if (COMBAT_RULES.sceneSpeeds.includes(saved)) {
+      return saved;
+    }
+  } catch (error) {
+    // nichts gemerkt: Standard-Tempo
+  }
+  return COMBAT_RULES.sceneSpeeds[0];
+}
+
+function saveSpeed(speed) {
+  try {
+    localStorage.setItem(SPEED_STORAGE_KEY, String(speed));
+  } catch (error) {
+    // nicht schlimm, dann gilt beim nächsten Mal wieder 1x
   }
 }

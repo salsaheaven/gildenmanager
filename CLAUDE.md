@@ -53,7 +53,8 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: LootBoxScreen (Sch
                LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden, während des Tagesabschlusses zurückgehalten).
                InventoryOverlay = Inventar als Vollbild-Fenster mit Kategorien (Knopf „Inventar“ in der Reiterleiste).
                CombatReport = Ergebnis, Schadensmesser und Kampfbericht (wiederverwendbar).
-               BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken); läuft über update(sekunden).
+               BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken, großer Skill-Name, Tempo 1x/2x/4x); läuft über update(sekunden).
+               Tempo der Szene: `pacing`, `sceneSpeeds` und `sceneAnimationRate` in `combatRules.js`.
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
                OrdersPanel = Auswahllisten für Anweisungen (Labor + Heldenbildschirm).
                Leisten: TopBar, NavBar. Helfer: PixelArt, Sound, Toast, format, TraitChip.
