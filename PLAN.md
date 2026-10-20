@@ -4,11 +4,9 @@
 "Gildenmanager" (Arbeitstitel) ist ein Management-Spiel: Man führt eine typische MMORPG-Gilde, spielt aber nicht selbst in Dungeons. Man rekrutiert Helden, levelt, skillt und rüstet sie aus und schickt sie los. Währenddessen baut man die Gildenhalle aus, craftet und später vielleicht Diplomatie.
 Festgelegt:
 - **Browser-Spiel** mit **Pixel-Art**
-- **Rundenbasiert** (1 Runde = 1 Tag, ein Held = eine Aufgabe pro Tag), Kämpfe **simuliert + Kampfszene + Kampfbericht**. Bis M1 lief das Spiel in Echtzeit mit Pause/Speed, siehe „Umbau auf Runden“.
+- **Rundenbasiert** (1 Runde = 1 Tag, ein Held = eine Aufgabe pro Tag), Kämpfe **simuliert + Kampfszene + Kampfbericht**. Anfangs lief das Spiel in Echtzeit mit Pause/Speed, siehe „Umbau auf Runden“.
 - **Übungsprojekt fürs Vibecoding:** Der Code muss für Programmier-Einsteiger einfach lesbar und stark modular sein, mit einer Datei pro Konzept wie bei Java-Klassen.
 - **Pflicht: ein extrem motivierender Kern-Loop** (Dopamin), also Lootboxen, Seltenheitsstufen, Klassen-Sets zum Sammeln.
-
-Das Projektverzeichnis ist leer → Neustart.
 
 ## Tech-Stack (bewusst einfach gehalten)
 - **Reines JavaScript mit ES-Klassen**: kein TypeScript, kein React. `class Hero { ... }` liest sich fast wie Java, und Dateien werden per `import` eingebunden.
@@ -58,7 +56,7 @@ src/
 - Nach jedem Schritt kurz erklären, was wo geändert wurde
 
 ## Motivations-Design (Kern-Loop)
-**Loop:** Gruppe losschicken → Fortschrittsbalken → **Kiste kommt an** → Kiste öffnen (Animation, Seltenheitsfarbe leuchtet auf) → Held stärker ausrüsten → schwierigeren Dungeon schaffen → bessere Kisten.
+**Loop:** Gruppen für den Tag einplanen → „Tag beenden“ → Kämpfe als Szene → **Boss-Kiste** öffnen (Animation, Seltenheitsfarbe leuchtet auf) → Held stärker ausrüsten → schwierigeren Dungeon schaffen → bessere Kisten.
 - **Seltenheiten** wie im klassischen MMO: Grau, Weiß, Grün, **Blau**, **Lila**, **Orange (legendär)**, jeweils mit eigener Farbe, eigenem Sound und eigenem Effekt
 - **Lootboxen** in Stufen (Holz/Silber/Gold/Episch). Das Öffnen ist inszeniert: wackeln, aufspringen, Items erscheinen nacheinander, das seltenste zuletzt.
 - **Pity-System:** Nach X Kisten ohne Lila gibt es garantiert eins, damit Pechsträhnen nicht frustrieren
@@ -73,7 +71,7 @@ Das Spielkonzept, auf dem diese Reihenfolge beruht, steht in [KONZEPT.md](KONZEP
 
 **M0 – Fundament ✅:** Setup, Spieluhr mit Pause/Speed, Speichern/Laden, Pixel-Grundlayout, Schatzkammer mit Lootboxen und Pity, online auf GitHub Pages.
 
-**M1 – Helden & erster Dungeon (wichtigster Meilenstein):**
+**M1 – Helden & erster Dungeon ✅:**
 In kleinen, jeweils online testbaren Schritten:
 1. ✅ **Helden:** 5 Klassen (Krieger, Priester, Runenwirker, Magier, Schurke), Rekrutierung mit Helden-Seltenheit und Eigenschaften, Ausrüstung anlegen
 2. ✅ **Kampf-Labor:** Testbildschirm, auf dem eine Gruppe gegen einen Boss antritt. Er zeigt Kampfbericht und Siegchance aus 200 Simulationen und dient zum Testen und Balancen.
@@ -100,7 +98,7 @@ In kleinen, jeweils online testbaren Schritten:
 
 **M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie, New Game+.
 
-Nach M1 testen wir zusammen, ob der Loop Spaß macht, und passen dann an.
+Jetzt (nach M1 und dem Umbau auf Runden) testen wir zusammen, ob der Loop Spaß macht, und passen dann an.
 
 ## Balancing & Playtests
 Das Balancing kommt gesammelt später, wenn genug Ideen zusammen sind. Grundsatz: Jede Wahl braucht Vor- und Nachteile (siehe `KONZEPT.md`). Werkzeuge, von billig nach teuer:
