@@ -7,7 +7,7 @@
 import { simulateBattle } from './CombatSimulator.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
 
-// options = { heroes, bossId, tacticId, enemyLevel (optional, Stufe des Bosses), count (optional), seed (optional) }
+// options = { heroes, bossId, enemyLevel (optional, Stufe des Bosses), count (optional), seed (optional) }
 export function estimateChances(options) {
   const count = options.count || COMBAT_RULES.simulationCount;
   const baseSeed = options.seed || 1;
@@ -25,7 +25,6 @@ export function estimateChances(options) {
     const result = simulateBattle({
       heroes: options.heroes,
       bossId: options.bossId,
-      tacticId: options.tacticId,
       enemyLevel: options.enemyLevel,
       seed: baseSeed + i * 7919, // weit auseinanderliegende Seeds = unterschiedliche Kämpfe
       recordLog: false,

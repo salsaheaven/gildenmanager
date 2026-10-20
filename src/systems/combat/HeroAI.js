@@ -9,6 +9,7 @@
 // ============================================================
 
 import { ABILITIES } from '../../data/abilities.js';
+import { COMBAT_RULES } from '../../data/combatRules.js';
 
 // Beim Rückzug machen die Helden keinen Schaden mehr, sie heilen und schützen sich nur
 const RETREAT_SKILL_TYPES = ['heal', 'shield', 'buff', 'mana', 'cleanse'];
@@ -51,13 +52,12 @@ function breaksManaReserve(hero, ability) {
 
 // Alle Bedingungen, die in data/abilities.js unter "when" (oder in Anweisungen) stehen können
 function isConditionMet(battle, hero, condition, ability) {
-  const tactic = battle.tactic;
   const casting = battle.getCasting();
   const enemiesThere = battle.getLivingEnemies().length > 0 && !battle.isDummyFight();
   const bossTarget = battle.getBossTarget();
   const lowestAlly = battle.getLowestAlly();
-  // Eine Anweisung "Heilen ab …" ersetzt die Heilschwelle der Taktik
-  const healThreshold = hero.orderSettings.healThreshold || tactic.healThreshold;
+  // Eine Anweisung "Heilen ab …" ersetzt die normale Heilschwelle
+  const healThreshold = hero.orderSettings.healThreshold || COMBAT_RULES.healThreshold;
 
   switch (condition) {
     case 'always':
@@ -78,7 +78,7 @@ function isConditionMet(battle, hero, condition, ability) {
     // Ein Tank-Buster auf mich wird vorbereitet, oder ich habe wenig Leben
     case 'busterIncomingOrSelfLow': {
       const busterComing = casting !== null && casting.type === 'tankBuster' && bossTarget === hero;
-      return busterComing || hero.getHpPercent() < tactic.selfDefenseThreshold;
+      return busterComing || hero.getHpPercent() < COMBAT_RULES.selfDefenseThreshold;
     }
 
     // Nur wenn ein Tank-Buster angekündigt ist (bei Selbst-Skills: nur, wenn er mich trifft)

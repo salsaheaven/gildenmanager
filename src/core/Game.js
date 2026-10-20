@@ -196,7 +196,7 @@ export class Game {
   // Schickt eine Gruppe los. Gibt 'ok' oder einen Grund zurück:
   // 'locked' (Dungeon gesperrt), 'noHeroes', 'tooMany', 'busy' (ein Held ist schon unterwegs),
   // 'injured' (ein Held ist verletzt)
-  startExpedition(dungeonId, heroIds, tacticId, retreatRuleId) {
+  startExpedition(dungeonId, heroIds, retreatRuleId) {
     if (!this.isDungeonUnlocked(dungeonId)) {
       return 'locked';
     }
@@ -223,7 +223,6 @@ export class Game {
       this.guild.nextExpeditionId,
       dungeonId,
       heroes.map((hero) => hero.toSaveData()),
-      tacticId,
       retreatRuleId,
       seed,
     );

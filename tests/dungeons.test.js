@@ -49,7 +49,7 @@ describe('Dungeon-Daten', () => {
 
 describe('simulateRun', () => {
   it('gleicher Seed = gleicher Run, Begegnungen laufen nacheinander', () => {
-    const options = { dungeonId: 'broodNests', tacticId: 'balanced', retreatRuleId: 'never', seed: 5, recordLog: true };
+    const options = { dungeonId: 'broodNests', retreatRuleId: 'never', seed: 5, recordLog: true };
     const a = simulateRun({ ...options, heroes: createTestGroup(10) });
     const b = simulateRun({ ...options, heroes: createTestGroup(10) });
     expect(a.outcome).toBe('success');
@@ -58,7 +58,7 @@ describe('simulateRun', () => {
   });
 
   it('Leben aus der Trash-Begegnung geht in den Bosskampf mit', () => {
-    const run = simulateRun({ heroes: createTestGroup(1), dungeonId: 'bearCave', tacticId: 'balanced', seed: 3, recordLog: true });
+    const run = simulateRun({ heroes: createTestGroup(1), dungeonId: 'bearCave', seed: 3, recordLog: true });
     const afterTrash = run.encounters[0].heroes;
     const bossStart = run.encounters[1].startingCombatants.filter((c) => c.side === 'hero');
     // Erholung zwischen den Begegnungen: höchstens volles Leben, mindestens so viel wie nach dem Trash
@@ -74,7 +74,7 @@ describe('simulateRun', () => {
     const heroes = createTestGroup(1, 'uncommon', ['warrior', 'mage', 'rogue']);
     let retreats = 0;
     for (let seed = 1; seed < 30; seed++) {
-      const run = simulateRun({ heroes, dungeonId: 'ruinedChapel', tacticId: 'balanced', retreatRuleId: 'afterOne', seed, recordLog: true });
+      const run = simulateRun({ heroes, dungeonId: 'ruinedChapel', retreatRuleId: 'afterOne', seed, recordLog: true });
       expect(run.outcome).not.toBe('success');
       if (run.outcome === 'retreat') {
         retreats++;
@@ -86,7 +86,7 @@ describe('simulateRun', () => {
   });
 
   it('Rückzug per Hand: bis zur Rückzugsrunde verläuft der Run genau gleich', () => {
-    const base = { heroes: createTestGroup(1), dungeonId: 'bearCave', tacticId: 'balanced', seed: 9, recordLog: true };
+    const base = { heroes: createTestGroup(1), dungeonId: 'bearCave', seed: 9, recordLog: true };
     const normal = simulateRun(base);
     const retreated = simulateRun({ ...base, manualRetreat: { encounterIndex: 1, round: 6 } });
     const before = (run) => run.encounters[1].log.filter((entry) => entry.round < 6);
@@ -99,7 +99,7 @@ describe('Expeditionen', () => {
   it('Run starten, Zeit laufen lassen, Belohnung bekommen', () => {
     const { game, heroIds } = gameWithGroup(10);
     const goldBefore = game.guild.gold;
-    expect(game.startExpedition('bearCave', heroIds, 'balanced', 'never')).toBe('ok');
+    expect(game.startExpedition('bearCave', heroIds, 'never')).toBe('ok');
     expect(game.guild.isHeroBusy(heroIds[0])).toBe(true);
 
     const reports = [];
@@ -117,9 +117,9 @@ describe('Expeditionen', () => {
 
   it('gesperrte Dungeons und beschäftigte Helden', () => {
     const { game, heroIds } = gameWithGroup(10);
-    expect(game.startExpedition('ruinedChapel', heroIds, 'balanced', 'never')).toBe('locked');
-    game.startExpedition('bearCave', heroIds, 'balanced', 'never');
-    expect(game.startExpedition('bearCave', heroIds, 'balanced', 'never')).toBe('busy');
+    expect(game.startExpedition('ruinedChapel', heroIds, 'never')).toBe('locked');
+    game.startExpedition('bearCave', heroIds, 'never');
+    expect(game.startExpedition('bearCave', heroIds, 'never')).toBe('busy');
     // Wer unterwegs ist, kann nicht umgerüstet oder entlassen werden
     expect(game.dismissHero(heroIds[0])).toBe(false);
   });
@@ -127,19 +127,19 @@ describe('Expeditionen', () => {
   it('nach dem ersten Erfolg ist der nächste Dungeon frei, nach 3 Erfolgen gibt es Schnellkampf', () => {
     const { game, heroIds } = gameWithGroup(10);
     for (let i = 0; i < BALANCING.quickFinishAfterClears; i++) {
-      game.startExpedition('bearCave', heroIds, 'balanced', 'never');
+      game.startExpedition('bearCave', heroIds, 'never');
       game.advanceTime(10000);
     }
     expect(game.isDungeonUnlocked('ruinedChapel')).toBe(true);
     expect(game.canQuickFinish('bearCave')).toBe(true);
-    game.startExpedition('bearCave', heroIds, 'balanced', 'never');
+    game.startExpedition('bearCave', heroIds, 'never');
     expect(game.finishExpeditionNow(game.guild.expeditions[0].id)).toBe(true);
     expect(game.guild.expeditions.length).toBe(0);
   });
 
   it('ein Run mittendrin speichern und laden verläuft genau gleich', () => {
     const { game, heroIds } = gameWithGroup(1);
-    game.startExpedition('bearCave', heroIds, 'balanced', 'never');
+    game.startExpedition('bearCave', heroIds, 'never');
     game.advanceTime(12);
     const original = game.guild.expeditions[0];
     const loaded = Game.fromSaveData(JSON.parse(JSON.stringify(game.toSaveData())));
@@ -151,7 +151,7 @@ describe('Expeditionen', () => {
 
   it('Rückzug befehlen beendet den Run ohne Beute', () => {
     const { game, heroIds } = gameWithGroup(10);
-    game.startExpedition('bearCave', heroIds, 'balanced', 'never');
+    game.startExpedition('bearCave', heroIds, 'never');
     game.advanceTime(3);
     expect(game.orderRetreat(game.guild.expeditions[0].id)).toBe(true);
     const reports = [];
@@ -162,7 +162,7 @@ describe('Expeditionen', () => {
   });
 
   it('die Dauer eines Runs ergibt sich aus der Zeitleiste', () => {
-    const run = simulateRun({ heroes: createTestGroup(5), dungeonId: 'bearCave', tacticId: 'balanced', seed: 2, recordLog: true });
+    const run = simulateRun({ heroes: createTestGroup(5), dungeonId: 'bearCave', seed: 2, recordLog: true });
     const timeline = computeRunTimeline(run, BALANCING.travelSeconds);
     expect(timeline.segments.length).toBe(run.encounters.length);
     expect(timeline.totalTime).toBeGreaterThan(BALANCING.travelSeconds);

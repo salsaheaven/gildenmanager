@@ -1,6 +1,6 @@
 // ============================================================
 // BATTLE – der Zustand eines laufenden Kampfes
-// Kennt alle Kämpfer, die Runde, den Zufall, die Taktik und den Kampfbericht.
+// Kennt alle Kämpfer, die Runde, den Zufall, und den Kampfbericht.
 // Der Boss ist freiwillig: Bei Trash-Gruppen gibt es keinen (boss = null).
 // Bietet Hilfsfragen an wie "Wen greift der Boss an?" oder "Wer ist am verletztesten?".
 // ============================================================
@@ -12,11 +12,10 @@ import { MINIONS } from '../../data/enemies.js';
 export class Battle {
   // recordLog = false spart Zeit, wenn nur das Ergebnis zählt (z.B. bei 200 Simulationen)
   // enemyLevel = Stufe der Gegner (Stufe des Dungeons, siehe data/scaling.js)
-  constructor(heroes, boss, tactic, random, recordLog, enemyLevel = 1) {
+  constructor(heroes, boss, random, recordLog, enemyLevel = 1) {
     this.heroes = heroes;      // Combatant-Liste der Helden
     this.enemies = boss ? [boss] : []; // Combatant-Liste der Gegner (Boss + Diener/Trash)
     this.boss = boss;                  // null bei Trash-Gruppen
-    this.tactic = tactic;
     this.random = random;
     this.recordLog = recordLog;
     this.round = 0;

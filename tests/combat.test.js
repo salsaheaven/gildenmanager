@@ -7,7 +7,6 @@ import { createTestGroup } from '../src/systems/combat/TestGroup.js';
 import { Combatant } from '../src/systems/combat/Combatant.js';
 import { ABILITIES } from '../src/data/abilities.js';
 import { BOSSES, MINIONS } from '../src/data/enemies.js';
-import { TACTICS } from '../src/data/tactics.js';
 import { SPRITES } from '../src/data/sprites.js';
 
 const SKILL_TYPES = ['damage', 'heal', 'shield', 'buff', 'taunt', 'mana', 'cleanse', 'stun', 'interrupt', 'dot'];
@@ -73,55 +72,53 @@ describe('CombatSimulator', () => {
   const group = createTestGroup(1);
 
   it('gleicher Seed ergibt denselben Kampf', () => {
-    const a = simulateBattle({ heroes: group, bossId: 'grimfang', tacticId: 'balanced', seed: 42, recordLog: true });
-    const b = simulateBattle({ heroes: group, bossId: 'grimfang', tacticId: 'balanced', seed: 42, recordLog: true });
+    const a = simulateBattle({ heroes: group, bossId: 'grimfang', seed: 42, recordLog: true });
+    const b = simulateBattle({ heroes: group, bossId: 'grimfang', seed: 42, recordLog: true });
     expect(a.rounds).toBe(b.rounds);
     expect(a.log).toEqual(b.log);
   });
 
-  it('jeder Boss lässt sich mit allen Taktiken ohne Fehler simulieren', () => {
+  it('jeder Boss lässt sich ohne Fehler simulieren', () => {
     for (const boss of BOSSES) {
-      for (const tactic of TACTICS) {
-        const result = simulateBattle({ heroes: group, bossId: boss.id, tacticId: tactic.id, seed: 7, recordLog: true });
-        expect(result.rounds).toBeGreaterThan(0);
-        expect(result.log.length).toBeGreaterThan(0);
-      }
+      const result = simulateBattle({ heroes: group, bossId: boss.id, seed: 7, recordLog: true });
+      expect(result.rounds).toBeGreaterThan(0);
+      expect(result.log.length).toBeGreaterThan(0);
     }
   });
 
   it('der Kampf verändert die echten Helden nicht', () => {
     const before = group.map((hero) => JSON.stringify(hero.toSaveData()));
-    simulateBattle({ heroes: group, bossId: 'skarrix', tacticId: 'aggressive', seed: 3, recordLog: false });
+    simulateBattle({ heroes: group, bossId: 'skarrix', seed: 3, recordLog: false });
     expect(group.map((hero) => JSON.stringify(hero.toSaveData()))).toEqual(before);
   });
 
   it('die Übungspuppe läuft genau die eingestellten Runden', () => {
-    const result = simulateBattle({ heroes: group, bossId: 'trainingDummy', tacticId: 'balanced', seed: 1, recordLog: false });
+    const result = simulateBattle({ heroes: group, bossId: 'trainingDummy', seed: 1, recordLog: false });
     expect(result.rounds).toBe(BOSSES.find((b) => b.id === 'trainingDummy').dummyRounds);
     expect(result.heroes.every((hero) => hero.alive)).toBe(true);
   });
 
   it('Skarrix ruft Diener, Morva wird vom Schurken unterbrochen', () => {
-    const skarrix = simulateBattle({ heroes: group, bossId: 'skarrix', tacticId: 'balanced', seed: 5, recordLog: true });
+    const skarrix = simulateBattle({ heroes: group, bossId: 'skarrix', seed: 5, recordLog: true });
     expect(skarrix.log.some((entry) => entry.text.includes('Diener erscheinen'))).toBe(true);
-    const morva = simulateBattle({ heroes: group, bossId: 'morva', tacticId: 'balanced', seed: 5, recordLog: true });
+    const morva = simulateBattle({ heroes: group, bossId: 'morva', seed: 5, recordLog: true });
     expect(morva.log.some((entry) => entry.text.includes('unterbricht'))).toBe(true);
   });
 });
 
 describe('ChanceEstimator', () => {
   it('Konter zählen: ohne Heiler sinkt die Siegchance stark', () => {
-    const full = estimateChances({ heroes: createTestGroup(1), bossId: 'grimfang', tacticId: 'balanced', count: 100 });
+    const full = estimateChances({ heroes: createTestGroup(1), bossId: 'grimfang', count: 100 });
     const noHealer = estimateChances({
       heroes: createTestGroup(1, 'uncommon', ['warrior', 'mage', 'rogue']),
-      bossId: 'grimfang', tacticId: 'balanced', count: 100,
+      bossId: 'grimfang', count: 100,
     });
     expect(full.winRate).toBeGreaterThan(noHealer.winRate + 0.3);
   });
 
   it('höheres Level erhöht die Siegchance', () => {
-    const level1 = estimateChances({ heroes: createTestGroup(1), bossId: 'skarrix', tacticId: 'balanced', count: 100 });
-    const level5 = estimateChances({ heroes: createTestGroup(5), bossId: 'skarrix', tacticId: 'balanced', count: 100 });
+    const level1 = estimateChances({ heroes: createTestGroup(1), bossId: 'skarrix', count: 100 });
+    const level5 = estimateChances({ heroes: createTestGroup(5), bossId: 'skarrix', count: 100 });
     expect(level5.winRate).toBeGreaterThan(level1.winRate);
   });
 });

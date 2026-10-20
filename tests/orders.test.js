@@ -42,7 +42,7 @@ describe('Anweisungs-Daten', () => {
             }
           }
           for (const bossId of ['grimfang', 'morva', 'skarrix']) {
-            expect(() => estimateChances({ heroes: group, bossId, tacticId: 'balanced', count: 3 })).not.toThrow();
+            expect(() => estimateChances({ heroes: group, bossId, count: 3 })).not.toThrow();
           }
         }
       }
@@ -80,8 +80,8 @@ describe('Hero-Anweisungen', () => {
     const late = createTestGroup(1);
     early.find((h) => h.classId === 'priest').setOrder('healThreshold', 'early');
     late.find((h) => h.classId === 'priest').setOrder('healThreshold', 'late');
-    const earlyChance = estimateChances({ heroes: early, bossId: 'skarrix', tacticId: 'balanced', count: 150 });
-    const lateChance = estimateChances({ heroes: late, bossId: 'skarrix', tacticId: 'balanced', count: 150 });
+    const earlyChance = estimateChances({ heroes: early, bossId: 'skarrix', count: 150 });
+    const lateChance = estimateChances({ heroes: late, bossId: 'skarrix', count: 150 });
     expect(earlyChance.winRate).toBeGreaterThan(lateChance.winRate + 0.3);
   });
 });

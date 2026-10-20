@@ -1,6 +1,6 @@
 // ============================================================
 // COMBATLABSCREEN – das Kampf-Labor (Testbildschirm)
-// Gruppe wählen (Testgruppe oder eigene Helden), Boss und Taktik wählen, dann:
+// Gruppe wählen (Testgruppe oder eigene Helden), Boss wählen, dann:
 //   - "Kampf ansehen": ein einzelner Kampf als Szene, danach der vollständige Bericht
 //   - "Siegchance berechnen": viele Kämpfe, daraus Siegchance und Risiko
 // Nichts davon verändert den Spielstand.
@@ -9,7 +9,6 @@
 import { BOSSES, getBoss } from '../data/enemies.js';
 import { getBossLevel } from '../data/dungeons.js';
 import { scaleEnemyStats } from '../systems/combat/Battle.js';
-import { TACTICS } from '../data/tactics.js';
 import { simulateBattle } from '../systems/combat/CombatSimulator.js';
 import { estimateChances } from '../systems/combat/ChanceEstimator.js';
 import { createTestGroup } from '../systems/combat/TestGroup.js';
@@ -31,7 +30,6 @@ export class CombatLabScreen {
     this.testLevel = 1;
     this.selectedHeroIds = new Set();  // gewählte eigene Helden
     this.bossId = 'grimfang';
-    this.tacticId = 'balanced';
     this.fightCounter = 0;             // sorgt dafür, dass jeder Kampf anders verläuft
     this.activeScene = null;           // die gerade laufende Kampfszene
     this.testOrders = {};              // Anweisungen der Testgruppe: Klasse → { Anweisung → Option }
@@ -50,10 +48,6 @@ export class CombatLabScreen {
           <h3>Gegner</h3>
           <div class="boss-list"></div>
           <div class="boss-info"></div>
-
-          <h3>Taktik</h3>
-          <div class="button-row tactic-buttons"></div>
-          <p class="hint tactic-description"></p>
 
           <h3>Anweisungen</h3>
           <div class="orders-list"></div>
@@ -89,7 +83,6 @@ export class CombatLabScreen {
     this.renderGroupOptions();
     this.renderGroupPreview();
     this.renderBossList();
-    this.renderTactics();
     this.renderOrderList();
     const hasGroup = this.getGroup().length > 0;
     this.root.querySelector('.fight-button').disabled = !hasGroup;
@@ -223,17 +216,6 @@ export class CombatLabScreen {
     });
   }
 
-  renderTactics() {
-    this.fillButtonRow(
-      this.root.querySelector('.tactic-buttons'),
-      TACTICS.map((tactic) => ({ label: tactic.name, value: tactic.id })),
-      (value) => value === this.tacticId,
-      (value) => { this.tacticId = value; },
-    );
-    const tactic = TACTICS.find((t) => t.id === this.tacticId);
-    this.root.querySelector('.tactic-description').textContent = tactic.description;
-  }
-
   // ---------- Kämpfe ----------
 
   // Kampf berechnen und als Szene abspielen. Am Ende erscheint der Bericht darunter.
@@ -243,7 +225,6 @@ export class CombatLabScreen {
     const result = simulateBattle({
       heroes: group,
       bossId: this.bossId,
-      tacticId: this.tacticId,
       enemyLevel: getBossLevel(this.bossId),
       seed: Date.now() + this.fightCounter,
       recordLog: true,
@@ -274,7 +255,6 @@ export class CombatLabScreen {
     const estimate = estimateChances({
       heroes: group,
       bossId: this.bossId,
-      tacticId: this.tacticId,
       enemyLevel: getBossLevel(this.bossId),
       seed: Date.now(),
     });

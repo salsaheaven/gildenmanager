@@ -19,11 +19,10 @@ import { BALANCING } from '../data/balancing.js';
 
 export class Expedition {
   // heroSnapshots = Speicherdaten der Helden beim Start (Hero.toSaveData)
-  constructor(id, dungeonId, heroSnapshots, tacticId, retreatRuleId, seed) {
+  constructor(id, dungeonId, heroSnapshots, retreatRuleId, seed) {
     this.id = id;
     this.dungeonId = dungeonId;
     this.heroSnapshots = heroSnapshots;
-    this.tacticId = tacticId;
     this.retreatRuleId = retreatRuleId;
     this.seed = seed;
     this.elapsed = 0;            // vergangene Spielsekunden seit dem Start
@@ -42,7 +41,6 @@ export class Expedition {
       this.result = simulateRun({
         heroes: this.heroSnapshots.map((snapshot) => Hero.fromSaveData(snapshot)),
         dungeonId: this.dungeonId,
-        tacticId: this.tacticId,
         retreatRuleId: this.retreatRuleId,
         seed: this.seed,
         recordLog: true,
@@ -110,7 +108,6 @@ export class Expedition {
       id: this.id,
       dungeonId: this.dungeonId,
       heroSnapshots: this.heroSnapshots,
-      tacticId: this.tacticId,
       retreatRuleId: this.retreatRuleId,
       seed: this.seed,
       elapsed: this.elapsed,
@@ -119,7 +116,7 @@ export class Expedition {
   }
 
   static fromSaveData(data) {
-    const expedition = new Expedition(data.id, data.dungeonId, data.heroSnapshots, data.tacticId, data.retreatRuleId, data.seed);
+    const expedition = new Expedition(data.id, data.dungeonId, data.heroSnapshots, data.retreatRuleId, data.seed);
     expedition.elapsed = data.elapsed;
     expedition.manualRetreat = data.manualRetreat;
     return expedition;

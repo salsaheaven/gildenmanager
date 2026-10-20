@@ -62,7 +62,7 @@ describe('Item-Level', () => {
     const group = createTestGroup(10);
     group.forEach((hero, index) => { hero.id = 100 + index; });
     game.guild.heroes.push(...group);
-    game.startExpedition('bearCave', group.map((hero) => hero.id), 'balanced', 'never');
+    game.startExpedition('bearCave', group.map((hero) => hero.id), 'never');
     game.advanceTime(game.guild.expeditions[0].getTotalTime() + 1);
     const box = game.guild.boxes.find((b) => b.typeId === 'chestGrimfang');
     expect(box.itemLevel).toBe(DUNGEONS[0].level);

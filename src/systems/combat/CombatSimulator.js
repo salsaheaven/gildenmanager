@@ -26,7 +26,6 @@ import { useAbility, useBasicAttack } from './AbilityEffects.js';
 import { ABILITIES } from '../../data/abilities.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
 import { getBoss } from '../../data/enemies.js';
-import { getTactic } from '../../data/tactics.js';
 import { getDungeon } from '../../data/dungeons.js';
 import { getRetreatRule } from '../../data/retreatRules.js';
 
@@ -59,23 +58,22 @@ export function createBossCombatant(bossData, level = 1) {
 
 // ---------- Einstiege ----------
 
-// Ein einzelner Bosskampf. options = { heroes: Hero-Liste, bossId, tacticId, seed, recordLog,
+// Ein einzelner Bosskampf. options = { heroes: Hero-Liste, bossId, seed, recordLog,
 //                                      enemyLevel (Stufe des Bosses, Standard 1) }
 export function simulateBattle(options) {
   const random = new Random(options.seed);
   const heroes = options.heroes.map((hero) => createHeroCombatant(hero));
-  return runEncounter(heroes, { type: 'boss', bossId: options.bossId }, getTactic(options.tacticId), random, options.recordLog, {},
+  return runEncounter(heroes, { type: 'boss', bossId: options.bossId }, random, options.recordLog, {},
     options.enemyLevel || 1);
 }
 
 // Ein ganzer Dungeon-Run.
-// options = { heroes, dungeonId, tacticId, retreatRuleId, seed, recordLog,
+// options = { heroes, dungeonId, retreatRuleId, seed, recordLog,
 //             manualRetreat: { encounterIndex, round } oder null (Rückzug per Hand, siehe Expedition) }
 // Gibt { dungeonId, outcome, encounters, heroes } zurück.
 //   outcome = 'success', 'defeat', 'retreat' oder 'timeout'
 export function simulateRun(options) {
   const dungeon = getDungeon(options.dungeonId);
-  const tactic = getTactic(options.tacticId);
   const retreatRule = getRetreatRule(options.retreatRuleId || 'never');
   const random = new Random(options.seed);
   const heroes = options.heroes.map((hero) => createHeroCombatant(hero));
@@ -99,7 +97,7 @@ export function simulateRun(options) {
       rule: retreatRule,
       atRound: manualHere ? manualRetreat.round : null,
     };
-    const result = runEncounter(heroes, dungeon.encounters[i], tactic, random, options.recordLog, retreatOptions,
+    const result = runEncounter(heroes, dungeon.encounters[i], random, options.recordLog, retreatOptions,
       dungeon.level);
     encounters.push(result);
 
@@ -128,7 +126,7 @@ export function simulateRun(options) {
 // encounter = { type: 'boss', bossId } oder { type: 'trash', name, enemies: [...] }
 // retreatOptions = { rule (aus retreatRules.js), atRound (Rückzug per Hand ab dieser Runde) }
 // level          = Stufe der Gegner (Stufe des Dungeons, siehe data/scaling.js)
-export function runEncounter(heroes, encounter, tactic, random, recordLog, retreatOptions, level = 1) {
+export function runEncounter(heroes, encounter, random, recordLog, retreatOptions, level = 1) {
   // Die Statistik (Schadensmesser) zählt pro Begegnung neu
   for (const hero of heroes) {
     hero.damageDone = 0;
@@ -145,7 +143,7 @@ export function runEncounter(heroes, encounter, tactic, random, recordLog, retre
   if (boss) {
     boss.defenseConstant = getDefenseConstant(level);
   }
-  const battle = new Battle(heroes, boss, tactic, random, recordLog, level);
+  const battle = new Battle(heroes, boss, random, recordLog, level);
   if (encounter.type === 'trash') {
     for (const enemyId of encounter.enemies) {
       battle.spawnMinion(enemyId);

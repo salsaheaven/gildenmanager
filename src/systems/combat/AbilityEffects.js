@@ -20,10 +20,10 @@ export function rollOutput(battle, caster, scaling, power, critBonus = 0) {
   return { amount: amount, crit: crit };
 }
 
-// Held fügt einem Gegner Schaden zu (mit Taktik-Faktor und Aggro)
+// Held fügt einem Gegner Schaden zu (mit Aggro)
 export function heroDealsDamage(battle, caster, target, actionName, scaling, power, options = {}) {
   const output = rollOutput(battle, caster, scaling, power, options.critBonus || 0);
-  const result = target.takeDamage(output.amount * battle.tactic.damageMultiplier);
+  const result = target.takeDamage(output.amount);
   caster.damageDone += result.damage;
   caster.threat += result.damage * (options.threat || 1);
 
@@ -147,7 +147,7 @@ function applyPoison(battle, caster, ability, target) {
     kind: 'dot',
     name: ability.name,
     sourceId: caster.id,
-    damagePerRound: output.amount * battle.tactic.damageMultiplier,
+    damagePerRound: output.amount,
     remaining: ability.duration,
     isDebuff: true,
   });

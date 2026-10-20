@@ -1,13 +1,12 @@
 // ============================================================
 // DUNGEONSCREEN – Dungeons auswählen, Gruppe losschicken, Runs verfolgen
 //   Links:  alle Dungeons (gesperrte grau)
-//   Rechts: der gewählte Dungeon mit Begegnungen, Gruppe, Taktik, Rückzugsregel, Anweisungen
+//   Rechts: der gewählte Dungeon mit Begegnungen, Gruppe, Rückzugsregel, Anweisungen
 //   Unten:  laufende Runs (Fortschritt, Zuschauen, Rückzug) und Berichte
 // ============================================================
 
 import { DUNGEONS, getDungeon } from '../data/dungeons.js';
 import { getBoss, MINIONS } from '../data/enemies.js';
-import { TACTICS } from '../data/tactics.js';
 import { RETREAT_RULES } from '../data/retreatRules.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
 import { BALANCING } from '../data/balancing.js';
@@ -26,7 +25,6 @@ export class DungeonScreen {
     this.game = game;
     this.dungeonId = DUNGEONS[0].id;
     this.selectedHeroIds = new Set();
-    this.tacticId = 'balanced';
     this.retreatRuleId = 'never';
 
     this.root.innerHTML = `
@@ -123,8 +121,6 @@ export class DungeonScreen {
       <h3>Gruppe (bis zu ${GROUP_SIZE} Helden)</h3>
       <div class="group-picker"></div>
       <div class="group-check"></div>
-      <h3>Taktik</h3>
-      <div class="button-row tactic-buttons"></div>
       <h3>Rückzug</h3>
       <div class="button-row retreat-buttons"></div>
       <p class="hint">Der Rückzug dauert ${COMBAT_RULES.retreatRounds} Runden, in denen der Gegner weiter angreift. Danach gibt es keine Beute.</p>
@@ -139,8 +135,6 @@ export class DungeonScreen {
     this.renderReward(panel.querySelector('.reward-line'), dungeon);
     this.renderGroupPicker(panel.querySelector('.group-picker'));
     this.renderGroupCheck(panel.querySelector('.group-check'), dungeon);
-    this.fillButtonRow(panel.querySelector('.tactic-buttons'), TACTICS.map((t) => ({ label: t.name, value: t.id })),
-      (value) => value === this.tacticId, (value) => { this.tacticId = value; });
     this.fillButtonRow(panel.querySelector('.retreat-buttons'), RETREAT_RULES.map((r) => ({ label: r.name, value: r.id })),
       (value) => value === this.retreatRuleId, (value) => { this.retreatRuleId = value; });
 
@@ -293,7 +287,7 @@ export class DungeonScreen {
 
   start() {
     const heroIds = [...this.selectedHeroIds];
-    const result = this.game.startExpedition(this.dungeonId, heroIds, this.tacticId, this.retreatRuleId);
+    const result = this.game.startExpedition(this.dungeonId, heroIds, this.retreatRuleId);
     if (result !== 'ok') {
       showToast('Das geht gerade nicht.', '#ff6b6b');
       return;

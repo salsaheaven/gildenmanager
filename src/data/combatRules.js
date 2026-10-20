@@ -23,6 +23,13 @@ export const COMBAT_RULES = {
   enemyVariation: 0.25,
   enemyCritChance: 0.1,
 
+  // Heiler heilen, wenn jemand unter diesen Anteil Leben fällt
+  // (die Anweisung "Heilen ab" beim Priester kann das ändern, siehe heroOrders.js)
+  healThreshold: 0.6,
+
+  // Der Tank benutzt seine Verteidigung, wenn er unter diesen Anteil Leben fällt
+  selfDefenseThreshold: 0.45,
+
   // Unter diesem Mana-Anteil warnt der Kampfbericht "hat kaum noch Mana!"
   lowManaWarning: 0.12,
 

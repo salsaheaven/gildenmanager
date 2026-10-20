@@ -4,7 +4,7 @@
 // Die ERSTE Option ist immer die Standard-Einstellung.
 //
 // effects einer Option (alle freiwillig):
-//   healThreshold  = heilt, wenn jemand unter diesen Anteil Leben fällt (statt der Taktik)
+//   healThreshold  = heilt, wenn jemand unter diesen Anteil Leben fällt (statt des Standards aus combatRules.js)
 //   targetPriority = 'boss': Schaden zuerst auf den Boss statt auf Diener
 //   manaReserve    = Anteil Mana, der für Notfälle aufgehoben wird (keine Schadens-Skills darunter)
 //   abilityWhen    = { skill-id: Bedingung } ersetzt die Bedingung eines Skills
@@ -46,7 +46,7 @@ export const HERO_ORDERS = {
       id: 'healThreshold',
       name: 'Heilen ab',
       options: [
-        { id: 'tactic', label: 'Wie die Taktik', effects: {} },
+        { id: 'normal', label: 'Normal (unter 60 %)', effects: {} },
         { id: 'early', label: 'Früh (unter 80 %)', effects: { healThreshold: 0.8 } },
         { id: 'late', label: 'Spät (unter 40 %)', effects: { healThreshold: 0.4 } },
       ],

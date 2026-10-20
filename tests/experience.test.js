@@ -93,7 +93,7 @@ describe('EP-Berechnung', () => {
 describe('Nach dem Run', () => {
   it('ein Erfolg gibt allen Helden EP, der Bericht nennt sie', () => {
     const { game, heroIds } = gameWithGroup(1);
-    game.startExpedition('bearCave', heroIds, 'balanced', 'never');
+    game.startExpedition('bearCave', heroIds, 'never');
     const levelUps = [];
     game.on('heroLevelUp', (data) => levelUps.push(data));
     game.advanceTime(game.guild.expeditions[0].getTotalTime() + 1);
@@ -118,12 +118,12 @@ describe('Nach dem Run', () => {
 
     const game = new Game(3);
     game.guild.heroes.push(hero);
-    expect(game.startExpedition('bearCave', [1], 'balanced', 'never')).toBe('injured');
+    expect(game.startExpedition('bearCave', [1], 'never')).toBe('injured');
     const healed = [];
     game.on('heroHealed', (healedHero) => healed.push(healedHero));
     game.advanceTime(INJURIES.injurySeconds + 1);
     expect(hero.isInjured()).toBe(false);
     expect(healed.length).toBe(1);
-    expect(game.startExpedition('bearCave', [1], 'balanced', 'never')).toBe('ok');
+    expect(game.startExpedition('bearCave', [1], 'never')).toBe('ok');
   });
 });

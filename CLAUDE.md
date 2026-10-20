@@ -21,7 +21,7 @@ Das Projekt ist ein Vibecoding-Übungsprojekt. Der Code soll auch für Programmi
 - Nach jeder Änderung kurz und laienverständlich erklären, was in welcher Datei passiert ist
 
 ## Design-Grundsatz
-**Jede Wahlmöglichkeit im Spiel braucht Vor- und Nachteile** (Anweisungen, Taktiken, Klassen, Eigenschaften, Talente …).
+**Jede Wahlmöglichkeit im Spiel braucht Vor- und Nachteile** (Anweisungen, Klassen, Eigenschaften, Talente …).
 Eine Option, die immer die beste ist, ist keine Wahl. Neue Optionen deshalb per Simulation prüfen: Ist eine Option gegen alle Bosse besser als die anderen, braucht sie einen Nachteil. Details stehen in `KONZEPT.md`.
 
 ## Arbeitsweise
@@ -42,7 +42,7 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
                TestGroup (Standard-Gruppe fürs Labor)
 src/data/      Reine Inhalte: rarities, items, lootBoxes, balancing, sprites (Pixel-Art als Text),
                heroClasses, abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
-               enemies (Bosse + Diener/Trash), tactics, combatRules, heroOrders (Kampf-Anweisungen pro Klasse),
+               enemies (Bosse + Diener/Trash), combatRules, heroOrders (Kampf-Anweisungen pro Klasse),
                dungeons (Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen)
