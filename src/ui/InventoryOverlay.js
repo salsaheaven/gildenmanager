@@ -1,28 +1,50 @@
 // ============================================================
-// INVENTORYPANEL – zeigt alle Items der Gilde als Raster.
+// INVENTORYOVERLAY – das Inventar als Vollbild-Fenster
+// Wird über den Knopf "Inventar" in der Reiterleiste geöffnet, von jedem Bildschirm aus.
+// Oben: Kategorien (Alle, Waffe, Nebenhand, Kopf …). Darunter alle Items als Raster.
 // Klick auf ein Item zeigt Details und einen Verkaufen-Knopf.
+// Schließen mit dem X oder der Escape-Taste.
 // ============================================================
 
 import { getRarity } from '../data/rarities.js';
 import { STAT_NAMES, SLOT_NAMES } from '../data/items.js';
+import { EQUIPMENT_SLOTS } from '../entities/Hero.js';
 import { createItemCanvas } from './PixelArt.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 
-export class InventoryPanel {
-  constructor(rootElement, game) {
-    this.root = rootElement;
+export class InventoryOverlay {
+  // onNewItemsChanged = Funktion, die bei neuen/gesehenen Items aufgerufen wird
+  // (bekommt die Anzahl neuer Items, z.B. für das Abzeichen am Inventar-Knopf)
+  constructor(game, onNewItemsChanged) {
     this.game = game;
+    this.onNewItemsChanged = onNewItemsChanged;
+    this.isOpen = false;
+    this.category = null;           // null = alle Kategorien, sonst ein Ausrüstungsplatz wie 'weapon'
     this.selectedItemId = null;
     this.hiddenItemIds = new Set(); // Items, die gerade noch in der Kiste "stecken"
     this.newItemIds = new Set();    // frisch gefundene Items bekommen einen Punkt
 
+    this.root = document.createElement('div');
+    this.root.className = 'inventory-overlay';
+    this.root.hidden = true;
     this.root.innerHTML = `
-      <h2>Inventar <span class="inventory-count"></span></h2>
-      <div class="inventory-grid"></div>
-      <div class="item-details"></div>
-      <button class="sell-junk-button"></button>
+      <div class="inventory-header">
+        <h2>Inventar <span class="inventory-count"></span></h2>
+        <button class="close-button" title="Schließen (Esc)">✕</button>
+      </div>
+      <div class="inventory-categories"></div>
+      <div class="inventory-body">
+        <div class="inventory-grid"></div>
+        <div class="inventory-side">
+          <div class="item-details"></div>
+          <button class="sell-junk-button"></button>
+        </div>
+      </div>
     `;
+    document.body.appendChild(this.root);
+
+    this.root.querySelector('.close-button').addEventListener('click', () => this.close());
 
     this.root.querySelector('.sell-junk-button').addEventListener('click', () => {
       const gold = this.game.sellAllOfRarity('poor');
@@ -32,8 +54,35 @@ export class InventoryPanel {
       }
     });
 
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && this.isOpen) {
+        this.close();
+      }
+    });
+
     game.on('changed', () => this.render());
+  }
+
+  open() {
+    this.isOpen = true;
+    this.root.hidden = false;
+    document.body.classList.add('overlay-open'); // Seite dahinter nicht mitscrollen
     this.render();
+  }
+
+  close() {
+    Sound.click();
+    this.isOpen = false;
+    this.root.hidden = true;
+    document.body.classList.remove('overlay-open');
+  }
+
+  toggle() {
+    if (this.isOpen) {
+      this.close();
+    } else {
+      this.open();
+    }
   }
 
   // Items verstecken, bis sie in der Kiste aufgedeckt wurden
@@ -50,8 +99,8 @@ export class InventoryPanel {
     this.render();
   }
 
-  // Beste Items zuerst: nach Seltenheit, dann nach Stärke
-  getSortedItems() {
+  // Alle sichtbaren Items, beste zuerst: nach Seltenheit, dann nach Stärke
+  getVisibleItems() {
     const visible = this.game.guild.inventory.filter((item) => !this.hiddenItemIds.has(item.id));
     visible.sort((a, b) => {
       if (b.getRarityRank() !== a.getRarityRank()) {
@@ -62,21 +111,72 @@ export class InventoryPanel {
     return visible;
   }
 
-  render() {
-    const items = this.getSortedItems();
-    this.root.querySelector('.inventory-count').textContent = '(' + items.length + ')';
+  // Nur die Items der gewählten Kategorie
+  getItemsInCategory(items, category) {
+    if (category === null) {
+      return items;
+    }
+    return items.filter((item) => item.getSlot() === category);
+  }
 
+  render() {
+    // Verkaufte oder angelegte Items sind nicht mehr "neu"
+    for (const itemId of this.newItemIds) {
+      if (!this.game.guild.findItem(itemId)) {
+        this.newItemIds.delete(itemId);
+      }
+    }
+    this.onNewItemsChanged(this.newItemIds.size);
+
+    // Geschlossen muss nichts gezeichnet werden
+    if (!this.isOpen) {
+      return;
+    }
+
+    const items = this.getVisibleItems();
+    this.root.querySelector('.inventory-count').textContent = '(' + items.length + ')';
+    this.renderCategories(items);
+
+    const shownItems = this.getItemsInCategory(items, this.category);
     const grid = this.root.querySelector('.inventory-grid');
     grid.innerHTML = '';
-    for (const item of items) {
+    for (const item of shownItems) {
       grid.appendChild(this.createSlot(item));
     }
     if (items.length === 0) {
-      grid.innerHTML = '<p class="empty">Noch leer. Öffne eine Kiste!</p>';
+      grid.innerHTML = '<p class="empty">Noch leer. Öffne eine Kiste in der Schatzkammer!</p>';
+    } else if (shownItems.length === 0) {
+      grid.innerHTML = '<p class="empty">In dieser Kategorie liegt nichts.</p>';
     }
 
     this.renderDetails();
     this.renderSellJunkButton(items);
+  }
+
+  // Knöpfe für die Kategorien, jeweils mit Anzahl und Punkt für neue Items
+  renderCategories(items) {
+    const container = this.root.querySelector('.inventory-categories');
+    container.innerHTML = '';
+    const categories = [null, ...EQUIPMENT_SLOTS];
+    for (const category of categories) {
+      const itemsInCategory = this.getItemsInCategory(items, category);
+      const hasNew = itemsInCategory.some((item) => this.newItemIds.has(item.id));
+
+      const button = document.createElement('button');
+      button.className = 'category-button';
+      button.classList.toggle('active', category === this.category);
+      const name = category === null ? 'Alle' : SLOT_NAMES[category];
+      button.textContent = name + ' ' + itemsInCategory.length;
+      if (hasNew) {
+        button.insertAdjacentHTML('beforeend', '<span class="new-dot"></span>');
+      }
+      button.addEventListener('click', () => {
+        Sound.click();
+        this.category = category;
+        this.render();
+      });
+      container.appendChild(button);
+    }
   }
 
   createSlot(item) {
@@ -113,7 +213,7 @@ export class InventoryPanel {
     const item = this.game.guild.findItem(this.selectedItemId);
 
     if (!item || this.hiddenItemIds.has(item.id)) {
-      details.innerHTML = '<p class="hint">Klicke ein Item an.</p>';
+      details.innerHTML = '<p class="hint">Tippe ein Item an.</p>';
       return;
     }
 

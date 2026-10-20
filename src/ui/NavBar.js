@@ -1,5 +1,6 @@
 // ============================================================
-// NAVBAR – die Reiter unter der oberen Leiste (Schatzkammer, Helden, Taverne)
+// NAVBAR – die Reiter unter der oberen Leiste (Schatzkammer, Helden, Taverne …)
+// Ganz rechts sitzt zusätzlich der Inventar-Knopf (öffnet ein Fenster, ist kein Reiter).
 // Kleine Abzeichen zeigen, wo etwas Neues wartet.
 // ============================================================
 
@@ -23,6 +24,20 @@ export class NavBar {
       this.root.appendChild(button);
       this.buttons[tab.id] = button;
     }
+  }
+
+  // Ein Knopf, der kein Reiter ist (z.B. "Inventar"). Er bekommt auch ein Abzeichen über setBadge.
+  addExtraButton(id, name, onClick) {
+    const button = document.createElement('button');
+    button.className = 'nav-tab nav-extra';
+    button.innerHTML = '<span class="nav-name"></span><span class="nav-badge" hidden></span>';
+    button.querySelector('.nav-name').textContent = name;
+    button.addEventListener('click', () => {
+      Sound.click();
+      onClick();
+    });
+    this.root.appendChild(button);
+    this.buttons[id] = button;
   }
 
   setActive(tabId) {

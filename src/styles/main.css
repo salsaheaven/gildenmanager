@@ -228,14 +228,14 @@ button:disabled {
 
 .lootbox-screen {
   display: grid;
-  grid-template-columns: 280px 1fr 320px;
+  grid-template-columns: 280px 1fr;
   gap: 16px;
   min-height: calc(100vh - 160px);
 }
 
 @media (max-width: 1000px) {
   .lootbox-screen {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -527,7 +527,68 @@ button:disabled {
 
 /* ---------- Inventar ---------- */
 
-.inventory-panel {
+/* Vollbild-Fenster über allem (nur die Benachrichtigungen liegen noch darüber) */
+.inventory-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--background);
+}
+
+.inventory-overlay[hidden] {
+  display: none;
+}
+
+/* Solange das Fenster offen ist, scrollt die Seite dahinter nicht mit */
+body.overlay-open {
+  overflow: hidden;
+}
+
+.inventory-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inventory-header h2 {
+  margin: 0;
+}
+
+.close-button {
+  font-size: 22px;
+  padding: 4px 14px;
+}
+
+.inventory-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.category-button {
+  position: relative;
+}
+
+.category-button.active {
+  background: var(--panel-light);
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+/* Raster links, Details rechts. Auf dem Handy untereinander (siehe unten). */
+.inventory-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+}
+
+.inventory-side {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -535,9 +596,8 @@ button:disabled {
 
 .inventory-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
   gap: 6px;
-  max-height: 50vh;
   overflow-y: auto;
   /* Platz für den Scrollbalken freihalten, damit nichts springt,
      und etwas Innenabstand, damit Punkte und Pfeile an den Rändern nicht abgeschnitten werden */
@@ -658,6 +718,10 @@ button:disabled {
   border-bottom: none;
   box-shadow: none;
   background: var(--panel);
+}
+
+.nav-extra {
+  margin-left: auto;
 }
 
 .nav-tab.active {
@@ -830,7 +894,7 @@ h3 {
 
 @media (max-width: 1000px) {
   .hero-screen {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -930,7 +994,7 @@ h3 {
 
 @media (max-width: 700px) {
   .detail-columns {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -1145,7 +1209,7 @@ h3 {
 
 @media (max-width: 1000px) {
   .lab-screen {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -1951,7 +2015,7 @@ h3 {
 
 @media (max-width: 1000px) {
   .dungeon-screen {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -2127,4 +2191,78 @@ h3 {
 /* Unterwegs: Ausrüstung kann nicht abgelegt werden */
 .equipment-slot.busy .unequip-button {
   display: none;
+}
+
+/* ============================================================
+   HANDY (schmale Bildschirme)
+   ============================================================ */
+
+@media (max-width: 700px) {
+  #screen {
+    padding: 10px;
+  }
+
+  /* Reiter als Raster mit 3 Spalten statt aus dem Bild zu laufen */
+  #nav-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 10px 10px 8px;
+    gap: 10px 6px;
+  }
+
+  .nav-tab {
+    padding: 10px 4px;
+    font-size: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .nav-tab.active {
+    border-bottom-color: var(--gold);
+  }
+
+  .nav-extra {
+    margin-left: 0;
+  }
+
+  /* Benachrichtigungen unten statt über den Reitern */
+  #toasts {
+    top: auto;
+    bottom: 16px;
+    left: 10px;
+    right: 10px;
+  }
+
+  .toast {
+    font-size: 17px;
+  }
+
+  /* Kampfszene verkleinern, damit sie auf den Bildschirm passt */
+  .battle-scene {
+    zoom: 0.7;
+  }
+
+  .scene-field {
+    padding: 40px 10px 20px;
+    gap: 10px;
+  }
+
+  .order-row {
+    grid-template-columns: 105px minmax(0, 1fr);
+  }
+
+  /* Inventar: Raster oben, Details unten als feste Leiste */
+  .inventory-overlay {
+    padding: 10px;
+  }
+
+  .inventory-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+  }
+
+  .inventory-side .item-details {
+    min-height: 0;
+    max-height: 36vh;
+    overflow-y: auto;
+  }
 }

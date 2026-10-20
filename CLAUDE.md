@@ -46,6 +46,7 @@ src/data/      Reine Inhalte: rarities, items, lootBoxes, balancing, sprites (Pi
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: LootBoxScreen (Schatzkammer),
                HeroScreen (+ HeroDetailPanel, EquipPanel), TavernScreen, CombatLabScreen,
                DungeonScreen (+ RunViewer = laufenden Run als Szene zeigen).
+               InventoryOverlay = Inventar als Vollbild-Fenster mit Kategorien (Knopf „Inventar“ in der Reiterleiste).
                CombatReport = Ergebnis, Schadensmesser und Kampfbericht (wiederverwendbar).
                BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken); läuft im Takt der Spieluhr.
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
@@ -60,6 +61,7 @@ tests/         Vitest-Tests (prüfen auch, ob die Daten gültig sind)
 - Zufall läuft immer über `Random`, nie direkt über `Math.random()`. So bleibt er testbar und wird mitgespeichert.
 - Balancing des Kampfs: Im Kampf-Labor ausprobieren, oder per Node-Skript mit `estimateChances` viele Varianten durchrechnen.
   Zielwerte für eine Level-1-Gruppe ohne Ausrüstung: Grimmzahn ~90 %, Morva ~70 %, Skarrix ~50 %.
+- Die Oberfläche muss auch auf dem Handy funktionieren (Breite ~390 px). Handy-Regeln stehen am Ende von `main.css` (`@media (max-width: 700px)`).
 - Pixel-Art steht als Text-Raster in `src/data/sprites.js`. Ein Zeichen ist ein Pixel, die Farben stehen in `PALETTE`.
 
 ## Befehle

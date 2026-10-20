@@ -29,7 +29,13 @@ export class HeroScreen {
     `;
 
     this.detailPanel = new HeroDetailPanel(this.root.querySelector('.hero-detail'), game, {
-      onSlotClicked: (slot) => this.equipPanel.setSlotFilter(slot),
+      onSlotClicked: (slot) => {
+        this.equipPanel.setSlotFilter(slot);
+        // Auf dem Handy steht die Ausrüstungsliste weit unten: dorthin scrollen
+        if (window.innerWidth <= 700) {
+          this.root.querySelector('.equip-panel').scrollIntoView({ behavior: 'smooth' });
+        }
+      },
       onDismissed: () => {
         this.selectedHeroId = null;
         this.render();

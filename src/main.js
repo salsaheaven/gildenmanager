@@ -16,6 +16,7 @@ import { CombatLabScreen } from './ui/CombatLabScreen.js';
 import { DungeonScreen, outcomeText } from './ui/DungeonScreen.js';
 import { getDungeon } from './data/dungeons.js';
 import { DebugPanel } from './ui/DebugPanel.js';
+import { InventoryOverlay } from './ui/InventoryOverlay.js';
 import { Sound } from './ui/Sound.js';
 import { showToast } from './ui/Toast.js';
 
@@ -63,7 +64,15 @@ for (const tab of TABS) {
 }
 
 const navBar = new NavBar(document.getElementById('nav-bar'), TABS, showScreen);
-new LootBoxScreen(screenElements.treasury, game);
+
+// Das Inventar ist ein Vollbild-Fenster, das von überall geöffnet werden kann.
+// Das Abzeichen am Knopf zeigt, wie viele frische Items noch nicht angeschaut wurden.
+const inventory = new InventoryOverlay(game, (newItemCount) => {
+  navBar.setBadge('inventory', newItemCount > 0 ? String(newItemCount) : '');
+});
+navBar.addExtraButton('inventory', 'Inventar', () => inventory.toggle());
+
+new LootBoxScreen(screenElements.treasury, game, inventory);
 new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'));
 const tavernScreen = new TavernScreen(screenElements.tavern, game);
 const combatLabScreen = new CombatLabScreen(screenElements.lab, game);

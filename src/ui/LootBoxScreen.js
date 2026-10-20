@@ -1,5 +1,6 @@
 // ============================================================
-// LOOTBOXSCREEN – die Schatzkammer: Kisten öffnen, kaufen, Inventar
+// LOOTBOXSCREEN – die Schatzkammer: Kisten öffnen und kaufen
+// (Das Inventar ist ein eigenes Vollbild-Fenster, siehe InventoryOverlay.)
 //
 // Ablauf beim Öffnen (das Herzstück der Motivation!):
 //   1. Kiste wackelt (je besser die Kiste, desto länger)
@@ -13,7 +14,6 @@ import { LOOT_BOXES, getLootBoxType } from '../data/lootBoxes.js';
 import { STAT_NAMES } from '../data/items.js';
 import { BALANCING } from '../data/balancing.js';
 import { createChestCanvas, createItemCanvas, createSpriteCanvas } from './PixelArt.js';
-import { InventoryPanel } from './InventoryPanel.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 
@@ -22,9 +22,11 @@ const FIRST_ITEM_DELAY = 450;
 const TIME_BETWEEN_ITEMS = 500;
 
 export class LootBoxScreen {
-  constructor(rootElement, game) {
+  // inventory = das InventoryOverlay. Frische Items werden dort versteckt, bis sie aufgedeckt sind.
+  constructor(rootElement, game, inventory) {
     this.root = rootElement;
     this.game = game;
+    this.inventory = inventory;
 
     // Zustand der laufenden Öffnung
     this.isOpening = false;
@@ -51,8 +53,6 @@ export class LootBoxScreen {
           <div class="stage-hint"></div>
           <div class="stage-actions"></div>
         </section>
-
-        <section class="panel inventory-panel"></section>
       </div>
     `;
 
@@ -61,8 +61,6 @@ export class LootBoxScreen {
     this.itemsElement = this.root.querySelector('.stage-items');
     this.hintElement = this.root.querySelector('.stage-hint');
     this.actionsElement = this.root.querySelector('.stage-actions');
-
-    this.inventoryPanel = new InventoryPanel(this.root.querySelector('.inventory-panel'), game);
 
     // Klick auf die Bühne während des Öffnens = Animation überspringen
     this.stage.addEventListener('click', (event) => {
@@ -170,7 +168,7 @@ export class LootBoxScreen {
     // Eine Holzkiste als Deko, damit die Bühne nicht leer ist
     this.chestElement.appendChild(createChestCanvas(getLootBoxType('wood'), 10));
     this.chestElement.classList.add('idle');
-    this.hintElement.textContent = 'Wähle links eine Kiste zum Öffnen';
+    this.hintElement.textContent = 'Wähle eine Kiste zum Öffnen';
   }
 
   startOpening(boxTypeId) {
@@ -186,7 +184,7 @@ export class LootBoxScreen {
     this.currentBoxType = getLootBoxType(boxTypeId);
     this.currentItems = items;
     this.revealedCount = 0;
-    this.inventoryPanel.hideItems(items);
+    this.inventory.hideItems(items);
     this.renderBoxList();
 
     // Phase 1: Wackeln
@@ -232,7 +230,7 @@ export class LootBoxScreen {
     this.revealedCount++;
 
     this.itemsElement.appendChild(this.createItemCard(item));
-    this.inventoryPanel.revealItem(item);
+    this.inventory.revealItem(item);
     Sound.itemReveal(item.getRarityRank());
 
     // Phase 4: Legendär = großes Spektakel
@@ -283,9 +281,15 @@ export class LootBoxScreen {
     this.renderActions();
   }
 
-  // Knopf "Noch eine öffnen", damit man direkt weitermachen kann
+  // Knöpfe "Noch eine öffnen" (direkt weitermachen) und "Ins Inventar"
   renderActions() {
     this.actionsElement.innerHTML = '';
+    const inventoryButton = document.createElement('button');
+    inventoryButton.className = 'big-button';
+    inventoryButton.textContent = 'Ins Inventar';
+    inventoryButton.addEventListener('click', () => this.inventory.open());
+    this.actionsElement.appendChild(inventoryButton);
+
     const remaining = this.game.guild.countBoxes(this.currentBoxType.id);
     if (remaining > 0) {
       const againButton = document.createElement('button');
