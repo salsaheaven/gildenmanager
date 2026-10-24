@@ -9,6 +9,9 @@
 // color         = Farbe der Kleidung im Pixelbild
 // sprite        = welches Pixelbild aus sprites.js benutzt wird
 // weapons       = welche Waffen und Nebenhand-Items die Klasse tragen darf (Item-Vorlagen-ids).
+// armorType     = welche Rüstungsart die Klasse trägt: 'plate', 'leather' oder 'cloth' (siehe items.js)
+// usefulStats   = welche Item-Werte der Klasse etwas bringen. Nur sie zählen für Upgrade-Pfeile,
+//                 "Bestes anlegen" und den Ausrüstungswert (AW). Beispiel: Magie hilft dem Krieger nicht.
 //                 Rüstung, Helm, Stiefel und Ringe darf jeder tragen.
 // baseStats     = Werte auf Level 1
 // growth        = so viel kommt pro Level dazu
@@ -25,6 +28,8 @@ export const HERO_CLASSES = [
     color: '#b03a2e',
     sprite: 'heroWarrior',
     weapons: ['sword', 'shield'],
+    armorType: 'plate',
+    usefulStats: ['attack', 'defense', 'health'],
     baseStats: { health: 120, mana: 0, attack: 10, magic: 0, defense: 12 },
     growth: { health: 12, mana: 0, attack: 2, magic: 0, defense: 2 },
     abilities: ['bulwarkStrike', 'challengingShout', 'ironWatch'],
@@ -38,6 +43,8 @@ export const HERO_CLASSES = [
     color: '#8fa8ff',
     sprite: 'heroPriest',
     weapons: ['staff'],
+    armorType: 'cloth',
+    usefulStats: ['magic', 'mana', 'defense', 'health'],
     baseStats: { health: 70, mana: 100, attack: 2, magic: 12, defense: 4 },
     growth: { health: 7, mana: 10, attack: 0, magic: 2.5, defense: 1 },
     abilities: ['streamOfLife', 'sparkOfGrace', 'silentDevotion'],
@@ -51,6 +58,8 @@ export const HERO_CLASSES = [
     color: '#2fb5a8',
     sprite: 'heroRuneweaver',
     weapons: ['staff', 'shield'],
+    armorType: 'cloth',
+    usefulStats: ['magic', 'mana', 'defense', 'health'],
     baseStats: { health: 80, mana: 90, attack: 3, magic: 10, defense: 6 },
     growth: { health: 8, mana: 9, attack: 0, magic: 2, defense: 1 },
     abilities: ['runeArmor', 'glyphCircle', 'releasingRune'],
@@ -64,6 +73,8 @@ export const HERO_CLASSES = [
     color: '#4b5bd6',
     sprite: 'heroMage',
     weapons: ['staff'],
+    armorType: 'cloth',
+    usefulStats: ['magic', 'mana', 'defense', 'health'],
     baseStats: { health: 60, mana: 110, attack: 2, magic: 15, defense: 3 },
     growth: { health: 6, mana: 11, attack: 0, magic: 3, defense: 0.5 },
     abilities: ['emberLance', 'ashRain', 'iceWreath'],
@@ -77,6 +88,8 @@ export const HERO_CLASSES = [
     color: '#3a3a48',
     sprite: 'heroRogue',
     weapons: ['sword'],
+    armorType: 'leather',
+    usefulStats: ['attack', 'defense', 'health'],
     baseStats: { health: 85, mana: 0, attack: 14, magic: 0, defense: 6 },
     growth: { health: 8, mana: 0, attack: 3, magic: 0, defense: 1 },
     abilities: ['shadowStab', 'silencingBlow', 'viperBite'],
@@ -106,4 +119,22 @@ export function getHeroClass(classId) {
     }
   }
   throw new Error('Unbekannte Klasse: ' + classId);
+}
+
+// Welche Klassen können ein Item dieser Vorlage gebrauchen? (für die Anzeige "Für: …")
+// Waffen: wer sie tragen darf. Rüstung: wer diese Rüstungsart trägt.
+// Ringe: alle, deren normaler Angriff mit dem Wert des Rings arbeitet (Angriff oder Magie).
+export function getSuitableClasses(template) {
+  return HERO_CLASSES.filter((heroClass) => {
+    if (template.slot === 'weapon' || template.slot === 'offhand') {
+      return heroClass.weapons.includes(template.id);
+    }
+    if (template.armorType) {
+      return heroClass.armorType === template.armorType;
+    }
+    if (template.forScaling) {
+      return heroClass.basicAttack.scaling === template.forScaling;
+    }
+    return true;
+  });
 }

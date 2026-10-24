@@ -90,7 +90,7 @@ In kleinen, jeweils online testbaren Schritten:
 
 - **Design-Review 01** (2026-10-24, Unterlagen in `docs/review01/`, Mess-Werkzeuge in `tools/`). Die Vorschläge werden einzeln entschieden, Entscheidungen stehen in `KONZEPT.md`. Reihenfolge: P8 → P1 → P4 → P2 → P3 → Sammelbuch → P6 → P7 → P9 → P5.
   - **P8, Schritt 1** ✅ „Gierig“ (+20 % Gold) und „Glückspilz“ (+1 Item in der Boss-Kiste) wirken, wenn so ein Held mitkämpft. Im Tagesabschluss steht, wer den Bonus gebracht hat.
-  - **P8, Schritt 2:** Rüstungsarten Platte / Leder / Stoff, Angriffs- und Zauber-Ring.
+  - **P8, Schritt 2** ✅ Rüstungsarten Platte (Krieger) / Leder (Schurke) / Stoff (Zauberer), umgefärbte Pixelbilder, Kampfring und Zauberring für alle. Upgrade-Pfeile, „Bestes anlegen“ und AW zählen nur Werte, die der Klasse nützen (`usefulStats`). Spielstand-Version 2, alte Stände werden ignoriert.
 
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 

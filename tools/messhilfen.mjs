@@ -7,17 +7,8 @@ import { simulateRun } from '../src/systems/combat/CombatSimulator.js';
 import { Hero } from '../src/entities/Hero.js';
 import { LootSystem } from '../src/systems/LootSystem.js';
 import { Random } from '../src/core/Random.js';
-import { getItemTemplate } from '../src/data/items.js';
-
-// Welche Waffen und Nebenhand-Items jede Klasse zum Messen bekommt
-const WEAPONS_BY_CLASS = {
-  warrior: ['sword', 'shield'],
-  priest: ['staff'],
-  runeweaver: ['staff', 'shield'],
-  mage: ['staff'],
-  rogue: ['sword'],
-};
-const ARMOR_SLOTS = ['helmet', 'armor', 'boots', 'ring'];
+import { ITEM_TEMPLATES } from '../src/data/items.js';
+import { getSuitableClasses } from '../src/data/heroClasses.js';
 
 // Die Standardgruppe: je ein Held jeder Klasse
 export const STANDARD_GROUP = ['warrior', 'priest', 'runeweaver', 'mage', 'rogue'];
@@ -26,6 +17,7 @@ export const STANDARD_GROUP = ['warrior', 'priest', 'runeweaver', 'mage', 'rogue
 // classIds  = Liste von Klassen, doppelte sind erlaubt (z.B. zwei Schurken)
 // level     = Level aller Helden
 // itemLevel = 0: ohne Ausrüstung, sonst grüne Ausrüstung mit diesem Item-Level in allen Plätzen
+//             (jeweils die Vorlage, die zur Klasse passt: eigene Waffen, eigene Rüstungsart, passender Ring)
 export function createGroup(classIds, level, itemLevel = 0) {
   // Fester Seed: Jede Gruppe bekommt bei gleichen Angaben genau dieselbe Ausrüstung
   const lootSystem = new LootSystem(new Random(5));
@@ -36,12 +28,14 @@ export function createGroup(classIds, level, itemLevel = 0) {
     const hero = new Hero(-(i + 1), 'Test ' + (i + 1), classId, 'uncommon', [], { skin: '#f1c39b', hair: '#6b3f17' });
     hero.level = level;
     if (itemLevel > 0) {
-      for (const templateId of WEAPONS_BY_CLASS[classId].concat(ARMOR_SLOTS)) {
-        const item = lootSystem.createItem('uncommon', itemId, itemLevel, getItemTemplate(templateId));
-        itemId++;
-        if (hero.canEquip(item)) {
-          hero.equip(item);
+      for (const template of ITEM_TEMPLATES) {
+        const suitable = getSuitableClasses(template).some((heroClass) => heroClass.id === classId);
+        if (!suitable) {
+          continue;
         }
+        const item = lootSystem.createItem('uncommon', itemId, itemLevel, template);
+        itemId++;
+        hero.equip(item);
       }
     }
     group.push(hero);

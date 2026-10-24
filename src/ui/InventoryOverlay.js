@@ -10,6 +10,7 @@ import { getRarity } from '../data/rarities.js';
 import { STAT_NAMES, SLOT_NAMES } from '../data/items.js';
 import { EQUIPMENT_SLOTS } from '../entities/Hero.js';
 import { createItemCanvas } from './PixelArt.js';
+import { describeItemKind, describeSuitableClasses } from './format.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 
@@ -222,7 +223,8 @@ export class InventoryOverlay {
     const rarity = item.getRarity();
     details.innerHTML = `
       <div class="detail-name" style="color: ${rarity.color}"></div>
-      <div class="detail-sub">${rarity.name} · ${SLOT_NAMES[item.getSlot()]} · Stufe ${item.itemLevel}</div>
+      <div class="detail-sub">${rarity.name} · ${describeItemKind(item)} · Stufe ${item.itemLevel}</div>
+      <div class="detail-for">${describeSuitableClasses(item)}</div>
       <ul class="detail-stats"></ul>
       <div class="detail-power">Stärke: ${item.getPower()}</div>
       <div class="detail-upgrade"></div>

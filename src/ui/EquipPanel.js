@@ -7,7 +7,7 @@
 import { SLOT_NAMES } from '../data/items.js';
 import { EQUIPMENT_SLOTS } from '../entities/Hero.js';
 import { createItemCanvas } from './PixelArt.js';
-import { formatStats, formatDifference } from './format.js';
+import { formatStats, formatDifference, describeItemKind, describeClassArmor } from './format.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 
@@ -20,6 +20,7 @@ export class EquipPanel {
 
     this.root.innerHTML = `
       <h2>Ausrüstung anlegen</h2>
+      <p class="hint equip-armor-hint"></p>
       <button class="big-button equip-best-button">Bestes anlegen</button>
       <div class="slot-filters"></div>
       <div class="equip-list"></div>
@@ -91,6 +92,9 @@ export class EquipPanel {
       return;
     }
 
+    // Hinweis, welche Rüstung der Held tragen darf (z.B. "Krieger tragen Platte")
+    this.root.querySelector('.equip-armor-hint').textContent = describeClassArmor(this.hero.getClass()) + '. Ringe passen allen.';
+
     const items = this.getMatchingItems();
     bestButton.disabled = !items.some((item) => this.hero.getUpgradeValue(item) > 0);
 
@@ -118,7 +122,7 @@ export class EquipPanel {
       <span class="equip-diff"></span>
     `);
     row.querySelector('.equip-name').textContent = item.name;
-    row.querySelector('.equip-stats').textContent = SLOT_NAMES[item.getSlot()] + ' · Stufe ' + item.itemLevel + ' · ' + formatStats(item.stats);
+    row.querySelector('.equip-stats').textContent = describeItemKind(item) + ' · Stufe ' + item.itemLevel + ' · ' + formatStats(item.stats);
 
     const diffElement = row.querySelector('.equip-diff');
     diffElement.textContent = formatDifference(difference);

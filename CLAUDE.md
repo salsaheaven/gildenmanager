@@ -28,7 +28,7 @@ Eine Option, die immer die beste ist, ist keine Wahl. Neue Optionen deshalb per 
 - **Klein und spielbar:** Große Features in Schritte zerlegen, die jeweils einzeln spielbar sind. Nach jedem Schritt pushen. GitHub Pages veröffentlicht dann automatisch, und man kann sofort online testen.
 - **Modular, auch um Token zu sparen:** Kleine Dateien mit einer klaren Aufgabe. Für eine Änderung nur die betroffenen Dateien lesen, nicht das ganze Projekt. Die Übersicht unten zeigt, wo was liegt.
 - Testhilfen wie ein Test-Menü oder ein Kampf-Labor sind ausdrücklich erwünscht, damit spätere Inhalte schnell prüfbar sind
-- **Keine Abwärtskompatibilität während der Entwicklung:** Alte Spielstände müssen nicht weiter funktionieren. Kein Umrechnungs-Code für alte Speicherformate; beim Testen einfach „Neu“ drücken.
+- **Keine Abwärtskompatibilität während der Entwicklung:** Alte Spielstände müssen nicht weiter funktionieren. Kein Umrechnungs-Code für alte Speicherformate; stattdessen `SAVE_VERSION` in `SaveManager.js` erhöhen, dann werden alte Stände ignoriert. Beim Testen einfach „Neu“ drücken.
 
 ## Aufbau
 ```
@@ -42,8 +42,8 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
                Combatant (ein Kämpfer), HeroAI (welcher Skill?), EnemyAI (Boss-Mechaniken),
                AbilityEffects (was ein Skill bewirkt), ChanceEstimator (200 Kämpfe → Siegchance),
                TestGroup (Standard-Gruppe fürs Labor)
-src/data/      Reine Inhalte: rarities, items, lootBoxes, balancing, sprites (Pixel-Art als Text),
-               heroClasses, abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
+src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes, balancing, sprites (Pixel-Art als Text),
+               heroClasses (inkl. Rüstungsart und nützliche Werte pro Klasse), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
                enemies (Bosse + Diener/Trash), combatRules, heroOrders (Kampf-Anweisungen pro Klasse),
                dungeons (Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),

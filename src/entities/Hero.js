@@ -163,20 +163,30 @@ export class Hero {
     for (const slot of EQUIPMENT_SLOTS) {
       const item = this.equipment[slot];
       if (item) {
-        score += item.getPower();
+        score += this.getItemPower(item);
       }
     }
     return score;
   }
 
+  // Stärke eines Items für diesen Helden: Es zählen nur Werte, die seiner Klasse etwas bringen
+  // (usefulStats in heroClasses.js). Ein Zauberring ist für den Krieger also nichts wert.
+  getItemPower(item) {
+    return item.getPower(this.getClass().usefulStats);
+  }
+
   // ---------- Ausrüstung ----------
 
-  // Darf der Held dieses Item tragen?
-  // Waffen und Nebenhand hängen von der Klasse ab, alles andere darf jeder.
+  // Darf der Held das Item tragen? Waffen nur aus der Liste seiner Klasse,
+  // Rüstung nur in der Rüstungsart seiner Klasse, Ringe immer.
   canEquip(item) {
     const slot = item.getSlot();
     if (slot === 'weapon' || slot === 'offhand') {
       return this.getClass().weapons.includes(item.templateId);
+    }
+    const armorType = item.getTemplate().armorType;
+    if (armorType) {
+      return this.getClass().armorType === armorType;
     }
     return true;
   }
@@ -199,8 +209,8 @@ export class Hero {
   // Wie viel stärker (+) oder schwächer (−) wäre der Held mit diesem Item im Vergleich zum jetzigen?
   getUpgradeValue(item) {
     const current = this.equipment[item.getSlot()];
-    const currentPower = current ? current.getPower() : 0;
-    return item.getPower() - currentPower;
+    const currentPower = current ? this.getItemPower(current) : 0;
+    return this.getItemPower(item) - currentPower;
   }
 
   // ---------- Anweisungen ----------

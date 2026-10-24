@@ -656,6 +656,12 @@ body.overlay-open {
   margin-bottom: 6px;
 }
 
+/* Für welche Klassen ein Item gedacht ist */
+.detail-for {
+  color: #ffe9a8;
+  margin-bottom: 6px;
+}
+
 .detail-stats {
   list-style: none;
   padding: 0;

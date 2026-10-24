@@ -3,8 +3,7 @@
 // ============================================================
 
 import { getRarity, getRarityRank } from '../data/rarities.js';
-import { getItemTemplate, STAT_POWER_WEIGHTS } from '../data/items.js';
-import { getItemLevelFactor } from '../data/scaling.js';
+import { getItemTemplate, getTemplateColors, STAT_POWER_WEIGHTS } from '../data/items.js';
 
 export class Item {
   // id         = eindeutige Nummer dieses Items
@@ -43,12 +42,19 @@ export class Item {
     return this.getTemplate().sprite;
   }
 
+  // Farben, die im Pixelbild ersetzt werden (z.B. Leder braun, Stoff violett)
+  getSpriteColors() {
+    return getTemplateColors(this.getTemplate());
+  }
+
   // Gesamtstärke: Summe aller Werte (gewichtet, siehe STAT_POWER_WEIGHTS).
-  // Praktisch zum Vergleichen von Items.
-  getPower() {
+  // usefulStats = freiwillig: nur diese Werte zählen (z.B. die Werte, die einer Klasse etwas bringen)
+  getPower(usefulStats = null) {
     let power = 0;
     for (const statName in this.stats) {
-      power += this.stats[statName] * STAT_POWER_WEIGHTS[statName];
+      if (usefulStats === null || usefulStats.includes(statName)) {
+        power += this.stats[statName] * STAT_POWER_WEIGHTS[statName];
+      }
     }
     return Math.round(power);
   }
@@ -69,15 +75,6 @@ export class Item {
   }
 
   static fromSaveData(data) {
-    // Items aus alten Spielständen (vor dem Item-Level) waren viel stärker.
-    // Sie werden auf die neuen Werte von Item-Level 1 umgerechnet.
-    if (data.itemLevel === undefined) {
-      const stats = {};
-      for (const statName in data.stats) {
-        stats[statName] = Math.max(1, Math.round(data.stats[statName] * getItemLevelFactor(1)));
-      }
-      return new Item(data.id, data.templateId, data.rarityId, data.name, stats, 1);
-    }
     return new Item(data.id, data.templateId, data.rarityId, data.name, data.stats, data.itemLevel);
   }
 }

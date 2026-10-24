@@ -68,9 +68,9 @@ export const LOOT_BOXES = [
     shakeTime: 1.3,
     chances: { poor: 10, common: 30, uncommon: 35, rare: 19, epic: 5, legendary: 1 },
     bossLoot: [
-      { templateId: 'ring', name: 'Grimmzahns Fangzahn', minRarity: 'rare' },
-      { templateId: 'armor', name: 'Bärenfell-Harnisch', minRarity: 'rare' },
-      { templateId: 'helmet', name: 'Prankenhelm', minRarity: 'rare' },
+      { templateId: 'attackRing', name: 'Grimmzahns Fangzahn', minRarity: 'rare' },
+      { templateId: 'leatherArmor', name: 'Bärenfell-Harnisch', minRarity: 'rare' },
+      { templateId: 'plateHelmet', name: 'Prankenhelm', minRarity: 'rare' },
     ],
   },
   {
@@ -84,8 +84,8 @@ export const LOOT_BOXES = [
     chances: { poor: 5, common: 25, uncommon: 35, rare: 25, epic: 8, legendary: 2 },
     bossLoot: [
       { templateId: 'staff', name: 'Stab der Schattenruferin', minRarity: 'rare' },
-      { templateId: 'helmet', name: 'Kapuze der Schwester', minRarity: 'rare' },
-      { templateId: 'ring', name: 'Gebetsring der Kapelle', minRarity: 'rare' },
+      { templateId: 'clothHelmet', name: 'Kapuze der Schwester', minRarity: 'rare' },
+      { templateId: 'magicRing', name: 'Gebetsring der Kapelle', minRarity: 'rare' },
     ],
   },
   {
@@ -100,7 +100,7 @@ export const LOOT_BOXES = [
     bossLoot: [
       { templateId: 'shield', name: 'Chitinschild', minRarity: 'rare' },
       { templateId: 'sword', name: 'Brutklinge', minRarity: 'rare' },
-      { templateId: 'boots', name: 'Säurestiefel', minRarity: 'rare' },
+      { templateId: 'leatherBoots', name: 'Säurestiefel', minRarity: 'rare' },
     ],
   },
 ];

@@ -7,12 +7,12 @@ import { Hero } from '../src/entities/Hero.js';
 import { Item } from '../src/entities/Item.js';
 import { Guild } from '../src/entities/Guild.js';
 import { RecruitmentSystem } from '../src/systems/RecruitmentSystem.js';
-import { HERO_CLASSES } from '../src/data/heroClasses.js';
+import { HERO_CLASSES, getSuitableClasses } from '../src/data/heroClasses.js';
 import { HERO_RARITIES } from '../src/data/heroRarities.js';
 import { ABILITIES } from '../src/data/abilities.js';
 import { TRAITS } from '../src/data/traits.js';
 import { SPRITES } from '../src/data/sprites.js';
-import { STAT_NAMES, getItemTemplate } from '../src/data/items.js';
+import { STAT_NAMES, getItemTemplate, ITEM_TEMPLATES, ARMOR_TYPES } from '../src/data/items.js';
 import { BALANCING } from '../src/data/balancing.js';
 
 const LOOKS = { skin: '#f1c39b', hair: '#6b3f17' };
@@ -86,7 +86,47 @@ describe('Hero', () => {
     expect(mage.canEquip(makeItem(1, 'staff', { magic: 5 }))).toBe(true);
     expect(mage.canEquip(makeItem(2, 'sword', { attack: 5 }))).toBe(false);
     expect(mage.canEquip(makeItem(3, 'shield', { defense: 5 }))).toBe(false);
-    expect(mage.canEquip(makeItem(4, 'helmet', { defense: 5 }))).toBe(true);
+    expect(mage.canEquip(makeItem(4, 'clothHelmet', { magic: 5 }))).toBe(true);
+  });
+
+  it('Rüstung nur in der eigenen Art, Ringe darf jeder tragen', () => {
+    const warrior = makeHero('warrior');
+    const rogue = makeHero('rogue');
+    const priest = makeHero('priest');
+    expect(warrior.canEquip(makeItem(1, 'plateArmor', { defense: 5 }))).toBe(true);
+    expect(warrior.canEquip(makeItem(2, 'leatherArmor', { attack: 5 }))).toBe(false);
+    expect(warrior.canEquip(makeItem(3, 'clothArmor', { magic: 5 }))).toBe(false);
+    expect(rogue.canEquip(makeItem(4, 'leatherBoots', { attack: 1 }))).toBe(true);
+    expect(rogue.canEquip(makeItem(5, 'plateBoots', { defense: 1 }))).toBe(false);
+    expect(priest.canEquip(makeItem(6, 'clothHelmet', { magic: 2 }))).toBe(true);
+    expect(priest.canEquip(makeItem(7, 'plateHelmet', { defense: 2 }))).toBe(false);
+    expect(priest.canEquip(makeItem(8, 'attackRing', { attack: 2 }))).toBe(true);
+    expect(warrior.canEquip(makeItem(9, 'magicRing', { magic: 2 }))).toBe(true);
+  });
+
+  it('jede Klasse findet für jeden Platz mindestens eine passende Vorlage', () => {
+    for (const heroClass of HERO_CLASSES) {
+      expect(ARMOR_TYPES[heroClass.armorType], heroClass.id).toBeDefined();
+      const hero = makeHero(heroClass.id);
+      for (const slot of ['weapon', 'head', 'chest', 'feet', 'ring']) {
+        const fitting = ITEM_TEMPLATES.filter((template) => template.slot === slot &&
+          hero.canEquip(makeItem(1, template.id, {})) &&
+          getSuitableClasses(template).includes(heroClass));
+        expect(fitting.length, heroClass.id + ' ' + slot).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('Item-Vorlagen: Rüstungsart und Ring-Ziel sind gültig', () => {
+    for (const template of ITEM_TEMPLATES) {
+      if (template.armorType) {
+        expect(ARMOR_TYPES[template.armorType], template.id).toBeDefined();
+      }
+      if (template.slot === 'ring') {
+        expect(['attack', 'magic']).toContain(template.forScaling);
+      }
+      expect(SPRITES[template.sprite], template.id).toBeDefined();
+    }
   });
 
   it('Upgrade-Wert vergleicht mit dem getragenen Item', () => {
@@ -211,5 +251,17 @@ describe('Game: Helden', () => {
     const loaded = Game.fromSaveData(data);
     expect(loaded.guild.heroes.length).toBe(0);
     expect(loaded.guild.candidates.length).toBe(BALANCING.candidateCount);
+  });
+});
+
+describe('Item-Stärke pro Klasse', () => {
+  it('nur Werte, die der Klasse etwas bringen, zählen (Zauberring ist für den Schurken nichts wert)', () => {
+    const rogue = makeHero('rogue');
+    const attackRing = makeItem(1, 'attackRing', { attack: 3 });
+    const magicRing = makeItem(2, 'magicRing', { magic: 3, mana: 8 });
+    expect(rogue.getUpgradeValue(attackRing)).toBeGreaterThan(rogue.getUpgradeValue(magicRing));
+    expect(rogue.getUpgradeValue(magicRing)).toBe(0);
+    const mage = makeHero('mage');
+    expect(mage.getUpgradeValue(magicRing)).toBeGreaterThan(mage.getUpgradeValue(attackRing));
   });
 });

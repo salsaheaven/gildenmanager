@@ -30,9 +30,10 @@ export function createSpriteCanvas(spriteName, scale, extraColors = {}) {
   return canvas;
 }
 
-// Bild eines Items: Die Stellen mit "R" bekommen die Seltenheitsfarbe
+// Bild eines Items: Die Stellen mit "R" bekommen die Seltenheitsfarbe,
+// dazu die Farben der Rüstungsart (Platte grau, Leder braun, Stoff violett)
 export function createItemCanvas(item, scale) {
-  return createSpriteCanvas(item.getSprite(), scale, { R: item.getRarity().color });
+  return createSpriteCanvas(item.getSprite(), scale, { ...item.getSpriteColors(), R: item.getRarity().color });
 }
 
 // Bild einer Kiste in ihren Farben (geschlossen oder offen mit Leuchtfarbe)

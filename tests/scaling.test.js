@@ -1,11 +1,10 @@
-// Tests für die Skalierung: Item-Level, Gegnerstufen, Rüstung, alte Spielstände.
+// Tests für die Skalierung: Item-Level, Gegnerstufen, Rüstung.
 
 import { describe, it, expect } from 'vitest';
 import { SCALING, getItemLevelFactor, getEnemyLevelFactors, getDefenseConstant } from '../src/data/scaling.js';
 import { DUNGEONS, getBossLevel } from '../src/data/dungeons.js';
 import { getItemTemplate } from '../src/data/items.js';
 import { getBoss } from '../src/data/enemies.js';
-import { Item } from '../src/entities/Item.js';
 import { Guild } from '../src/entities/Guild.js';
 import { LootSystem } from '../src/systems/LootSystem.js';
 import { createBossCombatant } from '../src/systems/combat/CombatSimulator.js';
@@ -66,14 +65,6 @@ describe('Item-Level', () => {
     game.endDay();
     const box = game.guild.boxes.find((b) => b.typeId === 'chestGrimfang');
     expect(box.itemLevel).toBe(DUNGEONS[0].level);
-  });
-
-  it('Items aus alten Spielständen (ohne Item-Level) werden auf Stufe 1 umgerechnet', () => {
-    const old = Item.fromSaveData({ id: 1, templateId: 'sword', rarityId: 'uncommon', name: 'Schwert', stats: { attack: 8 } });
-    expect(old.itemLevel).toBe(1);
-    expect(old.stats.attack).toBe(Math.round(8 * getItemLevelFactor(1)));
-    const again = Item.fromSaveData(old.toSaveData());
-    expect(again.stats.attack).toBe(old.stats.attack); // nicht nochmal umrechnen
   });
 });
 
