@@ -100,15 +100,28 @@ export class InventoryOverlay {
     this.render();
   }
 
-  // Alle sichtbaren Items, beste zuerst: nach Seltenheit, dann nach Stärke
+  // Für andere Bildschirme (z.B. die Ausrüstungsliste im Heldenbildschirm):
+  // Ist das Item frisch gefunden und noch nicht angesehen?
+  isNew(itemId) {
+    return this.newItemIds.has(itemId);
+  }
+
+  // Steckt das Item noch in einer Kiste, die gerade geöffnet wird?
+  isHidden(itemId) {
+    return this.hiddenItemIds.has(itemId);
+  }
+
+  // Das Item wurde angesehen oder angelegt: nicht mehr "neu"
+  markSeen(itemId) {
+    if (this.newItemIds.delete(itemId)) {
+      this.render();
+    }
+  }
+
+  // Alle sichtbaren Items: höchstes Item-Level zuerst, bei gleichem Level die seltensten zuerst
   getVisibleItems() {
     const visible = this.game.guild.inventory.filter((item) => !this.hiddenItemIds.has(item.id));
-    visible.sort((a, b) => {
-      if (b.getRarityRank() !== a.getRarityRank()) {
-        return b.getRarityRank() - a.getRarityRank();
-      }
-      return b.getPower() - a.getPower();
-    });
+    visible.sort(compareByItemLevel);
     return visible;
   }
 
@@ -194,10 +207,6 @@ export class InventoryOverlay {
       dot.className = 'new-dot';
       slot.appendChild(dot);
     }
-    // Grüner Pfeil, wenn das Item für einen Helden besser wäre als seine jetzige Ausrüstung
-    if (this.game.guild.findBestUpgrade(item)) {
-      slot.insertAdjacentHTML('beforeend', '<span class="upgrade-arrow">▲</span>');
-    }
     if (item.id === this.selectedItemId) {
       slot.classList.add('selected');
     }
@@ -226,17 +235,9 @@ export class InventoryOverlay {
       <div class="detail-sub">${rarity.name} · ${describeItemKind(item)} · Stufe ${item.itemLevel}</div>
       <div class="detail-for">${describeSuitableClasses(item)}</div>
       <ul class="detail-stats"></ul>
-      <div class="detail-power">Stärke: ${item.getPower()}</div>
-      <div class="detail-upgrade"></div>
       <button class="sell-button">Verkaufen (${item.getSellValue()} Gold)</button>
     `;
     details.querySelector('.detail-name').textContent = item.name;
-
-    const upgrade = this.game.guild.findBestUpgrade(item);
-    if (upgrade) {
-      details.querySelector('.detail-upgrade').textContent =
-        '▲ Besser für ' + upgrade.hero.name + ' (+' + upgrade.value + ')';
-    }
 
     const statList = details.querySelector('.detail-stats');
     for (const statName in item.stats) {
@@ -261,4 +262,12 @@ export class InventoryOverlay {
     button.textContent = 'Schrott verkaufen (' + junk.length + ' = ' + goldValue + ' Gold)';
     button.disabled = junk.length === 0;
   }
+}
+
+// Sortierung für Item-Listen: höchstes Item-Level zuerst, dann die seltensten
+export function compareByItemLevel(a, b) {
+  if (b.itemLevel !== a.itemLevel) {
+    return b.itemLevel - a.itemLevel;
+  }
+  return b.getRarityRank() - a.getRarityRank();
 }

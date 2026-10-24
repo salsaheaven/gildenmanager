@@ -1,7 +1,7 @@
 // ============================================================
 // HERODETAILPANEL – zeigt alles über einen Helden:
 // Bild, Name, Klasse, Eigenschaften, Werte, Skills und die 6 Ausrüstungsplätze.
-// Klick auf einen Ausrüstungsplatz filtert rechts die passende Ausrüstung.
+// Klick auf einen Ausrüstungsplatz zeigt rechts die Ausrüstungsliste für diesen Platz.
 // ============================================================
 
 import { ROLE_NAMES, ROW_NAMES } from '../data/heroClasses.js';
@@ -23,8 +23,10 @@ export class HeroDetailPanel {
     this.hero = null;
   }
 
-  showHero(hero) {
+  // selectedSlot = Platz, dessen Liste gerade rechts offen ist (wird hervorgehoben)
+  showHero(hero, selectedSlot = null) {
     this.hero = hero;
+    this.selectedSlot = selectedSlot;
     if (!hero) {
       this.root.innerHTML = `
         <p class="empty">Wähle links einen Helden aus.</p>
@@ -127,7 +129,7 @@ export class HeroDetailPanel {
     }
   }
 
-  // Die 6 Plätze. Klick auf einen Platz zeigt rechts passende Items.
+  // Die 6 Plätze. Klick auf einen Platz (belegt oder leer) zeigt rechts die Ausrüstungsliste.
   // Klick auf das kleine x nimmt das Item ab.
   renderEquipment() {
     const grid = this.root.querySelector('.equipment-grid');
@@ -135,6 +137,7 @@ export class HeroDetailPanel {
       const item = this.hero.equipment[slot];
       const slotElement = document.createElement('div');
       slotElement.className = 'equipment-slot';
+      slotElement.classList.toggle('selected-slot', slot === this.selectedSlot);
       slotElement.innerHTML = `<div class="slot-icon"></div><div class="slot-label">${SLOT_NAMES[slot]}</div>`;
 
       if (item) {

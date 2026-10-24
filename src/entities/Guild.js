@@ -153,22 +153,6 @@ export class Guild {
     return null;
   }
 
-  // Sucht den Helden, für den dieses Item die größte Verbesserung wäre.
-  // Gibt { hero, value } zurück oder null, wenn es für niemanden besser ist.
-  findBestUpgrade(item) {
-    let best = null;
-    for (const hero of this.heroes) {
-      if (!hero.canEquip(item)) {
-        continue;
-      }
-      const value = hero.getUpgradeValue(item);
-      if (value > 0 && (best === null || value > best.value)) {
-        best = { hero: hero, value: value };
-      }
-    }
-    return best;
-  }
-
   // Ist der Held heute schon für einen Dungeon eingeplant? (ein Held = eine Aufgabe pro Tag)
   isHeroBusy(heroId) {
     return this.expeditions.some((expedition) => expedition.getHeroIds().includes(heroId));

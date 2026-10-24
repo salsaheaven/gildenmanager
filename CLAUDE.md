@@ -51,7 +51,8 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus),
                riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tagesplan, Startseite), LootBoxScreen (Schatzkammer),
-               HeroScreen (+ HeroDetailPanel, EquipPanel), TavernScreen, CombatLabScreen,
+               HeroScreen (+ HeroDetailPanel, EquipPanel = Ausrüstungsliste für den angetippten Platz, nach Item-Level sortiert,
+               Vergleich pro Wert, bewusst ohne „bestes Item“), TavernScreen, CombatLabScreen,
                DungeonScreen (+ RunViewer = Bericht eines beendeten Runs zeigen).
                DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe als Szene, danach Zusammenfassung mit Beute.
                LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden, während des Tagesabschlusses zurückgehalten).

@@ -750,34 +750,12 @@ body.overlay-open {
   border: 2px solid #0c0914;
 }
 
-.upgrade-arrow {
-  color: #1eff00;
-  font-size: 16px;
-  text-shadow: 0 0 4px #1eff00;
-  animation: arrow-bob 0.8s ease-in-out infinite;
-}
-
-@keyframes arrow-bob {
-  50% { translate: 0 -2px; }
-}
-
 .inventory-slot .item-level {
   position: absolute;
   bottom: 0;
   left: 3px;
   font-size: 14px;
   color: var(--text-dim);
-}
-
-.inventory-slot .upgrade-arrow {
-  position: absolute;
-  bottom: -2px;
-  right: 1px;
-}
-
-.detail-upgrade {
-  color: #1eff00;
-  margin-bottom: 8px;
 }
 
 h3 {
@@ -1094,6 +1072,12 @@ h3 {
   border: 2px solid var(--rarity);
 }
 
+/* Platz, dessen Ausrüstungsliste gerade rechts offen ist */
+.equipment-slot.selected-slot {
+  background: #2a2040;
+  box-shadow: 0 0 0 2px var(--gold);
+}
+
 .equipment-slot:hover {
   background: #1d1530;
 }
@@ -1133,12 +1117,6 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.slot-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
 }
 
 .filter-button {
@@ -1185,17 +1163,39 @@ h3 {
   font-size: 16px;
 }
 
-.equip-diff {
-  font-size: 22px;
+.equip-current {
+  margin-bottom: 10px;
+  padding: 6px 8px;
+  background: #120d1c;
+  border: 2px solid var(--border);
+}
+
+.equip-current-label {
   color: var(--text-dim);
 }
 
-.equip-diff.better {
+/* Vergleich zum angelegten Teil, Wert für Wert */
+.equip-compare {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  font-size: 16px;
+  color: var(--text-dim);
+}
+
+.stat-change.up {
   color: #1eff00;
 }
 
-.equip-diff.worse {
+.stat-change.down {
   color: #ff6b6b;
+}
+
+.new-chip {
+  padding: 0 4px;
+  font-size: 13px;
+  color: #14101f;
+  background: var(--gold);
 }
 
 /* ---------- Test-Menü ---------- */

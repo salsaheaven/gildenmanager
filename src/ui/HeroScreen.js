@@ -1,7 +1,7 @@
 // ============================================================
 // HEROSCREEN – die Heldenübersicht
 // Links: Liste aller Helden. Mitte: Details des gewählten Helden.
-// Rechts: passende Ausrüstung aus dem Inventar.
+// Rechts: Ausrüstungsliste für den Platz, auf den man in der Mitte getippt hat.
 // ============================================================
 
 import { BALANCING } from '../data/balancing.js';
@@ -12,10 +12,12 @@ import { Sound } from './Sound.js';
 
 export class HeroScreen {
   // onGoToTavern = Funktion, die zur Taverne wechselt (für den Hinweis bei leerer Gilde)
-  constructor(rootElement, game, onGoToTavern) {
+  // inventory    = das InventoryOverlay (für die "neu"-Markierung in der Ausrüstungsliste)
+  constructor(rootElement, game, onGoToTavern, inventory) {
     this.root = rootElement;
     this.game = game;
     this.selectedHeroId = null;
+    this.selectedSlot = null; // Ausrüstungsplatz, dessen Liste rechts gezeigt wird
 
     this.root.innerHTML = `
       <div class="hero-screen">
@@ -30,7 +32,8 @@ export class HeroScreen {
 
     this.detailPanel = new HeroDetailPanel(this.root.querySelector('.hero-detail'), game, {
       onSlotClicked: (slot) => {
-        this.equipPanel.setSlotFilter(slot);
+        this.selectedSlot = slot;
+        this.render();
         // Auf dem Handy steht die Ausrüstungsliste weit unten: dorthin scrollen
         if (window.innerWidth <= 700) {
           this.root.querySelector('.equip-panel').scrollIntoView({ behavior: 'smooth' });
@@ -42,7 +45,7 @@ export class HeroScreen {
       },
       onGoToTavern: onGoToTavern,
     });
-    this.equipPanel = new EquipPanel(this.root.querySelector('.equip-panel'), game);
+    this.equipPanel = new EquipPanel(this.root.querySelector('.equip-panel'), game, inventory);
 
     game.on('changed', () => this.render());
     this.render();
@@ -67,8 +70,8 @@ export class HeroScreen {
     }
 
     const selectedHero = this.game.guild.findHero(this.selectedHeroId);
-    this.detailPanel.showHero(selectedHero);
-    this.equipPanel.showHero(selectedHero);
+    this.detailPanel.showHero(selectedHero, this.selectedSlot);
+    this.equipPanel.show(selectedHero, this.selectedSlot);
   }
 
   createRosterEntry(hero) {
@@ -86,25 +89,11 @@ export class HeroScreen {
     `);
     entry.querySelector('.roster-name').textContent = hero.name;
 
-    // Grüner Pfeil, wenn im Inventar etwas Besseres für diesen Helden liegt
-    if (this.hasUpgradeWaiting(hero)) {
-      entry.insertAdjacentHTML('beforeend', '<span class="upgrade-arrow" title="Bessere Ausrüstung verfügbar">▲</span>');
-    }
-
     entry.addEventListener('click', () => {
       Sound.click();
       this.selectedHeroId = hero.id;
       this.render();
     });
     return entry;
-  }
-
-  hasUpgradeWaiting(hero) {
-    for (const item of this.game.guild.inventory) {
-      if (hero.canEquip(item) && hero.getUpgradeValue(item) > 0) {
-        return true;
-      }
-    }
-    return false;
   }
 }

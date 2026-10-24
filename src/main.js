@@ -76,7 +76,7 @@ const inventory = new InventoryOverlay(game, (newItemCount) => {
 navBar.addExtraButton('inventory', 'Inventar', () => inventory.toggle());
 
 const lootBoxScreen = new LootBoxScreen(screenElements.treasury, game, inventory);
-new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'));
+new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'), inventory);
 new TavernScreen(screenElements.tavern, game);
 const combatLabScreen = new CombatLabScreen(screenElements.lab, game);
 new DungeonScreen(screenElements.dungeons, game);
@@ -102,19 +102,11 @@ function showScreen(screenId) {
   updateBadges();
 }
 
-// Abzeichen an den Reitern: Kisten, Helden mit Upgrade, neue Bewerber
+// Abzeichen an den Reitern: Kisten, neue Bewerber, geplante Runs
+// (neue Items zeigt der Inventar-Knopf selbst an)
 function updateBadges() {
   const guild = game.guild;
   navBar.setBadge('treasury', guild.boxes.length > 0 ? String(guild.boxes.length) : '');
-
-  let heroesWithUpgrade = 0;
-  for (const hero of guild.heroes) {
-    const hasUpgrade = guild.inventory.some((item) => hero.canEquip(item) && hero.getUpgradeValue(item) > 0);
-    if (hasUpgrade) {
-      heroesWithUpgrade++;
-    }
-  }
-  navBar.setBadge('heroes', heroesWithUpgrade > 0 ? '▲' + heroesWithUpgrade : '');
   navBar.setBadge('tavern', tavernHasNews ? '!' : '');
   const planned = guild.expeditions.length;
   navBar.setBadge('dungeons', dungeonHasNews ? '!' : (planned > 0 ? String(planned) : ''));

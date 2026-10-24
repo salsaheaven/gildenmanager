@@ -16,15 +16,32 @@ export function formatStats(stats) {
   return parts.join('  ');
 }
 
-// 5 → "+5", -3 → "−3", 0 → "±0"
-export function formatDifference(value) {
-  if (value > 0) {
-    return '+' + value;
+// Unterschied pro Wert zwischen einem Item und dem gerade angelegten (oder null = Platz leer).
+// Ergebnis: Liste von { text, change } mit change = 'up' (mehr), 'down' (weniger).
+// Beispiel: [{ text: '+3 Angriff', change: 'up' }, { text: '−2 Rüstung', change: 'down' }]
+// Bewusst keine Gesamtnote: Was besser ist, entscheidet der Spieler.
+export function describeStatDifferences(item, currentItem) {
+  const statNames = new Set(Object.keys(item.stats));
+  if (currentItem) {
+    for (const statName in currentItem.stats) {
+      statNames.add(statName);
+    }
   }
-  if (value < 0) {
-    return '−' + Math.abs(value);
+  const differences = [];
+  for (const statName in STAT_NAMES) {
+    if (!statNames.has(statName)) {
+      continue;
+    }
+    const newValue = item.stats[statName] || 0;
+    const oldValue = currentItem ? (currentItem.stats[statName] || 0) : 0;
+    const difference = newValue - oldValue;
+    if (difference > 0) {
+      differences.push({ text: '+' + difference + ' ' + STAT_NAMES[statName], change: 'up' });
+    } else if (difference < 0) {
+      differences.push({ text: '−' + Math.abs(difference) + ' ' + STAT_NAMES[statName], change: 'down' });
+    }
   }
-  return '±0';
+  return differences;
 }
 
 // Platz und Rüstungsart eines Items, z.B. "Kopf · Stoff" oder "Waffe"

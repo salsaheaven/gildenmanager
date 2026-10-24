@@ -1,139 +1,127 @@
 // ============================================================
-// EQUIPPANEL – rechte Seite im Heldenbildschirm:
-// alle Items aus dem Inventar, die der gewählte Held tragen kann,
-// mit Vergleich zum aktuell getragenen Item (grün = besser).
+// EQUIPPANEL – rechte Seite im Heldenbildschirm: die Ausrüstungsliste für EINEN Platz.
+// Sie erscheint, wenn man links auf einen Ausrüstungsplatz tippt (belegt oder leer).
+//   - oben: was der Held in diesem Platz gerade trägt
+//   - darunter: alle passenden Items aus dem Inventar, höchstes Item-Level zuerst
+//   - pro Item der Unterschied zu dem angelegten Teil, Wert für Wert (z.B. "+3 Angriff · −2 Rüstung")
+// Bewusst ohne "bestes Item" und ohne Gesamtnote: Welches Teil besser passt, entscheidet der Spieler.
 // ============================================================
 
 import { SLOT_NAMES } from '../data/items.js';
-import { EQUIPMENT_SLOTS } from '../entities/Hero.js';
 import { createItemCanvas } from './PixelArt.js';
-import { formatStats, formatDifference, describeItemKind, describeClassArmor } from './format.js';
+import { formatStats, describeItemKind, describeClassArmor, describeStatDifferences } from './format.js';
+import { compareByItemLevel } from './InventoryOverlay.js';
 import { Sound } from './Sound.js';
-import { showToast } from './Toast.js';
 
 export class EquipPanel {
-  constructor(rootElement, game) {
+  // inventory = das InventoryOverlay (weiß, welche Items "neu" sind)
+  constructor(rootElement, game, inventory) {
     this.root = rootElement;
     this.game = game;
+    this.inventory = inventory;
     this.hero = null;
-    this.slotFilter = null; // null = alle Plätze anzeigen
-
-    this.root.innerHTML = `
-      <h2>Ausrüstung anlegen</h2>
-      <p class="hint equip-armor-hint"></p>
-      <button class="big-button equip-best-button">Bestes anlegen</button>
-      <div class="slot-filters"></div>
-      <div class="equip-list"></div>
-    `;
-
-    this.root.querySelector('.equip-best-button').addEventListener('click', () => {
-      if (!this.hero) {
-        return;
-      }
-      const count = this.game.equipBestItems(this.hero.id);
-      if (count > 0) {
-        Sound.itemReveal(2);
-        showToast(this.hero.name + ': ' + count + ' Teile angelegt!', '#1eff00');
-      }
-    });
-
-    this.renderFilters();
+    this.slot = null; // gewählter Ausrüstungsplatz, null = noch keiner
   }
 
-  showHero(hero) {
+  // slot = gewählter Platz (bleibt beim Wechsel des Helden erhalten, so kann man Helden vergleichen)
+  show(hero, slot) {
     this.hero = hero;
+    this.slot = slot;
     this.render();
-  }
-
-  setSlotFilter(slot) {
-    this.slotFilter = this.slotFilter === slot ? null : slot;
-    this.renderFilters();
-    this.render();
-  }
-
-  renderFilters() {
-    const container = this.root.querySelector('.slot-filters');
-    container.innerHTML = '';
-    const options = [null, ...EQUIPMENT_SLOTS];
-    for (const slot of options) {
-      const button = document.createElement('button');
-      button.className = 'filter-button';
-      button.textContent = slot === null ? 'Alle' : SLOT_NAMES[slot];
-      button.classList.toggle('active', slot === this.slotFilter);
-      button.addEventListener('click', () => {
-        Sound.click();
-        this.slotFilter = slot;
-        this.renderFilters();
-        this.render();
-      });
-      container.appendChild(button);
-    }
-  }
-
-  // Passende Items, die größten Verbesserungen zuerst
-  getMatchingItems() {
-    const items = this.game.guild.inventory.filter((item) => {
-      if (!this.hero.canEquip(item)) {
-        return false;
-      }
-      return this.slotFilter === null || item.getSlot() === this.slotFilter;
-    });
-    items.sort((a, b) => this.hero.getUpgradeValue(b) - this.hero.getUpgradeValue(a));
-    return items;
   }
 
   render() {
-    const list = this.root.querySelector('.equip-list');
-    const bestButton = this.root.querySelector('.equip-best-button');
-    list.innerHTML = '';
-
     if (!this.hero) {
-      bestButton.disabled = true;
+      this.root.innerHTML = '';
+      return;
+    }
+    if (!this.slot) {
+      this.root.innerHTML = `
+        <h2>Ausrüstung</h2>
+        <p class="hint">Tippe links auf einen Ausrüstungsplatz, um passende Items aus dem Inventar zu sehen.</p>
+        <p class="hint equip-armor-hint"></p>
+      `;
+      this.root.querySelector('.equip-armor-hint').textContent = describeClassArmor(this.hero.getClass()) + '. Ringe passen allen.';
       return;
     }
 
-    // Hinweis, welche Rüstung der Held tragen darf (z.B. "Krieger tragen Platte")
+    const currentItem = this.hero.equipment[this.slot];
+    this.root.innerHTML = `
+      <h2></h2>
+      <p class="hint equip-armor-hint"></p>
+      <div class="equip-current"></div>
+      <div class="equip-list"></div>
+    `;
+    this.root.querySelector('h2').textContent = SLOT_NAMES[this.slot] + ' für ' + this.hero.name;
     this.root.querySelector('.equip-armor-hint').textContent = describeClassArmor(this.hero.getClass()) + '. Ringe passen allen.';
+    this.renderCurrentItem(this.root.querySelector('.equip-current'), currentItem);
 
+    const list = this.root.querySelector('.equip-list');
     const items = this.getMatchingItems();
-    bestButton.disabled = !items.some((item) => this.hero.getUpgradeValue(item) > 0);
-
     for (const item of items) {
-      list.appendChild(this.createItemRow(item));
+      list.appendChild(this.createItemRow(item, currentItem));
     }
     if (items.length === 0) {
-      list.innerHTML = '<p class="empty">Keine passenden Items. Öffne Kisten in der Schatzkammer!</p>';
+      list.innerHTML = '<p class="empty">Keine passenden Items im Inventar. Öffne Kisten in der Schatzkammer!</p>';
     }
   }
 
-  createItemRow(item) {
-    const rarity = item.getRarity();
-    const difference = this.hero.getUpgradeValue(item);
+  // "Angelegt: …" mit den Werten des getragenen Items, oder "Angelegt: nichts"
+  renderCurrentItem(container, currentItem) {
+    if (!currentItem) {
+      container.innerHTML = '<span class="equip-current-label">Angelegt:</span> <span class="hint">nichts</span>';
+      return;
+    }
+    container.innerHTML = '<span class="equip-current-label">Angelegt:</span> <b></b><div class="equip-stats"></div>';
+    const name = container.querySelector('b');
+    name.textContent = currentItem.name;
+    name.style.color = currentItem.getRarity().color;
+    container.querySelector('.equip-stats').textContent =
+      describeItemKind(currentItem) + ' · Stufe ' + currentItem.itemLevel + ' · ' + formatStats(currentItem.stats);
+  }
 
+  // Alle Items für den gewählten Platz, die der Held tragen darf: höchstes Item-Level zuerst
+  getMatchingItems() {
+    const items = this.game.guild.inventory.filter((item) =>
+      item.getSlot() === this.slot && this.hero.canEquip(item) && !this.inventory.isHidden(item.id));
+    items.sort(compareByItemLevel);
+    return items;
+  }
+
+  createItemRow(item, currentItem) {
     const row = document.createElement('button');
     row.className = 'equip-row';
-    row.style.setProperty('--rarity', rarity.color);
+    row.style.setProperty('--rarity', item.getRarity().color);
     row.appendChild(createItemCanvas(item, 3));
     row.insertAdjacentHTML('beforeend', `
       <span class="equip-text">
         <span class="equip-name"></span>
         <span class="equip-stats"></span>
+        <span class="equip-compare"></span>
       </span>
-      <span class="equip-diff"></span>
     `);
     row.querySelector('.equip-name').textContent = item.name;
+    if (this.inventory.isNew(item.id)) {
+      row.querySelector('.equip-name').insertAdjacentHTML('beforeend', ' <span class="new-chip">neu</span>');
+    }
     row.querySelector('.equip-stats').textContent = describeItemKind(item) + ' · Stufe ' + item.itemLevel + ' · ' + formatStats(item.stats);
 
-    const diffElement = row.querySelector('.equip-diff');
-    diffElement.textContent = formatDifference(difference);
-    if (difference > 0) {
-      diffElement.classList.add('better');
-    } else if (difference < 0) {
-      diffElement.classList.add('worse');
+    // Unterschied zum angelegten Teil, Wert für Wert (grün = mehr, rot = weniger)
+    const compare = row.querySelector('.equip-compare');
+    const differences = describeStatDifferences(item, currentItem);
+    if (differences.length === 0) {
+      compare.textContent = 'gleiche Werte wie angelegt';
+    }
+    for (const difference of differences) {
+      const part = document.createElement('span');
+      part.className = 'stat-change ' + difference.change;
+      part.textContent = difference.text;
+      compare.appendChild(part);
     }
 
     row.addEventListener('click', () => {
       if (this.game.equipItem(this.hero.id, item.id)) {
+        this.inventory.markSeen(item.id);
         Sound.itemReveal(Math.min(item.getRarityRank(), 3));
       }
     });
