@@ -12,13 +12,15 @@ export class Item {
   // name       = fertiger Name, z.B. "Schwert des Bären"
   // stats      = fertige Werte, z.B. { attack: 9 }
   // itemLevel  = Item-Level: Stufe des Dungeons, aus dem es stammt (siehe data/scaling.js)
-  constructor(id, templateId, rarityId, name, stats, itemLevel = 1) {
+  // resistances = Resistenzen gegen Schadensarten in Prozent, z.B. { acid: 10 } (siehe data/damageTypes.js)
+  constructor(id, templateId, rarityId, name, stats, itemLevel = 1, resistances = {}) {
     this.id = id;
     this.templateId = templateId;
     this.rarityId = rarityId;
     this.name = name;
     this.stats = stats;
     this.itemLevel = itemLevel;
+    this.resistances = resistances;
   }
 
   getTemplate() {
@@ -71,10 +73,11 @@ export class Item {
       name: this.name,
       stats: this.stats,
       itemLevel: this.itemLevel,
+      resistances: this.resistances,
     };
   }
 
   static fromSaveData(data) {
-    return new Item(data.id, data.templateId, data.rarityId, data.name, data.stats, data.itemLevel);
+    return new Item(data.id, data.templateId, data.rarityId, data.name, data.stats, data.itemLevel, data.resistances);
   }
 }

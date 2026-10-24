@@ -34,6 +34,8 @@ export class Combatant {
     this.attack = options.stats.attack || 0;
     this.magic = options.stats.magic || 0;
     this.defense = options.stats.defense || 0;
+    // Resistenzen gegen Schadensarten in Prozent, z.B. { acid: 15 } (nur Helden, aus ihrer Ausrüstung)
+    this.resistances = options.resistances || {};
     // Wie stark Rüstung wirkt. Hängt von der Stufe des Kampfs ab und wird von der Begegnung gesetzt.
     this.defenseConstant = getDefenseConstant(1);
 
@@ -87,11 +89,13 @@ export class Combatant {
 
   // Beschreibt einen Treffer oder eine Heilung für die Kampfszene (aufploppende Zahl + Lebensbalken)
   // kind = 'damage', 'heal' oder 'shield'
-  describeHit(amount, kind, crit = false, absorbed = 0) {
+  // damageType = Schadensart (nur bei Schaden), färbt die Zahl in der Szene
+  describeHit(amount, kind, crit = false, absorbed = 0, damageType = 'physical') {
     return {
       targetId: this.id,
       amount: amount,
       kind: kind,
+      damageType: damageType,
       crit: crit,
       absorbed: absorbed,
       hpAfter: this.hp,
@@ -130,14 +134,17 @@ export class Combatant {
 
   // ---------- Schaden & Heilung ----------
 
-  // Nimmt Schaden: erst Rüstung und Buffs, dann fängt der Schild ab, dann geht Leben verloren.
+  // Nimmt Schaden: erst Rüstung, Resistenz und Buffs, dann fängt der Schild ab, dann geht Leben verloren.
+  // damageType = Schadensart (siehe data/damageTypes.js). Eine passende Resistenz mindert den Schaden zusätzlich.
   // Gibt zurück: { damage: verlorenes Leben, absorbed: vom Schild abgefangen }
-  takeDamage(rawAmount, ignoreDefense = false) {
+  takeDamage(rawAmount, ignoreDefense = false, damageType = 'physical') {
     let amount = rawAmount * this.getDamageTakenFactor();
     if (!ignoreDefense) {
       const reduction = this.defense / (this.defense + this.defenseConstant);
       amount = amount * (1 - reduction);
     }
+    const resistance = this.resistances[damageType] || 0;
+    amount = amount * (1 - resistance / 100);
     amount = Math.max(1, Math.round(amount));
 
     const absorbed = Math.min(this.shield, amount);

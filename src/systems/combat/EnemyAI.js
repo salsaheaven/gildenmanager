@@ -6,6 +6,7 @@
 
 import { COMBAT_RULES } from '../../data/combatRules.js';
 import { MINIONS } from '../../data/enemies.js';
+import { getDamageType } from '../../data/damageTypes.js';
 
 export function takeEnemyTurn(battle, enemy) {
   if (enemy.isStunned()) {
@@ -29,7 +30,7 @@ function minionAttack(battle, minion) {
     target = battle.random.pick(battle.getLivingHeroes());
   }
   battle.logAction(minion, null, minionData.attackFx, [target], false);
-  enemyHits(battle, minion, target, 'greift an', 1.0);
+  enemyHits(battle, minion, target, 'greift an', 1.0, minionData.attackDamageType || 'physical');
 }
 
 function takeBossTurn(battle, boss) {
@@ -69,7 +70,7 @@ function takeBossTurn(battle, boss) {
 
   const target = battle.getBossTarget();
   battle.logAction(boss, null, bossData.attackFx, [target], false);
-  enemyHits(battle, boss, target, 'schlägt zu', 1.0);
+  enemyHits(battle, boss, target, 'schlägt zu', 1.0, bossData.attackDamageType || 'physical');
 }
 
 function isMechanicDue(mechanic, round) {
@@ -82,14 +83,14 @@ function resolveMechanic(battle, boss, mechanic) {
       const target = battle.getBossTarget();
       battle.logAction(boss, mechanic.name, mechanic.fx, [target], true);
       battle.addLog(boss.name + ': ' + mechanic.name + '!', 'mechanic', { cast: { state: 'end' } });
-      enemyHits(battle, boss, target, 'trifft mit voller Wucht', mechanic.power);
+      enemyHits(battle, boss, target, 'trifft mit voller Wucht', mechanic.power, mechanic.damageType || 'physical');
       break;
     }
     case 'groupCast':
       battle.logAction(boss, mechanic.name, mechanic.fx, battle.getLivingHeroes(), true);
       battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die ganze Gruppe!', 'mechanic', { cast: { state: 'end' } });
       for (const hero of battle.getLivingHeroes()) {
-        enemyHits(battle, boss, hero, 'trifft', mechanic.power);
+        enemyHits(battle, boss, hero, 'trifft', mechanic.power, mechanic.damageType || 'physical');
       }
       break;
     case 'frontWave': {
@@ -97,7 +98,7 @@ function resolveMechanic(battle, boss, mechanic) {
       battle.logAction(boss, mechanic.name, mechanic.fx, frontRow, true);
       battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die vordere Reihe!', 'mechanic', { cast: { state: 'end' } });
       for (const hero of frontRow) {
-        enemyHits(battle, boss, hero, 'trifft', mechanic.power);
+        enemyHits(battle, boss, hero, 'trifft', mechanic.power, mechanic.damageType || 'physical');
       }
       break;
     }
@@ -118,6 +119,7 @@ function resolveMechanic(battle, boss, mechanic) {
         name: mechanic.name,
         sourceId: boss.id,
         damagePerRound: boss.attack * mechanic.power,
+        damageType: mechanic.damageType || 'physical',
         remaining: mechanic.duration,
         isDebuff: true,
       });
@@ -131,8 +133,8 @@ function resolveMechanic(battle, boss, mechanic) {
   }
 }
 
-// Ein Gegner trifft einen Helden
-function enemyHits(battle, enemy, target, verb, power) {
+// Ein Gegner trifft einen Helden. damageType = Schadensart (siehe data/damageTypes.js)
+function enemyHits(battle, enemy, target, verb, power, damageType) {
   if (!target) {
     return;
   }
@@ -140,16 +142,19 @@ function enemyHits(battle, enemy, target, verb, power) {
   const enrageFactor = enemy.enraged ? 2 : 1;
   const crit = battle.random.next() < COMBAT_RULES.enemyCritChance;
   const critFactor = crit ? COMBAT_RULES.critMultiplier : 1;
-  const result = target.takeDamage(enemy.attack * power * variation * enrageFactor * critFactor);
+  const result = target.takeDamage(enemy.attack * power * variation * enrageFactor * critFactor, false, damageType);
   enemy.damageDone += result.damage;
 
   const critText = crit ? ' kritisch' : '';
   let text = enemy.name + ' ' + verb + critText + ': ' + target.name + ' verliert ' + result.damage + ' Leben';
+  if (damageType !== 'physical') {
+    text += ' durch ' + getDamageType(damageType).name; // z.B. "… verliert 37 Leben durch Säure"
+  }
   if (result.absorbed > 0) {
     text += ' (' + result.absorbed + ' vom Schild abgefangen)';
   }
   battle.addLog(text + '.', crit ? 'crit' : 'damage',
-    { hits: [target.describeHit(result.damage, 'damage', crit, result.absorbed)] });
+    { hits: [target.describeHit(result.damage, 'damage', crit, result.absorbed, damageType)] });
   if (!target.alive) {
     battle.addLog(target.name + ' fällt!', 'death');
   }

@@ -40,6 +40,7 @@ export function createHeroCombatant(hero) {
     side: 'hero',
     row: heroClass.row,
     stats: hero.getStats(),
+    resistances: hero.getResistances(),
     abilityIds: heroClass.abilities,
     basicAttack: heroClass.basicAttack,
     orderSettings: hero.getOrderSettings(),
@@ -289,13 +290,13 @@ function tickDamageOverTime(battle, target, effect, everyone) {
   if (!target.alive) {
     return;
   }
-  const result = target.takeDamage(effect.damagePerRound, true);
+  const result = target.takeDamage(effect.damagePerRound, true, effect.damageType || 'physical');
   const source = everyone.find((combatant) => combatant.id === effect.sourceId);
   if (source) {
     source.damageDone += result.damage;
   }
   battle.addLog(effect.name + ' verletzt ' + target.name + ' um ' + result.damage + '.', 'damage',
-    { hits: [target.describeHit(result.damage, 'damage')] });
+    { hits: [target.describeHit(result.damage, 'damage', false, 0, effect.damageType || 'physical')] });
   if (!target.alive) {
     battle.addLog(target.name + (target.side === 'hero' ? ' fällt!' : ' ist besiegt!'), 'death');
   }

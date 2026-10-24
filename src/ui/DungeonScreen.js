@@ -8,6 +8,7 @@
 
 import { DUNGEONS, getDungeon } from '../data/dungeons.js';
 import { getBoss, MINIONS } from '../data/enemies.js';
+import { getDamageType } from '../data/damageTypes.js';
 import { RETREAT_RULES } from '../data/retreatRules.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
 import { COMBAT_RULES } from '../data/combatRules.js';
@@ -155,9 +156,14 @@ export class DungeonScreen {
       if (encounter.type === 'boss') {
         const boss = getBoss(encounter.bossId);
         icons.appendChild(createSpriteCanvas(boss.sprite, 3));
-        const mechanics = boss.mechanics.map((m) => attempted ? m.name + ': ' + m.hint : m.name).join(' · ');
+        // Mechaniken mit Schadensart, z.B. "Säureschwall (Säure)": wogegen man sich rüsten kann
+        const mechanics = boss.mechanics.map((m) => {
+          const name = m.name + describeDamageType(m.damageType);
+          return attempted ? name + ': ' + m.hint : name;
+        }).join(' · ');
         text.innerHTML = '<b></b><span></span>';
-        text.querySelector('b').textContent = (index + 1) + '. Boss: ' + boss.name + ' – ' + boss.title;
+        text.querySelector('b').textContent = (index + 1) + '. Boss: ' + boss.name + ' – ' + boss.title +
+          (boss.attackDamageType ? ' · greift mit ' + getDamageType(boss.attackDamageType).name + ' an' : '');
         text.querySelector('span').textContent = attempted ? mechanics : mechanics + ' (Tipps nach dem ersten Versuch)';
       } else {
         for (const enemyId of encounter.enemies) {
@@ -167,7 +173,7 @@ export class DungeonScreen {
         text.innerHTML = '<b></b><span></span>';
         text.querySelector('b').textContent = (index + 1) + '. ' + encounter.name;
         text.querySelector('span').textContent = encounter.enemies.length + ' Gegner: ' +
-          [...new Set(encounter.enemies.map((id) => MINIONS[id].name))].join(', ');
+          [...new Set(encounter.enemies.map((id) => MINIONS[id].name + describeDamageType(MINIONS[id].attackDamageType)))].join(', ');
       }
       row.appendChild(icons);
       row.appendChild(text);
@@ -371,6 +377,14 @@ export function outcomeText(outcome) {
 }
 
 // "verletzt (noch 1 Tag)" bzw. "verletzt (noch 3 Tage)"
+// " (Säure)" für nicht-körperlichen Schaden, sonst nichts
+function describeDamageType(damageTypeId) {
+  if (!damageTypeId || damageTypeId === 'physical') {
+    return '';
+  }
+  return ' (' + getDamageType(damageTypeId).name + ')';
+}
+
 export function describeInjury(hero) {
   return 'verletzt (noch ' + hero.injuryDays + (hero.injuryDays === 1 ? ' Tag)' : ' Tage)');
 }

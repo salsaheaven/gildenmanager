@@ -5,6 +5,7 @@
 //   name, title  = Anzeige
 //   sprite       = Pixelbild aus sprites.js
 //   stats        = health (Leben), attack (Angriff), defense (Rüstung)
+//   attackDamageType = Schadensart des normalen Angriffs (siehe damageTypes.js), ohne Angabe 'physical'
 //   enrageRound  = ab dieser Runde rast der Boss (doppelter Schaden). null = nie.
 //   isDummy      = Übungspuppe: greift nicht an, nur zum Schaden-Messen
 //   mechanics    = besondere Fähigkeiten (siehe unten)
@@ -19,6 +20,7 @@
 //   firstAt       = in welcher Runde zum ersten Mal
 //   every         = danach alle so viele Runden
 //   power         = Faktor auf den Angriff des Bosses
+//   damageType    = Schadensart (siehe damageTypes.js), ohne Angabe 'physical'
 //   castTime      = 1: wird eine Runde vorher angekündigt ("bereitet vor"), 0: sofort
 //   interruptible = kann ein Schurke den Zauber unterbrechen?
 //   duration      = Dauer des Fluchs in Runden
@@ -63,16 +65,17 @@ export const BOSSES = [
     title: 'Die Schattenruferin',
     sprite: 'bossCultist',
     attackFx: 'shadowBolt',
+    attackDamageType: 'shadow',
     stats: { health: 1250, attack: 25, defense: 5 },
     enrageRound: 30,
     mechanics: [
       {
-        type: 'groupCast', name: 'Schattenwoge',
+        type: 'groupCast', name: 'Schattenwoge', damageType: 'shadow',
         firstAt: 3, every: 4, power: 2.3, castTime: 1, interruptible: true, fx: 'shadowWave',
         hint: 'Ein Schurke kann die Woge mit Stummschlag unterbrechen.',
       },
       {
-        type: 'curse', name: 'Fluch der Fäulnis',
+        type: 'curse', name: 'Fluch der Fäulnis', damageType: 'shadow',
         firstAt: 5, every: 6, power: 0.5, duration: 6, castTime: 0, fx: 'curse',
         hint: 'Der Runenwirker entfernt Flüche mit der Lösungsrune.',
       },
@@ -93,7 +96,7 @@ export const BOSSES = [
         hint: 'Flächenschaden (Aschenregen des Magiers) räumt die Brut schnell weg.',
       },
       {
-        type: 'frontWave', name: 'Säureschwall',
+        type: 'frontWave', name: 'Säureschwall', damageType: 'acid',
         firstAt: 6, every: 7, power: 2.1, castTime: 1, interruptible: false, fx: 'acidWave',
         hint: 'Trifft nur die vordere Reihe: weniger Nahkämpfer mitnehmen.',
       },
@@ -105,6 +108,7 @@ export const BOSSES = [
 //   name, sprite = Anzeige (colors = andere Farben für dasselbe Pixelbild, z.B. rote Kultisten)
 //   stats        = health, attack, defense
 //   attackFx     = Animation des Angriffs
+//   attackDamageType = Schadensart des Angriffs (siehe damageTypes.js), ohne Angabe 'physical'
 //   targeting    = 'threat': greift den mit der meisten Aggro an (der Tank kann ihn halten)
 //                  'random': greift zufällig an (der Tank kann ihn nicht abfangen)
 export const MINIONS = {
@@ -112,6 +116,7 @@ export const MINIONS = {
     name: 'Brutling',
     sprite: 'minionBroodling',
     attackFx: 'bite',
+    attackDamageType: 'acid',
     targeting: 'random',
     stats: { health: 65, attack: 13, defense: 0 },
   },
@@ -128,6 +133,7 @@ export const MINIONS = {
     sprite: 'bossCultist',
     colors: { P: '#7a2020', p: '#d06060' },
     attackFx: 'shadowBolt',
+    attackDamageType: 'shadow',
     targeting: 'random',
     stats: { health: 80, attack: 12, defense: 2 },
   },

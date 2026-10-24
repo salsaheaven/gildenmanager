@@ -13,6 +13,7 @@ import { SLOT_NAMES } from '../data/items.js';
 import { getOrdersForClass } from '../data/heroOrders.js';
 import { getXpForNextLevel } from '../data/experience.js';
 import { SCALING } from '../data/scaling.js';
+import { MAX_RESISTANCE } from '../data/damageTypes.js';
 
 // Alle Ausrüstungsplätze, z.B. ['weapon', 'offhand', 'head', …]
 export const EQUIPMENT_SLOTS = Object.keys(SLOT_NAMES);
@@ -167,6 +168,23 @@ export class Hero {
       }
     }
     return score;
+  }
+
+  // Resistenzen aus allen angelegten Items zusammengezählt, höchstens MAX_RESISTANCE pro Schadensart.
+  // Ergebnis z.B. { acid: 18, shadow: 5 }
+  getResistances() {
+    const resistances = {};
+    for (const slot of EQUIPMENT_SLOTS) {
+      const item = this.equipment[slot];
+      if (!item) {
+        continue;
+      }
+      for (const damageTypeId in item.resistances) {
+        const total = (resistances[damageTypeId] || 0) + item.resistances[damageTypeId];
+        resistances[damageTypeId] = Math.min(MAX_RESISTANCE, total);
+      }
+    }
+    return resistances;
   }
 
   // Stärke eines Items für diesen Helden: Es zählen nur Werte, die seiner Klasse etwas bringen

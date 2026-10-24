@@ -18,6 +18,7 @@ import { computeEncounterTimeline } from '../systems/combat/BattleTimeline.js';
 import { COMBAT_RULES } from '../data/combatRules.js';
 import { Sound } from './Sound.js';
 import { SkillTooltip } from './SkillTooltip.js';
+import { getDamageType } from '../data/damageTypes.js';
 
 const TICKER_LINES = 6;       // so viele Zeilen zeigt der Ticker
 
@@ -462,7 +463,9 @@ export class BattleScene {
 
     if (hit.kind === 'damage') {
       if (hit.amount > 0) {
-        this.showFloat(hit.targetId, '-' + hit.amount + (hit.crit ? '!' : ''), hit.crit ? 'float-crit' : 'float-damage');
+        // Nicht-körperlicher Schaden bekommt die Farbe seiner Schadensart (z.B. Säure grün)
+        const color = hit.damageType && hit.damageType !== 'physical' ? getDamageType(hit.damageType).color : null;
+        this.showFloat(hit.targetId, '-' + hit.amount + (hit.crit ? '!' : ''), hit.crit ? 'float-crit' : 'float-damage', color);
         unit.element.classList.remove('hit');
         void unit.element.offsetWidth;
         unit.element.classList.add('hit');
@@ -496,7 +499,8 @@ export class BattleScene {
   }
 
   // Aufploppende Zahl oder Wort über einer Figur
-  showFloat(unitId, text, cssClass) {
+  // color = freiwillig: eigene Farbe für die Zahl (z.B. die Farbe der Schadensart)
+  showFloat(unitId, text, cssClass, color = null) {
     const unit = this.units[unitId];
     if (!unit) {
       return;
@@ -504,6 +508,9 @@ export class BattleScene {
     const float = document.createElement('div');
     float.className = 'float-text ' + cssClass;
     float.textContent = text;
+    if (color) {
+      float.style.color = color;
+    }
     // leicht versetzt, damit sich mehrere Zahlen nicht genau überdecken
     float.style.left = 30 + Math.random() * 40 + '%';
     unit.element.querySelector('.unit-floats').appendChild(float);
