@@ -10,7 +10,7 @@ Faustregel: Unterschiede bis etwa ±4 Prozentpunkte sind Zufall.
 |---|---|---|
 | `bot-durchlauf.mjs` | Wie schnell kommt ein Bot voran? Erfolgsquote, Tage bis zu jedem Dungeon, Gold, Anteil Upgrade-Items | `node tools/bot-durchlauf.mjs 60 20 level` (oder `push`) |
 | `siegchance.mjs` | Siegchance der Standardgruppe je Dungeon und Level, nackt und grün ausgerüstet | `node tools/siegchance.mjs` |
-| `gruppen-vergleich.mjs` | Wie stark hängt der Erfolg von der Klassenmischung ab? | `node tools/gruppen-vergleich.mjs` |
+| `gruppen-vergleich.mjs` | Wie stark hängt der Erfolg von der Klassenmischung ab? (mit Ausrüstung aus dem vorherigen Dungeon) | `node tools/gruppen-vergleich.mjs` |
 | `anweisungen.mjs` | Was bewirkt jede Anweisung, in verschiedenen Gruppen? | `node tools/anweisungen.mjs` (dauert etwa 30 Sekunden) |
 | `zielwerte.mjs` | Liegen die Siegchancen bei den Zielwerten aus KONZEPT.md („Schwierigkeit“)? | `node tools/zielwerte.mjs` |
 | `kampfdauer.mjs` | Wie lange dauert ein Run in Runden und Minuten (Tempo 1x)? | `node tools/kampfdauer.mjs` |

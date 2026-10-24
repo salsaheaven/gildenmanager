@@ -93,7 +93,7 @@ In kleinen, jeweils online testbaren Schritten:
   - **P8, Schritt 2** ✅ Rüstungsarten Platte (Krieger) / Leder (Schurke) / Stoff (Zauberer), umgefärbte Pixelbilder, Kampfring und Zauberring für alle. Upgrade-Pfeile, „Bestes anlegen“ und AW zählen nur Werte, die der Klasse nützen (`usefulStats`). Spielstand-Version 2, alte Stände werden ignoriert.
   - **P1, Schritt 1** ✅ Risiko-Anzeige in Worten („Sicher / Machbar / Riskant / Aussichtslos“, dazu „Gefallene: selten / manchmal / oft“) im Dungeon-Bildschirm und bei geplanten Gruppen (auch im Tagesplan). 100 simulierte Runs, Stufen in `riskLevels.js`.
   - **P1, Schritt 2** ✅ Gegner wachsen pro Stufe stärker (Leben +60 %, Angriff +28 %), alle Zielwerte innerhalb ±11 Punkten (`tools/zielwerte.mjs`). Nebenwirkung, bewusst so gelassen: viel mehr Gefallene bei knappen Siegen, im Bot doppelt so viele Tage mit Verletzten.
-  - **P1, Schritt 3:** Gruppenmischung neu messen, über Morva entscheiden.
+  - **P1, Schritt 3** ✅ Gruppenmischung neu gemessen: mit realistischer Ausrüstung situativ (Kapelle: 2 Schurken 100 %, Brutnester: 2 Magier 99 %, Standardgruppe je ~86 %). Morva bleibt, wie sie ist.
 
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 
