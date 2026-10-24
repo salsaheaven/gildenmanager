@@ -2290,6 +2290,27 @@ h3 {
   margin-top: 6px;
 }
 
+/* Einschätzung vor dem Run: "Einschätzung: Riskant · Gefallene: oft" */
+.risk-badge {
+  display: inline-block;
+  margin: 8px 0 4px;
+  padding: 4px 10px;
+  border: 2px solid var(--risk-color);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.risk-name {
+  color: var(--risk-color);
+  font-weight: normal;
+  font-family: var(--font-title);
+  font-size: 11px;
+}
+
+.risk-label,
+.risk-fall {
+  color: var(--text-dim);
+}
+
 .gear-check.good { color: #1eff00; }
 .gear-check.bad { color: #ff9f43; }
 

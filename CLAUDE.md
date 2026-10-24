@@ -40,7 +40,7 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
                simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug),
                BattleTimeline (wann passiert was → Dauer eines Runs), Battle (Zustand + Zielwahl),
                Combatant (ein Kämpfer), HeroAI (welcher Skill?), EnemyAI (Boss-Mechaniken),
-               AbilityEffects (was ein Skill bewirkt), ChanceEstimator (200 Kämpfe → Siegchance),
+               AbilityEffects (was ein Skill bewirkt), ChanceEstimator (200 Kämpfe → Siegchance; estimateRunChances = ganzer Dungeon),
                TestGroup (Standard-Gruppe fürs Labor)
 src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes, balancing, sprites (Pixel-Art als Text),
                heroClasses (inkl. Rüstungsart und nützliche Werte pro Klasse), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
@@ -48,7 +48,8 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                dungeons (Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),
-               heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus)
+               heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus),
+               riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tagesplan, Startseite), LootBoxScreen (Schatzkammer),
                HeroScreen (+ HeroDetailPanel, EquipPanel), TavernScreen, CombatLabScreen,
                DungeonScreen (+ RunViewer = Bericht eines beendeten Runs zeigen).
@@ -60,6 +61,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tag
                SkillTooltip = Fenster mit Skills und Abklingzeiten, wenn die Maus über einem Helden der Szene steht (Handy: antippen).
                Tempo der Szene: `pacing`, `sceneSpeeds` und `sceneAnimationRate` in `combatRules.js`.
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
+               RiskBadge = Einschätzung eines Runs in Worten („Riskant · Gefallene: oft“).
                OrdersPanel = Auswahllisten für Anweisungen (Labor + Heldenbildschirm).
                Leisten: TopBar, NavBar. Helfer: PixelArt, Sound, Toast, format, TraitChip.
                DebugPanel = Test-Menü (Taste F2)
@@ -71,8 +73,8 @@ tools/         Mess-Werkzeuge für Balancing (Node-Skripte mit der echten Spiell
 - Jede Klasse, die gespeichert wird, hat `toSaveData()` und `static fromSaveData()`.
 - Zufall läuft immer über `Random`, nie direkt über `Math.random()`. So bleibt er testbar und wird mitgespeichert.
 - Balancing des Kampfs: Im Kampf-Labor ausprobieren, oder mit den Mess-Werkzeugen in `tools/` viele Varianten durchrechnen (vorher und nachher messen).
-  Zielwerte (ganzer Dungeon): Bärenhöhle mit nackter Level-1-Gruppe ~90 %. Für jeden weiteren Dungeon gilt:
-  Gruppe auf der Stufe des Dungeons mit grüner Ausrüstung aus dem vorherigen Dungeon ~75–85 %, mit Ausrüstung der eigenen Stufe ~95 %.
+  Zielwerte (ganzer Dungeon, siehe „Schwierigkeit“ in KONZEPT.md): Bärenhöhle mit nackter Level-1-Gruppe ~90 %. Für jeden weiteren Dungeon gilt:
+  Gruppe auf der Stufe des Dungeons mit grüner Ausrüstung aus dem vorherigen Dungeon ~85 %, mit Ausrüstung der eigenen Stufe ~95 %, eine Stufe darunter ~50 %.
 - Die Oberfläche muss auch auf dem Handy funktionieren (Breite ~390 px). Handy-Regeln stehen am Ende von `main.css` (`@media (max-width: 700px)`).
 - Pixel-Art steht als Text-Raster in `src/data/sprites.js`. Ein Zeichen ist ein Pixel, die Farben stehen in `PALETTE`.
 

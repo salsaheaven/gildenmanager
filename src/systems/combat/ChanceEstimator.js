@@ -2,9 +2,11 @@
 // CHANCEESTIMATOR – berechnet die Siegchance
 // Simuliert denselben Kampf viele Male mit verschiedenem Zufall und zählt aus:
 // Wie oft gewonnen? Wie oft ist jemand gefallen? Wer fällt am häufigsten?
+// estimateChances = ein einzelner Bosskampf (Kampf-Labor)
+// estimateRunChances = ein ganzer Dungeon (Risiko-Einschätzung vor dem Run)
 // ============================================================
 
-import { simulateBattle } from './CombatSimulator.js';
+import { simulateBattle, simulateRun } from './CombatSimulator.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
 
 // options = { heroes, bossId, enemyLevel (optional, Stufe des Bosses), count (optional), seed (optional) }
@@ -60,5 +62,33 @@ export function estimateChances(options) {
     fallenRate: fightsWithFallen / count, // Anteil der Kämpfe, in denen mindestens ein Held fällt
     fallRateByHero: fallRateByHero,
     averageGroupDamagePerRound: totalDamage / totalRounds,
+  };
+}
+
+// Ein ganzer Dungeon-Run, viele Male simuliert.
+// options = { heroes, dungeonId, retreatRuleId, count }
+// Ergebnis: { winRate, fallenRate } (Anteile von 0 bis 1)
+// Die Seeds sind immer dieselben: Dieselbe Gruppe bekommt also immer dieselbe Einschätzung.
+export function estimateRunChances(options) {
+  let wins = 0;
+  let runsWithFallen = 0;
+  for (let i = 0; i < options.count; i++) {
+    const result = simulateRun({
+      heroes: options.heroes,
+      dungeonId: options.dungeonId,
+      retreatRuleId: options.retreatRuleId,
+      seed: 1 + i * 7919,
+      recordLog: false,
+    });
+    if (result.outcome === 'success') {
+      wins++;
+    }
+    if (result.heroes.some((hero) => !hero.alive)) {
+      runsWithFallen++;
+    }
+  }
+  return {
+    winRate: wins / options.count,
+    fallenRate: runsWithFallen / options.count,
   };
 }

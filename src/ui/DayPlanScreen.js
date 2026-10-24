@@ -12,6 +12,7 @@ import { getDungeon } from '../data/dungeons.js';
 import { RETREAT_RULES } from '../data/retreatRules.js';
 import { createHeroCanvas } from './PixelArt.js';
 import { describeInjury } from './DungeonScreen.js';
+import { createRiskBadge } from './RiskBadge.js';
 import { Sound } from './Sound.js';
 
 export class DayPlanScreen {
@@ -121,12 +122,11 @@ export class DayPlanScreen {
         (retreatRule ? ' · Rückzug: ' + retreatRule.name : '');
 
       const heroList = card.querySelector('.day-plan-heroes');
-      for (const heroId of expedition.getHeroIds()) {
-        const hero = this.game.guild.findHero(heroId);
-        if (hero) {
-          heroList.appendChild(this.createHeroRow(hero, null));
-        }
+      const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
+      for (const hero of heroes) {
+        heroList.appendChild(this.createHeroRow(hero, null));
       }
+      heroList.before(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId));
       card.querySelector('.cancel-button').addEventListener('click', () => {
         Sound.click();
         this.game.cancelExpedition(expedition.id);

@@ -14,6 +14,7 @@ import { COMBAT_RULES } from '../data/combatRules.js';
 import { createHeroCanvas, createSpriteCanvas, createChestCanvas } from './PixelArt.js';
 import { renderOrders } from './OrdersPanel.js';
 import { RunViewer } from './RunViewer.js';
+import { createRiskBadge } from './RiskBadge.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 
@@ -104,6 +105,7 @@ export class DungeonScreen {
       <h3>Gruppe (bis zu ${GROUP_SIZE} Helden)</h3>
       <div class="group-picker"></div>
       <div class="group-check"></div>
+      <div class="risk-line"></div>
       <h3>Rückzug</h3>
       <div class="button-row retreat-buttons"></div>
       <p class="hint">Der Rückzug dauert ${COMBAT_RULES.retreatRounds} Runden, in denen der Gegner weiter angreift. Danach gibt es keine Beute.</p>
@@ -123,6 +125,10 @@ export class DungeonScreen {
       (value) => value === this.retreatRuleId, (value) => { this.retreatRuleId = value; });
 
     const group = this.getSelectedHeroes();
+    // Einschätzung in Worten, neu berechnet bei jeder Änderung an Gruppe, Ausrüstung oder Rückzug
+    if (unlocked && group.length > 0) {
+      panel.querySelector('.risk-line').appendChild(createRiskBadge(group, dungeon.id, this.retreatRuleId));
+    }
     renderOrders(panel.querySelector('.orders-list'), group, (hero, orderId, optionId) => {
       this.game.setHeroOrder(hero.id, orderId, optionId);
     });
@@ -306,6 +312,8 @@ export class DungeonScreen {
       row.querySelector('.run-name').textContent = dungeon.name;
       row.querySelector('.run-status').textContent = heroNames.join(', ') +
         (retreatRule ? ' · Rückzug: ' + retreatRule.name : '');
+      const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
+      row.querySelector('.run-head').after(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId));
       row.querySelector('.cancel-button').addEventListener('click', () => {
         Sound.click();
         this.game.cancelExpedition(expedition.id);
