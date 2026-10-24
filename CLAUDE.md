@@ -28,6 +28,7 @@ Eine Option, die immer die beste ist, ist keine Wahl. Neue Optionen deshalb per 
 - **Klein und spielbar:** Große Features in Schritte zerlegen, die jeweils einzeln spielbar sind. Nach jedem Schritt lokal committen. **Gepusht (und damit von GitHub Pages veröffentlicht) wird nur bei Meilensteinen**, z.B. wenn ein Review-Vorschlag komplett umgesetzt ist, nicht bei jeder kleinen Änderung.
 - **Modular, auch um Token zu sparen:** Kleine Dateien mit einer klaren Aufgabe. Für eine Änderung nur die betroffenen Dateien lesen, nicht das ganze Projekt. Die Übersicht unten zeigt, wo was liegt.
 - Testhilfen wie ein Test-Menü oder ein Kampf-Labor sind ausdrücklich erwünscht, damit spätere Inhalte schnell prüfbar sind
+- **Noch kein Feintuning:** Während der Entwicklung zählen Grundgerüst, Mechaniken und Gameplay-Loop. Neue Features nur kurz mit `tools/` auf grobe Fehler prüfen (z.B. 0 % oder 100 % Siegchance). Gebalanced wird ganz am Ende.
 - **Keine Abwärtskompatibilität während der Entwicklung:** Alte Spielstände müssen nicht weiter funktionieren. Kein Umrechnungs-Code für alte Speicherformate; stattdessen `SAVE_VERSION` in `SaveManager.js` erhöhen, dann werden alte Stände ignoriert. Beim Testen einfach „Neu“ drücken.
 
 ## Aufbau
