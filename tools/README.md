@@ -12,6 +12,7 @@ Faustregel: Unterschiede bis etwa ±4 Prozentpunkte sind Zufall.
 | `siegchance.mjs` | Siegchance der Standardgruppe je Dungeon und Level, nackt und grün ausgerüstet | `node tools/siegchance.mjs` |
 | `gruppen-vergleich.mjs` | Wie stark hängt der Erfolg von der Klassenmischung ab? | `node tools/gruppen-vergleich.mjs` |
 | `anweisungen.mjs` | Was bewirkt jede Anweisung, in verschiedenen Gruppen? | `node tools/anweisungen.mjs` (dauert etwa 30 Sekunden) |
+| `zielwerte.mjs` | Liegen die Siegchancen bei den Zielwerten aus KONZEPT.md („Schwierigkeit“)? | `node tools/zielwerte.mjs` |
 | `kampfdauer.mjs` | Wie lange dauert ein Run in Runden und Minuten (Tempo 1x)? | `node tools/kampfdauer.mjs` |
 
 `messhilfen.mjs` enthält die gemeinsamen Bausteine (Testgruppe bauen, viele Runs messen).

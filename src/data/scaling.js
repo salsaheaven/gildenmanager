@@ -23,11 +23,12 @@ export const SCALING = {
   itemBaseFactor: 0.38,
   itemGrowthPerLevel: 0.44,
 
-  // Gegner: Zuwachs pro Stufe über 1 (0.5 = +50 % der Grundwerte pro Stufe).
-  // Per Simulation so gewählt, dass eine Gruppe auf der Stufe des Dungeons
-  // mit grüner Ausrüstung dieser Stufe auf jedem Level ähnlich gut abschneidet.
-  enemyHealthPerLevel: 0.5,
-  enemyAttackPerLevel: 0.25,
+  // Gegner: Zuwachs pro Stufe über 1 (0.6 = +60 % der Grundwerte pro Stufe).
+  // Per Simulation (tools/zielwerte.mjs) auf die Zielwerte aus KONZEPT.md ("Schwierigkeit") eingestellt:
+  // Stufe des Dungeons mit Ausrüstung aus dem vorigen Dungeon ~85 %, eine Stufe darunter ~50 %.
+  // Vorsicht: Schon kleine Änderungen verschieben die Siegchancen stark.
+  enemyHealthPerLevel: 0.6,
+  enemyAttackPerLevel: 0.28,
   enemyDefensePerLevel: 0.1,
 
   // Rüstungs-Konstante: auf Stufe 1 und Zuwachs pro Stufe

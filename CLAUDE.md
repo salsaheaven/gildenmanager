@@ -25,7 +25,7 @@ Das Projekt ist ein Vibecoding-Übungsprojekt. Der Code soll auch für Programmi
 Eine Option, die immer die beste ist, ist keine Wahl. Neue Optionen deshalb per Simulation prüfen: Ist eine Option gegen alle Bosse besser als die anderen, braucht sie einen Nachteil. Details stehen in `KONZEPT.md`.
 
 ## Arbeitsweise
-- **Klein und spielbar:** Große Features in Schritte zerlegen, die jeweils einzeln spielbar sind. Nach jedem Schritt pushen. GitHub Pages veröffentlicht dann automatisch, und man kann sofort online testen.
+- **Klein und spielbar:** Große Features in Schritte zerlegen, die jeweils einzeln spielbar sind. Nach jedem Schritt lokal committen. **Gepusht (und damit von GitHub Pages veröffentlicht) wird nur bei Meilensteinen**, z.B. wenn ein Review-Vorschlag komplett umgesetzt ist, nicht bei jeder kleinen Änderung.
 - **Modular, auch um Token zu sparen:** Kleine Dateien mit einer klaren Aufgabe. Für eine Änderung nur die betroffenen Dateien lesen, nicht das ganze Projekt. Die Übersicht unten zeigt, wo was liegt.
 - Testhilfen wie ein Test-Menü oder ein Kampf-Labor sind ausdrücklich erwünscht, damit spätere Inhalte schnell prüfbar sind
 - **Keine Abwärtskompatibilität während der Entwicklung:** Alte Spielstände müssen nicht weiter funktionieren. Kein Umrechnungs-Code für alte Speicherformate; stattdessen `SAVE_VERSION` in `SaveManager.js` erhöhen, dann werden alte Stände ignoriert. Beim Testen einfach „Neu“ drücken.
