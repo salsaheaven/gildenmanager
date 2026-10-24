@@ -7,6 +7,6 @@ export function createTraitChip(trait) {
   const chip = document.createElement('span');
   chip.className = 'trait-chip';
   chip.textContent = trait.name;
-  chip.title = trait.description + (trait.later ? ' (wirkt ab den Dungeons)' : '');
+  chip.title = trait.description;
   return chip;
 }

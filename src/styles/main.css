@@ -2466,6 +2466,14 @@ h3 {
   margin-bottom: 8px;
 }
 
+.day-trait-bonus {
+  /* eigene Zeile unter Gold und Kiste */
+  order: 1;
+  flex-basis: 100%;
+  color: #ffd23f;
+  font-size: 17px;
+}
+
 .day-reward {
   display: flex;
   align-items: center;

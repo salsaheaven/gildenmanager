@@ -25,6 +25,7 @@ import { getLootBoxType } from '../data/lootBoxes.js';
 import { getDungeon } from '../data/dungeons.js';
 import { Expedition } from '../entities/Expedition.js';
 import { applyRunResults } from '../systems/ExperienceSystem.js';
+import { getGroupGoldBonus, getGroupExtraChestItems } from '../systems/TraitEffects.js';
 
 export class Game {
   constructor(seed = Date.now()) {
@@ -208,7 +209,11 @@ export class Game {
       fallenNames: result.heroes.filter((hero) => !hero.alive).map((hero) => hero.name),
       gold: 0,
       trashGold: 0,
+      bonusGold: 0,         // Extra-Gold durch "Gierig"
+      bonusGoldHero: null,  // wer es gebracht hat
       chest: null,
+      chestBonusItems: 0,   // Extra-Items durch "Glückspilz"
+      chestBonusHero: null,
       firstClear: false,
       expedition: expedition.toSaveData(), // zum erneuten Ansehen
     };
@@ -227,9 +232,19 @@ export class Game {
       report.chest = dungeon.rewards.chest;
       report.firstClear = this.guild.getClears(dungeon.id) === 0;
       this.guild.addGold(dungeon.rewards.gold);
-      this.guild.addBox(dungeon.rewards.chest, dungeon.level); // Items in der Stufe des Dungeons
+      // Ein Glückspilz in der Gruppe legt ein Item mehr in die Kiste
+      const extraItems = getGroupExtraChestItems(heroes);
+      report.chestBonusItems = extraItems.bonus;
+      report.chestBonusHero = extraItems.heroName;
+      this.guild.addBox(dungeon.rewards.chest, dungeon.level, extraItems.bonus); // Items in der Stufe des Dungeons
       this.guild.dungeonClears[dungeon.id] = this.guild.getClears(dungeon.id) + 1;
     }
+
+    // Ein Gieriger in der Gruppe holt mehr Gold heraus (auf Boss- und Trash-Gold)
+    const goldBonus = getGroupGoldBonus(heroes);
+    report.bonusGold = Math.round((report.gold + report.trashGold) * goldBonus.bonus);
+    report.bonusGoldHero = report.bonusGold > 0 ? goldBonus.heroName : null;
+    this.guild.addGold(report.bonusGold);
 
     // Erfahrung für alle gewonnenen Begegnungen, Verletzungen für Gefallene
     report.heroResults = applyRunResults(this.guild, result, dungeon);

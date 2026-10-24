@@ -64,8 +64,8 @@ export class Guild {
   // ---------- Kisten ----------
 
   // itemLevel = Item-Level der Items darin (1 = Anfang)
-  addBox(boxTypeId, itemLevel = 1) {
-    this.boxes.push(new LootBox(boxTypeId, itemLevel));
+  addBox(boxTypeId, itemLevel = 1, bonusItems = 0) {
+    this.boxes.push(new LootBox(boxTypeId, itemLevel, bonusItems));
   }
 
   // Nimmt eine Kiste dieser Art heraus (oder null, wenn keine da ist)

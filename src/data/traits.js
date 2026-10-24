@@ -2,8 +2,10 @@
 // EIGENSCHAFTEN
 // Jeder Held bekommt zufällige Eigenschaften (wie viele, hängt von seiner Seltenheit ab).
 //
-// statBonus = Prozent-Änderung der Werte: 0.1 = +10 %, -0.1 = −10 %
-// later     = true, wenn die Eigenschaft erst mit den Dungeons wirkt
+// statBonus       = Prozent-Änderung der Werte: 0.1 = +10 %, -0.1 = −10 %
+// goldBonus       = mehr Gold aus dem Run (0.2 = +20 %), wenn der Held mitkämpft
+// extraChestItems = so viele Items mehr in der Boss-Kiste, wenn der Held mitkämpft
+// goldBonus und extraChestItems stapeln sich nicht: Zwei Gierige bringen nicht mehr als einer.
 // ============================================================
 
 export const TRAITS = [
@@ -14,8 +16,8 @@ export const TRAITS = [
   { id: 'sturdy',   name: 'Standfest',    description: '+10 % Rüstung',               statBonus: { defense: 0.1 } },
   { id: 'hothead',  name: 'Hitzkopf',     description: '+20 % Angriff, −10 % Rüstung', statBonus: { attack: 0.2, defense: -0.1 } },
   { id: 'fragile',  name: 'Zerbrechlich', description: '+15 % Magie, −10 % Leben',    statBonus: { magic: 0.15, health: -0.1 } },
-  { id: 'greedy',   name: 'Gierig',       description: '+20 % Gold aus Dungeons',     statBonus: {}, later: true },
-  { id: 'lucky',    name: 'Glückspilz',   description: 'Bessere Beute aus Dungeons',  statBonus: {}, later: true },
+  { id: 'greedy',   name: 'Gierig',       description: '+20 % Gold aus dem Dungeon, wenn er mitkämpft', statBonus: {}, goldBonus: 0.2 },
+  { id: 'lucky',    name: 'Glückspilz',   description: '+1 Item in der Boss-Kiste, wenn er mitkämpft',  statBonus: {}, extraChestItems: 1 },
 ];
 
 export function getTrait(traitId) {

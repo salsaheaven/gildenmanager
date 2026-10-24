@@ -88,6 +88,10 @@ In kleinen, jeweils online testbaren Schritten:
   4. ✅ **Tagesplan:** Neuer Reiter „Tagesplan“ (Startseite): welcher Held heute was macht (Dungeon, Kuriert sich aus, Ruht sich aus), Hinweis auf freie Helden, Gruppen absagen, „Tag beenden“. Die Leiste oben zeigt, wie viele Helden frei sind. Aufgaben stehen in `heroTasks.js`, dort kommen später Farmen oder Kräuter sammeln dazu.
   - ✅ Dazu: **Skill-Fenster in der Kampfszene.** Maus über einem Helden (Handy: antippen) zeigt seine Skills mit Beschreibung, Mana, Abklingzeit und ob sie gerade bereit sind (läuft im Kampf mit).
 
+- **Design-Review 01** (2026-10-24, Unterlagen in `docs/review01/`, Mess-Werkzeuge in `tools/`). Die Vorschläge werden einzeln entschieden, Entscheidungen stehen in `KONZEPT.md`. Reihenfolge: P8 → P1 → P4 → P2 → P3 → Sammelbuch → P6 → P7 → P9 → P5.
+  - **P8, Schritt 1** ✅ „Gierig“ (+20 % Gold) und „Glückspilz“ (+1 Item in der Boss-Kiste) wirken, wenn so ein Held mitkämpft. Im Tagesabschluss steht, wer den Bonus gebracht hat.
+  - **P8, Schritt 2:** Rüstungsarten Platte / Leder / Stoff, Angriffs- und Zauber-Ring.
+
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 
 **M2 – Progression:** ~~Gildenkurier abschalten~~ (✅ schon erledigt und beim Umbau auf Runden ganz entfernt), Kisten aus dem Händler nehmen; der Laden verkauft Verbrauchsgüter und Mats, dazu der Wanderhändler. Talente, Zerlegen und Verbessern (+1 bis +10), Klassen-Sets + Sammelbuch, Heroisch-Modus mit Permadeath + Ehrenhalle.

@@ -37,6 +37,12 @@ export class DebugPanel {
         game.guild.candidates.push(candidate);
       });
     }
+    // Zum Ausprobieren der Eigenschaften, die nach einem Run wirken
+    this.addButton('Bewerber: Gierig + Glückspilz', () => {
+      const candidate = game.recruitmentSystem.createCandidate(game.guild.createHeroId(), 'epic');
+      candidate.traitIds = ['greedy', 'lucky'];
+      game.guild.candidates.push(candidate);
+    });
     // Vorläufig, bis es Erfahrung gibt: alle Helden ein Level höher (höchstens bis zum Maximum)
     this.addButton('+1 Level (alle Helden)', () => {
       for (const hero of game.guild.heroes) {

@@ -328,7 +328,7 @@ export class DungeonScreen {
       row.className = 'report-row outcome-' + report.outcome;
       let text = 'Tag ' + report.day + ' – ' + dungeon.name + ': ' + outcomeText(report.outcome);
       if (report.outcome === 'success') {
-        text += ' +' + report.gold + ' Gold, ' + getLootBoxType(report.chest).name;
+        text += ' +' + (report.gold + report.trashGold + report.bonusGold) + ' Gold, ' + getLootBoxType(report.chest).name;
       }
       if (report.fallenNames.length > 0) {
         text += ' · gefallen: ' + report.fallenNames.join(', ');

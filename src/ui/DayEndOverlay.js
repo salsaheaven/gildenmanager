@@ -210,13 +210,21 @@ export class DayEndOverlay {
   }
 
   renderRewards(container, report) {
-    const gold = report.gold + (report.trashGold || 0);
+    const gold = report.gold + report.trashGold + report.bonusGold;
     if (gold > 0) {
       const goldLine = document.createElement('div');
       goldLine.className = 'day-reward';
       goldLine.appendChild(createSpriteCanvas('coin', 2));
       goldLine.insertAdjacentHTML('beforeend', '<span>+' + gold + ' Gold</span>');
       container.appendChild(goldLine);
+    }
+    // Wirkung der Eigenschaften sichtbar machen
+    if (report.bonusGold > 0) {
+      container.appendChild(createTraitBonusLine(report.bonusGoldHero + ' ist gierig: +' + report.bonusGold + ' Gold'));
+    }
+    if (report.chestBonusItems > 0) {
+      container.appendChild(createTraitBonusLine(report.chestBonusHero + ' ist ein Glückspilz: +' +
+        report.chestBonusItems + ' Item in der Kiste'));
     }
 
     if (report.chest) {
@@ -269,4 +277,12 @@ export class DayEndOverlay {
     document.body.classList.remove('overlay-open');
     this.callbacks.onClosed();
   }
+}
+
+// Kleine Zeile unter der Beute, z.B. "Brakka ist gierig: +12 Gold"
+function createTraitBonusLine(text) {
+  const line = document.createElement('div');
+  line.className = 'day-trait-bonus';
+  line.textContent = text;
+  return line;
 }

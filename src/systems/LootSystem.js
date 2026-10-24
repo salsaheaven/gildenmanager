@@ -19,10 +19,11 @@ export class LootSystem {
 
   // Öffnet eine Kiste: erzeugt alle Items, legt sie ins Inventar der Gilde
   // und gibt sie sortiert zurück (das seltenste zuletzt, für die Spannung!).
-  // itemLevel = Item-Level aller Items in der Kiste
-  rollBoxContents(boxType, guild, itemLevel = 1) {
+  // itemLevel  = Item-Level aller Items in der Kiste
+  // bonusItems = so viele Zufalls-Items kommen zusätzlich dazu (z.B. durch einen Glückspilz)
+  rollBoxContents(boxType, guild, itemLevel = 1, bonusItems = 0) {
     const items = [];
-    let normalCount = boxType.itemCount;
+    let normalCount = boxType.itemCount + bonusItems;
 
     // Boss-Kiste: ein Item aus der Beutetabelle des Bosses ist garantiert
     if (boxType.bossLoot) {
