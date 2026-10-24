@@ -11,7 +11,7 @@
 // ============================================================
 
 import { LOOT_BOXES, getLootBoxType } from '../data/lootBoxes.js';
-import { STAT_NAMES } from '../data/items.js';
+import { formatItemValues } from './format.js';
 import { BALANCING } from '../data/balancing.js';
 import { createChestCanvas, createItemCanvas, createSpriteCanvas } from './PixelArt.js';
 import { Sound } from './Sound.js';
@@ -264,11 +264,7 @@ export class LootBoxScreen {
 
     const stats = document.createElement('div');
     stats.className = 'card-stats';
-    const parts = [];
-    for (const statName in item.stats) {
-      parts.push('+' + item.stats[statName] + ' ' + STAT_NAMES[statName]);
-    }
-    stats.textContent = parts.join('  ');
+    stats.textContent = formatItemValues(item);
     card.appendChild(stats);
 
     return card;

@@ -3,6 +3,7 @@
 // ============================================================
 
 import { STAT_NAMES, SLOT_NAMES, ARMOR_TYPES, getArmorTypeName } from '../data/items.js';
+import { DAMAGE_TYPES } from '../data/damageTypes.js';
 import { getSuitableClasses } from '../data/heroClasses.js';
 
 // { attack: 9, health: 20 } → "+9 Angriff  +20 Leben"
@@ -14,6 +15,21 @@ export function formatStats(stats) {
     }
   }
   return parts.join('  ');
+}
+
+// Resistenzen als Text: { acid: 8 } → "+8 % Säure"
+export function formatResistances(resistances) {
+  const parts = [];
+  for (const damageTypeId in resistances) {
+    parts.push('+' + resistances[damageTypeId] + ' % ' + DAMAGE_TYPES[damageTypeId].name);
+  }
+  return parts.join('  ');
+}
+
+// Alle Werte eines Items als Text: Werte und Resistenzen, z.B. "+3 Angriff  +9 Leben  +8 % Säure"
+export function formatItemValues(item) {
+  const resistanceText = formatResistances(item.resistances);
+  return formatStats(item.stats) + (resistanceText ? '  ' + resistanceText : '');
 }
 
 // Unterschied pro Wert zwischen einem Item und dem gerade angelegten (oder null = Platz leer).
@@ -34,14 +50,24 @@ export function describeStatDifferences(item, currentItem) {
     }
     const newValue = item.stats[statName] || 0;
     const oldValue = currentItem ? (currentItem.stats[statName] || 0) : 0;
-    const difference = newValue - oldValue;
-    if (difference > 0) {
-      differences.push({ text: '+' + difference + ' ' + STAT_NAMES[statName], change: 'up' });
-    } else if (difference < 0) {
-      differences.push({ text: '−' + Math.abs(difference) + ' ' + STAT_NAMES[statName], change: 'down' });
-    }
+    addDifference(differences, newValue - oldValue, STAT_NAMES[statName]);
+  }
+  // Resistenzen genauso, z.B. "+8 % Säure"
+  for (const damageTypeId in DAMAGE_TYPES) {
+    const newValue = item.resistances[damageTypeId] || 0;
+    const oldValue = currentItem ? (currentItem.resistances[damageTypeId] || 0) : 0;
+    addDifference(differences, newValue - oldValue, '% ' + DAMAGE_TYPES[damageTypeId].name);
   }
   return differences;
+}
+
+// Hängt einen Unterschied an die Liste an (0 = nichts). label z.B. "Angriff" oder "% Säure"
+function addDifference(differences, difference, label) {
+  if (difference > 0) {
+    differences.push({ text: '+' + difference + ' ' + label, change: 'up' });
+  } else if (difference < 0) {
+    differences.push({ text: '−' + Math.abs(difference) + ' ' + label, change: 'down' });
+  }
 }
 
 // Platz und Rüstungsart eines Items, z.B. "Kopf · Stoff" oder "Waffe"

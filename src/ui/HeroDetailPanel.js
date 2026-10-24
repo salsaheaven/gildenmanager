@@ -8,6 +8,7 @@ import { ROLE_NAMES, ROW_NAMES } from '../data/heroClasses.js';
 import { ABILITIES } from '../data/abilities.js';
 import { SLOT_NAMES, STAT_NAMES } from '../data/items.js';
 import { EQUIPMENT_SLOTS } from '../entities/Hero.js';
+import { DAMAGE_TYPES, MAX_RESISTANCE } from '../data/damageTypes.js';
 import { createHeroCanvas, createItemCanvas } from './PixelArt.js';
 import { createTraitChip } from './TraitChip.js';
 import { Sound } from './Sound.js';
@@ -61,6 +62,7 @@ export class HeroDetailPanel {
           <h3>Werte</h3>
           <table class="stat-table"></table>
           <div class="gear-score">Ausrüstungswert: <b>${hero.getGearScore()}</b></div>
+          <div class="hero-resistances"></div>
         </div>
         <div>
           <h3>Skills</h3>
@@ -92,12 +94,32 @@ export class HeroDetailPanel {
     }
 
     this.renderStats();
+    this.renderResistances();
     this.renderSkills();
     this.renderEquipment();
     renderOrders(this.root.querySelector('.hero-orders'), [hero], (changedHero, orderId, optionId) => {
       this.game.setHeroOrder(changedHero.id, orderId, optionId);
     }, false);
     this.setupDismissButton();
+  }
+
+  // Resistenzen aus der Ausrüstung, z.B. "Resistenzen: Säure 13 %, Schatten 5 %" (in der Farbe der Schadensart)
+  renderResistances() {
+    const container = this.root.querySelector('.hero-resistances');
+    const resistances = this.hero.getResistances();
+    if (Object.keys(resistances).length === 0) {
+      container.innerHTML = '<span class="hint">Keine Resistenzen</span>';
+      return;
+    }
+    container.innerHTML = '<span class="hint">Resistenzen:</span> ';
+    for (const damageTypeId in resistances) {
+      const part = document.createElement('span');
+      part.className = 'resistance-chip';
+      part.style.color = DAMAGE_TYPES[damageTypeId].color;
+      part.textContent = DAMAGE_TYPES[damageTypeId].name + ' ' + resistances[damageTypeId] + ' %' +
+        (resistances[damageTypeId] >= MAX_RESISTANCE ? ' (Maximum)' : '');
+      container.appendChild(part);
+    }
   }
 
   // Tabelle: fertiger Wert, dazu in Grün der Bonus durch Ausrüstung und Eigenschaften

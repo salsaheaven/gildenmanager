@@ -18,7 +18,9 @@ export const STANDARD_GROUP = ['warrior', 'priest', 'runeweaver', 'mage', 'rogue
 // level     = Level aller Helden
 // itemLevel = 0: ohne Ausrüstung, sonst grüne Ausrüstung mit diesem Item-Level in allen Plätzen
 //             (jeweils die Vorlage, die zur Klasse passt: eigene Waffen, eigene Rüstungsart, passender Ring)
-export function createGroup(classIds, level, itemLevel = 0) {
+// resistance = freiwillig: { damageType, pieces, percent } – so viele Rüstungsteile (Kopf, Brust, Füße)
+//              jedes Helden tragen zusätzlich diese Resistenz, z.B. { damageType: 'acid', pieces: 2, percent: 8 }
+export function createGroup(classIds, level, itemLevel = 0, resistance = null) {
   // Fester Seed: Jede Gruppe bekommt bei gleichen Angaben genau dieselbe Ausrüstung
   const lootSystem = new LootSystem(new Random(5));
   let itemId = 1;
@@ -35,7 +37,15 @@ export function createGroup(classIds, level, itemLevel = 0) {
         }
         const item = lootSystem.createItem('uncommon', itemId, itemLevel, template);
         itemId++;
+        // Zufällige Resistenzen aus der Kiste entfernen, die Messung soll genau festlegen, was getragen wird
+        item.resistances = {};
         hero.equip(item);
+      }
+    }
+    if (resistance && itemLevel > 0) {
+      const armorSlots = ['head', 'chest', 'feet'].slice(0, resistance.pieces);
+      for (const slot of armorSlots) {
+        hero.equipment[slot].resistances = { [resistance.damageType]: resistance.percent };
       }
     }
     group.push(hero);
@@ -47,6 +57,7 @@ export function createGroup(classIds, level, itemLevel = 0) {
 // Alle Messungen benutzen dieselben Seeds (1, 7920, 15839 …). So vergleicht man zwei Varianten
 // mit genau denselben Zufallszahlen, und Unterschiede kommen von der Variante, nicht vom Glück.
 // orders = { klassen-id: { anweisungs-id: options-id } }, gilt für alle Helden dieser Klasse
+// resistance = freiwillig, siehe createGroup
 // Ergebnis: { win, fall, rounds } = Siege in %, Runs mit Gefallenen in %, Ø Kampfrunden pro Run
 export function measureRuns(options) {
   const runs = options.runs || 300;
@@ -54,7 +65,7 @@ export function measureRuns(options) {
   let runsWithFallen = 0;
   let rounds = 0;
   for (let i = 0; i < runs; i++) {
-    const group = createGroup(options.classIds, options.level, options.itemLevel || 0);
+    const group = createGroup(options.classIds, options.level, options.itemLevel || 0, options.resistance || null);
     const orders = options.orders || {};
     for (const hero of group) {
       const heroOrders = orders[hero.classId] || {};

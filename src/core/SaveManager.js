@@ -6,7 +6,7 @@ const SAVE_KEY = 'gildenmanager-save';
 
 // Wenn sich der Aufbau des Spielstands ändert, wird diese Zahl erhöht.
 // Alte Spielstände mit anderer Version werden dann nicht geladen.
-const SAVE_VERSION = 2; // 2 = Rüstungsarten (Platte, Leder, Stoff)
+const SAVE_VERSION = 3; // 3 = Resistenzen auf Items
 
 export class SaveManager {
   // storage = wo gespeichert wird. Normalerweise localStorage des Browsers,

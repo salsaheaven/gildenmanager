@@ -21,6 +21,9 @@ export const DAMAGE_TYPES = {
 // Höchste Resistenz pro Held und Schadensart, in Prozent
 export const MAX_RESISTANCE = 50;
 
+// Gegen diese Schadensarten gibt es Resistenzen auf Beute (alles außer körperlich)
+export const RESISTANCE_TYPES = Object.keys(DAMAGE_TYPES).filter((damageTypeId) => damageTypeId !== 'physical');
+
 export function getDamageType(damageTypeId) {
   const damageType = DAMAGE_TYPES[damageTypeId];
   if (!damageType) {

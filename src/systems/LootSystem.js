@@ -3,11 +3,13 @@
 // - Seltenheit nach den Chancen der Kiste
 // - Pity-System: Nach zu viel Pech gibt es garantiert ein episches Item
 // - Item-Vorlage, Name und Werte (Werte wachsen mit dem Item-Level, siehe data/scaling.js)
-// - Boss-Kisten: ein garantiertes Boss-Item (fester Name, Mindest-Seltenheit)
+// - Boss-Kisten: ein garantiertes Boss-Item (fester Name, Mindest-Seltenheit, feste Resistenz des Bosses)
+// - Resistenzen: Zufalls-Items haben manchmal eine zufällige Resistenz (Chance und Höhe in rarities.js)
 // ============================================================
 
 import { Item } from '../entities/Item.js';
 import { ITEM_TEMPLATES, ITEM_SUFFIXES, getItemTemplate } from '../data/items.js';
+import { RESISTANCE_TYPES } from '../data/damageTypes.js';
 import { getRarity, getRarityRank } from '../data/rarities.js';
 import { BALANCING } from '../data/balancing.js';
 import { getItemLevelFactor } from '../data/scaling.js';
@@ -79,12 +81,15 @@ export class LootSystem {
     if (getRarityRank(rarityId) < getRarityRank(entry.minRarity)) {
       rarityId = entry.minRarity;
     }
-    return this.createItem(rarityId, guild.createItemId(), itemLevel, getItemTemplate(entry.templateId), entry.name);
+    return this.createItem(rarityId, guild.createItemId(), itemLevel, getItemTemplate(entry.templateId), entry.name,
+      boxType.bossResistance || null);
   }
 
   // Baut ein fertiges Item: zufällige Vorlage, passender Name, Werte mit leichter Streuung.
   // template und fixedName sind freiwillig (für Boss-Items mit festem Namen).
-  createItem(rarityId, itemId, itemLevel = 1, template = null, fixedName = null) {
+  // fixedResistance = Schadensart, gegen die das Item sicher eine Resistenz hat (Boss-Items),
+  //                   sonst bekommt es mit etwas Glück eine zufällige.
+  createItem(rarityId, itemId, itemLevel = 1, template = null, fixedName = null, fixedResistance = null) {
     if (template === null) {
       template = this.random.pick(ITEM_TEMPLATES);
     }
@@ -100,7 +105,23 @@ export class LootSystem {
     }
 
     const name = fixedName || this.createItemName(template, rarityId);
-    return new Item(itemId, template.id, rarityId, name, stats, itemLevel);
+    const resistances = this.rollResistances(rarity, fixedResistance);
+    return new Item(itemId, template.id, rarityId, name, stats, itemLevel, resistances);
+  }
+
+  // Resistenz eines neuen Items: fest (Boss-Item) oder mit etwas Glück eine zufällige.
+  // Ergebnis z.B. { acid: 8 } oder {} (keine Resistenz)
+  rollResistances(rarity, fixedResistance) {
+    if (rarity.resistance === 0) {
+      return {};
+    }
+    if (fixedResistance) {
+      return { [fixedResistance]: rarity.resistance };
+    }
+    if (this.random.next() < rarity.randomResistanceChance) {
+      return { [this.random.pick(RESISTANCE_TYPES)]: rarity.resistance };
+    }
+    return {};
   }
 
   createItemName(template, rarityId) {

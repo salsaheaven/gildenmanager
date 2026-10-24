@@ -2311,6 +2311,10 @@ h3 {
   color: var(--text-dim);
 }
 
+.resistance-chip {
+  margin-right: 8px;
+}
+
 .gear-check.good { color: #1eff00; }
 .gear-check.bad { color: #ff9f43; }
 

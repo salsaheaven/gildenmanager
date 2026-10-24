@@ -1,22 +1,27 @@
 // ============================================================
 // BOT-DURCHLAUF – ein Bot spielt das echte Spiel viele Tage lang und misst den Fortschritt
 //
-// Aufruf:  node tools/bot-durchlauf.mjs [Tage] [Spielstände] [Modus]
+// Aufruf:  node tools/bot-durchlauf.mjs [Tage] [Spielstände] [Modus] [Resistenz-Gewicht]
 //   Modus "level": nimmt den höchsten Dungeon, dessen Stufe höchstens dem Ø Gruppenlevel entspricht
 //   Modus "push":  nimmt immer den höchsten freigeschalteten Dungeon
-// Beispiel: node tools/bot-durchlauf.mjs 60 20 level
+//   Resistenz-Gewicht: so viele Werte-Punkte ist 1 % passende Resistenz für den Bot wert (Standard 0.5,
+//                      0 = Resistenzen ignorieren). So lässt sich messen, wie viel Resistenzen bringen.
+// Beispiel: node tools/bot-durchlauf.mjs 60 20 level 0.5
 //
 // Der Bot heuert je einen Helden jeder Klasse an, schickt die Gruppe jeden Tag los (wenn niemand
-// verletzt ist), öffnet alle Kisten, legt die beste Ausrüstung an und verkauft Schrott.
+// verletzt ist), öffnet alle Kisten und verkauft Schrott. Vor jedem Run rüstet er für den Ziel-Dungeon aus:
+// pro Platz das Teil mit den meisten nützlichen Werten plus Resistenz gegen die Schadensarten des Dungeons.
 // ============================================================
 
 import { Game } from '../src/core/Game.js';
-import { DUNGEONS } from '../src/data/dungeons.js';
+import { DUNGEONS, getDungeonDamageTypes } from '../src/data/dungeons.js';
+import { EQUIPMENT_SLOTS } from '../src/entities/Hero.js';
 import { STANDARD_GROUP } from './messhilfen.mjs';
 
 const DAYS = Number(process.argv[2] || 60);
 const SAVEGAMES = Number(process.argv[3] || 20);
 const MODE = process.argv[4] || 'level';
+const RESISTANCE_WEIGHT = process.argv[5] === undefined ? 0.5 : Number(process.argv[5]);
 const REPORT_DAYS = [10, 20, 30, 45, 60, 90];
 const CHEAPEST_HERO = 40;
 
@@ -33,6 +38,8 @@ const stats = {
   levelAt: {},
   goldAt: {},
   stuckSavegames: 0,   // Spielstände, in denen keine volle Gruppe zustande kam
+  resistanceRuns: 0,   // Runs in Dungeons mit besonderer Schadensart (Schatten, Säure …)
+  resistanceSum: 0,    // Summe der passenden Resistenz pro Held in diesen Runs
 };
 for (const dungeon of DUNGEONS) {
   stats.firstClearDays[dungeon.id] = [];
@@ -71,7 +78,39 @@ function chooseDungeon(game, heroes) {
   return fitting[fitting.length - 1];
 }
 
-// Alle Kisten öffnen, zählen, wie viele Items ein Upgrade sind, dann das Beste anlegen
+// Wie gut ist ein Item für diesen Helden in diesem Dungeon? Nützliche Werte plus passende Resistenz.
+function scoreItem(hero, item, damageTypes) {
+  let score = hero.getItemPower(item);
+  for (const damageType of damageTypes) {
+    score += (item.resistances[damageType] || 0) * RESISTANCE_WEIGHT;
+  }
+  return score;
+}
+
+// Vor dem Run: pro Platz das Teil mit der besten Bewertung für diesen Dungeon anlegen
+function equipForDungeon(game, hero, dungeon) {
+  const damageTypes = getDungeonDamageTypes(dungeon.id);
+  for (const slot of EQUIPMENT_SLOTS) {
+    const current = hero.equipment[slot];
+    let best = current;
+    let bestScore = current ? scoreItem(hero, current, damageTypes) : 0;
+    for (const item of game.guild.inventory) {
+      if (item.getSlot() !== slot || !hero.canEquip(item)) {
+        continue;
+      }
+      const score = scoreItem(hero, item, damageTypes);
+      if (score > bestScore) {
+        best = item;
+        bestScore = score;
+      }
+    }
+    if (best !== current) {
+      game.equipItem(hero.id, best.id);
+    }
+  }
+}
+
+// Alle Kisten öffnen und zählen, wie viele Items für irgendwen ein Upgrade (nach Werten) sind
 function openAllChests(game) {
   const guild = game.guild;
   while (guild.boxes.length > 0) {
@@ -88,9 +127,6 @@ function openAllChests(game) {
     if (upgrades === 0) {
       stats.chestsWithoutUpgrade++;
     }
-    for (const hero of guild.heroes) {
-      game.equipBestItems(hero.id);
-    }
   }
 }
 
@@ -105,16 +141,25 @@ for (let savegame = 1; savegame <= SAVEGAMES; savegame++) {
     stats.stuckSavegames++;
     continue;
   }
-  for (const hero of guild.heroes) {
-    game.equipBestItems(hero.id);
-  }
-
   const startDay = game.day;
   let losingStreak = 0;
   for (let day = 1; day <= DAYS; day++) {
     const ready = guild.heroes.filter((hero) => !hero.isInjured());
     if (ready.length === 5) {
       const dungeon = chooseDungeon(game, ready);
+      for (const hero of ready) {
+        equipForDungeon(game, hero, dungeon);
+      }
+      // Messen, wie viel passende Resistenz die Gruppe trägt
+      const damageTypes = getDungeonDamageTypes(dungeon.id);
+      if (damageTypes.length > 0) {
+        stats.resistanceRuns++;
+        for (const hero of ready) {
+          for (const damageType of damageTypes) {
+            stats.resistanceSum += (hero.getResistances()[damageType] || 0) / ready.length;
+          }
+        }
+      }
       game.startExpedition(dungeon.id, ready.map((hero) => hero.id), 'never');
     } else {
       stats.daysWithoutRun++;
@@ -155,7 +200,7 @@ function percent(part, total) {
   return total > 0 ? Math.round((part / total) * 100) + ' %' : '-';
 }
 
-console.log('Modus', MODE, '·', DAYS, 'Tage ·', SAVEGAMES, 'Spielstände');
+console.log('Modus', MODE, '·', DAYS, 'Tage ·', SAVEGAMES, 'Spielstände · Resistenz-Gewicht', RESISTANCE_WEIGHT);
 if (stats.stuckSavegames > 0) {
   console.log('ACHTUNG:', stats.stuckSavegames, 'Spielstände ohne volle Gruppe (nicht mitgezählt)');
 }
@@ -167,6 +212,8 @@ console.log('Runs', stats.runs, '· Erfolgsquote', percent(stats.successes, stat
   '· Tage ohne Run (Verletzte)', stats.daysWithoutRun, '· längste Pechsträhne', stats.longestLosingStreak);
 console.log('Kisten', stats.chests, '· Items', stats.items, '· davon Upgrade', percent(stats.upgradeItems, stats.items),
   '· Kisten ganz ohne Upgrade', percent(stats.chestsWithoutUpgrade, stats.chests));
+console.log('Ø passende Resistenz pro Held in Dungeons mit Schatten/Säure …:',
+  stats.resistanceRuns > 0 ? (stats.resistanceSum / stats.resistanceRuns).toFixed(1) + ' %' : '-');
 for (const day in stats.levelAt) {
   console.log('Tag', day, '· Ø Level', average(stats.levelAt[day]), '· Ø Gold', average(stats.goldAt[day]));
 }

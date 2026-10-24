@@ -9,7 +9,7 @@
 
 import { SLOT_NAMES } from '../data/items.js';
 import { createItemCanvas } from './PixelArt.js';
-import { formatStats, describeItemKind, describeClassArmor, describeStatDifferences } from './format.js';
+import { formatItemValues, describeItemKind, describeClassArmor, describeStatDifferences } from './format.js';
 import { compareByItemLevel } from './InventoryOverlay.js';
 import { Sound } from './Sound.js';
 
@@ -77,7 +77,7 @@ export class EquipPanel {
     name.textContent = currentItem.name;
     name.style.color = currentItem.getRarity().color;
     container.querySelector('.equip-stats').textContent =
-      describeItemKind(currentItem) + ' · Stufe ' + currentItem.itemLevel + ' · ' + formatStats(currentItem.stats);
+      describeItemKind(currentItem) + ' · Stufe ' + currentItem.itemLevel + ' · ' + formatItemValues(currentItem);
   }
 
   // Alle Items für den gewählten Platz, die der Held tragen darf: höchstes Item-Level zuerst
@@ -104,7 +104,7 @@ export class EquipPanel {
     if (this.inventory.isNew(item.id)) {
       row.querySelector('.equip-name').insertAdjacentHTML('beforeend', ' <span class="new-chip">neu</span>');
     }
-    row.querySelector('.equip-stats').textContent = describeItemKind(item) + ' · Stufe ' + item.itemLevel + ' · ' + formatStats(item.stats);
+    row.querySelector('.equip-stats').textContent = describeItemKind(item) + ' · Stufe ' + item.itemLevel + ' · ' + formatItemValues(item);
 
     // Unterschied zum angelegten Teil, Wert für Wert (grün = mehr, rot = weniger)
     const compare = row.querySelector('.equip-compare');

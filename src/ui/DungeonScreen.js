@@ -6,7 +6,7 @@
 // Ausgekämpft wird erst bei "Tag beenden" (oben in der Leiste).
 // ============================================================
 
-import { DUNGEONS, getDungeon } from '../data/dungeons.js';
+import { DUNGEONS, getDungeon, getDungeonDamageTypes } from '../data/dungeons.js';
 import { getBoss, MINIONS } from '../data/enemies.js';
 import { getDamageType } from '../data/damageTypes.js';
 import { RETREAT_RULES } from '../data/retreatRules.js';
@@ -102,6 +102,7 @@ export class DungeonScreen {
       <h2></h2>
       <p class="hint dungeon-description"></p>
       <div class="encounter-list"></div>
+      <div class="damage-type-line"></div>
       <div class="reward-line"></div>
       <h3>Gruppe (bis zu ${GROUP_SIZE} Helden)</h3>
       <div class="group-picker"></div>
@@ -119,6 +120,19 @@ export class DungeonScreen {
     panel.querySelector('.dungeon-description').textContent = dungeon.description;
 
     this.renderEncounters(panel.querySelector('.encounter-list'), dungeon);
+    // Welche Resistenzen hier helfen, z.B. "Schadensarten: Schatten"
+    const damageTypes = getDungeonDamageTypes(dungeon.id);
+    if (damageTypes.length > 0) {
+      const line = panel.querySelector('.damage-type-line');
+      line.innerHTML = '<span class="hint">Schadensarten hier (Resistenzen helfen):</span> ';
+      for (const damageTypeId of damageTypes) {
+        const part = document.createElement('span');
+        part.className = 'resistance-chip';
+        part.style.color = getDamageType(damageTypeId).color;
+        part.textContent = getDamageType(damageTypeId).name;
+        line.appendChild(part);
+      }
+    }
     this.renderReward(panel.querySelector('.reward-line'), dungeon);
     this.renderGroupPicker(panel.querySelector('.group-picker'));
     this.renderGroupCheck(panel.querySelector('.group-check'), dungeon);

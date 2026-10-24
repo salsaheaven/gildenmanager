@@ -15,6 +15,8 @@
 //                         trashGold: Gold pro besiegter Trash-Gruppe (gibt es auch, wenn der Run danach scheitert)
 // ============================================================
 
+import { getBoss, MINIONS } from './enemies.js';
+
 export const DUNGEONS = [
   {
     id: 'bearCave',
@@ -77,4 +79,27 @@ export function getBossLevel(bossId) {
     }
   }
   return 1;
+}
+
+// Welche Schadensarten (außer körperlich) kommen in diesem Dungeon vor? Ergebnis z.B. ['shadow']
+// Wird für Hinweise und den Test-Bot gebraucht: Gegen diese Arten lohnen sich Resistenzen.
+export function getDungeonDamageTypes(dungeonId) {
+  const types = new Set();
+  for (const encounter of getDungeon(dungeonId).encounters) {
+    if (encounter.type === 'boss') {
+      const boss = getBoss(encounter.bossId);
+      types.add(boss.attackDamageType);
+      for (const mechanic of boss.mechanics) {
+        types.add(mechanic.damageType);
+        if (mechanic.minion) {
+          types.add(MINIONS[mechanic.minion].attackDamageType);
+        }
+      }
+    } else {
+      for (const minionId of encounter.enemies) {
+        types.add(MINIONS[minionId].attackDamageType);
+      }
+    }
+  }
+  return [...types].filter((damageTypeId) => damageTypeId && damageTypeId !== 'physical');
 }

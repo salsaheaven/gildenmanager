@@ -8,6 +8,7 @@
 
 import { getRarity } from '../data/rarities.js';
 import { STAT_NAMES, SLOT_NAMES } from '../data/items.js';
+import { DAMAGE_TYPES } from '../data/damageTypes.js';
 import { EQUIPMENT_SLOTS } from '../entities/Hero.js';
 import { createItemCanvas } from './PixelArt.js';
 import { describeItemKind, describeSuitableClasses } from './format.js';
@@ -243,6 +244,13 @@ export class InventoryOverlay {
     for (const statName in item.stats) {
       const line = document.createElement('li');
       line.textContent = '+' + item.stats[statName] + ' ' + STAT_NAMES[statName];
+      statList.appendChild(line);
+    }
+    for (const damageTypeId in item.resistances) {
+      const line = document.createElement('li');
+      line.className = 'detail-resistance';
+      line.style.color = DAMAGE_TYPES[damageTypeId].color;
+      line.textContent = '+' + item.resistances[damageTypeId] + ' % ' + DAMAGE_TYPES[damageTypeId].name + '-Resistenz';
       statList.appendChild(line);
     }
 

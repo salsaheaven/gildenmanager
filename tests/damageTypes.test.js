@@ -47,3 +47,35 @@ describe('Schadensarten', () => {
     expect(hero.getResistances()).toEqual({ acid: MAX_RESISTANCE, shadow: 5 });
   });
 });
+
+describe('Resistenzen auf Beute', () => {
+  it('Boss-Items tragen die Resistenz ihres Bosses, Zufalls-Items manchmal eine zufällige', async () => {
+    const { Guild } = await import('../src/entities/Guild.js');
+    const { LootSystem } = await import('../src/systems/LootSystem.js');
+    const { Random } = await import('../src/core/Random.js');
+    const { getLootBoxType } = await import('../src/data/lootBoxes.js');
+    const guild = new Guild();
+    const lootSystem = new LootSystem(new Random(3));
+    let bossItemsWithShadow = 0;
+    let randomItemsWithResistance = 0;
+    let randomItems = 0;
+    for (let i = 0; i < 100; i++) {
+      const items = lootSystem.rollBoxContents(getLootBoxType('chestMorva'), guild, 3);
+      for (const item of items) {
+        const isBossItem = ['Stab der Schattenruferin', 'Kapuze der Schwester', 'Gebetsring der Kapelle'].includes(item.name);
+        if (isBossItem) {
+          expect(item.resistances.shadow).toBeGreaterThan(0);
+          bossItemsWithShadow++;
+        } else {
+          randomItems++;
+          if (Object.keys(item.resistances).length > 0) {
+            randomItemsWithResistance++;
+          }
+        }
+      }
+    }
+    expect(bossItemsWithShadow).toBeGreaterThanOrEqual(100);
+    expect(randomItemsWithResistance).toBeGreaterThan(0);
+    expect(randomItemsWithResistance).toBeLessThan(randomItems / 2);
+  });
+});

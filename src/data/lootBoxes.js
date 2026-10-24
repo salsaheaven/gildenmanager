@@ -13,6 +13,8 @@
 // chances     = Prozent-Chance pro Seltenheit
 // bossLoot    = nur Boss-Kisten: besondere Items des Bosses. Eines davon ist garantiert in der Kiste,
 //               mindestens in der Seltenheit minRarity. { templateId, name, minRarity }
+// bossResistance = nur Boss-Kisten: Resistenz, die alle Boss-Items tragen (Schadensart des Bosses,
+//               siehe damageTypes.js). Fehlt sie, haben die Boss-Items keine feste Resistenz.
 // ============================================================
 
 export const LOOT_BOXES = [
@@ -75,6 +77,7 @@ export const LOOT_BOXES = [
   },
   {
     id: 'chestMorva',
+    bossResistance: 'shadow',
     name: 'Morvas Reliquien',
     price: null,
     itemCount: 3,
@@ -90,6 +93,7 @@ export const LOOT_BOXES = [
   },
   {
     id: 'chestSkarrix',
+    bossResistance: 'acid',
     name: 'Skarrix’ Brutschatz',
     price: null,
     itemCount: 4,
