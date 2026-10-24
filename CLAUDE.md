@@ -63,12 +63,13 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tag
                Leisten: TopBar, NavBar. Helfer: PixelArt, Sound, Toast, format, TraitChip.
                DebugPanel = Test-Menü (Taste F2)
 tests/         Vitest-Tests (prüfen auch, ob die Daten gültig sind)
+tools/         Mess-Werkzeuge für Balancing (Node-Skripte mit der echten Spiellogik, siehe tools/README.md)
 ```
 - Die Logik (`core/`, `entities/`, `systems/`) kennt **keine** UI und kein `document`.
 - Die UI ruft Methoden von `Game` auf und hört auf `game.on('changed')` bzw. auf weitere Events.
 - Jede Klasse, die gespeichert wird, hat `toSaveData()` und `static fromSaveData()`.
 - Zufall läuft immer über `Random`, nie direkt über `Math.random()`. So bleibt er testbar und wird mitgespeichert.
-- Balancing des Kampfs: Im Kampf-Labor ausprobieren, oder per Node-Skript mit `estimateChances` viele Varianten durchrechnen.
+- Balancing des Kampfs: Im Kampf-Labor ausprobieren, oder mit den Mess-Werkzeugen in `tools/` viele Varianten durchrechnen (vorher und nachher messen).
   Zielwerte (ganzer Dungeon): Bärenhöhle mit nackter Level-1-Gruppe ~90 %. Für jeden weiteren Dungeon gilt:
   Gruppe auf der Stufe des Dungeons mit grüner Ausrüstung aus dem vorherigen Dungeon ~75–85 %, mit Ausrüstung der eigenen Stufe ~95 %.
 - Die Oberfläche muss auch auf dem Handy funktionieren (Breite ~390 px). Handy-Regeln stehen am Ende von `main.css` (`@media (max-width: 700px)`).

@@ -1,0 +1,19 @@
+# Mess-Werkzeuge
+
+Kleine Node-Skripte, die die **echte Spiellogik** aus `src/` benutzen, um Balancing-Fragen mit Zahlen zu beantworten.
+Sie gehören nicht zum Spiel und werden nicht mit ausgeliefert. Entstanden aus dem Design-Review in `docs/review01/`.
+
+Alle Messungen benutzen feste Seeds. Zwei Varianten werden also mit genau denselben Zufallszahlen verglichen.
+Faustregel: Unterschiede bis etwa ±4 Prozentpunkte sind Zufall.
+
+| Werkzeug | Frage | Aufruf |
+|---|---|---|
+| `bot-durchlauf.mjs` | Wie schnell kommt ein Bot voran? Erfolgsquote, Tage bis zu jedem Dungeon, Gold, Anteil Upgrade-Items | `node tools/bot-durchlauf.mjs 60 20 level` (oder `push`) |
+| `siegchance.mjs` | Siegchance der Standardgruppe je Dungeon und Level, nackt und grün ausgerüstet | `node tools/siegchance.mjs` |
+| `gruppen-vergleich.mjs` | Wie stark hängt der Erfolg von der Klassenmischung ab? | `node tools/gruppen-vergleich.mjs` |
+| `anweisungen.mjs` | Was bewirkt jede Anweisung, in verschiedenen Gruppen? | `node tools/anweisungen.mjs` (dauert etwa 30 Sekunden) |
+| `kampfdauer.mjs` | Wie lange dauert ein Run in Runden und Minuten (Tempo 1x)? | `node tools/kampfdauer.mjs` |
+
+`messhilfen.mjs` enthält die gemeinsamen Bausteine (Testgruppe bauen, viele Runs messen).
+
+Bei Balancing-Änderungen: vorher und nachher messen und beide Zahlen vergleichen.
