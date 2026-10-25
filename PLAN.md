@@ -104,7 +104,7 @@ In kleinen, jeweils online testbaren Schritten:
 
 **M3 – Rivalen & Gildenhalle:** KI-Gilden, Rangliste, News-Ticker, Gebäude (Kaserne, Lazarett, Schmiede), Crafting.
 
-**M4 – Raids & Endboss:** 10er-Raids, Endboss, Endauswertung nach Spieltagen.
+**M4 – Raids & Endboss:** Zwei 40-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~60 Helden im Roster, 10+ Dungeons.
 
 **M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie, New Game+.
 

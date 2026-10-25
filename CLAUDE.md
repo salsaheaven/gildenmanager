@@ -22,13 +22,17 @@ Das Projekt ist ein Vibecoding-Übungsprojekt. Der Code soll auch für Programmi
 
 ## Design-Grundsatz
 **Jede Wahlmöglichkeit im Spiel braucht Vor- und Nachteile** (Anweisungen, Klassen, Eigenschaften, Talente …).
-Eine Option, die immer die beste ist, ist keine Wahl. Neue Optionen deshalb per Simulation prüfen: Ist eine Option gegen alle Bosse besser als die anderen, braucht sie einen Nachteil. Details stehen in `KONZEPT.md`.
+Eine Option, die immer die beste ist, ist keine Wahl. Geprüft wird das per Simulation erst beim Endbalancing, nicht jetzt. Details stehen in `KONZEPT.md`.
 
 ## Arbeitsweise
 - **Klein und spielbar:** Große Features in Schritte zerlegen, die jeweils einzeln spielbar sind. Nach jedem Schritt lokal committen. **Gepusht (und damit von GitHub Pages veröffentlicht) wird nur bei Meilensteinen**, z.B. wenn ein Review-Vorschlag komplett umgesetzt ist, nicht bei jeder kleinen Änderung.
 - **Modular, auch um Token zu sparen:** Kleine Dateien mit einer klaren Aufgabe. Für eine Änderung nur die betroffenen Dateien lesen, nicht das ganze Projekt. Die Übersicht unten zeigt, wo was liegt.
 - Testhilfen wie ein Test-Menü oder ein Kampf-Labor sind ausdrücklich erwünscht, damit spätere Inhalte schnell prüfbar sind
-- **Noch kein Feintuning:** Während der Entwicklung zählen Grundgerüst, Mechaniken und Gameplay-Loop. Neue Features nur kurz mit `tools/` auf grobe Fehler prüfen (z.B. 0 % oder 100 % Siegchance). Gebalanced wird ganz am Ende.
+- **Kein Balancing, keine Progressions-Arbeit – aktuell ein reiner Testballon.** Ziel des fertigen Spiels: Roster von ~60 Helden, 10+ Dungeons,
+  zwei 40-Mann-Raids (der letzte Raid ist der Endboss). Mit 10 Helden und 3 Dungeons ist Balancing sinnlos.
+  Jetzt werden **Gameplay-Loops und Features** eingebaut. Die Progression muss weder Sinn ergeben noch motivieren.
+  Keine Zielwert-Messungen, keine Parameter-Suchen, kein Nachtunen von Gegnern oder Chancen, auch nicht „nur kurz“.
+  Erlaubt ist nur: prüfen, dass ein neues Feature nicht kaputt ist (Tests grün, kein Absturz). Zahlen einfach grob setzen und weitermachen.
 - **Keine Abwärtskompatibilität während der Entwicklung:** Alte Spielstände müssen nicht weiter funktionieren. Kein Umrechnungs-Code für alte Speicherformate; stattdessen `SAVE_VERSION` in `SaveManager.js` erhöhen, dann werden alte Stände ignoriert. Beim Testen einfach „Neu“ drücken.
 
 ## Aufbau
@@ -75,9 +79,7 @@ tools/         Mess-Werkzeuge für Balancing (Node-Skripte mit der echten Spiell
 - Die UI ruft Methoden von `Game` auf und hört auf `game.on('changed')` bzw. auf weitere Events.
 - Jede Klasse, die gespeichert wird, hat `toSaveData()` und `static fromSaveData()`.
 - Zufall läuft immer über `Random`, nie direkt über `Math.random()`. So bleibt er testbar und wird mitgespeichert.
-- Balancing des Kampfs: Im Kampf-Labor ausprobieren, oder mit den Mess-Werkzeugen in `tools/` viele Varianten durchrechnen (vorher und nachher messen).
-  Zielwerte (ganzer Dungeon, siehe „Schwierigkeit“ in KONZEPT.md): Bärenhöhle mit nackter Level-1-Gruppe ~90 %. Für jeden weiteren Dungeon gilt:
-  Gruppe auf der Stufe des Dungeons mit grüner Ausrüstung aus dem vorherigen Dungeon ~85 %, mit Ausrüstung der eigenen Stufe ~95 %, eine Stufe darunter ~50 %.
+- Balancing (erst ganz am Ende, wenn Roster, Dungeons und Raids stehen): Kampf-Labor und Mess-Werkzeuge in `tools/`. Die Zielwerte stehen unter „Schwierigkeit“ in KONZEPT.md.
 - Die Oberfläche muss auch auf dem Handy funktionieren (Breite ~390 px). Handy-Regeln stehen am Ende von `main.css` (`@media (max-width: 700px)`).
 - Pixel-Art steht als Text-Raster in `src/data/sprites.js`. Ein Zeichen ist ein Pixel, die Farben stehen in `PALETTE`.
 
