@@ -37,6 +37,10 @@ export const PALETTE = {
   V: '#2e6b2e', // Grün dunkel
   y: '#e2c275', // Stroh hell
   Y: '#a8873e', // Stroh dunkel
+  i: '#bfe8ff', // Eis hell
+  I: '#4a8ac8', // Eis dunkel
+  o: '#ffb03a', // Sonnenglut
+  O: '#a02a1a', // Dunkelrot
 };
 
 export const SPRITES = {
@@ -601,6 +605,108 @@ export const SPRITES = {
     '.kVvvVk.',
     'k.kVVk.k',
     '........',
+  ],
+
+  bossFrostGiant: [
+    '.....kkkkkk.....',
+    '....kwiiiiwk....',
+    '...kiiiiiiiik...',
+    '...kiekiikeik...',
+    '...kiiiiiiiik...',
+    '...kiwwwwwwik...',
+    '..kkiwwwwwwikk..',
+    '.kIIkwwwwwwkIIk.',
+    'kIIIIkwwwwkIIIIk',
+    'kIiIIIkkkkIIIiIk',
+    'kIikIIIIIIIIkiIk',
+    'kiik.kIIIIk.kiik',
+    '.kk..kIIIIk..kk.',
+    '.....kIIkIIk....',
+    '.....kIIkIIk....',
+    '....kkkk.kkkk...',
+  ],
+
+  bossWitch: [
+    '.......kk.......',
+    '......kPPk......',
+    '.....kPPPk......',
+    '....kPPPPPk.....',
+    '..kkkPPPPPkkk...',
+    '.kPPPPPPPPPPPk..',
+    '...kvvvvvvvk....',
+    '...kvevvvevk....',
+    '...kvvvVvvvk....',
+    '....kvkkkvk.....',
+    '...kPPkkkPPk....',
+    '..kPPPPPPPPPk...',
+    '.kvPPPPPPPPPvk..',
+    '.kkPPPPPPPPPkk..',
+    '..kPPPPPPPPPk...',
+    '..kkkkkkkkkkk...',
+  ],
+
+  bossGolem: [
+    '....kkkkkkkk....',
+    '...kSSSSSSSSk...',
+    '...kSrSSSSrSk...',
+    '...kSSSSSSSSk...',
+    '...kSSkkkkSSk...',
+    '.kkkkSSSSSSkkkk.',
+    'kSSSkSSrrSSkSSSk',
+    'kSSSkSrrrrSkSSSk',
+    'kSSSkSSrrSSkSSSk',
+    'kSskkSSSSSSkksSk',
+    'kSSk.kSSSSk.kSSk',
+    'kkkk.kSSSSk.kkkk',
+    '.....kSSkSSk....',
+    '....kSSSkSSSk...',
+    '....kSSSkSSSk...',
+    '....kkkkkkkkk...',
+  ],
+
+  bossSunPriest: [
+    '.....o.oo.o.....',
+    '....o.kkkk.o....',
+    '...o.kggggk.o...',
+    '.....khhhhk.....',
+    '.....khkkhk.....',
+    '.....khhhhk.....',
+    '....kgggggGk....',
+    '...kgggOOgggk...',
+    '..kggggOOggggk..',
+    '.khkgggggggkhk..',
+    '.kk.kgggggGk....',
+    '....kgggggGk....',
+    '...kgggggggGk...',
+    '...kGggggggGk...',
+    '..kGGGGGGGGGGk..',
+    '..kkkkkkkkkkkk..',
+  ],
+
+  minionKobold: [
+    '..k....k..',
+    '.kik..kik.',
+    '.kiiiiiik.',
+    'kiekiikeik',
+    '.kiiiiiik.',
+    '..kIIIIk..',
+    '.kIIiiIIk.',
+    '.kIIIIIIk.',
+    '..kIk.kIk.',
+    '..kk..kk..',
+  ],
+
+  minionWisp: [
+    '....kk....',
+    '...kwwk...',
+    '..kwyywk..',
+    '.kwyyyywk.',
+    '.kwyeeywk.',
+    '.kwyyyywk.',
+    '..kwyywk..',
+    '...kwwk...',
+    '....kk....',
+    '..........',
   ],
 
   bossDummy: [

@@ -58,6 +58,49 @@ export const DUNGEONS = [
     ],
     rewards: { gold: 110, chest: 'chestSkarrix', trashGold: 15 },
   },
+  {
+    id: 'frostPeak',
+    name: 'Die Frostzinne',
+    description: 'Kobolde schwärmen über den Gletscher. Oben wartet Hrimgar, dessen Vernichtungsschlag jeden Tank zerschmettert.',
+    recommendedGearScore: 55,
+    level: 7,
+    unlockAfter: 'broodNests',
+    encounters: [
+      { type: 'trash', name: 'Koboldbande', enemies: ['iceKobold', 'iceKobold', 'iceKobold', 'iceKobold', 'iceKobold'] },
+      { type: 'trash', name: 'Frostwölfe', enemies: ['frostWolf', 'frostWolf', 'frostWolf'] },
+      { type: 'boss', bossId: 'hrimgar' },
+    ],
+    rewards: { gold: 150, chest: 'chestHrimgar', trashGold: 18 },
+  },
+  {
+    id: 'witchMoor',
+    name: 'Das Spukmoor',
+    description: 'Irrlichter locken Wanderer in den Sumpf. Mutter Grezza verflucht jeden, der ihre Hütte erreicht.',
+    recommendedGearScore: 80,
+    level: 9,
+    unlockAfter: 'frostPeak',
+    encounters: [
+      { type: 'trash', name: 'Moorleichen', enemies: ['bogCorpse', 'bogCorpse', 'bogCorpse'] },
+      { type: 'trash', name: 'Irrlichter', enemies: ['wisp', 'wisp', 'wisp', 'wisp'] },
+      { type: 'boss', bossId: 'grezza' },
+    ],
+    rewards: { gold: 200, chest: 'chestGrezza', trashGold: 22 },
+  },
+  {
+    id: 'sunTemple',
+    name: 'Der versunkene Sonnentempel',
+    description: 'Ein Steinwächter hütet das Tor. Dahinter beschwört Hohepriester Azhur die letzte Sonne.',
+    recommendedGearScore: 110,
+    level: 11,
+    unlockAfter: 'witchMoor',
+    encounters: [
+      { type: 'trash', name: 'Tempelwache', enemies: ['templeConstruct', 'templeConstruct', 'sunAcolyte', 'sunAcolyte'] },
+      { type: 'boss', bossId: 'stoneGuardian' },
+      { type: 'trash', name: 'Sonnenchor', enemies: ['sunAcolyte', 'sunAcolyte', 'sunAcolyte'] },
+      { type: 'boss', bossId: 'azhur' },
+    ],
+    rewards: { gold: 280, chest: 'chestAzhur', trashGold: 26 },
+  },
 ];
 
 export function getDungeon(dungeonId) {

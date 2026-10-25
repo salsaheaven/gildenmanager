@@ -94,6 +94,16 @@ describe('Besondere Mechaniken', () => {
     expect(hero.alive).toBe(true);
   });
 
+  it('Gottesschild fängt den Vernichtungsschlag von Hrimgar ab', () => {
+    const group = createTestGroup(7, 'uncommon', ['paladin', 'priest', 'runeweaver', 'mage', 'rogue']);
+    const result = simulateBattle({ heroes: group, bossId: 'hrimgar', enemyLevel: 7, seed: 2, recordLog: true });
+    const shieldIndex = result.log.findIndex((entry) => entry.text.includes('wirkt Gottesschild'));
+    expect(shieldIndex).toBeGreaterThan(-1);
+    // Der nächste Treffer des Vernichtungsschlags nach dem Gottesschild macht keinen Schaden
+    const hit = result.log.slice(shieldIndex).find((entry) => entry.text.includes('trifft mit voller Wucht'));
+    expect(hit.hits[0].amount).toBe(0);
+  });
+
   it('Wundenzorn: der Barbar macht mit wenig Leben mehr Schaden', () => {
     const barbarian = new Combatant({ id: 'b', name: 'B', side: 'hero', stats: { health: 100 },
       passive: { rageFromMissingHealth: 1.0 } });
