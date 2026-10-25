@@ -30,7 +30,7 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
 |---|---|
 | Helden | Persönlichkeiten: zufällige Bewerber mit Namen, **Seltenheit** (Grün bis Orange) und Eigenschaften (z.B. „Gierig“, „Mutig“) |
 | Helden-Seltenheit | Bewirkt mehr Wachstum pro Level und mehr Eigenschafts- bzw. Talentplätze. Gute Ausrüstung kann eine niedrige Seltenheit ausgleichen. |
-| Klassen | 12 Klassen in 4 Rollen, Details siehe [Kampf](#kampf). M1 startet mit 5 Klassen. |
+| Klassen | **Entschieden 2026-10-25** (Design-Review, P9): **15 Klassen**, je **3 pro Position**: Tank, Heiler, Nahkampf-DD, Fernkampf-DD, Support. Jede Klasse hat etwas, das nur sie kann, und eine klare Schwäche. Details siehe [Klassen](#klassen). M1 startet mit 5 Klassen. |
 | Dungeons | MMO-Klassiker: 5er-Gruppe aus Tank, Heiler und 3 DD. Stufen Normal → Heroisch. Jede Stufe hat ein empfohlenes Ausrüstungsniveau. |
 | Aufbau eines Dungeons | Immer **mindestens eine Trash-Gruppe und ein Boss**. Spätere Dungeons haben mehrere Trash-Gruppen und 2 bis 3 Bosse. Leben und Mana werden zwischen den Begegnungen nur teilweise aufgefüllt. Man muss also mit seinen Kräften haushalten. |
 | Raids | **Zwei 40-Mann-Raids**, der letzte Raid ist der Endboss (entschieden 2026-10-25). Details werden später gesondert geplant. |
@@ -84,9 +84,10 @@ Jeder Boss hat 1 bis 3 **Mechaniken mit Konter**, sodass die Gruppenzusammenstel
 |---|---|
 | Tank-Buster (riesiger Schlag auf den Tank) | Priester (Strom des Lebens), Runenwirker (Runenpanzer), Krieger (Eiserne Wacht) |
 | Gefährlicher Zauber | Schurke (Stummschlag unterbricht) |
+| Vernichtungsschlag (einmal, auch mit −50 % tödlich) | Paladin (Gottesschild), knapp: Krieger + Runenpanzer |
 | Diener-Wellen | Magier (Aschenregen), Jäger (Pfeilfächer), CC |
 | Schaden auf die ganze Gruppe | Druide (Hainsegen), Paladin (Schwur der Standhaftigkeit), Schamane (Felsenpfahl) |
-| Wutanfall nach X Runden | Genug Schaden: Barde (Lied der Klingen), Hexenmeister (Bruchmal) |
+| Wutanfall nach X Runden | Genug Schaden: Barde (Lied der Klingen), Hexenmeister (wachsende Flüche) |
 | Fluch oder Furcht | Runenwirker (Lösungsrune), Barde (Weckruf) |
 | Flammenwelle auf die vordere Reihe | Weniger Nahkämpfer mitnehmen, Feuerresistenz |
 
@@ -94,20 +95,32 @@ Jeder Boss hat 1 bis 3 **Mechaniken mit Konter**, sodass die Gruppenzusammenstel
 Jeder Skill hat eine Abklingzeit und kostet bei Zauberern Mana. Alle Zahlen stehen später in `src/data/abilities.js`.
 **M1** = in Meilenstein 1 enthalten.
 
-| Rolle | Klasse | Skill 1 | Skill 2 | Skill 3 | M1 |
+Jede Klasse hat ein **Alleinstellungsmerkmal** (was nur sie kann) und eine **Schwäche**. Entschieden 2026-10-25 (P9).
+Regel für Raids: **Gleiche Buffs zählen nicht doppelt** (zwei Barden geben nicht zweimal +20 %).
+
+| Position | Klasse | Alleinstellung | Schwäche | Skills | M1 |
 |---|---|---|---|---|---|
-| Tank | **Krieger** | Bollwerkstoß (Schaden + viel Aggro) | Herausforderungsruf (zwingt den Gegner, ihn anzugreifen) | Eiserne Wacht (−50 % Schaden für 3 Runden) | ✅ |
-| Tank | **Paladin** | Lichtbrecher (Schaden + Aggro) | Gelübde der Genesung (heilt sich selbst stark) | Schwur der Standhaftigkeit (die ganze Gruppe nimmt −10 % Schaden) | |
-| Heiler | **Priester** | Strom des Lebens (riesige Einzelheilung, teuer) | Funke der Gnade (schnell, kleiner, günstig) | Stille Andacht (stellt Mana wieder her) | ✅ |
-| Heiler | **Druide** | Moosmantel (Heilung über Zeit) | Hainsegen (Heilung über Zeit für alle) | Ruf der Wurzeln (belebt einen Gefallenen einmal pro Kampf) | |
-| Heiler | **Runenwirker** | Runenpanzer (fängt Schaden vorab ab) | Glyphenkreis (kleine Schilde für alle) | Lösungsrune (entfernt einen Fluch oder Debuff) | ✅ |
-| DD hinten | **Magier** | Glutlanze (hoher Einzelschaden) | Aschenregen (Flächenschaden auf alle Gegner) | Eiskranz (friert alle Gegner 1 Runde ein, CC) | ✅ |
-| DD hinten | **Jäger** | Falkenauge (konstanter Einzelschaden) | Pfeilfächer (trifft 3 Ziele) | Fangnetz (setzt einen Diener 3 Runden fest, CC) | |
-| DD vorne | **Schurke** | Schattenstich (hohe Krit-Chance) | Stummschlag (unterbricht einen Boss-Zauber) | Natternbiss (Schaden über Zeit) | ✅ |
-| DD vorne | **Barbar** | Sensenkreis (Schaden an allen Gegnern vorne) | Wundenzorn (mehr Schaden, je weniger Leben er hat) | Steinherz (ignoriert 2 Runden lang Betäubung und Furcht) | |
-| Support | **Barde** | Lied der Klingen (+20 % Schaden für die Gruppe) | Schlummerweise (schläfert einen Gegner ein, CC) | Weckruf (beendet Furcht und Betäubung) | |
-| Support | **Schamane** | Bärenpfahl (+Angriff für die vordere Reihe) | Quellpfahl (Mana für alle Heiler und Zauberer) | Felsenpfahl (−Flächenschaden für die Gruppe) | |
-| Support | **Hexenmeister** | Welkfluch (Boss macht −20 % Schaden) | Bruchmal (Boss nimmt +15 % Schaden) | Zehrender Griff (Schaden, heilt den Hexenmeister) | |
+| Tank | **Krieger** (Platte) | Übersteht **häufige** große Schläge: Eiserne Wacht (−50 % Schaden für 3 Runden) ist alle 6 Runden bereit | Kein Notfall gegen einen einzelnen tödlichen Schlag | Bollwerkstoß, Herausforderungsruf, Eiserne Wacht | ✅ |
+| Tank | **Paladin** (Platte, braucht Magie) | **Gottesschild:** einmal pro Kampf 1 Runde unverwundbar. Es gibt Bosse mit einem „Vernichtungsschlag“, den nur er sicher überlebt (ohne Paladin höchstens knapp, z.B. Krieger + Runenpanzer). Heilt sich selbst, Aura: Gruppe nimmt −10 % Schaden | Braucht **Mana**: In langen Dungeons mit wenig Erholung geht ihm die Puste aus | Lichtbrecher (Schaden + Aggro), Gelübde der Genesung, Schwur der Standhaftigkeit, Gottesschild | |
+| Tank | *offen* | | | | |
+| Heiler | **Priester** (Stoff) | Riesige Einzelheilung gegen plötzliche Spitzen | Teuer, Mana knapp | Strom des Lebens, Funke der Gnade, Stille Andacht | ✅ |
+| Heiler | **Druide** (Leder, braucht Magie) | **Wiederbelebung im Kampf:** einmal pro Kampf einen Gefallenen mit ~30 % Leben zurückholen. Heilt über Zeit, also im Voraus: stark gegen gleichmäßigen Schaden | Kaum schnelle Notfallheilung, schwach gegen Tank-Buster. Teilt sich Leder mit Schurke und Jäger. Kein Ersatz-Tank (keine Bärengestalt) | Moosmantel, Hainsegen, Ruf der Wurzeln | |
+| Heiler | **Runenwirker** (Stoff) | Schilde fangen Schaden vorab ab, entfernt Flüche | Schilde verpuffen, wenn kein Schaden kommt | Runenpanzer, Glyphenkreis, Lösungsrune | ✅ |
+| Nahkampf-DD | **Schurke** (Leder) | Unterbricht Boss-Zauber | Steht vorne, wird von Frontwellen getroffen | Schattenstich, Stummschlag, Natternbiss | ✅ |
+| Nahkampf-DD | **Barbar** | Mehr Schaden, je weniger Leben er hat | Lebt gefährlich, belastet den Heiler | Sensenkreis, Wundenzorn, Steinherz | |
+| Nahkampf-DD | *offen* | | | | |
+| Fernkampf-DD | **Magier** (Stoff) | Flächenschaden und Einfrieren | Wenig Leben | Glutlanze, Aschenregen, Eiskranz | ✅ |
+| Fernkampf-DD | **Jäger** (Leder) | **Begleiter als 6. Kämpfer:** bindet einen Trash-Gegner, auch zufällig angreifende (Kultisten, Brutlinge), die der Tank nicht halten kann | Allein schwächer als der Magier. Der Begleiter kann sterben und frisst Heilung | Falkenauge, Pfeilfächer, Fangnetz | |
+| Fernkampf-DD | **Hexenmeister** (Stoff) | **Flüche wachsen jede Runde**, die sie auf dem Ziel liegen: In langen Bosskämpfen macht er irgendwann mehr Schaden als alle anderen | Gegen Trash schwach: Die Gegner sterben, bevor die Flüche wirken. (Früher als Support geplant; Boss-Schwächung um Prozente wäre in Raids Pflicht geworden.) | *Skills noch offen* | |
+| Support | **Barde** | Lied der Klingen (+20 % Schaden für die Gruppe) | | Lied der Klingen, Schlummerweise, Weckruf | |
+| Support | **Schamane** | Pfähle stärken vorne Angriff, hinten Mana | | Bärenpfahl, Quellpfahl, Felsenpfahl | |
+| Support | *offen* (Idee: Chronomant, verkürzt die Abklingzeiten der Gruppe) | | | | |
+
+**Offene Fragen zu den Klassen:**
+- Die drei offenen Plätze (Tank, Nahkampf-DD, Support) werden noch vorgegeben. Idee für den Tank: Mönch, weicht aus statt zu blocken (stark gegen viele kleine Treffer, schwach gegen große Schläge).
+- Zählt ein wiederbelebter Held trotzdem als gefallen und ist danach verletzt? (Vorschlag: ja, aber kürzer.)
+- Jäger: Mehrere Begleiter zur Wahl (Wolf tankt, Falke Schaden, Schlange Gift)? Begleiter in Dungeons zähmen und sammeln?
+- Platte und Leder brauchen Varianten mit Magie (Paladin, Druide).
 
 ## Skalierung
 | Thema | Entscheidung |
