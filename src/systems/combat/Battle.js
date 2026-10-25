@@ -3,17 +3,21 @@
 // Kennt alle Kämpfer, die Runde, den Zufall, und den Kampfbericht.
 // Der Boss ist freiwillig: Bei Trash-Gruppen gibt es keinen (boss = null).
 // Bietet Hilfsfragen an wie "Wen greift der Boss an?" oder "Wer ist am verletztesten?".
+// Begleiter (z.B. der Wolf des Jägers) stehen in einer eigenen Liste "pets": Sie kämpfen mit
+// und können geheilt werden, zählen aber nicht als Helden (der Kampf ist verloren, wenn nur noch sie stehen).
 // ============================================================
 
 import { getEnemyLevelFactors, getDefenseConstant } from '../../data/scaling.js';
 import { Combatant } from './Combatant.js';
 import { MINIONS } from '../../data/enemies.js';
+import { getHeroClass } from '../../data/heroClasses.js';
 
 export class Battle {
   // recordLog = false spart Zeit, wenn nur das Ergebnis zählt (z.B. bei 200 Simulationen)
   // enemyLevel = Stufe der Gegner (Stufe des Dungeons, siehe data/scaling.js)
   constructor(heroes, boss, random, recordLog, enemyLevel = 1) {
     this.heroes = heroes;      // Combatant-Liste der Helden
+    this.pets = [];            // Combatant-Liste der Begleiter (siehe summonPet)
     this.enemies = boss ? [boss] : []; // Combatant-Liste der Gegner (Boss + Diener/Trash)
     this.boss = boss;                  // null bei Trash-Gruppen
     this.random = random;
@@ -68,7 +72,7 @@ export class Battle {
     if (!this.recordLog) {
       return;
     }
-    const all = this.heroes.concat(this.enemies);
+    const all = this.heroes.concat(this.pets, this.enemies);
     this.snapshots.push({
       round: this.round,
       combatants: all.map((c) => ({ id: c.id, hp: c.hp, maxHp: c.maxHp, shield: c.shield, alive: c.alive })),
@@ -79,6 +83,10 @@ export class Battle {
 
   getLivingHeroes() {
     return this.heroes.filter((hero) => hero.alive);
+  }
+
+  getLivingPets() {
+    return this.pets.filter((pet) => pet.alive);
   }
 
   getLivingEnemies() {
@@ -144,15 +152,83 @@ export class Battle {
     return this.boss && this.boss.alive ? this.boss : null;
   }
 
-  // Der Held mit dem prozentual wenigsten Leben
+  // Der Held (oder Begleiter) mit dem prozentual wenigsten Leben.
+  // Begleiter zählen mit: Heiler kümmern sich auch um sie.
   getLowestAlly() {
     let lowest = null;
-    for (const hero of this.getLivingHeroes()) {
+    for (const hero of this.getLivingHeroes().concat(this.getLivingPets())) {
       if (lowest === null || hero.getHpPercent() < lowest.getHpPercent()) {
         lowest = hero;
       }
     }
     return lowest;
+  }
+
+  // Bis zu 3 Gegner: Diener zuerst (wenig Leben zuerst), dann der Boss
+  getThreeEnemies(attacker = null) {
+    const targets = [];
+    const first = this.getFocusTarget(attacker);
+    if (first) {
+      targets.push(first);
+    }
+    const others = this.getLivingEnemies().filter((enemy) => enemy !== first);
+    others.sort((a, b) => a.hp - b.hp);
+    for (const enemy of others) {
+      if (targets.length < 3) {
+        targets.push(enemy);
+      }
+    }
+    return targets;
+  }
+
+  // Der Diener mit dem meisten Leben, der noch nicht festgehalten wird (für Fangnetz, Schlummerweise)
+  getStrongestMinion() {
+    let strongest = null;
+    for (const minion of this.getLivingMinions()) {
+      if (minion.isStunned()) {
+        continue;
+      }
+      if (strongest === null || minion.hp > strongest.hp) {
+        strongest = minion;
+      }
+    }
+    return strongest;
+  }
+
+  // Der erste gefallene Held (für Ruf der Wurzeln). Begleiter werden nicht wiederbelebt.
+  getFallenAlly() {
+    return this.heroes.find((hero) => !hero.alive) || null;
+  }
+
+  // Der Held mit dem höchsten Angriff bzw. der höchsten Magie unter den Schadensmachern, außer mir selbst
+  getBestDamageAlly(caster) {
+    let best = null;
+    let bestValue = 0;
+    for (const hero of this.getLivingHeroes()) {
+      if (hero === caster || getHeroClass(hero.classId).role !== 'damage') {
+        continue;
+      }
+      const value = Math.max(hero.attack, hero.magic);
+      if (value > bestValue) {
+        best = hero;
+        bestValue = value;
+      }
+    }
+    return best;
+  }
+
+  // Der Held, dessen Skills insgesamt am längsten abklingen, außer mir selbst
+  getAllyWithCooldowns(caster) {
+    let best = null;
+    for (const hero of this.getLivingHeroes()) {
+      if (hero === caster || hero.getTotalCooldown() === 0) {
+        continue;
+      }
+      if (best === null || hero.getTotalCooldown() > best.getTotalCooldown()) {
+        best = hero;
+      }
+    }
+    return best;
   }
 
   getAverageHeroHpPercent() {
@@ -168,6 +244,30 @@ export class Battle {
   }
 
   // ---------- Diener ----------
+
+  // Ein Held mit Begleiter (Jäger) ruft ihn zu Beginn jeder Begegnung.
+  // Der Begleiter bekommt einen Anteil der Werte seines Helden (siehe "pet" in heroClasses.js).
+  summonPet(owner) {
+    const petData = getHeroClass(owner.classId).pet;
+    const pet = new Combatant({
+      id: 'pet-' + owner.id,
+      name: petData.name,
+      side: 'hero',
+      row: 'front',
+      stats: {
+        health: Math.round(owner.maxHp * petData.healthFactor),
+        attack: owner.attack * petData.attackFactor,
+        defense: owner.defense,
+      },
+      basicAttack: petData.basicAttack,
+      isPet: true,
+      ownerId: owner.id,
+      petSprite: { sprite: petData.sprite, colors: petData.colors || {} },
+    });
+    pet.defenseConstant = owner.defenseConstant;
+    this.pets.push(pet);
+    return pet;
+  }
 
   // Erzeugt einen Diener oder Trash-Gegner und stellt ihn in den Kampf
   spawnMinion(minionId) {

@@ -29,7 +29,9 @@ describe('Helden-Daten', () => {
   for (const heroClass of HERO_CLASSES) {
     it(`${heroClass.name}: Bild, Skills, Waffen und Werte sind gültig`, () => {
       expect(SPRITES[heroClass.sprite]).toBeDefined();
-      expect(heroClass.abilities.length).toBe(3);
+      // 3 Skills, der Paladin hat mit dem Gottesschild einen vierten
+      expect(heroClass.abilities.length).toBeGreaterThanOrEqual(3);
+      expect(heroClass.abilities.length).toBeLessThanOrEqual(4);
       for (const abilityId of heroClass.abilities) {
         expect(ABILITIES[abilityId], abilityId).toBeDefined();
       }

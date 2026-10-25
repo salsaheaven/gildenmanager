@@ -9,7 +9,8 @@ import { ABILITIES } from '../src/data/abilities.js';
 import { BOSSES, MINIONS } from '../src/data/enemies.js';
 import { SPRITES } from '../src/data/sprites.js';
 
-const SKILL_TYPES = ['damage', 'heal', 'shield', 'buff', 'taunt', 'mana', 'cleanse', 'stun', 'interrupt', 'dot'];
+const SKILL_TYPES = ['damage', 'heal', 'shield', 'buff', 'taunt', 'mana', 'cleanse', 'stun', 'interrupt', 'dot',
+  'hot', 'revive', 'resetCooldowns'];
 const MECHANIC_TYPES = ['tankBuster', 'groupCast', 'frontWave', 'summon', 'curse'];
 
 describe('Kampf-Daten', () => {

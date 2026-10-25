@@ -15,6 +15,8 @@ const PROJECTILES = {
   holyBolt: 'fx-holy',
   runeBolt: 'fx-rune',
   shadowBolt: 'fx-shadow',
+  arrow: 'fx-arrow',
+  lightning: 'fx-lightning',
 };
 
 // Effekte auf dem Ziel

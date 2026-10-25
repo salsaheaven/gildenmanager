@@ -3,8 +3,9 @@
 //
 // Ablauf jeder Runde:
 //   1. Rundenanfang: Abklingzeiten, Mana, Gift/Flüche, Effekte laufen ab, evtl. Rückzug beginnen
-//   2. Alle Helden handeln (in der Reihenfolge der Gruppe)
-//   3. Alle Gegner handeln (Diener/Trash, dann Boss)
+//   2. Alle Helden handeln (in der Reihenfolge der Gruppe). Mit Beschleunigung handelt ein Held zweimal.
+//   3. Begleiter handeln (z.B. der Wolf des Jägers)
+//   4. Alle Gegner handeln (Diener/Trash, dann Boss)
 // Ein Kampf endet, wenn die Gegner besiegt sind, alle Helden gefallen sind,
 // der Rückzug geschafft ist oder die maximale Rundenzahl erreicht ist.
 //
@@ -22,10 +23,11 @@ import { Combatant } from './Combatant.js';
 import { Battle, scaleEnemyStats } from './Battle.js';
 import { chooseAbility } from './HeroAI.js';
 import { takeEnemyTurn } from './EnemyAI.js';
-import { useAbility, useBasicAttack } from './AbilityEffects.js';
+import { useAbility, useBasicAttack, heroDealsDamage } from './AbilityEffects.js';
 import { ABILITIES } from '../../data/abilities.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
-import { getBoss } from '../../data/enemies.js';
+import { getBoss, MINIONS } from '../../data/enemies.js';
+import { getHeroClass } from '../../data/heroClasses.js';
 import { getDungeon } from '../../data/dungeons.js';
 import { getRetreatRule } from '../../data/retreatRules.js';
 
@@ -44,6 +46,7 @@ export function createHeroCombatant(hero) {
     abilityIds: heroClass.abilities,
     basicAttack: heroClass.basicAttack,
     orderSettings: hero.getOrderSettings(),
+    passive: heroClass.passive,
   });
 }
 
@@ -137,11 +140,17 @@ export function runEncounter(heroes, encounter, random, recordLog, retreatOption
       battle.spawnMinion(enemyId);
     }
   }
+  // Begleiter kommen zu jeder Begegnung frisch dazu (nur, wenn ihr Held noch lebt)
+  for (const hero of heroes) {
+    if (hero.alive && getHeroClass(hero.classId).pet) {
+      battle.summonPet(hero);
+    }
+  }
 
   const encounterName = bossData ? bossData.name : encounter.name;
   const maxRounds = bossData && bossData.isDummy ? bossData.dummyRounds : COMBAT_RULES.maxRounds;
   // Wer zu Beginn dabei ist (für die Kampfszene), mit dem aktuellen Leben aus vorigen Begegnungen
-  const startingCombatants = heroes.concat(battle.enemies).map((combatant) => combatant.describe());
+  const startingCombatants = heroes.concat(battle.pets, battle.enemies).map((combatant) => combatant.describe());
   battle.addLog('Der Kampf gegen ' + encounterName + ' beginnt!', 'info');
   battle.takeSnapshot();
 
@@ -156,6 +165,19 @@ export function runEncounter(heroes, encounter, random, recordLog, retreatOption
       }
       if (hero.alive && !hero.isStunned()) {
         takeHeroTurn(battle, hero);
+        // Beschleunigung (Chronomant): gleich noch ein Zug
+        if (hero.alive && hero.hasEffect('haste') && !battle.isOver()) {
+          takeHeroTurn(battle, hero);
+        }
+      }
+    }
+
+    for (const pet of battle.pets) {
+      if (battle.isOver()) {
+        break;
+      }
+      if (pet.alive && !pet.isStunned() && !battle.retreating) {
+        takePetTurn(battle, pet);
       }
     }
 
@@ -189,6 +211,30 @@ function takeHeroTurn(battle, hero) {
     // Beim Rückzug wird nicht angegriffen
     useBasicAttack(battle, hero);
   }
+}
+
+// Begleiter: stellt sich einem Diener entgegen (der dann nur noch ihn angreift) und beißt ihn.
+// Am liebsten nimmt er einen, der zufällig angreift, denn den kann der Tank nicht halten.
+// Gibt es keinen Diener, greift er das normale Ziel an (z.B. den Boss).
+function takePetTurn(battle, pet) {
+  if (!pet.boundEnemy || !pet.boundEnemy.alive) {
+    pet.boundEnemy = null;
+    const free = battle.getLivingMinions().filter((minion) => !minion.boundTo || !minion.boundTo.alive);
+    const randomAttacker = free.find((minion) => MINIONS[minion.minionId].targeting === 'random');
+    const chosen = randomAttacker || free[0] || null;
+    if (chosen) {
+      pet.boundEnemy = chosen;
+      chosen.boundTo = pet;
+      battle.addLog(pet.name + ' stellt sich ' + chosen.name + ' entgegen.', 'info',
+        { labels: [{ targetId: chosen.id, text: 'Gebunden' }] });
+    }
+  }
+  const target = pet.boundEnemy || battle.getFocusTarget(pet);
+  if (!target) {
+    return;
+  }
+  battle.logAction(pet, pet.basicAttack.name, pet.basicAttack.fx, [target], false);
+  heroDealsDamage(battle, pet, target, pet.basicAttack.name, pet.basicAttack.scaling, pet.basicAttack.power);
 }
 
 // Geht einem Heiler oder Zauberer das Mana aus, gibt es (einmal) eine Warnung.
@@ -254,6 +300,7 @@ function restBetweenEncounters(heroes) {
     hero.threat = 0;
     hero.effects = [];
     hero.cooldowns = {};
+    hero.usedOnce = {};
     hero.warnedLowMana = false;
   }
 }
@@ -269,7 +316,7 @@ function startRound(battle) {
     }
   }
 
-  const everyone = battle.heroes.concat(battle.enemies);
+  const everyone = battle.heroes.concat(battle.pets, battle.enemies);
   for (const combatant of everyone) {
     if (!combatant.alive) {
       continue;
@@ -280,17 +327,23 @@ function startRound(battle) {
       if (effect.kind === 'dot') {
         tickDamageOverTime(battle, combatant, effect, everyone);
       }
+      if (effect.kind === 'hot') {
+        tickHealOverTime(battle, combatant, effect, everyone);
+      }
       effect.remaining--;
     }
     combatant.effects = combatant.effects.filter((effect) => effect.remaining > 0);
   }
 }
 
+// Gift und Flüche. Mit "growth" wird der Schaden jede Runde größer (Hexenmeister).
 function tickDamageOverTime(battle, target, effect, everyone) {
   if (!target.alive) {
     return;
   }
-  const result = target.takeDamage(effect.damagePerRound, true, effect.damageType || 'physical');
+  const growthFactor = 1 + (effect.growth || 0) * (effect.ticks || 0);
+  effect.ticks = (effect.ticks || 0) + 1;
+  const result = target.takeDamage(effect.damagePerRound * growthFactor, true, effect.damageType || 'physical');
   const source = everyone.find((combatant) => combatant.id === effect.sourceId);
   if (source) {
     source.damageDone += result.damage;
@@ -299,6 +352,19 @@ function tickDamageOverTime(battle, target, effect, everyone) {
     { hits: [target.describeHit(result.damage, 'damage', false, 0, effect.damageType || 'physical')] });
   if (!target.alive) {
     battle.addLog(target.name + (target.side === 'hero' ? ' fällt!' : ' ist besiegt!'), 'death');
+  }
+}
+
+// Heilung über Zeit (Druide, Barde)
+function tickHealOverTime(battle, target, effect, everyone) {
+  const healed = target.heal(effect.healPerRound);
+  const source = everyone.find((combatant) => combatant.id === effect.sourceId);
+  if (source) {
+    source.healingDone += healed;
+  }
+  if (healed > 0) {
+    battle.addLog(effect.name + ' heilt ' + target.name + ' um ' + healed + '.', 'heal',
+      { hits: [target.describeHit(healed, 'heal')] });
   }
 }
 

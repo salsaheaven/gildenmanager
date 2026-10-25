@@ -11,7 +11,8 @@ import { getBossLevel } from '../data/dungeons.js';
 import { scaleEnemyStats } from '../systems/combat/Battle.js';
 import { simulateBattle } from '../systems/combat/CombatSimulator.js';
 import { estimateChances } from '../systems/combat/ChanceEstimator.js';
-import { createTestGroup } from '../systems/combat/TestGroup.js';
+import { createTestGroup, STANDARD_TEST_CLASSES } from '../systems/combat/TestGroup.js';
+import { HERO_CLASSES, ROLE_NAMES } from '../data/heroClasses.js';
 import { createHeroCanvas } from './PixelArt.js';
 import { renderCombatReport } from './CombatReport.js';
 import { BattleScene } from './BattleScene.js';
@@ -28,6 +29,7 @@ export class CombatLabScreen {
 
     this.mode = 'test';                // 'test' = Testgruppe, 'guild' = eigene Helden
     this.testLevel = 1;
+    this.testClassIds = STANDARD_TEST_CLASSES.slice(); // Klassen der Testgruppe (5 Plätze)
     this.selectedHeroIds = new Set();  // gewählte eigene Helden
     this.bossId = 'grimfang';
     this.fightCounter = 0;             // sorgt dafür, dass jeder Kampf anders verläuft
@@ -129,6 +131,7 @@ export class CombatLabScreen {
         (value) => value === this.testLevel,
         (value) => { this.testLevel = value; },
       );
+      this.renderClassPickers(container);
       return;
     }
 
@@ -159,10 +162,38 @@ export class CombatLabScreen {
     }
   }
 
+  // Testgruppe: pro Platz eine Auswahlliste mit allen Klassen (nach Rolle sortiert)
+  renderClassPickers(container) {
+    const row = document.createElement('div');
+    row.className = 'lab-class-pickers';
+    container.appendChild(row);
+    for (let slot = 0; slot < this.testClassIds.length; slot++) {
+      const select = document.createElement('select');
+      for (const role of Object.keys(ROLE_NAMES)) {
+        const group = document.createElement('optgroup');
+        group.label = ROLE_NAMES[role];
+        for (const heroClass of HERO_CLASSES.filter((entry) => entry.role === role)) {
+          const option = document.createElement('option');
+          option.value = heroClass.id;
+          option.textContent = heroClass.name;
+          option.selected = heroClass.id === this.testClassIds[slot];
+          group.appendChild(option);
+        }
+        select.appendChild(group);
+      }
+      select.addEventListener('change', () => {
+        Sound.click();
+        this.testClassIds[slot] = select.value;
+        this.renderSetup();
+      });
+      row.appendChild(select);
+    }
+  }
+
   // Die Helden, die gerade kämpfen würden
   getGroup() {
     if (this.mode === 'test') {
-      const group = createTestGroup(this.testLevel);
+      const group = createTestGroup(this.testLevel, 'uncommon', this.testClassIds);
       // Die Testgruppe wird jedes Mal neu erstellt, ihre Anweisungen merkt sich das Labor
       for (const hero of group) {
         hero.orders = { ...(this.testOrders[hero.classId] || {}) };

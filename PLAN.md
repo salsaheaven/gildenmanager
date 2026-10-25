@@ -88,7 +88,7 @@ In kleinen, jeweils online testbaren Schritten:
   4. ✅ **Tagesplan:** Neuer Reiter „Tagesplan“ (Startseite): welcher Held heute was macht (Dungeon, Kuriert sich aus, Ruht sich aus), Hinweis auf freie Helden, Gruppen absagen, „Tag beenden“. Die Leiste oben zeigt, wie viele Helden frei sind. Aufgaben stehen in `heroTasks.js`, dort kommen später Farmen oder Kräuter sammeln dazu.
   - ✅ Dazu: **Skill-Fenster in der Kampfszene.** Maus über einem Helden (Handy: antippen) zeigt seine Skills mit Beschreibung, Mana, Abklingzeit und ob sie gerade bereit sind (läuft im Kampf mit).
 
-- **Design-Review 01** (2026-10-24, Unterlagen in `docs/review01/`, Mess-Werkzeuge in `tools/`). Die Vorschläge werden einzeln entschieden, Entscheidungen stehen in `KONZEPT.md`. Reihenfolge: P8 → P1 → P4 → P2 → P3 → Sammelbuch → P6 → P7 → P9 → P5.
+- **Design-Review 01** (2026-10-24, Unterlagen in `docs/review01/`, Mess-Werkzeuge in `tools/`). Die Vorschläge werden einzeln entschieden, Entscheidungen stehen in `KONZEPT.md`. Reihenfolge: P8 → P1 → P4 → P9 (vorgezogen, 2026-10-25) → P2 → P3 → Sammelbuch → P6 → P7 → P5.
   - **P8, Schritt 1** ✅ „Gierig“ (+20 % Gold) und „Glückspilz“ (+1 Item in der Boss-Kiste) wirken, wenn so ein Held mitkämpft. Im Tagesabschluss steht, wer den Bonus gebracht hat.
   - **P8, Schritt 2** ✅ Rüstungsarten Platte (Krieger) / Leder (Schurke) / Stoff (Zauberer), umgefärbte Pixelbilder, Kampfring und Zauberring für alle. Upgrade-Pfeile, „Bestes anlegen“ und AW zählen nur Werte, die der Klasse nützen (`usefulStats`). Spielstand-Version 2, alte Stände werden ignoriert.
   - **P4, Schritt 1** ✅ Schadensarten im Kampf (`damageTypes.js`: Körperlich, Schatten, Licht, Feuer, Eis, Säure, Wasser). Morva und Kultisten machen Schatten, Säureschwall und Brutlinge Säure. Resistenzen (Prozent, höchstens 50) werden im Kampf schon berücksichtigt. Farbige Schadenszahlen, Schadensart im Ticker und in der Dungeon-Übersicht.
@@ -97,6 +97,8 @@ In kleinen, jeweils online testbaren Schritten:
   - **P1, Schritt 2** ✅ Gegner wachsen pro Stufe stärker (Leben +60 %, Angriff +28 %), alle Zielwerte innerhalb ±11 Punkten (`tools/zielwerte.mjs`). Nebenwirkung, bewusst so gelassen: viel mehr Gefallene bei knappen Siegen, im Bot doppelt so viele Tage mit Verletzten.
   - ✅ **Ausrüsten als Spieleraufgabe:** „Bestes anlegen“, Upgrade-Pfeile und Stärke-Zahl entfernt. Ausrüstungsliste pro angetipptem Platz, nach Item-Level sortiert, Vergleich Wert für Wert, „neu“-Markierung.
   - **P1, Schritt 3** ✅ Gruppenmischung neu gemessen: mit realistischer Ausrüstung situativ (Kapelle: 2 Schurken 100 %, Brutnester: 2 Magier 99 %, Standardgruppe je ~86 %). Morva bleibt, wie sie ist.
+  - **P9 (vorgezogen), Schritt 1** ✅ Alle 15 Klassen, 3 pro Position (Tank, Heiler, Nahkampf, Fernkampf, Support). Neu: Paladin, Mönch, Druide, Samurai, Barbar, Jäger (mit Wolf), Hexenmeister, Barde, Schamane, Chronomant. Neue Kampf-Bausteine: Heilung über Zeit, Wiederbelebung, Gruppen-Buffs (zählen nicht doppelt), Ausweichen, Unverwundbarkeit, Begleiter, Extra-Zug, wachsende Flüche, „einmal pro Kampf“. Neue Waffen, geweihte Platte und Wildleder. Kampf-Labor: Klassen der Testgruppe frei wählbar. Werte grob gesetzt.
+  - **P9, Schritt 2** offen: 3 neue Dungeons, deren Bosse die neuen Klassen brauchen (z.B. Vernichtungsschlag für den Paladin).
 
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 

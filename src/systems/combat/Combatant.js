@@ -13,7 +13,9 @@ export class Combatant {
   //   stats: { health, mana, attack, magic, defense },
   //   abilityIds (Liste), basicAttack, heroId (nur Helden), classId (nur Helden),
   //   bossData (nur Bosse), isMinion + minionId (nur Diener),
-  //   orderSettings (nur Helden: Anweisungen, siehe Hero.getOrderSettings)
+  //   orderSettings (nur Helden: Anweisungen, siehe Hero.getOrderSettings),
+  //   passive (nur Helden: dauerhafte Fähigkeit der Klasse, siehe heroClasses.js),
+  //   isPet + ownerId + petSprite (nur Begleiter, z.B. der Wolf des Jägers)
   // }
   constructor(options) {
     this.id = options.id;
@@ -26,6 +28,14 @@ export class Combatant {
     this.isMinion = options.isMinion || false;
     this.minionId = options.minionId || null;
     this.orderSettings = options.orderSettings || { abilityWhen: {} };
+    this.isPet = options.isPet || false;
+    this.ownerId = options.ownerId || null;
+    this.petSprite = options.petSprite || null;   // { sprite, colors } für die Kampfszene
+
+    // Dauerhafte Fähigkeiten der Klasse (z.B. Ausweichen beim Mönch, Wundenzorn beim Barbar)
+    const passive = options.passive || {};
+    this.baseDodgeChance = passive.dodgeChance || 0;
+    this.rageFromMissingHealth = passive.rageFromMissingHealth || 0;
 
     this.maxHp = options.stats.health;
     this.hp = this.maxHp;
@@ -46,6 +56,9 @@ export class Combatant {
     this.shield = 0;            // fängt Schaden ab, bevor Leben verloren geht
     this.threat = 0;            // Aggro: der Boss greift den Helden mit der meisten an
     this.cooldowns = {};        // Skill-id → Runden bis wieder verfügbar
+    this.usedOnce = {};         // Skill-id → true: Skills "einmal pro Kampf", die schon benutzt wurden
+    this.boundTo = null;        // Diener: von diesem Begleiter festgehalten (greift nur ihn an)
+    this.boundEnemy = null;     // Begleiter: diesen Gegner hält er gerade fest
     this.effects = [];          // laufende Effekte (Buffs, Gift, Flüche, Betäubung)
     this.casting = null;        // Boss: Mechanik, die gerade vorbereitet wird
     this.enraged = false;       // Boss: rast bereits?
@@ -84,6 +97,8 @@ export class Combatant {
       classId: this.classId,
       bossId: this.bossData ? this.bossData.id : null,
       minionId: this.minionId,
+      isPet: this.isPet,
+      petSprite: this.petSprite,
     };
   }
 
@@ -105,8 +120,18 @@ export class Combatant {
 
   // ---------- Effekte ----------
 
+  // Neuen Effekt anhängen. Hat er eine buffId (der Skill, von dem er stammt) und liegt derselbe Buff
+  // schon auf dem Kämpfer, wird der alte ersetzt statt gestapelt. So zählen gleiche Buffs nie doppelt.
   addEffect(effect) {
+    if (effect.buffId) {
+      this.effects = this.effects.filter((existing) => existing.buffId !== effect.buffId);
+    }
     this.effects.push(effect);
+  }
+
+  // Liegt ein Buff von diesem Skill auf mir?
+  hasBuff(buffId) {
+    return this.effects.some((effect) => effect.buffId === buffId);
   }
 
   hasEffect(kind) {
@@ -121,8 +146,11 @@ export class Combatant {
     return this.effects.some((effect) => effect.isDebuff);
   }
 
-  // Faktor auf erlittenen Schaden (z.B. 0.5 bei Eiserner Wacht)
+  // Faktor auf erlittenen Schaden (z.B. 0.5 bei Eiserner Wacht, 0 bei Gottesschild)
   getDamageTakenFactor() {
+    if (this.hasEffect('immune')) {
+      return 0;
+    }
     let factor = 1;
     for (const effect of this.effects) {
       if (effect.kind === 'damageTaken') {
@@ -132,13 +160,54 @@ export class Combatant {
     return factor;
   }
 
+  // Faktor auf den eigenen Schaden: Buffs (z.B. Lied der Klingen) und Wundenzorn (Barbar)
+  getDamageDoneFactor() {
+    let factor = 1;
+    for (const effect of this.effects) {
+      if (effect.kind === 'damageDone') {
+        factor = factor * (1 + effect.value);
+      }
+    }
+    if (this.rageFromMissingHealth > 0) {
+      factor = factor * (1 + (1 - this.getHpPercent()) * this.rageFromMissingHealth);
+    }
+    return factor;
+  }
+
+  // Chance, einem normalen Angriff auszuweichen (Mönch, Fließende Abwehr)
+  getDodgeChance() {
+    let chance = this.baseDodgeChance;
+    for (const effect of this.effects) {
+      if (effect.kind === 'dodge') {
+        chance += effect.value;
+      }
+    }
+    return Math.min(0.9, chance);
+  }
+
+  // Anteil des eigenen Schadens, der einen selbst heilt (Blutrausch)
+  getLifesteal() {
+    let share = 0;
+    for (const effect of this.effects) {
+      if (effect.kind === 'lifesteal') {
+        share += effect.value;
+      }
+    }
+    return share;
+  }
+
   // ---------- Schaden & Heilung ----------
 
   // Nimmt Schaden: erst Rüstung, Resistenz und Buffs, dann fängt der Schild ab, dann geht Leben verloren.
   // damageType = Schadensart (siehe data/damageTypes.js). Eine passende Resistenz mindert den Schaden zusätzlich.
   // Gibt zurück: { damage: verlorenes Leben, absorbed: vom Schild abgefangen }
   takeDamage(rawAmount, ignoreDefense = false, damageType = 'physical') {
-    let amount = rawAmount * this.getDamageTakenFactor();
+    const factor = this.getDamageTakenFactor();
+    if (factor === 0) {
+      // Unverwundbar (Gottesschild): kein Schaden
+      return { damage: 0, absorbed: 0 };
+    }
+    let amount = rawAmount * factor;
     if (!ignoreDefense) {
       const reduction = this.defense / (this.defense + this.defenseConstant);
       amount = amount * (1 - reduction);
@@ -162,6 +231,13 @@ export class Combatant {
     return { damage: damage, absorbed: absorbed };
   }
 
+  // Steht wieder auf (Ruf der Wurzeln) mit diesem Anteil seines Lebens
+  revive(hpShare) {
+    this.alive = true;
+    this.hp = Math.max(1, Math.round(this.maxHp * hpShare));
+    this.threat = 0;
+  }
+
   // Heilt, aber nie über das Maximum. Gibt die echte Heilung zurück.
   heal(amount) {
     const healed = Math.min(this.maxHp - this.hp, Math.round(amount));
@@ -172,7 +248,21 @@ export class Combatant {
   // ---------- Abklingzeiten ----------
 
   isReady(abilityId) {
-    return !this.cooldowns[abilityId];
+    return !this.cooldowns[abilityId] && !this.usedOnce[abilityId];
+  }
+
+  // Für Skills "einmal pro Kampf": als benutzt merken
+  markUsedOnce(abilityId) {
+    this.usedOnce[abilityId] = true;
+  }
+
+  // Wie viele Runden Abklingzeit stehen insgesamt noch aus? (für den Zeitsprung des Chronomanten)
+  getTotalCooldown() {
+    let total = 0;
+    for (const abilityId in this.cooldowns) {
+      total += this.cooldowns[abilityId];
+    }
+    return total;
   }
 
   startCooldown(abilityId, rounds) {

@@ -112,6 +112,121 @@ export const HERO_ORDERS = {
       ],
     },
   ],
+
+  paladin: [
+    {
+      id: 'divineShieldUse',
+      name: 'Gottesschild',
+      options: [
+        { id: 'buster', label: 'Vor einem großen Schlag', effects: {} },
+        { id: 'low', label: 'Wenn er wenig Leben hat', effects: { abilityWhen: { divineShield: 'selfLow' } } },
+      ],
+    },
+    {
+      id: 'oathUse',
+      name: 'Schwur der Standhaftigkeit',
+      options: [
+        { id: 'keep', label: 'Immer aufrechterhalten', effects: {} },
+        { id: 'incoming', label: 'Nur vor Gruppenschaden', effects: { abilityWhen: { oathOfSteadfastness: 'groupHitIncoming' } } },
+      ],
+    },
+  ],
+
+  monk: [
+    {
+      id: 'flowingGuardUse',
+      name: 'Fließende Abwehr',
+      options: [
+        { id: 'hurt', label: 'Wenn er angeschlagen ist', effects: {} },
+        { id: 'asap', label: 'Sofort, wenn bereit', effects: { abilityWhen: { flowingGuard: 'ready' } } },
+      ],
+    },
+  ],
+
+  druid: [
+    {
+      id: 'healThreshold',
+      name: 'Heilen ab',
+      options: [
+        { id: 'normal', label: 'Normal (unter 60 %)', effects: {} },
+        { id: 'early', label: 'Früh (unter 80 %)', effects: { healThreshold: 0.8 } },
+        { id: 'late', label: 'Spät (unter 40 %)', effects: { healThreshold: 0.4 } },
+      ],
+    },
+  ],
+
+  samurai: [
+    TARGET_ORDER,
+    {
+      id: 'iaiUse',
+      name: 'Iaido-Erstschlag',
+      options: [
+        { id: 'asap', label: 'Sofort', effects: {} },
+        { id: 'boss', label: 'Für den Boss aufheben', effects: { abilityWhen: { iaiStrike: 'onBoss' } } },
+      ],
+    },
+  ],
+
+  barbarian: [
+    TARGET_ORDER,
+  ],
+
+  hunter: [
+    TARGET_ORDER,
+    {
+      id: 'netUse',
+      name: 'Fangnetz',
+      options: [
+        { id: 'minions', label: 'Diener festhalten', effects: {} },
+        { id: 'never', label: 'Nie', effects: { abilityWhen: { snareNet: 'never' } } },
+      ],
+    },
+  ],
+
+  warlock: [
+    TARGET_ORDER,
+    {
+      id: 'manaUse',
+      name: 'Mana',
+      options: [
+        { id: 'free', label: 'Frei einsetzen', effects: {} },
+        { id: 'save', label: '30 % aufheben', effects: { manaReserve: 0.3 } },
+      ],
+    },
+  ],
+
+  bard: [
+    {
+      id: 'songUse',
+      name: 'Lied der Klingen',
+      options: [
+        { id: 'always', label: 'In jedem Kampf', effects: {} },
+        { id: 'boss', label: 'Nur im Bosskampf', effects: { abilityWhen: { songOfBlades: 'bossFightBuffMissing' } } },
+      ],
+    },
+  ],
+
+  shaman: [
+    {
+      id: 'bloodlustUse',
+      name: 'Kampfrausch',
+      options: [
+        { id: 'boss', label: 'Im Bosskampf', effects: {} },
+        { id: 'asap', label: 'In jedem Kampf sofort', effects: { abilityWhen: { bloodlust: 'groupBuffMissing' } } },
+      ],
+    },
+  ],
+
+  chronomancer: [
+    {
+      id: 'timeStopUse',
+      name: 'Zeitstillstand',
+      options: [
+        { id: 'cast', label: 'Bei Boss-Zaubern', effects: {} },
+        { id: 'asap', label: 'Sofort, wenn bereit', effects: { abilityWhen: { timeStop: 'ready' } } },
+      ],
+    },
+  ],
 };
 
 // Anweisungen einer Klasse (leere Liste, wenn die Klasse noch keine hat)

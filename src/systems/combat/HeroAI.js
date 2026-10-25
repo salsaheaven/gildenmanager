@@ -12,7 +12,7 @@ import { ABILITIES } from '../../data/abilities.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
 
 // Beim Rückzug machen die Helden keinen Schaden mehr, sie heilen und schützen sich nur
-const RETREAT_SKILL_TYPES = ['heal', 'shield', 'buff', 'mana', 'cleanse'];
+const RETREAT_SKILL_TYPES = ['heal', 'shield', 'buff', 'mana', 'cleanse', 'hot', 'revive', 'resetCooldowns'];
 
 // Gibt die id des gewählten Skills zurück, oder null für einen normalen Angriff
 export function chooseAbility(battle, hero) {
@@ -34,7 +34,7 @@ export function chooseAbility(battle, hero) {
       continue;
     }
     const condition = hero.orderSettings.abilityWhen[abilityId] || ability.when;
-    if (isConditionMet(battle, hero, condition, ability)) {
+    if (isConditionMet(battle, hero, condition, ability, abilityId)) {
       return abilityId;
     }
   }
@@ -51,7 +51,7 @@ function breaksManaReserve(hero, ability) {
 }
 
 // Alle Bedingungen, die in data/abilities.js unter "when" (oder in Anweisungen) stehen können
-function isConditionMet(battle, hero, condition, ability) {
+function isConditionMet(battle, hero, condition, ability, abilityId) {
   const casting = battle.getCasting();
   const enemiesThere = battle.getLivingEnemies().length > 0 && !battle.isDummyFight();
   const bossTarget = battle.getBossTarget();
@@ -89,6 +89,55 @@ function isConditionMet(battle, hero, condition, ability) {
 
     case 'allyHurt':
       return lowestAlly !== null && lowestAlly.getHpPercent() < healThreshold;
+
+    // Wie allyHurt, aber nur, wenn auf dem Verletzten noch keine Heilung über Zeit von diesem Skill liegt
+    case 'allyHurtWithoutHot':
+      return lowestAlly !== null && lowestAlly.getHpPercent() < healThreshold && !lowestAlly.hasBuff(abilityId);
+
+    // Ich selbst bin angeschlagen (Heilschwelle) bzw. in Not (Verteidigungsschwelle)
+    case 'selfHurt':
+      return enemiesThere && hero.getHpPercent() < healThreshold;
+
+    case 'selfLow':
+      return enemiesThere && hero.getHpPercent() < COMBAT_RULES.selfDefenseThreshold;
+
+    // Ein großer Schlag auf mich ist angekündigt (für einmalige Schutz-Skills wie Gottesschild)
+    case 'bigHitOnMe':
+      return casting !== null && casting.type === 'tankBuster' && bossTarget === hero;
+
+    // Ein Held ist gefallen (für Wiederbelebung)
+    case 'allyFallen':
+      return battle.getFallenAlly() !== null;
+
+    // Mindestens ein Held hat diesen Buff noch nicht (z.B. Lied der Klingen, Schwur der Standhaftigkeit)
+    case 'groupBuffMissing':
+      return enemiesThere && battle.getLivingHeroes().some((ally) => !ally.hasBuff(abilityId));
+
+    // Wie groupBuffMissing, aber nur im Bosskampf (Kampfrausch hebt man sich für den Boss auf)
+    case 'bossFightBuffMissing':
+      return enemiesThere && battle.boss !== null && battle.getLivingHeroes().some((ally) => !ally.hasBuff(abilityId));
+
+    // Ein anderer Held wartet auf wichtige Skills (mindestens 3 Runden Abklingzeit insgesamt)
+    case 'allyOnCooldown': {
+      const ally = battle.getAllyWithCooldowns(hero);
+      return enemiesThere && ally !== null && ally.getTotalCooldown() >= 3;
+    }
+
+    // Mein Ziel hat weniger als 30 % Leben (Hinrichtung)
+    case 'targetLow': {
+      const target = battle.getFocusTarget(hero);
+      return target !== null && !battle.isDummyFight() && target.getHpPercent() < 0.3;
+    }
+
+    // Mein Ziel ist der Boss (z.B. Iaido-Erstschlag für den Boss aufheben)
+    case 'onBoss': {
+      const target = battle.getFocusTarget(hero);
+      return target !== null && target === battle.boss;
+    }
+
+    // Es gibt Diener, die noch nicht festgehalten werden
+    case 'minionsThere':
+      return battle.getStrongestMinion() !== null;
 
     case 'allyBadlyHurt':
       return lowestAlly !== null && lowestAlly.getHpPercent() < healThreshold - 0.2;
@@ -128,13 +177,14 @@ function isConditionMet(battle, hero, condition, ability) {
     case 'bossCastingInterruptible':
       return casting !== null && casting.interruptible;
 
-    // Das Ziel hat noch kein Gift von mir
+    // Das Ziel hat diesen Fluch bzw. dieses Gift noch nicht von mir
     case 'targetWithoutPoison': {
       const target = battle.getFocusTarget(hero);
       if (!target) {
         return false;
       }
-      return !target.effects.some((effect) => effect.kind === 'dot' && effect.sourceId === hero.id);
+      return !target.effects.some((effect) =>
+        effect.kind === 'dot' && effect.sourceId === hero.id && effect.abilityId === abilityId);
     }
 
     default:

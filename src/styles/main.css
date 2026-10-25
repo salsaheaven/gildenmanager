@@ -991,6 +991,25 @@ h3 {
   gap: 20px;
 }
 
+/* Kampf-Labor: Klassen der Testgruppe wählen */
+.lab-class-pickers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.lab-class-pickers select {
+  flex: 1 1 110px;
+  min-width: 0;
+  font-family: var(--font-text);
+  font-size: 16px;
+  color: var(--text);
+  background: #120d1c;
+  border: 2px solid var(--border);
+  padding: 2px 4px;
+}
+
 @media (max-width: 700px) {
   .detail-columns {
     grid-template-columns: minmax(0, 1fr);
@@ -1927,13 +1946,17 @@ h3 {
 .fx-holy   { width: 8px; height: 8px; background: #ffffff; box-shadow: 0 0 10px 3px #ffe9a8; }
 .fx-rune   { width: 8px; height: 8px; background: #5ef2ff; box-shadow: 0 0 10px 3px #2fb5a8; }
 .fx-shadow { background: #b07ce8; box-shadow: 0 0 0 3px #5a2a8a, 0 0 12px 4px #3a1a5a; }
+.fx-arrow  { width: 14px; height: 3px; background: #c08a52; box-shadow: 3px 0 0 #d8dee9; }
+.fx-lightning { width: 8px; height: 8px; background: #e8f4ff; box-shadow: 0 0 0 2px #5ab0ff, 0 0 14px 5px #2a6ab0; }
 
 /* Einschlag eines Geschosses */
 .fx-fire-burst,
 .fx-spark-burst,
 .fx-holy-burst,
 .fx-rune-burst,
-.fx-shadow-burst {
+.fx-shadow-burst,
+.fx-arrow-burst,
+.fx-lightning-burst {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -1945,6 +1968,8 @@ h3 {
 .fx-holy-burst   { background: radial-gradient(circle, #ffffff 0%, #ffe9a8 35%, transparent 65%); width: 26px; height: 26px; }
 .fx-rune-burst   { background: radial-gradient(circle, #5ef2ff 0%, transparent 60%); width: 26px; height: 26px; }
 .fx-shadow-burst { background: radial-gradient(circle, #b07ce8 0%, #5a2a8a 40%, transparent 70%); }
+.fx-arrow-burst  { background: radial-gradient(circle, #d8dee9 0%, transparent 55%); width: 20px; height: 20px; }
+.fx-lightning-burst { background: radial-gradient(circle, #e8f4ff 0%, #5ab0ff 35%, transparent 65%); }
 
 @keyframes fx-burst {
   from { scale: 0.3; opacity: 1; }

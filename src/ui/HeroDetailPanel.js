@@ -141,6 +141,15 @@ export class HeroDetailPanel {
 
   renderSkills() {
     const list = this.root.querySelector('.skill-list');
+    // Dauerhafte Fähigkeit der Klasse (z.B. Ausweichen beim Mönch) steht ganz oben
+    const passive = this.hero.getClass().passive;
+    if (passive) {
+      const line = document.createElement('li');
+      line.innerHTML = '<b></b><span></span>';
+      line.querySelector('b').textContent = passive.name + ' (immer aktiv)';
+      line.querySelector('span').textContent = passive.description;
+      list.appendChild(line);
+    }
     for (const abilityId of this.hero.getClass().abilities) {
       const ability = ABILITIES[abilityId];
       const line = document.createElement('li');

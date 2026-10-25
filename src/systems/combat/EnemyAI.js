@@ -2,6 +2,8 @@
 // ENEMYAI – was Boss und Diener in ihrem Zug tun
 // Boss: Mechaniken nach Zeitplan (mit Ankündigung), Raserei, sonst normaler Angriff.
 // Diener und Trash: greifen je nach "targeting" den mit der meisten Aggro oder einen zufälligen Helden an.
+//   Hält ein Begleiter (Wolf des Jägers) sie fest, greifen sie nur ihn an.
+// Normalen Angriffen kann man ausweichen (Mönch), großen Schlägen und Zaubern nicht.
 // ============================================================
 
 import { COMBAT_RULES } from '../../data/combatRules.js';
@@ -24,13 +26,15 @@ export function takeEnemyTurn(battle, enemy) {
 function minionAttack(battle, minion) {
   const minionData = MINIONS[minion.minionId];
   let target;
-  if (minionData.targeting === 'threat') {
+  if (minion.boundTo && minion.boundTo.alive) {
+    target = minion.boundTo;
+  } else if (minionData.targeting === 'threat') {
     target = battle.getBossTarget();
   } else {
     target = battle.random.pick(battle.getLivingHeroes());
   }
   battle.logAction(minion, null, minionData.attackFx, [target], false);
-  enemyHits(battle, minion, target, 'greift an', 1.0, minionData.attackDamageType || 'physical');
+  enemyHits(battle, minion, target, 'greift an', 1.0, minionData.attackDamageType || 'physical', true);
 }
 
 function takeBossTurn(battle, boss) {
@@ -70,7 +74,7 @@ function takeBossTurn(battle, boss) {
 
   const target = battle.getBossTarget();
   battle.logAction(boss, null, bossData.attackFx, [target], false);
-  enemyHits(battle, boss, target, 'schlägt zu', 1.0, bossData.attackDamageType || 'physical');
+  enemyHits(battle, boss, target, 'schlägt zu', 1.0, bossData.attackDamageType || 'physical', true);
 }
 
 function isMechanicDue(mechanic, round) {
@@ -134,8 +138,14 @@ function resolveMechanic(battle, boss, mechanic) {
 }
 
 // Ein Gegner trifft einen Helden. damageType = Schadensart (siehe data/damageTypes.js)
-function enemyHits(battle, enemy, target, verb, power, damageType) {
+// dodgeable = true bei normalen Angriffen: Dann kann der Held ausweichen (Mönch).
+function enemyHits(battle, enemy, target, verb, power, damageType, dodgeable = false) {
   if (!target) {
+    return;
+  }
+  if (dodgeable && target.getDodgeChance() > 0 && battle.random.next() < target.getDodgeChance()) {
+    battle.addLog(target.name + ' weicht dem Angriff von ' + enemy.name + ' aus.', 'info',
+      { labels: [{ targetId: target.id, text: 'Ausgewichen' }] });
     return;
   }
   const variation = battle.random.between(1 - COMBAT_RULES.enemyVariation, 1 + COMBAT_RULES.enemyVariation);

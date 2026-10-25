@@ -20,19 +20,30 @@ export function rollOutput(battle, caster, scaling, power, critBonus = 0) {
   return { amount: amount, crit: crit };
 }
 
-// Held fügt einem Gegner Schaden zu (mit Aggro)
+// Held (oder Begleiter) fügt einem Gegner Schaden zu (mit Aggro).
+// Buffs auf den eigenen Schaden (Lied der Klingen, Wundenzorn) wirken hier.
+// Mit Blutrausch heilt ein Teil des Schadens den Angreifer selbst.
 export function heroDealsDamage(battle, caster, target, actionName, scaling, power, options = {}) {
   const output = rollOutput(battle, caster, scaling, power, options.critBonus || 0);
-  const result = target.takeDamage(output.amount);
+  const damageType = options.damageType || 'physical';
+  const result = target.takeDamage(output.amount * caster.getDamageDoneFactor(), false, damageType);
   caster.damageDone += result.damage;
   caster.threat += result.damage * (options.threat || 1);
 
   const critText = output.crit ? ' kritisch' : '';
   battle.addLog(caster.name + ': ' + actionName + ' trifft ' + target.name + critText + ' für ' + result.damage + '.',
     output.crit ? 'crit' : 'damage',
-    { hits: [target.describeHit(result.damage, 'damage', output.crit, result.absorbed)] });
+    { hits: [target.describeHit(result.damage, 'damage', output.crit, result.absorbed, damageType)] });
   if (!target.alive) {
     battle.addLog(target.name + ' ist besiegt!', 'death');
+  }
+
+  const lifesteal = caster.getLifesteal();
+  if (lifesteal > 0 && result.damage > 0) {
+    const healed = caster.heal(result.damage * lifesteal);
+    if (healed > 0) {
+      battle.addLog(caster.name + ' saugt ' + healed + ' Leben.', 'heal', { hits: [caster.describeHit(healed, 'heal')] });
+    }
   }
   return result.damage;
 }
@@ -62,6 +73,12 @@ function getTargets(battle, caster, ability) {
     case 'allEnemies':
       targets = battle.getLivingEnemies();
       break;
+    case 'threeEnemies':
+      targets = battle.getThreeEnemies(caster);
+      break;
+    case 'strongestMinion':
+      targets = [battle.getStrongestMinion()];
+      break;
     case 'self':
       targets = [caster];
       break;
@@ -77,6 +94,15 @@ function getTargets(battle, caster, ability) {
     case 'debuffedAlly':
       targets = [battle.getLivingHeroes().find((hero) => hero.hasDebuff())];
       break;
+    case 'fallenAlly':
+      // Das einzige Ziel, das tot sein darf (Wiederbelebung)
+      return [battle.getFallenAlly()].filter((target) => target !== null);
+    case 'bestDamageAlly':
+      targets = [battle.getBestDamageAlly(caster)];
+      break;
+    case 'allyWithCooldowns':
+      targets = [battle.getAllyWithCooldowns(caster)];
+      break;
     default:
       throw new Error('Unbekanntes Skill-Ziel: ' + ability.target);
   }
@@ -88,6 +114,9 @@ function getTargets(battle, caster, ability) {
 export function useAbility(battle, caster, abilityId, ability) {
   caster.mana -= ability.manaCost;
   caster.startCooldown(abilityId, ability.cooldown);
+  if (ability.oncePerFight) {
+    caster.markUsedOnce(abilityId);
+  }
 
   const targets = getTargets(battle, caster, ability);
   if (targets.length === 0) {
@@ -104,17 +133,27 @@ export function useAbility(battle, caster, abilityId, ability) {
       }
       break;
     case 'dot':
-      applyPoison(battle, caster, ability, targets[0]);
+      applyPoison(battle, caster, abilityId, ability, targets[0]);
       break;
     case 'heal':
       applyHeal(battle, caster, ability, targets[0]);
+      break;
+    case 'hot':
+      applyHealOverTime(battle, caster, abilityId, ability, targets);
+      break;
+    case 'revive':
+      applyRevive(battle, caster, ability, targets[0]);
+      break;
+    case 'resetCooldowns':
+      targets[0].cooldowns = {};
+      battle.addLog(caster.name + ': ' + ability.name + '! Die Skills von ' + targets[0].name + ' sind sofort wieder bereit.', 'shield',
+        { labels: [{ targetId: targets[0].id, text: 'Bereit!' }] });
       break;
     case 'shield':
       applyShield(battle, caster, ability, targets);
       break;
     case 'buff':
-      caster.addEffect({ kind: 'damageTaken', value: ability.value, remaining: ability.duration });
-      battle.addLog(caster.name + ' benutzt ' + ability.name + '.', 'shield');
+      applyBuff(battle, caster, abilityId, ability, targets);
       break;
     case 'taunt':
       applyTaunt(battle, caster, ability);
@@ -140,19 +179,63 @@ export function useAbility(battle, caster, abilityId, ability) {
   }
 }
 
-// Gift: macht mehrere Runden lang Schaden (wird am Rundenanfang abgerechnet)
-function applyPoison(battle, caster, ability, target) {
+// Gift oder Fluch: macht mehrere Runden lang Schaden (wird am Rundenanfang abgerechnet).
+// Mit "growth" wächst der Schaden jede Runde (Hexenmeister).
+function applyPoison(battle, caster, abilityId, ability, target) {
   const output = rollOutput(battle, caster, ability.scaling, ability.power);
   target.addEffect({
     kind: 'dot',
     name: ability.name,
     sourceId: caster.id,
-    damagePerRound: output.amount,
+    abilityId: abilityId,
+    damagePerRound: output.amount * caster.getDamageDoneFactor(),
+    growth: ability.growth || 0,
+    ticks: 0,
+    damageType: ability.damageType || 'physical',
     remaining: ability.duration,
     isDebuff: true,
   });
-  battle.addLog(caster.name + ' vergiftet ' + target.name + ' mit ' + ability.name + '.', 'damage',
-    { labels: [{ targetId: target.id, text: 'Gift' }] });
+  const word = ability.growth ? 'Fluch' : 'Gift';
+  battle.addLog(caster.name + ' belegt ' + target.name + ' mit ' + ability.name + '.', 'damage',
+    { labels: [{ targetId: target.id, text: word }] });
+}
+
+// Heilung über Zeit: heilt jede Runde ein Stück (wird am Rundenanfang abgerechnet)
+function applyHealOverTime(battle, caster, abilityId, ability, targets) {
+  for (const target of targets) {
+    const output = rollOutput(battle, caster, ability.scaling, ability.power);
+    target.addEffect({
+      kind: 'hot',
+      name: ability.name,
+      buffId: abilityId,
+      sourceId: caster.id,
+      healPerRound: output.amount,
+      remaining: ability.duration,
+    });
+  }
+  const who = targets.length === 1 ? targets[0].name : 'die Gruppe';
+  battle.addLog(caster.name + ': ' + ability.name + ' umhüllt ' + who + '.', 'heal',
+    { labels: targets.map((target) => ({ targetId: target.id, text: ability.name })) });
+}
+
+// Wiederbelebung: Der Gefallene steht mit einem Teil seines Lebens wieder auf
+function applyRevive(battle, caster, ability, target) {
+  target.revive(ability.value);
+  caster.healingDone += target.hp;
+  battle.addLog(caster.name + ': ' + ability.name + '! ' + target.name + ' steht wieder auf.', 'heal',
+    { hits: [target.describeHit(target.hp, 'heal')], labels: [{ targetId: target.id, text: 'Wiederbelebt!' }] });
+}
+
+// Buff: Verstärkung für sich selbst, einen Helden oder die ganze Gruppe (siehe "effect" in abilities.js).
+// buffId = Skill-id: Derselbe Buff ersetzt sich selbst, statt sich zu stapeln.
+function applyBuff(battle, caster, abilityId, ability, targets) {
+  const kind = ability.effect || 'damageTaken';
+  for (const target of targets) {
+    target.addEffect({ kind: kind, buffId: abilityId, value: ability.value, remaining: ability.duration });
+  }
+  const who = targets.length === 1 && targets[0] === caster ? '' : ' auf ' + (targets.length === 1 ? targets[0].name : 'die Gruppe');
+  battle.addLog(caster.name + ' wirkt ' + ability.name + who + '.', 'shield',
+    { labels: targets.map((target) => ({ targetId: target.id, text: ability.name })) });
 }
 
 function applyHeal(battle, caster, ability, target) {
@@ -195,11 +278,13 @@ function applyTaunt(battle, caster, ability) {
 // Betäubung: Gegner verlieren ihren nächsten Zug. Ein Boss-Zauber wird dadurch nur verzögert.
 function applyStun(battle, caster, ability, targets) {
   const labels = [];
+  const word = ability.label || 'Eingefroren';
   for (const enemy of targets) {
     enemy.addEffect({ kind: 'stun', remaining: ability.duration });
-    labels.push({ targetId: enemy.id, text: 'Eingefroren' });
+    labels.push({ targetId: enemy.id, text: word });
   }
-  battle.addLog(caster.name + ': ' + ability.name + ' friert alle Gegner ein!', 'mechanic', { labels: labels });
+  const who = targets.length === 1 ? targets[0].name : 'alle Gegner';
+  battle.addLog(caster.name + ': ' + ability.name + ' trifft ' + who + ' (' + word + ')!', 'mechanic', { labels: labels });
 }
 
 // Unterbrechen: bricht einen unterbrechbaren Boss-Zauber ab

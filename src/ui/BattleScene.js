@@ -154,7 +154,8 @@ export class BattleScene {
       element: unit, maxHp: info.maxHp, maxMana: info.maxMana, isMinion: Boolean(info.minionId),
       name: info.name, classId: info.classId, mana: info.mana, usedRounds: {},
     };
-    if (info.side === 'hero') {
+    // Skill-Fenster nur für Helden, Begleiter haben keine Skills
+    if (info.side === 'hero' && !info.isPet) {
       this.addTooltipEvents(info.id, unit);
     }
     this.setBars(info.id, info.hp, 0);
@@ -197,6 +198,9 @@ export class BattleScene {
   }
 
   createUnitCanvas(info) {
+    if (info.isPet) {
+      return createSpriteCanvas(info.petSprite.sprite, 3, info.petSprite.colors);
+    }
     if (info.side === 'hero') {
       return createHeroCanvas(this.heroesById[info.heroId], 4);
     }

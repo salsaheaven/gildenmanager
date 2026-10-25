@@ -46,9 +46,9 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
                BattleTimeline (wann passiert was → Dauer eines Runs), Battle (Zustand + Zielwahl),
                Combatant (ein Kämpfer), HeroAI (welcher Skill?), EnemyAI (Boss-Mechaniken),
                AbilityEffects (was ein Skill bewirkt), ChanceEstimator (200 Kämpfe → Siegchance; estimateRunChances = ganzer Dungeon),
-               TestGroup (Standard-Gruppe fürs Labor)
+               TestGroup (Testgruppe fürs Labor, Klassen frei wählbar)
 src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes, balancing, sprites (Pixel-Art als Text),
-               heroClasses (inkl. Rüstungsart und nützliche Werte pro Klasse), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
+               heroClasses (15 Klassen inkl. Rüstungsart, nützliche Werte, Dauer-Fähigkeit `passive` und Begleiter `pet`), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
                enemies (Bosse + Diener/Trash), combatRules, heroOrders (Kampf-Anweisungen pro Klasse),
                dungeons (Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),

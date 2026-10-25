@@ -97,6 +97,9 @@ export class SkillTooltip {
 // Ein Skill mit Abklingzeit 2, benutzt in Runde 5, ist ab Runde 8 wieder bereit
 // (so zählt auch Combatant.startCooldown).
 export function getSkillStatus(ability, usedRound, currentRound, mana) {
+  if (usedRound !== undefined && ability.oncePerFight) {
+    return { ready: false, text: 'schon benutzt' };
+  }
   if (usedRound !== undefined && ability.cooldown > 0) {
     const roundsLeft = Math.min(ability.cooldown, usedRound + ability.cooldown + 1 - currentRound);
     if (roundsLeft > 0) {
@@ -115,7 +118,9 @@ function describeCosts(ability) {
   if (ability.manaCost > 0) {
     parts.push(ability.manaCost + ' Mana');
   }
-  if (ability.cooldown > 0) {
+  if (ability.oncePerFight) {
+    parts.push('einmal pro Kampf');
+  } else if (ability.cooldown > 0) {
     parts.push('Abklingzeit ' + ability.cooldown + (ability.cooldown === 1 ? ' Runde' : ' Runden'));
   } else {
     parts.push('keine Abklingzeit');
