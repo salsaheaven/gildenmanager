@@ -113,6 +113,8 @@ In kleinen, jeweils online testbaren Schritten:
 Jetzt (nach M1 und dem Umbau auf Runden) testen wir zusammen, ob der Loop Spaß macht, und passen dann an.
 
 ## Balancing & Playtests
+**Fahrplan (entschieden 2026-10-29):** Zuerst wird eine spielbare Version mit dem **ganzen Umfang** gebaut (alle Systeme bis Raids und Endboss). Erst danach übernehmen günstige KI-Agenten (z.B. DeepSeek über OpenCode oder Cline) das Balancing mit den Werkzeugen aus `tools/`. Die Aufträge für diese Agenten schreiben wir gemeinsam, mit einer `AGENTS.md`, die auf die Regeln in `CLAUDE.md` verweist.
+
 Das Balancing kommt gesammelt später, wenn genug Ideen zusammen sind. Grundsatz: Jede Wahl braucht Vor- und Nachteile (siehe `KONZEPT.md`). Werkzeuge, von billig nach teuer:
 
 1. **Balancing-Bericht (Skript, ohne KI-Kosten):** ein Node-Skript, das für jeden Boss alle Kombinationen aus Anweisungen und Gruppe per `estimateChances` durchrechnet. Es meldet automatisch **dominante Optionen**, die in allen Kämpfen besser sind (wie zurzeit „Priester heilt früh“), und **nutzlose Optionen**, die nie die beste Wahl sind. Kann jederzeit gebaut werden und liefert in Sekunden Ergebnisse.
