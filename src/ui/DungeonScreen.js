@@ -83,7 +83,8 @@ export class DungeonScreen {
       `;
       card.querySelector('.dungeon-name').textContent = dungeon.name;
       card.querySelector('.dungeon-sub').textContent = unlocked
-        ? 'Stufe ' + dungeon.level + ' · Empf. AW ' + dungeon.recommendedGearScore + (clears > 0 ? ' · geschafft: ' + clears + '×' : ' · noch nie geschafft')
+        ? 'Stufe ' + dungeon.level + ' · Empf. AW ' + dungeon.recommendedGearScore + (clears > 0 ? ' · geschafft: ' + clears + '×' : ' · noch nie geschafft') +
+          (this.game.isDungeonScouted(dungeon.id) ? ' · Erkundet ✓' : '')
         : 'Gesperrt: erst ' + getDungeon(dungeon.unlockAfter).name + ' schaffen';
       card.addEventListener('click', () => {
         Sound.click();
@@ -121,6 +122,10 @@ export class DungeonScreen {
       <p class="hint">Die Gruppe kämpft, wenn du oben „Tag beenden“ drückst. Bis dahin kannst du sie noch umrüsten.</p>
     `;
     panel.querySelector('h2').textContent = dungeon.name;
+    if (this.game.isDungeonScouted(dungeon.id)) {
+      panel.querySelector('h2').insertAdjacentHTML('beforeend',
+        ' <span class="scouted-chip" title="Der nächste Run hier ist vorbereitet: Mechaniken bekannt, etwas mehr Schaden">Erkundet ✓</span>');
+    }
     panel.querySelector('.dungeon-description').textContent = dungeon.description;
 
     this.renderEncounters(panel.querySelector('.encounter-list'), dungeon);
@@ -153,7 +158,8 @@ export class DungeonScreen {
     }));
     // Einschätzung in Worten, neu berechnet bei jeder Änderung an Gruppe, Ausrüstung, Rückzug oder Vorräten
     if (unlocked && group.length > 0) {
-      panel.querySelector('.risk-line').appendChild(createRiskBadge(group, dungeon.id, this.retreatRuleId, this.chosenSupplies));
+      panel.querySelector('.risk-line').appendChild(createRiskBadge(group, dungeon.id, this.retreatRuleId, this.chosenSupplies,
+        this.game.isDungeonScouted(dungeon.id)));
     }
     renderOrders(panel.querySelector('.orders-list'), group, (hero, orderId, optionId) => {
       this.game.setHeroOrder(hero.id, orderId, optionId);
@@ -167,9 +173,9 @@ export class DungeonScreen {
     startButton.addEventListener('click', () => this.start());
   }
 
-  // Begegnungen mit Bildern. Boss-Mechaniken kennt man erst nach dem ersten Versuch.
+  // Begegnungen mit Bildern. Boss-Mechaniken kennt man erst nach dem ersten Versuch (oder nach dem Erkunden).
   renderEncounters(container, dungeon) {
-    const attempted = this.game.guild.getAttempts(dungeon.id) > 0;
+    const attempted = this.game.guild.getAttempts(dungeon.id) > 0 || this.game.isDungeonScouted(dungeon.id);
     dungeon.encounters.forEach((encounter, index) => {
       const row = document.createElement('div');
       row.className = 'encounter-row';
@@ -360,7 +366,7 @@ export class DungeonScreen {
         (expedition.supplies.length > 0 ? ' · Vorräte: ' + describeSupplies(expedition.supplies) : '');
       const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
       row.querySelector('.run-head').after(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId,
-        expedition.supplies));
+        expedition.supplies, this.game.isDungeonScouted(expedition.dungeonId)));
       row.querySelector('.cancel-button').addEventListener('click', () => {
         Sound.click();
         this.game.cancelExpedition(expedition.id);

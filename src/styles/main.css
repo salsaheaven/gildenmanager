@@ -1488,6 +1488,7 @@ h3 {
 
 .day-plan-hero {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   padding: 4px 6px;
@@ -2227,6 +2228,55 @@ h3 {
   cursor: pointer;
   color: var(--gold);
   margin-bottom: 6px;
+}
+
+/* ---------- Tagesaufgaben ---------- */
+
+.task-picker {
+  --task-color: var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.task-picker select {
+  font-family: var(--font-text);
+  font-size: 15px;
+  color: var(--task-color);
+  background: #120d1c;
+  border: 2px solid var(--task-color);
+  padding: 2px 4px;
+  max-width: 100%;
+}
+
+.day-plan-wages {
+  margin: 4px 0;
+}
+
+.gold-wages {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.scouted-chip {
+  font-size: 13px;
+  color: #c77dff;
+}
+
+.day-home-line {
+  border-left: 3px solid var(--task-color, var(--border));
+  padding-left: 6px;
+  margin: 3px 0;
+  font-size: 16px;
+}
+
+.day-home-line.wages {
+  color: var(--text-dim);
+}
+
+.day-home-line.unpaid {
+  color: #ff6b6b;
 }
 
 /* ---------- Händler und Vorräte ---------- */
@@ -2990,6 +3040,12 @@ h3 {
 
   .order-effects {
     margin-left: 113px;
+  }
+
+  /* Aufgaben-Auswahl im Tagesplan: eigene Zeile unter dem Namen */
+  .task-picker {
+    flex-basis: 100%;
+    margin-left: 0;
   }
 
   /* Inventar: Raster oben, Details unten als feste Leiste */

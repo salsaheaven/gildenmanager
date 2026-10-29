@@ -9,6 +9,8 @@
 //      Erst jetzt erscheinen die Level-Up-Banner, damit sie das Ergebnis nicht vorher verraten.
 // ============================================================
 
+import { HERO_TASKS } from '../data/heroTasks.js';
+import { getConsumable } from '../data/consumables.js';
 import { describeSupplies } from './SupplyPicker.js';
 import { createDefeatCausesView } from './DefeatCausesView.js';
 import { Hero } from '../entities/Hero.js';
@@ -59,9 +61,11 @@ export class DayEndOverlay {
     return this.phase !== 'closed';
   }
 
-  // Startet den Tagesabschluss. day = der Tag, der gerade zu Ende ging, reports = Berichte der Runs
-  start(day, reports) {
+  // Startet den Tagesabschluss. day = der Tag, der gerade zu Ende ging, reports = Berichte der Runs,
+  // daySummary = Ergebnisse der Aufgaben und der Sold (siehe Game.lastDaySummary)
+  start(day, reports, daySummary) {
     this.day = day;
+    this.daySummary = daySummary;
     this.runs = reports.map((report) => {
       const expedition = Expedition.fromSaveData(report.expedition);
       return {
@@ -169,6 +173,7 @@ export class DayEndOverlay {
     for (const run of this.runs) {
       summary.appendChild(this.createRunCard(run.report));
     }
+    summary.appendChild(this.createHomeCard(this.daySummary));
 
     const nextButton = body.querySelector('.next-day-button');
     nextButton.textContent = 'Weiter zu Tag ' + (this.day + 1);
@@ -183,6 +188,32 @@ export class DayEndOverlay {
       Sound.itemReveal(best.report.firstClear ? 4 : 3);
     }
     this.callbacks.onSummaryShown();
+  }
+
+  // Karte "Daheim": was die Helden ohne Kampf erledigt haben, und der Sold
+  createHomeCard(daySummary) {
+    const card = document.createElement('div');
+    card.className = 'day-run-card day-home-card';
+    card.innerHTML = '<div class="day-run-head"><b class="day-run-name">Daheim in der Gilde</b></div><div class="day-home-lines"></div>';
+    const lines = card.querySelector('.day-home-lines');
+    for (const task of daySummary.tasks) {
+      const text = describeTaskResult(task);
+      if (text) {
+        const line = document.createElement('div');
+        line.className = 'day-home-line';
+        line.style.setProperty('--task-color', HERO_TASKS[task.taskId].color);
+        line.textContent = text;
+        lines.appendChild(line);
+      }
+    }
+    const wages = daySummary.wages;
+    const wageLine = document.createElement('div');
+    wageLine.className = 'day-home-line wages' + (wages.paid < wages.total ? ' unpaid' : '');
+    wageLine.textContent = wages.paid < wages.total
+      ? 'Sold nicht voll bezahlt: ' + wages.paid + ' von ' + wages.total + ' Gold'
+      : 'Sold: −' + wages.total + ' Gold';
+    lines.appendChild(wageLine);
+    return card;
   }
 
   // Karte für einen Run: Ergebnis, Belohnung, Helden
@@ -236,6 +267,9 @@ export class DayEndOverlay {
 
     if (report.supplies && report.supplies.length > 0) {
       container.appendChild(createTraitBonusLine('Vorräte verbraucht: ' + describeSupplies(report.supplies)));
+    }
+    if (report.scouted) {
+      container.appendChild(createTraitBonusLine('Erkundet: Die Gruppe war vorbereitet'));
     }
 
     if (report.chest) {
@@ -291,6 +325,24 @@ export class DayEndOverlay {
 }
 
 // Kleine Zeile unter der Beute, z.B. "Brakka ist gierig: +12 Gold"
+// Eine Zeile für das Ergebnis einer Aufgabe (null bei "Ruht sich aus")
+function describeTaskResult(task) {
+  if (task.taskId === 'training') {
+    if (task.skipped === 'noGold') {
+      return task.name + ': Training fiel aus, zu wenig Gold für den Trainer';
+    }
+    return task.name + ' trainiert: +' + task.xp + ' EP' + (task.levelsGained > 0 ? ' · Level ' + task.newLevel + '!' : '');
+  }
+  if (task.taskId === 'herbs') {
+    return task.name + ' sammelt Kräuter: ' +
+      (task.foundSupply ? getConsumable(task.foundSupply).name + ' gefunden!' : 'heute nichts gefunden');
+  }
+  if (task.taskId === 'scouting' && task.scoutedDungeonId) {
+    return task.name + ' erkundet ' + getDungeon(task.scoutedDungeonId).name + ': Der nächste Run dort ist vorbereitet';
+  }
+  return null;
+}
+
 function createTraitBonusLine(text) {
   const line = document.createElement('div');
   line.className = 'day-trait-bonus';

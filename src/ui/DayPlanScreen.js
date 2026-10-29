@@ -4,7 +4,9 @@
 //   - Gruppen, die heute in einen Dungeon ziehen (mit Risiko-Einschätzung, aufklappbaren Anweisungen
 //     und "Absagen"). Ändert man eine Anweisung, rechnet die Einschätzung sofort neu.
 //   - Vorräte jeder Gruppe lassen sich hier noch tauschen
-//   - alle Helden, die heute nicht kämpfen (verletzt oder ohne Aufgabe); Verletzte bekommen einen Knopf für Verbandszeug
+//   - alle Helden, die heute nicht kämpfen: freie Helden bekommen eine Aufgabe (Ausruhen, Training, Kräuter,
+//     Erkunden mit Dungeon-Auswahl), Verletzte einen Knopf für Verbandszeug
+//   - "Wie gestern" plant die Gruppen vom Vortag noch einmal ein
 // Die Aufgaben selbst stehen in data/heroTasks.js, die Rechnung in systems/DayPlan.js.
 // ============================================================
 
@@ -18,6 +20,9 @@ import { createRiskBadge } from './RiskBadge.js';
 import { renderOrders } from './OrdersPanel.js';
 import { createSupplyPicker } from './SupplyPicker.js';
 import { getConsumable } from '../data/consumables.js';
+import { DUNGEONS } from '../data/dungeons.js';
+import { TASK_RULES } from '../data/heroTasks.js';
+import { showToast } from './Toast.js';
 import { Sound } from './Sound.js';
 
 export class DayPlanScreen {
@@ -34,7 +39,9 @@ export class DayPlanScreen {
           <h2 class="day-plan-title"></h2>
           <div class="day-plan-counts"></div>
           <div class="day-plan-hint"></div>
+          <div class="day-plan-wages hint"></div>
           <div class="day-plan-actions">
+            <button class="repeat-button">↻ Wie gestern</button>
             <button class="go-dungeons-button">Gruppe einplanen</button>
             <button class="big-button plan-end-day-button">Tag beenden ▶</button>
           </div>
@@ -54,6 +61,16 @@ export class DayPlanScreen {
       Sound.click();
       // Ohne Helden geht es zur Taverne, sonst zu den Dungeons (siehe renderHeader)
       this.onGoTo(this.root.querySelector('.go-dungeons-button').dataset.target);
+    });
+    this.root.querySelector('.repeat-button').addEventListener('click', () => {
+      const planned = this.game.repeatYesterday();
+      if (planned > 0) {
+        Sound.boxArrived();
+        showToast(planned === 1 ? '1 Gruppe wie gestern eingeplant' : planned + ' Gruppen wie gestern eingeplant', '#ffd23f');
+      } else {
+        Sound.click();
+        showToast('Keine Gruppe von gestern kann heute los.', '#ff6b6b');
+      }
     });
     this.root.querySelector('.plan-end-day-button').addEventListener('click', () => {
       Sound.click();
@@ -79,10 +96,22 @@ export class DayPlanScreen {
     const counts = this.root.querySelector('.day-plan-counts');
     counts.innerHTML = '';
     for (const taskId in HERO_TASKS) {
+      // Nur Aufgaben zeigen, die heute jemand hat (sonst wird die Leiste zu lang)
+      if (plan.counts[taskId] === 0 && taskId !== 'dungeon' && taskId !== 'rest') {
+        continue;
+      }
       const chip = createTaskChip(taskId);
       chip.textContent = HERO_TASKS[taskId].name + ': ' + plan.counts[taskId];
       counts.appendChild(chip);
     }
+
+    // Sold und Trainer-Kosten heute Abend
+    const training = plan.counts.training * TASK_RULES.trainingCost;
+    this.root.querySelector('.day-plan-wages').textContent = plan.entries.length === 0 ? '' :
+      'Heute Abend: Sold ' + this.game.getDailyWages() + ' Gold' + (training > 0 ? ' · Training ' + training + ' Gold' : '');
+    // "Wie gestern" nur, wenn es gestern Gruppen gab und heute noch keine geplant ist
+    const repeatButton = this.root.querySelector('.repeat-button');
+    repeatButton.hidden = this.game.guild.lastDayPlan.length === 0 || this.game.guild.expeditions.length > 0;
 
     // Hinweis, was man als Nächstes tun könnte
     const hint = this.root.querySelector('.day-plan-hint');
@@ -90,8 +119,8 @@ export class DayPlanScreen {
       hint.textContent = 'Du hast noch keine Helden. In der Taverne warten Bewerber.';
     } else if (plan.counts.rest > 0) {
       hint.textContent = plan.counts.rest === 1
-        ? '1 Held hat heute nichts zu tun. Schick ihn in einen Dungeon!'
-        : plan.counts.rest + ' Helden haben heute nichts zu tun. Schick sie in einen Dungeon!';
+        ? '1 Held ruht sich nur aus. Schick ihn in einen Dungeon oder gib ihm unten eine Aufgabe!'
+        : plan.counts.rest + ' Helden ruhen sich nur aus. Schick sie in einen Dungeon oder gib ihnen unten eine Aufgabe!';
     } else {
       hint.textContent = 'Alle Helden haben eine Aufgabe. Zeit, den Tag zu beenden!';
     }
@@ -132,7 +161,8 @@ export class DayPlanScreen {
       for (const hero of heroes) {
         heroList.appendChild(this.createHeroRow(hero, null));
       }
-      heroList.before(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies));
+      heroList.before(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies,
+        this.game.isDungeonScouted(expedition.dungeonId)));
       heroList.after(this.createOrdersSection(expedition, heroes));
       heroList.after(this.createSupplySection(expedition));
       card.querySelector('.cancel-button').addEventListener('click', () => {
@@ -201,16 +231,68 @@ export class DayPlanScreen {
     text.querySelector('b').textContent = hero.name;
     text.querySelector('.roster-sub').textContent = hero.getClass().name + ' · Lv ' + hero.level;
     row.appendChild(text);
-    if (taskId) {
+    if (taskId === 'injured') {
       const chip = createTaskChip(taskId);
-      chip.textContent = taskId === 'injured' ? describeInjury(hero) : HERO_TASKS[taskId].name;
+      chip.textContent = describeInjury(hero);
       chip.title = HERO_TASKS[taskId].description;
       row.appendChild(chip);
-    }
-    if (taskId === 'injured') {
       row.appendChild(this.createBandageButton(hero));
+    } else if (taskId) {
+      row.appendChild(this.createTaskPicker(hero));
     }
     return row;
+  }
+
+  // Auswahl der Aufgabe für einen freien Helden. Beim Erkunden zusätzlich: welcher Dungeon?
+  createTaskPicker(hero) {
+    const picker = document.createElement('span');
+    picker.className = 'task-picker';
+    picker.style.setProperty('--task-color', HERO_TASKS[hero.task.taskId].color);
+
+    const select = document.createElement('select');
+    for (const taskId in HERO_TASKS) {
+      if (!HERO_TASKS[taskId].choosable) {
+        continue;
+      }
+      const option = document.createElement('option');
+      option.value = taskId;
+      option.textContent = HERO_TASKS[taskId].name;
+      select.appendChild(option);
+    }
+    select.value = hero.task.taskId;
+    select.title = HERO_TASKS[hero.task.taskId].description;
+    select.addEventListener('change', () => {
+      Sound.click();
+      // Erkunden braucht einen Dungeon: zuerst den höchsten freigeschalteten nehmen
+      const dungeonId = select.value === 'scouting' ? this.getHighestUnlockedDungeonId() : null;
+      this.game.setHeroTask(hero.id, select.value, dungeonId);
+    });
+    picker.appendChild(select);
+
+    if (hero.task.taskId === 'scouting') {
+      const dungeonSelect = document.createElement('select');
+      for (const dungeon of DUNGEONS) {
+        if (!this.game.isDungeonUnlocked(dungeon.id)) {
+          continue;
+        }
+        const option = document.createElement('option');
+        option.value = dungeon.id;
+        option.textContent = dungeon.name + (this.game.isDungeonScouted(dungeon.id) ? ' ✓' : '');
+        dungeonSelect.appendChild(option);
+      }
+      dungeonSelect.value = hero.task.dungeonId;
+      dungeonSelect.addEventListener('change', () => {
+        Sound.click();
+        this.game.setHeroTask(hero.id, 'scouting', dungeonSelect.value);
+      });
+      picker.appendChild(dungeonSelect);
+    }
+    return picker;
+  }
+
+  getHighestUnlockedDungeonId() {
+    const unlocked = DUNGEONS.filter((dungeon) => this.game.isDungeonUnlocked(dungeon.id));
+    return unlocked[unlocked.length - 1].id;
   }
 
   // Verbandszeug: verkürzt die Verletzung um einen Tag (nur, wenn welches in der Vorratskammer liegt)

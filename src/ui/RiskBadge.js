@@ -8,9 +8,10 @@ import { estimateRunChances } from '../systems/combat/ChanceEstimator.js';
 import { getRiskLevel, getFallLevel, RISK_SIMULATION_COUNT } from '../data/riskLevels.js';
 
 // heroes = Hero-Objekte der Gruppe, retreatRuleId = gewählte Rückzugsregel
-// supplies = mitgenommene Verbrauchsgüter (freiwillig), sie fließen in die Einschätzung ein
-export function createRiskBadge(heroes, dungeonId, retreatRuleId, supplies = []) {
-  const chances = estimateRunChances({ heroes, dungeonId, retreatRuleId, supplies, count: RISK_SIMULATION_COUNT });
+// supplies = mitgenommene Verbrauchsgüter (freiwillig), scouted = Dungeon erkundet (freiwillig).
+// Beides fließt in die Einschätzung ein.
+export function createRiskBadge(heroes, dungeonId, retreatRuleId, supplies = [], scouted = false) {
+  const chances = estimateRunChances({ heroes, dungeonId, retreatRuleId, supplies, scouted, count: RISK_SIMULATION_COUNT });
   const risk = getRiskLevel(chances.winRate);
   const fall = getFallLevel(chances.fallenRate);
 

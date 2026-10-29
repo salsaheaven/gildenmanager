@@ -17,7 +17,7 @@ export class TopBar {
 
     this.root.innerHTML = `
       <div class="guild-name"><span class="guild-name-text"></span><span class="guild-title"></span></div>
-      <div class="gold"><span class="gold-icon"></span><span class="gold-amount"></span></div>
+      <div class="gold"><span class="gold-icon"></span><span class="gold-amount"></span><span class="gold-wages"></span></div>
       <div class="day-counter"></div>
       <button class="end-day-button">
         <span class="end-day-label">Tag beenden ▶</span>
@@ -79,6 +79,11 @@ export class TopBar {
       this.root.querySelector('.gold-amount').textContent = guild.gold;
     }
 
+    // Sold, der heute Abend fällig wird
+    const wages = this.game.getDailyWages();
+    this.root.querySelector('.gold-wages').textContent = wages > 0 ? ' (−' + wages + '/Tag)' : '';
+    this.root.querySelector('.gold-wages').title = 'Sold für alle Helden, wird jeden Abend bezahlt';
+
     // Tag: hüpft ebenfalls, wenn ein neuer Tag beginnt
     if (this.game.day !== this.shownDay) {
       this.bump(this.root.querySelector('.day-counter'), this.shownDay !== null);
@@ -88,7 +93,7 @@ export class TopBar {
 
     // Unter dem Knopf: was heute noch passiert (und wie viele Helden nichts zu tun haben)
     const runs = guild.expeditions.length;
-    const freeHeroes = getDayPlan(guild).counts.rest;
+    const freeHeroes = getDayPlan(guild).counts.rest; // nur wer sich ausruht, gilt als "frei"
     let planText = runs === 0 ? 'Keine Gruppe eingeplant' : (runs === 1 ? '1 Gruppe zieht los' : runs + ' Gruppen ziehen los');
     if (freeHeroes > 0) {
       planText += ' · ' + freeHeroes + ' frei';

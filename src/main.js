@@ -155,12 +155,14 @@ const dayEndOverlay = new DayEndOverlay(game, {
 game.on('dayEnding', () => levelUpBanner.hold());
 
 game.on('dayEnded', (data) => {
-  if (data.reports.length === 0) {
+  // Ohne Kämpfe und ohne Aufgaben (alle ruhen sich aus) reicht eine kurze Meldung
+  const somethingHappened = data.summary.tasks.some((task) => task.taskId !== 'rest');
+  if (data.reports.length === 0 && !somethingHappened) {
     Sound.click();
-    showToast('Ein ruhiger Tag. Tag ' + game.day + ' beginnt.', '#ffd23f');
+    showToast('Ein ruhiger Tag. Sold: −' + data.summary.wages.paid + ' Gold. Tag ' + game.day + ' beginnt.', '#ffd23f');
     levelUpBanner.release();
   } else {
-    dayEndOverlay.start(data.day, data.reports);
+    dayEndOverlay.start(data.day, data.reports, data.summary);
   }
   saveManager.save(game);
 });
