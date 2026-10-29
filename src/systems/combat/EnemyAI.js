@@ -189,7 +189,16 @@ function enemyHits(battle, enemy, target, verb, power, damageType, source, dodge
   }
   battle.addLog(text + '.', crit ? 'crit' : 'damage',
     { hits: [target.describeHit(result.damage, 'damage', crit, result.absorbed, damageType)] });
+  logSavedByTalent(battle, target, result);
   if (!target.alive) {
     battle.addLog(target.name + ' fällt!', 'death', { heroFallen: true });
+  }
+}
+
+// Talent "Letztes Gefecht" u.ä. hat einen Helden gerettet: in Bericht und Szene zeigen
+export function logSavedByTalent(battle, target, result) {
+  if (result.savedByTalent) {
+    battle.addLog(target.name + ' überlebt mit letzter Kraft!', 'warning',
+      { labels: [{ targetId: target.id, text: 'Letzte Kraft!' }] });
   }
 }

@@ -22,7 +22,8 @@ import { Random } from '../../core/Random.js';
 import { Combatant } from './Combatant.js';
 import { Battle, scaleEnemyStats } from './Battle.js';
 import { chooseAbility } from './HeroAI.js';
-import { takeEnemyTurn } from './EnemyAI.js';
+import { takeEnemyTurn, logSavedByTalent } from './EnemyAI.js';
+import { applyGroupAuras } from './OrderSettings.js';
 import { useAbility, useBasicAttack, heroDealsDamage } from './AbilityEffects.js';
 import { ABILITIES } from '../../data/abilities.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
@@ -34,8 +35,14 @@ import { TASK_RULES } from '../../data/heroTasks.js';
 import { combineSupplyEffects, applySupplyEffects, applyManaAtStart, applyRestHealth } from './SupplyEffects.js';
 
 // Macht aus einem Helden (entities/Hero.js) einen Kämpfer
+// Talente mit Werte-Bonus (z.B. +20 % Leben) wirken hier auf die Werte.
 export function createHeroCombatant(hero) {
   const heroClass = hero.getClass();
+  const settings = hero.getOrderSettings();
+  const stats = { ...hero.getStats() };
+  for (const statName in settings.statBonus) {
+    stats[statName] = Math.round((stats[statName] || 0) * (1 + settings.statBonus[statName]));
+  }
   return new Combatant({
     id: 'hero-' + hero.id,
     heroId: hero.id,
@@ -43,11 +50,11 @@ export function createHeroCombatant(hero) {
     name: hero.name,
     side: 'hero',
     row: heroClass.row,
-    stats: hero.getStats(),
+    stats: stats,
     resistances: hero.getResistances(),
     abilityIds: heroClass.abilities,
     basicAttack: heroClass.basicAttack,
-    orderSettings: hero.getOrderSettings(),
+    orderSettings: settings,
     passive: heroClass.passive,
   });
 }
@@ -69,6 +76,7 @@ export function createBossCombatant(bossData, level = 1) {
 export function simulateBattle(options) {
   const random = new Random(options.seed);
   const heroes = options.heroes.map((hero) => createHeroCombatant(hero));
+  applyGroupAuras(heroes);
   return runEncounter(heroes, { type: 'boss', bossId: options.bossId }, random, options.recordLog, {},
     options.enemyLevel || 1);
 }
@@ -84,6 +92,7 @@ export function simulateRun(options) {
   const retreatRule = getRetreatRule(options.retreatRuleId || 'never');
   const random = new Random(options.seed);
   const heroes = options.heroes.map((hero) => createHeroCombatant(hero));
+  applyGroupAuras(heroes);
   const supplyEffects = combineSupplyEffects(options.supplies || []);
   if (options.scouted) {
     supplyEffects.damageDone += TASK_RULES.scoutingDamageBonus;
@@ -366,6 +375,7 @@ function tickDamageOverTime(battle, target, effect, everyone) {
   }
   battle.addLog(effect.name + ' verletzt ' + target.name + ' um ' + result.damage + '.', 'damage',
     { hits: [target.describeHit(result.damage, 'damage', false, 0, effect.damageType || 'physical')] });
+  logSavedByTalent(battle, target, result);
   if (!target.alive) {
     battle.addLog(target.name + (target.side === 'hero' ? ' fällt!' : ' ist besiegt!'), 'death',
       { heroFallen: target.side === 'hero' });

@@ -12,6 +12,7 @@ import { getTrait } from '../data/traits.js';
 import { SLOT_NAMES } from '../data/items.js';
 import { getOrdersForClass } from '../data/heroOrders.js';
 import { combineOrderEffects } from '../systems/combat/OrderSettings.js';
+import { getTalentRows, findTalent, TALENT_RULES } from '../data/talents.js';
 import { getXpForNextLevel } from '../data/experience.js';
 import { SCALING } from '../data/scaling.js';
 import { MAX_RESISTANCE } from '../data/damageTypes.js';
@@ -39,6 +40,8 @@ export class Hero {
     // Gewählte Tagesaufgabe, wenn er nicht kämpft (siehe data/heroTasks.js). Bleibt stehen, bis man sie ändert.
     // dungeonId nur beim Erkunden: welcher Dungeon erkundet wird
     this.task = { taskId: 'rest', dungeonId: null };
+    // Gewählte Talente (Liste von Talent-ids, siehe data/talents.js)
+    this.talentIds = [];
 
     // Anweisungen für den Kampf: Anweisungs-id → gewählte Option (siehe data/heroOrders.js).
     // Fehlt eine Anweisung, gilt die Standard-Option.
@@ -248,10 +251,74 @@ export class Hero {
     this.orders[orderId] = optionId;
   }
 
-  // Fasst alle gewählten Optionen zu einem Paket für den Kampf zusammen (siehe combat/OrderSettings.js)
+  // Fasst alle gewählten Anweisungen und Talente zu einem Paket für den Kampf zusammen (siehe combat/OrderSettings.js)
   getOrderSettings() {
     const effectsList = getOrdersForClass(this.classId).map((order) => this.getChosenOption(order).effects);
-    return combineOrderEffects(effectsList);
+    const talents = this.talentIds.map((talentId) => findTalent(talentId));
+    for (const talent of talents) {
+      effectsList.push(talent.effects);
+    }
+    const settings = combineOrderEffects(effectsList);
+    // Auren für die ganze Gruppe behalten ihre Talent-id, damit sie in einer Gruppe nur einmal zählen
+    for (const talent of talents) {
+      if (talent.effects.groupAura) {
+        settings.groupAuras.push({ id: talent.id, ...talent.effects.groupAura });
+      }
+    }
+    return settings;
+  }
+
+  // ---------- Talente (siehe data/talents.js) ----------
+
+  // Ist die Talentreihe (0, 1 oder 2) für sein Level schon frei?
+  isTalentRowUnlocked(rowIndex) {
+    return this.level >= TALENT_RULES.rowLevels[rowIndex];
+  }
+
+  // Wie viele Talente darf er in dieser Reihe nehmen? (2 bei Doppelwahl, sonst 1; 0, wenn noch gesperrt)
+  getTalentPicksAllowed(rowIndex) {
+    if (!this.isTalentRowUnlocked(rowIndex)) {
+      return 0;
+    }
+    return rowIndex < TALENT_RULES.doubleRowsByRarity[this.rarityId] ? 2 : 1;
+  }
+
+  // Welche Talente hat er in dieser Reihe gewählt?
+  getTalentsInRow(rowIndex) {
+    const row = getTalentRows(this.classId)[rowIndex] || [];
+    return row.filter((talent) => this.talentIds.includes(talent.id));
+  }
+
+  // Kann er dieses Talent jetzt wählen? (eigene Klasse, Reihe frei, noch Platz in der Reihe, noch nicht gewählt)
+  canChooseTalent(talentId) {
+    const rows = getTalentRows(this.classId);
+    const rowIndex = rows.findIndex((row) => row.some((talent) => talent.id === talentId));
+    if (rowIndex === -1 || this.talentIds.includes(talentId)) {
+      return false;
+    }
+    return this.getTalentsInRow(rowIndex).length < this.getTalentPicksAllowed(rowIndex);
+  }
+
+  chooseTalent(talentId) {
+    if (!this.canChooseTalent(talentId)) {
+      return false;
+    }
+    this.talentIds.push(talentId);
+    return true;
+  }
+
+  // Wie viele Talent-Wahlen sind gerade noch offen? (für den Hinweis "Talent frei!")
+  getFreeTalentPicks() {
+    let free = 0;
+    for (let rowIndex = 0; rowIndex < getTalentRows(this.classId).length; rowIndex++) {
+      free += this.getTalentPicksAllowed(rowIndex) - this.getTalentsInRow(rowIndex).length;
+    }
+    return free;
+  }
+
+  // Was kostet Umskillen? (Gold pro Level)
+  getRespecCost() {
+    return TALENT_RULES.respecCostPerLevel * this.level;
   }
 
   // ---------- Speichern ----------
@@ -275,6 +342,7 @@ export class Hero {
       equipment: equipment,
       orders: this.orders,
       task: this.task,
+      talentIds: this.talentIds,
     };
   }
 
@@ -289,6 +357,7 @@ export class Hero {
     }
     hero.orders = data.orders || {};
     hero.task = data.task;
+    hero.talentIds = data.talentIds;
     for (const slot of EQUIPMENT_SLOTS) {
       const itemData = data.equipment[slot];
       hero.equipment[slot] = itemData ? Item.fromSaveData(itemData) : null;

@@ -504,6 +504,36 @@ export class Game {
     return count;
   }
 
+  // ---------- Aktionen: Talente (siehe data/talents.js) ----------
+
+  // Wählt ein Talent für einen Helden. Gibt true zurück, wenn es geklappt hat.
+  chooseHeroTalent(heroId, talentId) {
+    const hero = this.guild.findHero(heroId);
+    if (!hero || !hero.chooseTalent(talentId)) {
+      return false;
+    }
+    this.emit('changed');
+    return true;
+  }
+
+  // Umskillen: Alle Talente des Helden werden zurückgesetzt, das kostet Gold (siehe Hero.getRespecCost).
+  // Gibt 'ok' oder einen Grund zurück ('notFound', 'nothingToReset', 'noGold').
+  respecHero(heroId) {
+    const hero = this.guild.findHero(heroId);
+    if (!hero) {
+      return 'notFound';
+    }
+    if (hero.talentIds.length === 0) {
+      return 'nothingToReset';
+    }
+    if (!this.guild.spendGold(hero.getRespecCost())) {
+      return 'noGold';
+    }
+    hero.talentIds = [];
+    this.emit('changed');
+    return 'ok';
+  }
+
   // ---------- Aktionen: Tagesaufgaben (siehe data/heroTasks.js) ----------
 
   // Gibt einem Helden eine Aufgabe für die Tage, an denen er nicht kämpft.

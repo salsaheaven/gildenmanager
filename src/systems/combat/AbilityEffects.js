@@ -119,10 +119,14 @@ function getTargets(battle, caster, abilityId, ability) {
 }
 
 // Einen Skill ausführen. Mana und Abklingzeit werden hier abgezogen.
-// power = Stärke des Skills, eine Anweisung kann sie verändern (z.B. "Natternbiss 60 % stärker").
-export function useAbility(battle, caster, abilityId, ability) {
+// power = Stärke des Skills, Anweisungen und Talente können sie verändern (z.B. "Natternbiss 60 % stärker").
+// Ein Talent kann einen Skill auch länger halten lassen: Dann wird mit einer Kopie gerechnet, die eine längere Dauer hat.
+export function useAbility(battle, caster, abilityId, baseAbility) {
+  const durationBonus = caster.getAbilityDurationBonus(abilityId);
+  const ability = durationBonus > 0 ? { ...baseAbility, duration: baseAbility.duration + durationBonus } : baseAbility;
   caster.mana -= caster.getManaCost(ability);
-  const power = (ability.power || 0) * caster.getAbilityPowerFactor(abilityId);
+  const powerFactor = caster.getAbilityPowerFactor(abilityId);
+  const power = (ability.power || 0) * powerFactor;
   caster.startCooldown(abilityId, ability.cooldown);
   if (ability.oncePerFight) {
     caster.markUsedOnce(abilityId);
@@ -152,7 +156,7 @@ export function useAbility(battle, caster, abilityId, ability) {
       applyHealOverTime(battle, caster, abilityId, ability, power, targets);
       break;
     case 'revive':
-      applyRevive(battle, caster, ability, targets[0]);
+      applyRevive(battle, caster, ability, ability.value * powerFactor, targets[0]);
       break;
     case 'resetCooldowns':
       targets[0].cooldowns = {};
@@ -169,7 +173,7 @@ export function useAbility(battle, caster, abilityId, ability) {
       applyTaunt(battle, caster, ability);
       break;
     case 'mana':
-      caster.mana = Math.min(caster.maxMana, caster.mana + caster.maxMana * ability.value);
+      caster.mana = Math.min(caster.maxMana, caster.mana + caster.maxMana * ability.value * powerFactor);
       battle.addLog(caster.name + ' sammelt sich: ' + ability.name + '.', 'info',
         { labels: [{ targetId: caster.id, text: '+Mana' }], manaUpdate: { targetId: caster.id, mana: Math.round(caster.mana) } });
       break;
@@ -228,9 +232,9 @@ function applyHealOverTime(battle, caster, abilityId, ability, power, targets) {
     { labels: targets.map((target) => ({ targetId: target.id, text: ability.name })) });
 }
 
-// Wiederbelebung: Der Gefallene steht mit einem Teil seines Lebens wieder auf
-function applyRevive(battle, caster, ability, target) {
-  target.revive(ability.value);
+// Wiederbelebung: Der Gefallene steht mit einem Teil seines Lebens wieder auf (hpShare, z.B. 0.3, höchstens alles)
+function applyRevive(battle, caster, ability, hpShare, target) {
+  target.revive(Math.min(1, hpShare));
   caster.healingDone += target.hp;
   battle.addLog(caster.name + ': ' + ability.name + '! ' + target.name + ' steht wieder auf.', 'heal',
     { hits: [target.describeHit(target.hp, 'heal')], labels: [{ targetId: target.id, text: 'Wiederbelebt!' }] });

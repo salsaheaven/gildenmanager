@@ -47,7 +47,7 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
                simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug),
                BattleTimeline (wann passiert was → Dauer eines Runs, mit Zeitraffer für Trash und ruhige Runden), Battle (Zustand + Zielwahl),
                Combatant (ein Kämpfer), HeroAI (welcher Skill?), EnemyAI (Boss-Mechaniken),
-               AbilityEffects (was ein Skill bewirkt), OrderSettings (gewählte Anweisungen → ein Paket mit Wirkungen für den Kampf),
+               AbilityEffects (was ein Skill bewirkt), OrderSettings (gewählte Anweisungen + Talente → ein Paket mit Wirkungen für den Kampf, Gruppen-Auren),
                CauseTracker (woher der Schaden an den Helden kommt), SupplyEffects (Wirkung der mitgenommenen Vorräte im Run), DefeatAnalysis („Woran es lag“: Top 3 Ursachen + Tipp), ChanceEstimator (200 Kämpfe → Siegchance; estimateRunChances = ganzer Dungeon),
                TestGroup (Testgruppe fürs Labor, Klassen frei wählbar)
 src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes, balancing, sprites (Pixel-Art als Text),
@@ -60,6 +60,7 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben),
                damageTypes (Schadensarten mit Farbe, Obergrenze für Resistenzen),
                defeatCauses (Tipps und Hinweise für „Woran es lag“),
+               talents (pro Klasse 3 Talentreihen à 2, Doppelwahl für seltene Helden, Umskillen-Kosten),
                rivalGuilds (4 KI-Gilden mit Persönlichkeit: Versuchs- und Erfolgschance),
                consumables (Verbrauchsgüter des Händlers: Preis, Grundware/Tagesangebot, Wirkung; 2 Vorrats-Plätze pro Gruppe),
                collectionBook (Sammelbuch-Seiten pro Dungeon mit Titel und Gold-Bonus; die Items kommen aus `bossLoot` in lootBoxes)

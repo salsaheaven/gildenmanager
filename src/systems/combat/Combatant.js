@@ -210,6 +210,11 @@ export class Combatant {
     return 1 + (this.orderSettings.abilityPower[abilityId] || 0);
   }
 
+  // So viele Runden länger hält ein Skill (Talent, z.B. "Eiserne Wacht hält 1 Runde länger")
+  getAbilityDurationBonus(abilityId) {
+    return this.orderSettings.abilityDuration[abilityId] || 0;
+  }
+
   // Anteil des eigenen Schadens, der einen selbst heilt (Blutrausch)
   getLifesteal() {
     let share = 0;
@@ -225,12 +230,12 @@ export class Combatant {
 
   // Nimmt Schaden: erst Rüstung, Resistenz und Buffs, dann fängt der Schild ab, dann geht Leben verloren.
   // damageType = Schadensart (siehe data/damageTypes.js). Eine passende Resistenz mindert den Schaden zusätzlich.
-  // Gibt zurück: { damage: verlorenes Leben, absorbed: vom Schild abgefangen }
+  // Gibt zurück: { damage: verlorenes Leben, absorbed: vom Schild abgefangen, savedByTalent: mit 1 Leben gerettet }
   takeDamage(rawAmount, ignoreDefense = false, damageType = 'physical') {
     const factor = this.getDamageTakenFactor();
     if (factor === 0) {
       // Unverwundbar (Gottesschild): kein Schaden
-      return { damage: 0, absorbed: 0 };
+      return { damage: 0, absorbed: 0, savedByTalent: false };
     }
     let amount = rawAmount * factor;
     if (!ignoreDefense) {
@@ -243,7 +248,14 @@ export class Combatant {
 
     const absorbed = Math.min(this.shield, amount);
     this.shield -= absorbed;
-    const damage = Math.min(this.hp, amount - absorbed);
+    let damage = Math.min(this.hp, amount - absorbed);
+    // Talent "Letztes Gefecht" u.ä.: einmal pro Kampf bleibt er mit 1 Leben stehen
+    let savedByTalent = false;
+    if (damage >= this.hp && this.orderSettings.cheatDeath && !this.usedOnce.cheatDeath) {
+      damage = this.hp - 1;
+      this.usedOnce.cheatDeath = true;
+      savedByTalent = true;
+    }
     this.hp -= damage;
     this.damageTaken += damage;
 
@@ -253,7 +265,7 @@ export class Combatant {
       this.shield = 0;
       this.casting = null;
     }
-    return { damage: damage, absorbed: absorbed };
+    return { damage: damage, absorbed: absorbed, savedByTalent: savedByTalent };
   }
 
   // Steht wieder auf (Ruf der Wurzeln) mit diesem Anteil seines Lebens
