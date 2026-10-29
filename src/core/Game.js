@@ -16,6 +16,7 @@
 //   'heroHealed'           → ein verletzter Held ist wieder fit (Daten: der Held)
 // ============================================================
 
+import { advanceRivals, recordPlayerClear, getLeaderboard } from '../systems/RivalSystem.js';
 import { getDayPlan } from '../systems/DayPlan.js';
 import { HERO_TASKS } from '../data/heroTasks.js';
 import { resolveHeroTasks, payWages, getDailyWages } from '../systems/HeroTaskSystem.js';
@@ -103,9 +104,14 @@ export class Game {
       }
     }
     const wages = payWages(this.guild);
-    this.lastDaySummary = { day: endedDay, tasks: taskResults, wages: wages };
 
-    // 4. Der nächste Tag beginnt: neue Bewerber in der Taverne, neues Tagesangebot beim Händler
+    // 4. Die KI-Gilden sind dran (nach deinen Runs: am selben Abend bist du zuerst)
+    const rivalNews = advanceRivals(this.guild, endedDay, this.random);
+    // Neuigkeiten des Abends: deine (schon im Ticker) und die der Rivalen
+    const news = this.guild.news.filter((entry) => entry.day === endedDay);
+    this.lastDaySummary = { day: endedDay, tasks: taskResults, wages: wages, news: news, rivalNews: rivalNews };
+
+    // 5. Der nächste Tag beginnt: neue Bewerber in der Taverne, neues Tagesangebot beim Händler
     this.day++;
     this.refreshCandidates();
     this.refreshDailyOffer();
@@ -346,6 +352,7 @@ export class Game {
       chestBonusItems: 0,   // Extra-Items durch "Glückspilz"
       chestBonusHero: null,
       firstClear: false,
+      serverFirst: false,   // als erste Gilde des Servers geschafft?
       // "Woran es lag": Top-Ursachen, Tipp und Hinweise (nur bei Niederlage oder Gefallenen, sonst null)
       analysis: needsDefeatAnalysis(result) ? analyzeRun(result) : null,
       expedition: expedition.toSaveData(), // zum erneuten Ansehen
@@ -364,6 +371,11 @@ export class Game {
       report.gold = dungeon.rewards.gold;
       report.chest = dungeon.rewards.chest;
       report.firstClear = this.guild.getClears(dungeon.id) === 0;
+      // Zum ersten Mal geschafft: in die Rangliste und den Ticker, evtl. Server-First
+      if (report.firstClear) {
+        this.guild.firstClearDays[dungeon.id] = this.day;
+        report.serverFirst = recordPlayerClear(this.guild, dungeon.id, this.day);
+      }
       this.guild.addGold(dungeon.rewards.gold);
       // Ein Glückspilz in der Gruppe legt ein Item mehr in die Kiste
       const extraItems = getGroupExtraChestItems(heroes);
@@ -550,13 +562,24 @@ export class Game {
     return planned;
   }
 
-  // Wählt einen Gildentitel aus dem Sammelbuch (null = keinen Titel tragen)
+  // Alle Titel, die die Gilde tragen darf: aus vollen Sammelbuch-Seiten und aus eigenen Server-Firsts
+  getAvailableTitles() {
+    return this.guild.collection.getUnlockedTitles().concat(this.guild.earnedTitles);
+  }
+
+  // Wählt einen Gildentitel (null = keinen Titel tragen)
   selectGuildTitle(title) {
-    if (!this.guild.collection.selectTitle(title)) {
+    if (title !== null && !this.getAvailableTitles().includes(title)) {
       return false;
     }
+    this.guild.selectedTitle = title;
     this.emit('changed');
     return true;
+  }
+
+  // Rangliste aller Gilden (siehe systems/RivalSystem.js)
+  getLeaderboard() {
+    return getLeaderboard(this.guild);
   }
 
   // Ändert eine Kampf-Anweisung eines Helden (siehe data/heroOrders.js)

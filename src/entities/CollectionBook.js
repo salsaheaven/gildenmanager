@@ -12,7 +12,7 @@ import { getRarityRank } from '../data/rarities.js';
 export class CollectionBook {
   constructor() {
     this.found = {};          // Boss-Item-id → beste gefundene Seltenheit, z.B. { chitinShield: 'epic' }
-    this.selectedTitle = null; // gewählter Gildentitel (oder null = keiner)
+    // (Welcher Titel gewählt ist, merkt sich die Gilde: guild.selectedTitle)
   }
 
   // Trägt ein Item ein. Gibt zurück, was passiert ist:
@@ -83,15 +83,6 @@ export class CollectionBook {
     return COLLECTION_PAGES.filter((page) => this.isPageComplete(page)).map((page) => page.title);
   }
 
-  // Wählt einen Titel (nur freigeschaltete). null = keinen Titel tragen. Gibt true zurück, wenn es geklappt hat.
-  selectTitle(title) {
-    if (title !== null && !this.getUnlockedTitles().includes(title)) {
-      return false;
-    }
-    this.selectedTitle = title;
-    return true;
-  }
-
   // Gold-Bonus eines Dungeons (0, solange seine Seite nicht voll ist)
   getGoldBonus(dungeonId) {
     const page = getCollectionPage(dungeonId);
@@ -104,13 +95,12 @@ export class CollectionBook {
   // ---------- Speichern ----------
 
   toSaveData() {
-    return { found: this.found, selectedTitle: this.selectedTitle };
+    return { found: this.found };
   }
 
   static fromSaveData(data) {
     const book = new CollectionBook();
     book.found = data.found;
-    book.selectedTitle = data.selectedTitle;
     return book;
   }
 }

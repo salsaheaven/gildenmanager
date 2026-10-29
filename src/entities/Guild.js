@@ -4,6 +4,8 @@
 // (Später kommen hier Gebäude dazu.)
 // ============================================================
 
+import { RivalGuild } from './RivalGuild.js';
+import { RIVAL_GUILDS } from '../data/rivalGuilds.js';
 import { CollectionBook } from './CollectionBook.js';
 import { Item } from './Item.js';
 import { LootBox } from './LootBox.js';
@@ -33,6 +35,16 @@ export class Guild {
     this.dailyOffer = [];      // heutiges Tagesangebot des Händlers (Liste von Verbrauchsgut-ids)
     this.scoutedDungeons = {}; // erkundete Dungeons: Dungeon-id → true (gilt für den nächsten Run dort)
     this.lastDayPlan = [];     // die Gruppen von gestern, für "Wie gestern": [{ dungeonId, heroIds, retreatRuleId, supplies }]
+    this.firstClearDays = {};  // Dungeon-id → Tag, an dem deine Gilde ihn zum ersten Mal geschafft hat (Rangliste)
+
+    // KI-Gilden und Server (siehe data/rivalGuilds.js und systems/RivalSystem.js)
+    this.rivals = RIVAL_GUILDS.map((rival) => new RivalGuild(rival.id));
+    this.news = [];            // Neuigkeiten-Ticker, neueste zuerst: [{ day, text, color, kind, isPlayer }]
+    this.serverFirsts = {};    // Dungeon-id → { name, day, isPlayer }: wer ihn als erste Gilde geschafft hat
+
+    // Titel: verdiente Titel aus Server-Firsts (die aus dem Sammelbuch rechnet das Buch selbst aus)
+    this.earnedTitles = [];
+    this.selectedTitle = null; // gewählter Gildentitel (oder null = keiner), steht oben neben dem Namen
 
     // Pity-Zähler: Items seit dem letzten epischen oder legendären Item
     this.itemsSinceEpic = 0;
@@ -224,6 +236,12 @@ export class Guild {
       dailyOffer: this.dailyOffer,
       scoutedDungeons: this.scoutedDungeons,
       lastDayPlan: this.lastDayPlan,
+      firstClearDays: this.firstClearDays,
+      rivals: this.rivals.map((rival) => rival.toSaveData()),
+      news: this.news,
+      serverFirsts: this.serverFirsts,
+      earnedTitles: this.earnedTitles,
+      selectedTitle: this.selectedTitle,
     };
   }
 
@@ -250,6 +268,12 @@ export class Guild {
     guild.dailyOffer = data.dailyOffer;
     guild.scoutedDungeons = data.scoutedDungeons;
     guild.lastDayPlan = data.lastDayPlan;
+    guild.firstClearDays = data.firstClearDays;
+    guild.rivals = data.rivals.map((rivalData) => RivalGuild.fromSaveData(rivalData));
+    guild.news = data.news;
+    guild.serverFirsts = data.serverFirsts;
+    guild.earnedTitles = data.earnedTitles;
+    guild.selectedTitle = data.selectedTitle;
     return guild;
   }
 }

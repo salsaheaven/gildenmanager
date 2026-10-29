@@ -76,7 +76,7 @@ export class CollectionOverlay {
     const book = this.game.guild.collection;
     const progress = book.getProgress();
     this.root.querySelector('.collection-count').textContent = progress.found + ' / ' + progress.total;
-    this.renderTitleSelect(book);
+    this.renderTitleSelect();
 
     const pages = this.root.querySelector('.collection-pages');
     pages.innerHTML = '';
@@ -85,22 +85,23 @@ export class CollectionOverlay {
     }
   }
 
-  // Auswahl der freigeschalteten Titel (ohne volle Seite: nur "kein Titel")
-  renderTitleSelect(book) {
+  // Auswahl aller verdienten Titel (volle Sammelbuch-Seiten und eigene Server-Firsts)
+  renderTitleSelect() {
+    const titles = this.game.getAvailableTitles();
     const select = this.root.querySelector('.collection-title-select');
     select.innerHTML = '';
     const none = document.createElement('option');
     none.value = '';
     none.textContent = 'kein Titel';
     select.appendChild(none);
-    for (const title of book.getUnlockedTitles()) {
+    for (const title of titles) {
       const option = document.createElement('option');
       option.value = title;
       option.textContent = title;
       select.appendChild(option);
     }
-    select.value = book.selectedTitle || '';
-    select.disabled = book.getUnlockedTitles().length === 0;
+    select.value = this.game.guild.selectedTitle || '';
+    select.disabled = titles.length === 0;
   }
 
   // Eine Seite: Dungeon-Name, Fortschritt, Items, bei voller Seite Titel und Bonus

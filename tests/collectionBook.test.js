@@ -49,7 +49,6 @@ describe('Sammelbuch eintragen', () => {
     const book = new CollectionBook();
     const ids = getPageItems(BEAR_PAGE).map((entry) => entry.id);
     expect(book.getGoldBonus('bearCave')).toBe(0);
-    expect(book.selectTitle(BEAR_PAGE.title)).toBe(false);
 
     for (let i = 0; i < ids.length - 1; i++) {
       expect(book.record(bossItem(ids[i], 'epic')).completedPage).toBeNull();
@@ -63,8 +62,12 @@ describe('Sammelbuch eintragen', () => {
 
     expect(book.getGoldBonus('bearCave')).toBe(BEAR_PAGE.goldBonus);
     expect(book.getUnlockedTitles()).toEqual([BEAR_PAGE.title]);
-    expect(book.selectTitle(BEAR_PAGE.title)).toBe(true);
-    expect(book.selectedTitle).toBe(BEAR_PAGE.title);
+    // Titel wählen läuft über das Spiel (Titel gibt es aus Sammelbuch und Server-Firsts)
+    const game = new Game(1);
+    expect(game.selectGuildTitle(BEAR_PAGE.title)).toBe(false);
+    game.guild.collection = book;
+    expect(game.selectGuildTitle(BEAR_PAGE.title)).toBe(true);
+    expect(game.guild.selectedTitle).toBe(BEAR_PAGE.title);
   });
 });
 

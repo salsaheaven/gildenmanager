@@ -69,7 +69,7 @@ export class TopBar {
   // Aktualisiert die Anzeigen (bei jeder Änderung am Spielstand)
   update() {
     const guild = this.game.guild;
-    const title = guild.collection.selectedTitle;
+    const title = guild.selectedTitle;
     this.root.querySelector('.guild-title').textContent = title ? ' · ' + title : '';
 
     // Gold: kurz "hüpfen", wenn sich der Betrag ändert
