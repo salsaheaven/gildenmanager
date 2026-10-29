@@ -152,6 +152,7 @@ Regel für Raids: **Gleiche Buffs zählen nicht doppelt** (zwei Barden geben nic
 Alle Formeln und Zahlen dafür stehen in `src/data/` (`scaling.js`, `experience.js`) und werden per Simulation eingestellt.
 
 ## Noch offen (nächste Sessions)
+- **Oberfläche komplett neu (nach M3):** Zurzeit zu unübersichtlich. Gegliedert in Planungsabschnitte, Helden mit neuen anlegbaren Items vom Vortag markieren. Details in `PLAN.md` unter „UI-Neubau“.
 - **Endbalancing der Anweisungen:** Jedes Extrem soll irgendwo die beste Wahl sein und irgendwo schaden. Gemessen wird das mit `tools/anweisungen.mjs`. Die Übersicht am Ende markiert Optionen als „situativ“, „nie besser“ oder „immer gut“.
 - **Kampf-Feinheiten:** Erste Version steht im Kampf-Labor. Werte: Leben, Mana, Angriff, Magie, Rüstung. Aggro entsteht durch Schaden (beim Tank ×3 bis ×4) und Heilung. Alle Zahlen stehen in `src/data/`. Noch offen: Krit als eigener Wert auf Items? Wie stark fallen Eigenschaften im Kampf ins Gewicht?
 - **Umfang:** Zielbild steht (60 Helden, 10+ Dungeons, zwei 40-Mann-Raids). Offen: Wie lange dauert ein Durchlauf bis zum Endboss, in Spieltagen und in echten Stunden?

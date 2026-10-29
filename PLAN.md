@@ -121,6 +121,11 @@ In kleinen, jeweils online testbaren Schritten:
 - **Schritt 4** Crafting und Alchemie, Logik und Daten: Schmieden (Platz + Rüstungsart wählen, Seltenheit gewürfelt), Umschmieden (andere Rüstungsart), Boss-Trophäen und Boss-Rezepte, Kräuter statt fertiger Tränke und Brau-Rezepte im Labor.
 - **Schritt 5** Crafting und Alchemie, Oberfläche, danach M3 pushen.
 
+**UI-Neubau (nach M3, vor M4; gewünscht 2026-10-29):** Die Oberfläche ist mit allen Systemen zu unübersichtlich geworden und wird **komplett neu gemacht**. Vorher gemeinsam planen. Ideen:
+- Aufteilung in **Planungsabschnitte** statt vieler gleichrangiger Reiter (z.B. 1. Beute und Ausrüstung, 2. Helden und Aufgaben, 3. Gruppen und Dungeons, 4. Tag beenden)
+- **Helden markieren, die seit gestern neue Items bekommen haben, die sie anziehen können** (Hinweis in der Heldenliste und im Tagesplan)
+- Weniger auf einmal zeigen, Wichtiges zuerst, Details aufklappbar
+
 **M4 – Raids & Endboss:** Zwei 40-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~60 Helden im Roster, 10+ Dungeons.
 
 **M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie, New Game+.
