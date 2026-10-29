@@ -6,6 +6,7 @@
 // Nichts davon verändert den Spielstand.
 // ============================================================
 
+import { renderTalents } from './TalentPanel.js';
 import { BOSSES, getBoss } from '../data/enemies.js';
 import { getBossLevel } from '../data/dungeons.js';
 import { scaleEnemyStats } from '../systems/combat/Battle.js';
@@ -35,6 +36,7 @@ export class CombatLabScreen {
     this.fightCounter = 0;             // sorgt dafür, dass jeder Kampf anders verläuft
     this.activeScene = null;           // die gerade laufende Kampfszene
     this.testOrders = {};              // Anweisungen der Testgruppe: Klasse → { Anweisung → Option }
+    this.testTalents = {};             // Talente der Testgruppe: Klasse → Liste von Talent-ids (kostenlos änderbar)
 
     this.root.innerHTML = `
       <div class="lab-screen">
@@ -53,6 +55,9 @@ export class CombatLabScreen {
 
           <h3>Anweisungen</h3>
           <div class="orders-list"></div>
+
+          <h3>Talente</h3>
+          <div class="lab-talents"></div>
 
           <div class="lab-actions">
             <button class="big-button fight-button">Kampf ansehen</button>
@@ -86,6 +91,7 @@ export class CombatLabScreen {
     this.renderGroupPreview();
     this.renderBossList();
     this.renderOrderList();
+    this.renderTalentList();
     const hasGroup = this.getGroup().length > 0;
     this.root.querySelector('.fight-button').disabled = !hasGroup;
     this.root.querySelector('.estimate-button').disabled = !hasGroup;
@@ -197,6 +203,10 @@ export class CombatLabScreen {
       // Die Testgruppe wird jedes Mal neu erstellt, ihre Anweisungen merkt sich das Labor
       for (const hero of group) {
         hero.orders = { ...(this.testOrders[hero.classId] || {}) };
+        // Nur Talente behalten, die auf dem Test-Level erlaubt sind
+        for (const talentId of this.testTalents[hero.classId] || []) {
+          hero.chooseTalent(talentId);
+        }
       }
       return group;
     }
@@ -245,6 +255,40 @@ export class CombatLabScreen {
         this.game.setHeroOrder(hero.id, orderId, optionId);
       }
     });
+  }
+
+  // Talente: in der Testgruppe kostenlos, eigene Helden wie im Heldenbildschirm (Umskillen kostet dort Gold)
+  renderTalentList() {
+    const container = this.root.querySelector('.lab-talents');
+    container.innerHTML = '';
+    for (const hero of this.getGroup()) {
+      const block = document.createElement('div');
+      block.className = 'lab-talent-block';
+      block.innerHTML = '<div class="orders-hero"><span></span></div><div class="lab-talent-rows"></div>';
+      block.querySelector('.orders-hero span').textContent = hero.name;
+      if (this.mode === 'test') {
+        renderTalents(block.querySelector('.lab-talent-rows'), hero, {
+          onChoose: (changedHero, talentId) => {
+            Sound.click();
+            this.testTalents[changedHero.classId] = (this.testTalents[changedHero.classId] || []).concat(talentId);
+            this.renderSetup();
+          },
+          onReset: (changedHero) => {
+            Sound.click();
+            this.testTalents[changedHero.classId] = [];
+            this.renderSetup();
+          },
+        });
+      } else {
+        renderTalents(block.querySelector('.lab-talent-rows'), hero, {
+          onChoose: (changedHero, talentId) => this.game.chooseHeroTalent(changedHero.id, talentId),
+        });
+      }
+      container.appendChild(block);
+    }
+    if (container.children.length === 0) {
+      container.innerHTML = '<p class="hint">Wähle zuerst Helden aus.</p>';
+    }
   }
 
   // ---------- Kämpfe ----------

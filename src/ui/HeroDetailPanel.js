@@ -4,6 +4,7 @@
 // Klick auf einen Ausrüstungsplatz zeigt rechts die Ausrüstungsliste für diesen Platz.
 // ============================================================
 
+import { renderTalents } from './TalentPanel.js';
 import { ROLE_NAMES, ROW_NAMES } from '../data/heroClasses.js';
 import { ABILITIES } from '../data/abilities.js';
 import { SLOT_NAMES, STAT_NAMES } from '../data/items.js';
@@ -73,6 +74,9 @@ export class HeroDetailPanel {
       <h3>Ausrüstung</h3>
       <div class="equipment-grid"></div>
 
+      <h3>Talente</h3>
+      <div class="hero-talents"></div>
+
       <h3>Anweisungen für den Kampf</h3>
       <div class="hero-orders"></div>
 
@@ -97,10 +101,31 @@ export class HeroDetailPanel {
     this.renderResistances();
     this.renderSkills();
     this.renderEquipment();
+    renderTalents(this.root.querySelector('.hero-talents'), hero, {
+      onChoose: (changedHero, talentId) => {
+        if (this.game.chooseHeroTalent(changedHero.id, talentId)) {
+          Sound.levelUp();
+        }
+      },
+      // Umskillen kostet Gold (siehe respec)
+      onReset: (changedHero) => this.respec(changedHero),
+      resetLabel: 'Umskillen (' + hero.getRespecCost() + ' Gold)',
+    });
     renderOrders(this.root.querySelector('.hero-orders'), [hero], (changedHero, orderId, optionId) => {
       this.game.setHeroOrder(changedHero.id, orderId, optionId);
     }, false);
     this.setupDismissButton();
+  }
+
+  // Umskillen: setzt alle Talente zurück und kostet Gold
+  respec(hero) {
+    const result = this.game.respecHero(hero.id);
+    if (result === 'ok') {
+      Sound.coin();
+      showToast(hero.name + ' hat umgeskillt. Die Talente sind wieder frei.', '#ffd23f');
+    } else if (result === 'noGold') {
+      showToast('Nicht genug Gold zum Umskillen (' + hero.getRespecCost() + ' Gold).', '#ff6b6b');
+    }
   }
 
   // Resistenzen aus der Ausrüstung, z.B. "Resistenzen: Säure 13 %, Schatten 5 %" (in der Farbe der Schadensart)

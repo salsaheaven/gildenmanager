@@ -2230,6 +2230,83 @@ h3 {
   margin-bottom: 6px;
 }
 
+/* ---------- Talente ---------- */
+
+.talent-free-hint,
+.talent-free-chip {
+  color: var(--gold);
+  font-weight: bold;
+}
+
+.talent-row {
+  margin-bottom: 8px;
+}
+
+.talent-row.locked {
+  opacity: 0.5;
+}
+
+.talent-row-head {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.talent-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.talent-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 6px 8px;
+  text-align: left;
+  border: 2px solid var(--border);
+}
+
+.talent-option.choosable {
+  border-color: var(--gold);
+  animation: talent-glow 1.6s ease-in-out infinite;
+}
+
+.talent-option.chosen {
+  border-color: #1eff00;
+  background: rgba(30, 255, 0, 0.1);
+}
+
+.talent-option:disabled {
+  cursor: default;
+}
+
+@keyframes talent-glow {
+  50% { box-shadow: 0 0 10px var(--gold); }
+}
+
+.talent-name {
+  color: var(--gold);
+}
+
+.talent-option.chosen .talent-name {
+  color: #1eff00;
+}
+
+.talent-description {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.talent-reset-button {
+  margin-top: 4px;
+}
+
+.lab-talent-block {
+  margin-bottom: 10px;
+}
+
 /* ---------- Server: Ticker und Rangliste ---------- */
 
 .news-ticker {

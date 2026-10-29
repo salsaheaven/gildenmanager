@@ -67,7 +67,10 @@ export class LevelUpBanner {
       </div>
     `;
     this.root.querySelector('.level-up-portrait').appendChild(createHeroCanvas(next.hero, 6));
-    this.root.querySelector('.level-up-text').textContent = next.hero.name + ' erreicht Level ' + next.newLevel + '!';
+    // Ist (z.B. durch eine neue Talentreihe) ein Talent frei? Dann gleich darauf hinweisen
+    const talentFree = next.hero.getFreeTalentPicks() > 0;
+    this.root.querySelector('.level-up-text').textContent = next.hero.name + ' erreicht Level ' + next.newLevel + '!' +
+      (talentFree ? ' Talent frei!' : '');
     Sound.levelUp();
     this.timer = setTimeout(() => this.showNext(), SHOW_TIME);
   }

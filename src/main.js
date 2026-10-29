@@ -104,12 +104,15 @@ function showScreen(screenId) {
   updateBadges();
 }
 
-// Abzeichen an den Reitern: Kisten, neue Bewerber, geplante Runs
+// Abzeichen an den Reitern: Kisten, freie Talente, neue Bewerber, geplante Runs
 // (neue Items zeigt der Inventar-Knopf selbst an)
 function updateBadges() {
   const guild = game.guild;
   navBar.setBadge('treasury', guild.boxes.length > 0 ? String(guild.boxes.length) : '');
   navBar.setBadge('tavern', tavernHasNews ? '!' : '');
+  // Helden mit freier Talent-Wahl
+  const freeTalents = guild.heroes.filter((hero) => hero.getFreeTalentPicks() > 0).length;
+  navBar.setBadge('heroes', freeTalents > 0 ? '★' : '');
   const planned = guild.expeditions.length;
   navBar.setBadge('dungeons', dungeonHasNews ? '!' : (planned > 0 ? String(planned) : ''));
 }

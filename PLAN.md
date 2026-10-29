@@ -110,6 +110,7 @@ In kleinen, jeweils online testbaren Schritten:
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 
 **M2 – Progression:** ~~Gildenkurier abschalten~~ (✅ schon erledigt und beim Umbau auf Runden ganz entfernt), Kisten aus dem Händler nehmen; der Laden verkauft Verbrauchsgüter und Mats, dazu der Wanderhändler. **Talente** und **Zerlegen + Verbessern** (+1 bis +10). (Entschieden 2026-10-29: Heroisch mit Permadeath, Ehrenhalle und den Klassen-Sets kommt erst später als Endgame auf Max-Level.)
+- **Talente** ✅ 90 Talente (15 Klassen × 3 Reihen × 2), Doppelwahl für epische/legendäre Helden, Umskillen gegen Gold. Neue Kampf-Bausteine: Werte-Bonus, längere Skills, tödlichen Treffer überleben, Gruppen-Auren. Talent-Auswahl im Heldenbildschirm und im Kampf-Labor, Hinweise am Reiter, in der Heldenliste und im Level-Up-Banner. Spielstand-Version 9.
 
 **M3 – Rivalen & Gildenhalle:** KI-Gilden, Rangliste, News-Ticker, Gebäude (Kaserne, Lazarett, Schmiede), Crafting.
 

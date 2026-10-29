@@ -84,7 +84,7 @@ export class HeroScreen {
     entry.insertAdjacentHTML('beforeend', `
       <span class="roster-text">
         <span class="roster-name"></span>
-        <span class="roster-sub">${hero.getClass().name} · Lv ${hero.level} · AW ${hero.getGearScore()}${this.game.guild.isHeroBusy(hero.id) ? ' · heute im Dungeon' : ''}${hero.isInjured() ? ' · verletzt' : ''}</span>
+        <span class="roster-sub">${hero.getClass().name} · Lv ${hero.level} · AW ${hero.getGearScore()}${this.game.guild.isHeroBusy(hero.id) ? ' · heute im Dungeon' : ''}${hero.isInjured() ? ' · verletzt' : ''}${hero.getFreeTalentPicks() > 0 ? ' · <span class="talent-free-chip">Talent frei!</span>' : ''}</span>
       </span>
     `);
     entry.querySelector('.roster-name').textContent = hero.name;
