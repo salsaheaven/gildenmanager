@@ -4,7 +4,9 @@
 import { describe, it, expect } from 'vitest';
 import { LOOT_BOXES } from '../src/data/lootBoxes.js';
 import { RARITIES } from '../src/data/rarities.js';
-import { ITEM_TEMPLATES, SLOT_NAMES, STAT_NAMES } from '../src/data/items.js';
+import { ITEM_TEMPLATES, SLOT_NAMES, STAT_NAMES, ARMOR_TYPES } from '../src/data/items.js';
+import { LootSystem } from '../src/systems/LootSystem.js';
+import { Random } from '../src/core/Random.js';
 import { SPRITES, PALETTE } from '../src/data/sprites.js';
 import { BALANCING } from '../src/data/balancing.js';
 
@@ -28,6 +30,37 @@ describe('Kisten-Daten', () => {
 });
 
 describe('Item-Vorlagen', () => {
+  it('jede Rüstungsart fällt gleich oft (Summe der Drop-Gewichte pro Art und Platz gleich)', () => {
+    for (const slot of ['head', 'chest', 'feet']) {
+      const weightPerArmorType = {};
+      for (const armorType in ARMOR_TYPES) {
+        weightPerArmorType[armorType] = ITEM_TEMPLATES
+          .filter((template) => template.slot === slot && template.armorType === armorType)
+          .reduce((sum, template) => sum + (template.dropWeight || 1), 0);
+      }
+      const weights = Object.values(weightPerArmorType);
+      expect(new Set(weights).size, slot + ': ' + JSON.stringify(weightPerArmorType)).toBe(1);
+    }
+  });
+
+  it('im Spiel: 3000 Zufalls-Items, jede Rüstungsart etwa ein Drittel der Rüstungsteile', () => {
+    const lootSystem = new LootSystem(new Random(7));
+    const counts = { plate: 0, leather: 0, cloth: 0 };
+    let armorPieces = 0;
+    for (let i = 0; i < 3000; i++) {
+      const item = lootSystem.createItem('common', i);
+      const armorType = ITEM_TEMPLATES.find((template) => template.id === item.templateId).armorType;
+      if (armorType) {
+        counts[armorType]++;
+        armorPieces++;
+      }
+    }
+    for (const armorType in counts) {
+      expect(counts[armorType] / armorPieces, armorType).toBeGreaterThan(0.28);
+      expect(counts[armorType] / armorPieces, armorType).toBeLessThan(0.39);
+    }
+  });
+
   for (const template of ITEM_TEMPLATES) {
     it(`${template.name}: Slot, Werte und Bild existieren`, () => {
       expect(SLOT_NAMES[template.slot]).toBeDefined();

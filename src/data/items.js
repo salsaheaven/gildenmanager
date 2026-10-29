@@ -13,6 +13,9 @@
 // forScaling    = nur bei Ringen: für wen der Ring gedacht ist ('attack' = Angriff, 'magic' = Zauber).
 //                 Tragen darf ihn jeder.
 // colors        = freiwillig: Farben, die im Pixelbild ersetzt werden (sonst die Farben der Rüstungsart)
+// dropWeight    = freiwillig: wie oft die Vorlage in Kisten vorkommt (ohne Angabe 1, 2 = doppelt so oft).
+//                 Platte und Leder haben je zwei Varianten, Stoff nur eine. Deshalb hat Stoff Gewicht 2:
+//                 So fällt jede Rüstungsart gleich oft (ein Test prüft das).
 // ============================================================
 
 // Die drei Rüstungsarten. colors = Farben im Pixelbild (Stahl, Leder, Stoff)
@@ -54,9 +57,9 @@ export const ITEM_TEMPLATES = [
   { id: 'wildLeatherBoots',  name: 'Wildlederstiefel', legendaryName: 'Pfad der Wurzeln',        slot: 'feet',  sprite: 'boots',  armorType: 'leather', stats: { magic: 1, defense: 1, health: 6, mana: 4 } },
 
   // ---------- Stoff (Priester, Runenwirker, Magier, Hexenmeister, Barde, Chronomant): Magie und Mana, wenig Rüstung ----------
-  { id: 'clothHelmet', name: 'Stoffkapuze',  legendaryName: 'Kapuze der Sternenseherin', slot: 'head',  sprite: 'helmet', armorType: 'cloth', stats: { magic: 2, health: 8, mana: 8 } },
-  { id: 'clothArmor',  name: 'Stoffrobe',    legendaryName: 'Robe des Erzmagiers',       slot: 'chest', sprite: 'armor',  armorType: 'cloth', stats: { magic: 3, defense: 1, health: 12, mana: 12 } },
-  { id: 'clothBoots',  name: 'Stoffschuhe',  legendaryName: 'Pfad der Leere',            slot: 'feet',  sprite: 'boots',  armorType: 'cloth', stats: { magic: 1, health: 6, mana: 6 } },
+  { id: 'clothHelmet', name: 'Stoffkapuze',  legendaryName: 'Kapuze der Sternenseherin', slot: 'head',  sprite: 'helmet', armorType: 'cloth', dropWeight: 2, stats: { magic: 2, health: 8, mana: 8 } },
+  { id: 'clothArmor',  name: 'Stoffrobe',    legendaryName: 'Robe des Erzmagiers',       slot: 'chest', sprite: 'armor',  armorType: 'cloth', dropWeight: 2, stats: { magic: 3, defense: 1, health: 12, mana: 12 } },
+  { id: 'clothBoots',  name: 'Stoffschuhe',  legendaryName: 'Pfad der Leere',            slot: 'feet',  sprite: 'boots',  armorType: 'cloth', dropWeight: 2, stats: { magic: 1, health: 6, mana: 6 } },
 
   // ---------- Ringe: jeder darf sie tragen ----------
   { id: 'attackRing', name: 'Kampfring',  legendaryName: 'Siegel des Kriegsherrn', slot: 'ring', sprite: 'ring', forScaling: 'attack', stats: { attack: 4 } },

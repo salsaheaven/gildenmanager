@@ -93,7 +93,7 @@ export class LootSystem {
   //                   sonst bekommt es mit etwas Glück eine zufällige.
   createItem(rarityId, itemId, itemLevel = 1, template = null, fixedName = null, fixedResistance = null) {
     if (template === null) {
-      template = this.random.pick(ITEM_TEMPLATES);
+      template = this.pickTemplate();
     }
     const rarity = getRarity(rarityId);
     const levelFactor = getItemLevelFactor(itemLevel);
@@ -124,6 +124,15 @@ export class LootSystem {
       return { [this.random.pick(RESISTANCE_TYPES)]: rarity.resistance };
     }
     return {};
+  }
+
+  // Eine zufällige Item-Vorlage, gewichtet mit dropWeight (siehe items.js, ohne Angabe 1)
+  pickTemplate() {
+    const weights = {};
+    for (const template of ITEM_TEMPLATES) {
+      weights[template.id] = template.dropWeight || 1;
+    }
+    return getItemTemplate(this.random.pickWeighted(weights));
   }
 
   createItemName(template, rarityId) {
