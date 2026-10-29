@@ -3,7 +3,8 @@
 //   - oben: Tag, Überblick (wie viele im Dungeon, verletzt, frei) und "Tag beenden"
 //   - Gruppen, die heute in einen Dungeon ziehen (mit Risiko-Einschätzung, aufklappbaren Anweisungen
 //     und "Absagen"). Ändert man eine Anweisung, rechnet die Einschätzung sofort neu.
-//   - alle Helden, die heute nicht kämpfen (verletzt oder ohne Aufgabe)
+//   - Vorräte jeder Gruppe lassen sich hier noch tauschen
+//   - alle Helden, die heute nicht kämpfen (verletzt oder ohne Aufgabe); Verletzte bekommen einen Knopf für Verbandszeug
 // Die Aufgaben selbst stehen in data/heroTasks.js, die Rechnung in systems/DayPlan.js.
 // ============================================================
 
@@ -15,6 +16,8 @@ import { createHeroCanvas } from './PixelArt.js';
 import { describeInjury } from './DungeonScreen.js';
 import { createRiskBadge } from './RiskBadge.js';
 import { renderOrders } from './OrdersPanel.js';
+import { createSupplyPicker } from './SupplyPicker.js';
+import { getConsumable } from '../data/consumables.js';
 import { Sound } from './Sound.js';
 
 export class DayPlanScreen {
@@ -129,14 +132,27 @@ export class DayPlanScreen {
       for (const hero of heroes) {
         heroList.appendChild(this.createHeroRow(hero, null));
       }
-      heroList.before(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId));
+      heroList.before(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies));
       heroList.after(this.createOrdersSection(expedition, heroes));
+      heroList.after(this.createSupplySection(expedition));
       card.querySelector('.cancel-button').addEventListener('click', () => {
         Sound.click();
         this.game.cancelExpedition(expedition.id);
       });
       list.appendChild(card);
     }
+  }
+
+  // Vorräte der Gruppe: tauschen ist bis zum Tagesende möglich
+  createSupplySection(expedition) {
+    const section = document.createElement('div');
+    section.className = 'day-plan-supplies';
+    section.innerHTML = '<span class="day-plan-supplies-label">Vorräte</span>';
+    section.appendChild(createSupplyPicker(this.game.guild, expedition.supplies, expedition.supplies, (next) => {
+      Sound.click();
+      this.game.setExpeditionSupplies(expedition.id, next);
+    }));
+    return section;
   }
 
   // Aufklappbare Anweisungen der Gruppe. Bleibt nach einer Änderung offen (die Seite wird dabei neu gebaut).
@@ -191,7 +207,27 @@ export class DayPlanScreen {
       chip.title = HERO_TASKS[taskId].description;
       row.appendChild(chip);
     }
+    if (taskId === 'injured') {
+      row.appendChild(this.createBandageButton(hero));
+    }
     return row;
+  }
+
+  // Verbandszeug: verkürzt die Verletzung um einen Tag (nur, wenn welches in der Vorratskammer liegt)
+  createBandageButton(hero) {
+    const bandages = getConsumable('bandages');
+    const count = this.game.guild.countSupply(bandages.id);
+    const button = document.createElement('button');
+    button.className = 'bandage-button';
+    button.textContent = bandages.icon + ' Verband (' + count + ')';
+    button.title = bandages.description + (count === 0 ? '. Gibt es beim Händler in der Schatzkammer.' : '');
+    button.disabled = count === 0;
+    button.addEventListener('click', () => {
+      if (this.game.useSupplyOnHero(bandages.id, hero.id)) {
+        Sound.coin();
+      }
+    });
+    return button;
   }
 }
 

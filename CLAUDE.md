@@ -60,7 +60,7 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                defeatCauses (Tipps und Hinweise für „Woran es lag“),
                consumables (Verbrauchsgüter des Händlers: Preis, Grundware/Tagesangebot, Wirkung; 2 Vorrats-Plätze pro Gruppe),
                collectionBook (Sammelbuch-Seiten pro Dungeon mit Titel und Gold-Bonus; die Items kommen aus `bossLoot` in lootBoxes)
-src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tagesplan, Startseite), LootBoxScreen (Schatzkammer),
+src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tagesplan, Startseite), LootBoxScreen (Schatzkammer: Kisten, Händler, Vorratskammer),
                HeroScreen (+ HeroDetailPanel, EquipPanel = Ausrüstungsliste für den angetippten Platz, nach Item-Level sortiert,
                Vergleich pro Wert, bewusst ohne „bestes Item“), TavernScreen, CombatLabScreen,
                DungeonScreen (+ RunViewer = Bericht eines beendeten Runs zeigen).
@@ -74,6 +74,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tag
                SkillTooltip = Fenster mit Skills und Abklingzeiten, wenn die Maus über einem Helden der Szene steht (Handy: antippen).
                Tempo der Szene: `pacing` (inkl. Zeitraffer `trashSpeed`, `quietRoundSpeed`), `sceneSpeeds` und `sceneAnimationRate` in `combatRules.js`.
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
+               SupplyPicker = Vorrats-Plätze einer Gruppe (Dungeon-Bildschirm + Tagesplan).
                RiskBadge = Einschätzung eines Runs in Worten („Riskant · Gefallene: oft“).
                OrdersPanel = Auswahllisten für Anweisungen mit Vorteil (grün) und Nachteil (rot) (Labor, Dungeon, Tagesplan, Heldenbildschirm).
                Leisten: TopBar, NavBar. Helfer: PixelArt, Sound, Toast, format, TraitChip.

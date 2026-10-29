@@ -2229,6 +2229,83 @@ h3 {
   margin-bottom: 6px;
 }
 
+/* ---------- Händler und Vorräte ---------- */
+
+.shop-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.shop-description {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.supply-icon {
+  width: 22px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.supply-storage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.supply-chip {
+  --supply-color: var(--text);
+  padding: 2px 8px;
+  border: 2px solid var(--supply-color);
+  color: var(--supply-color);
+  font-size: 15px;
+}
+
+.supply-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.supply-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.supply-slots select {
+  font-family: var(--font-text);
+  font-size: 16px;
+  color: var(--text);
+  background: #120d1c;
+  border: 2px solid var(--border);
+  padding: 2px 4px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.supply-effects {
+  font-size: 15px;
+}
+
+.day-plan-supplies {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 6px 0;
+}
+
+.day-plan-supplies-label {
+  color: var(--gold);
+}
+
+.bandage-button {
+  font-size: 14px;
+  padding: 2px 8px;
+}
+
 /* ---------- Sammelbuch ---------- */
 
 .collection-button {

@@ -16,6 +16,7 @@ import { createHeroCanvas, createSpriteCanvas, createChestCanvas } from './Pixel
 import { renderOrders } from './OrdersPanel.js';
 import { RunViewer } from './RunViewer.js';
 import { createRiskBadge } from './RiskBadge.js';
+import { createSupplyPicker, describeSupplies } from './SupplyPicker.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 
@@ -28,6 +29,7 @@ export class DungeonScreen {
     this.dungeonId = DUNGEONS[0].id;
     this.selectedHeroIds = new Set();
     this.retreatRuleId = 'never';
+    this.chosenSupplies = []; // Vorräte, die die Gruppe mitnehmen soll (siehe SupplyPicker)
 
     this.root.innerHTML = `
       <div class="dungeon-screen">
@@ -111,6 +113,8 @@ export class DungeonScreen {
       <h3>Rückzug</h3>
       <div class="button-row retreat-buttons"></div>
       <p class="hint">Der Rückzug dauert ${COMBAT_RULES.retreatRounds} Runden, in denen der Gegner weiter angreift. Danach gibt es keine Beute.</p>
+      <h3>Vorräte</h3>
+      <div class="supply-line"></div>
       <h3>Anweisungen</h3>
       <div class="orders-list"></div>
       <div class="lab-actions"><button class="big-button start-button">Für heute einplanen</button></div>
@@ -140,9 +144,16 @@ export class DungeonScreen {
       (value) => value === this.retreatRuleId, (value) => { this.retreatRuleId = value; });
 
     const group = this.getSelectedHeroes();
-    // Einschätzung in Worten, neu berechnet bei jeder Änderung an Gruppe, Ausrüstung oder Rückzug
+    // Gewählte Vorräte, die nicht mehr in der Kammer liegen (z.B. von einer anderen Gruppe genommen), fallen weg
+    this.chosenSupplies = this.keepAvailableSupplies(this.chosenSupplies);
+    panel.querySelector('.supply-line').appendChild(createSupplyPicker(this.game.guild, this.chosenSupplies, [], (next) => {
+      Sound.click();
+      this.chosenSupplies = next;
+      this.render();
+    }));
+    // Einschätzung in Worten, neu berechnet bei jeder Änderung an Gruppe, Ausrüstung, Rückzug oder Vorräten
     if (unlocked && group.length > 0) {
-      panel.querySelector('.risk-line').appendChild(createRiskBadge(group, dungeon.id, this.retreatRuleId));
+      panel.querySelector('.risk-line').appendChild(createRiskBadge(group, dungeon.id, this.retreatRuleId, this.chosenSupplies));
     }
     renderOrders(panel.querySelector('.orders-list'), group, (hero, orderId, optionId) => {
       this.game.setHeroOrder(hero.id, orderId, optionId);
@@ -289,9 +300,22 @@ export class DungeonScreen {
     }
   }
 
+  // Nur die Vorräte behalten, die noch in der Vorratskammer liegen
+  keepAvailableSupplies(supplyIds) {
+    const counts = {};
+    const kept = [];
+    for (const supplyId of supplyIds) {
+      counts[supplyId] = (counts[supplyId] || 0) + 1;
+      if (counts[supplyId] <= this.game.guild.countSupply(supplyId)) {
+        kept.push(supplyId);
+      }
+    }
+    return kept;
+  }
+
   start() {
     const heroIds = [...this.selectedHeroIds];
-    const result = this.game.startExpedition(this.dungeonId, heroIds, this.retreatRuleId);
+    const result = this.game.startExpedition(this.dungeonId, heroIds, this.retreatRuleId, this.chosenSupplies);
     if (result !== 'ok') {
       showToast('Das geht gerade nicht.', '#ff6b6b');
       return;
@@ -299,6 +323,7 @@ export class DungeonScreen {
     Sound.boxArrived();
     showToast('Eingeplant: ' + getDungeon(this.dungeonId).name + '. Die Gruppe kämpft am Ende des Tages.', '#ffd23f');
     this.selectedHeroIds.clear();
+    this.chosenSupplies = [];
     this.render();
   }
 
@@ -331,9 +356,11 @@ export class DungeonScreen {
       `;
       row.querySelector('.run-name').textContent = dungeon.name;
       row.querySelector('.run-status').textContent = heroNames.join(', ') +
-        (retreatRule ? ' · Rückzug: ' + retreatRule.name : '');
+        (retreatRule ? ' · Rückzug: ' + retreatRule.name : '') +
+        (expedition.supplies.length > 0 ? ' · Vorräte: ' + describeSupplies(expedition.supplies) : '');
       const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
-      row.querySelector('.run-head').after(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId));
+      row.querySelector('.run-head').after(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId,
+        expedition.supplies));
       row.querySelector('.cancel-button').addEventListener('click', () => {
         Sound.click();
         this.game.cancelExpedition(expedition.id);

@@ -103,6 +103,7 @@ In kleinen, jeweils online testbaren Schritten:
   - **P3, Schritt 1** ✅ Zeitraffer in der Kampfszene: Trash 4x, ruhige Bossrunden 3x, wichtige Runden normal (`BattleTimeline.js`, Zahlen in `combatRules.pacing`). Ein Run ist etwa 40–50 % kürzer (`tools/kampfdauer.mjs` vergleicht mit und ohne).
   - **P3, Schritt 2** ✅ „Woran es lag“: Der Kampf merkt sich, woher der Schaden an den Helden kommt (`CauseTracker.js`), `DefeatAnalysis.js` macht daraus die Top 3 Ursachen mit Anteil, Hinweisen und Tipp. Anzeige im Tagesabschluss und im gespeicherten Bericht. Neue Einblendung „Verpasst!“ für nicht unterbrochene Mechaniken.
   - **Sammelbuch** ✅ Eine Seite pro Dungeon mit seinen Boss-Items (beste gefundene Seltenheit als Sterne, fehlende als „???“). Volle Seite: Gildentitel (oben neben dem Gildennamen), goldene bzw. glänzende Seite, +10 % Gold in diesem Dungeon. Schilder und Töne beim Kistenöffnen, Banner bei voller Seite. Knopf in der Schatzkammer, Test-Menü: „+3 Boss-Kisten Bärenhöhle“. Spielstand-Version 5.
+  - **P6** ✅ Keine Kaufkisten mehr. Der Händler (Schatzkammer) verkauft Verbrauchsgüter: Grundware (Heil-, Manatränke, Verbandszeug) und 3 wechselnde Tagesangebote (Schutztränke, Wutelixier, Steinhaut), Preise bewusst spürbar. Vorratskammer, 2 Vorrats-Plätze pro Gruppe im Dungeon-Bildschirm und im Tagesplan (Einschätzung rechnet sie mit), Verband-Knopf bei Verletzten, „Vorräte verbraucht“ im Tagesabschluss. Spielstand-Version 6.
 
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 

@@ -9,6 +9,7 @@
 //      Erst jetzt erscheinen die Level-Up-Banner, damit sie das Ergebnis nicht vorher verraten.
 // ============================================================
 
+import { describeSupplies } from './SupplyPicker.js';
 import { createDefeatCausesView } from './DefeatCausesView.js';
 import { Hero } from '../entities/Hero.js';
 import { Expedition } from '../entities/Expedition.js';
@@ -231,6 +232,10 @@ export class DayEndOverlay {
     if (report.chestBonusItems > 0) {
       container.appendChild(createTraitBonusLine(report.chestBonusHero + ' ist ein Glückspilz: +' +
         report.chestBonusItems + ' Item in der Kiste'));
+    }
+
+    if (report.supplies && report.supplies.length > 0) {
+      container.appendChild(createTraitBonusLine('Vorräte verbraucht: ' + describeSupplies(report.supplies)));
     }
 
     if (report.chest) {
