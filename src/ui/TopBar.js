@@ -1,5 +1,5 @@
 // ============================================================
-// TOPBAR – die Leiste oben: Gildenname, Gold, aktueller Tag, Knopf "Tag beenden"
+// TOPBAR – die Leiste oben: Gildenname (mit Titel aus dem Sammelbuch), Gold, aktueller Tag, Knopf "Tag beenden"
 // ============================================================
 
 import { createSpriteCanvas } from './PixelArt.js';
@@ -16,7 +16,7 @@ export class TopBar {
     this.shownDay = null;
 
     this.root.innerHTML = `
-      <div class="guild-name"></div>
+      <div class="guild-name"><span class="guild-name-text"></span><span class="guild-title"></span></div>
       <div class="gold"><span class="gold-icon"></span><span class="gold-amount"></span></div>
       <div class="day-counter"></div>
       <button class="end-day-button">
@@ -30,7 +30,7 @@ export class TopBar {
     `;
 
     this.root.querySelector('.gold-icon').appendChild(createSpriteCanvas('coin', 3));
-    this.root.querySelector('.guild-name').textContent = game.guild.name;
+    this.root.querySelector('.guild-name-text').textContent = game.guild.name;
 
     this.root.querySelector('.end-day-button').addEventListener('click', () => {
       Sound.click();
@@ -69,6 +69,8 @@ export class TopBar {
   // Aktualisiert die Anzeigen (bei jeder Änderung am Spielstand)
   update() {
     const guild = this.game.guild;
+    const title = guild.collection.selectedTitle;
+    this.root.querySelector('.guild-title').textContent = title ? ' · ' + title : '';
 
     // Gold: kurz "hüpfen", wenn sich der Betrag ändert
     if (guild.gold !== this.shownGold) {

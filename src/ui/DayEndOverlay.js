@@ -213,7 +213,7 @@ export class DayEndOverlay {
   }
 
   renderRewards(container, report) {
-    const gold = report.gold + report.trashGold + report.bonusGold;
+    const gold = report.gold + report.trashGold + report.bonusGold + report.collectionGold;
     if (gold > 0) {
       const goldLine = document.createElement('div');
       goldLine.className = 'day-reward';
@@ -224,6 +224,9 @@ export class DayEndOverlay {
     // Wirkung der Eigenschaften sichtbar machen
     if (report.bonusGold > 0) {
       container.appendChild(createTraitBonusLine(report.bonusGoldHero + ' ist gierig: +' + report.bonusGold + ' Gold'));
+    }
+    if (report.collectionGold > 0) {
+      container.appendChild(createTraitBonusLine('Sammelbuch (volle Seite): +' + report.collectionGold + ' Gold'));
     }
     if (report.chestBonusItems > 0) {
       container.appendChild(createTraitBonusLine(report.chestBonusHero + ' ist ein Glückspilz: +' +

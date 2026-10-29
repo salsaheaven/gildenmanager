@@ -2229,6 +2229,178 @@ h3 {
   margin-bottom: 6px;
 }
 
+/* ---------- Sammelbuch ---------- */
+
+.collection-button {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.guild-title {
+  color: var(--text-dim);
+}
+
+.collection-overlay {
+  overflow-y: auto;
+}
+
+.collection-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-dim);
+}
+
+.collection-title-row select {
+  font-family: var(--font-text);
+  font-size: 16px;
+  color: var(--text);
+  background: #120d1c;
+  border: 2px solid var(--border);
+  padding: 2px 4px;
+}
+
+.collection-pages {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.collection-page {
+  padding: 10px;
+  border: 3px solid var(--border);
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Volle Seite: golden */
+.collection-page.complete {
+  border-color: var(--gold);
+}
+
+/* Alles mindestens Lila: die Seite glänzt */
+.collection-page.shiny {
+  box-shadow: 0 0 14px #a335ee, inset 0 0 18px rgba(163, 53, 238, 0.35);
+  animation: collection-shine 2.4s ease-in-out infinite;
+}
+
+@keyframes collection-shine {
+  50% { box-shadow: 0 0 22px #ffd23f, inset 0 0 22px rgba(255, 210, 63, 0.3); }
+}
+
+.collection-page-head {
+  display: flex;
+  justify-content: space-between;
+  color: var(--gold);
+}
+
+.collection-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.collection-entry {
+  --rarity: var(--border);
+  width: 92px;
+  padding: 6px 4px;
+  border: 2px solid var(--rarity);
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.collection-entry-name {
+  color: var(--rarity);
+}
+
+.collection-stars {
+  color: var(--gold);
+}
+
+.collection-entry.shiny {
+  box-shadow: 0 0 8px var(--rarity);
+}
+
+/* Noch nicht gefunden: nur ein dunkler Umriss */
+.collection-entry.missing {
+  border-style: dashed;
+}
+
+.collection-entry.missing canvas {
+  filter: brightness(0);
+  opacity: 0.5;
+}
+
+.collection-entry.missing .collection-entry-name {
+  color: var(--text-dim);
+}
+
+.collection-reward {
+  font-size: 15px;
+  color: var(--text-dim);
+}
+
+.collection-page.complete .collection-reward {
+  color: var(--gold);
+}
+
+/* Schild auf der Item-Karte beim Kistenöffnen */
+.collection-chip {
+  margin-top: 4px;
+  padding: 1px 6px;
+  font-size: 14px;
+  color: #120d1c;
+  background: var(--gold);
+  animation: collection-chip-pop 0.5s ease-out;
+}
+
+.collection-chip.improved {
+  background: #a335ee;
+  color: #ffffff;
+}
+
+@keyframes collection-chip-pop {
+  0% { transform: scale(0.3); }
+  70% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Banner auf der Bühne, wenn eine Seite voll wird */
+.collection-banner {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  transform: translateX(-50%);
+  z-index: 5;
+  padding: 10px 18px;
+  border: 3px solid var(--gold);
+  background: rgba(12, 9, 20, 0.92);
+  text-align: center;
+  animation: collection-chip-pop 0.6s ease-out;
+}
+
+.collection-banner[hidden] {
+  display: none;
+}
+
+.collection-banner-title {
+  font-family: var(--font-title);
+  font-size: 14px;
+  color: var(--gold);
+}
+
+.collection-banner-text {
+  margin-top: 4px;
+  font-size: 16px;
+}
+
 /* ---------- Woran es lag (Ursachen nach Niederlage oder Gefallenen) ---------- */
 
 .defeat-causes {

@@ -142,4 +142,21 @@ export const Sound = {
       playTone(NOTES[10], (rank + 1) * 0.06 + 0.2, 0.9, 'square', 0.04);
     }
   },
+
+  // Neu im Sammelbuch: helles Glockenspiel nach oben. improved = verbessert (etwas kürzer)
+  collectionEntry(improved) {
+    const melody = improved ? [4, 7] : [3, 5, 8];
+    for (let i = 0; i < melody.length; i++) {
+      playTone(NOTES[melody[i]], 0.35 + i * 0.08, 0.3, 'triangle', 0.07);
+    }
+  },
+
+  // Eine Sammelbuch-Seite ist voll: kleine Fanfare
+  collectionPage() {
+    const melody = [2, 4, 6, 9];
+    for (let i = 0; i < melody.length; i++) {
+      playTone(NOTES[melody[i]], 0.6 + i * 0.1, 0.2, 'square', 0.05);
+    }
+    playTone(NOTES[10], 1.0, 0.8, 'triangle', 0.07);
+  },
 };

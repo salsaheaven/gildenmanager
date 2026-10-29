@@ -18,6 +18,7 @@ import { DayPlanScreen } from './ui/DayPlanScreen.js';
 import { DayEndOverlay } from './ui/DayEndOverlay.js';
 import { DebugPanel } from './ui/DebugPanel.js';
 import { InventoryOverlay } from './ui/InventoryOverlay.js';
+import { CollectionOverlay } from './ui/CollectionOverlay.js';
 import { LevelUpBanner } from './ui/LevelUpBanner.js';
 import { Sound } from './ui/Sound.js';
 import { showToast } from './ui/Toast.js';
@@ -75,7 +76,8 @@ const inventory = new InventoryOverlay(game, (newItemCount) => {
 });
 navBar.addExtraButton('inventory', 'Inventar', () => inventory.toggle());
 
-const lootBoxScreen = new LootBoxScreen(screenElements.treasury, game, inventory);
+const collection = new CollectionOverlay(game);
+const lootBoxScreen = new LootBoxScreen(screenElements.treasury, game, inventory, collection);
 new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'), inventory);
 new TavernScreen(screenElements.tavern, game);
 const combatLabScreen = new CombatLabScreen(screenElements.lab, game);

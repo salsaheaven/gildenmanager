@@ -102,6 +102,7 @@ In kleinen, jeweils online testbaren Schritten:
   - **P2** ✅ Anweisungen neu: pro Klasse genau 2 (Haltung + Eigenheit), je „Ausgewogen“ plus zwei Extreme mit Vor- und Nachteil (grün/rot angezeigt). Wirkungs-Baukasten im Kampf (`OrderSettings.js`). Einstellbar am Helden, im Dungeon-Bildschirm und aufklappbar im Tagesplan, wo die Risiko-Einschätzung sofort neu rechnet. Skill-Fenster zeigt die echten Mana-Kosten. `tools/anweisungen.mjs` misst alle 15 Klassen und markiert Optionen als situativ / nie besser / immer gut. Spielstand-Version 4.
   - **P3, Schritt 1** ✅ Zeitraffer in der Kampfszene: Trash 4x, ruhige Bossrunden 3x, wichtige Runden normal (`BattleTimeline.js`, Zahlen in `combatRules.pacing`). Ein Run ist etwa 40–50 % kürzer (`tools/kampfdauer.mjs` vergleicht mit und ohne).
   - **P3, Schritt 2** ✅ „Woran es lag“: Der Kampf merkt sich, woher der Schaden an den Helden kommt (`CauseTracker.js`), `DefeatAnalysis.js` macht daraus die Top 3 Ursachen mit Anteil, Hinweisen und Tipp. Anzeige im Tagesabschluss und im gespeicherten Bericht. Neue Einblendung „Verpasst!“ für nicht unterbrochene Mechaniken.
+  - **Sammelbuch** ✅ Eine Seite pro Dungeon mit seinen Boss-Items (beste gefundene Seltenheit als Sterne, fehlende als „???“). Volle Seite: Gildentitel (oben neben dem Gildennamen), goldene bzw. glänzende Seite, +10 % Gold in diesem Dungeon. Schilder und Töne beim Kistenöffnen, Banner bei voller Seite. Knopf in der Schatzkammer, Test-Menü: „+3 Boss-Kisten Bärenhöhle“. Spielstand-Version 5.
 
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 

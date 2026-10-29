@@ -7,6 +7,7 @@
 //   2. Kiste springt auf und leuchtet in der Farbe des BESTEN Items darin
 //   3. Items erscheinen nacheinander, das seltenste zuletzt
 //   4. Bei Legendär: Bildschirm wackelt und blitzt
+//   5. Boss-Items: Schild "Neu im Sammelbuch!" bzw. "Sammelbuch verbessert!", bei voller Seite ein Banner
 // Ein Klick auf die Bühne überspringt die Animation.
 // ============================================================
 
@@ -23,10 +24,12 @@ const TIME_BETWEEN_ITEMS = 500;
 
 export class LootBoxScreen {
   // inventory = das InventoryOverlay. Frische Items werden dort versteckt, bis sie aufgedeckt sind.
-  constructor(rootElement, game, inventory) {
+  // collection = das CollectionOverlay (Sammelbuch), wird über einen Knopf geöffnet
+  constructor(rootElement, game, inventory, collection) {
     this.root = rootElement;
     this.game = game;
     this.inventory = inventory;
+    this.collection = collection;
 
     // Zustand der laufenden Öffnung
     this.isOpening = false;
@@ -38,6 +41,7 @@ export class LootBoxScreen {
     this.root.innerHTML = `
       <div class="lootbox-screen">
         <section class="panel box-panel">
+          <button class="collection-button"></button>
           <h2>Deine Kisten</h2>
           <div class="box-list"></div>
           <h2>Händler</h2>
@@ -52,6 +56,7 @@ export class LootBoxScreen {
           <div class="stage-items"></div>
           <div class="stage-hint"></div>
           <div class="stage-actions"></div>
+          <div class="collection-banner" hidden></div>
         </section>
       </div>
     `;
@@ -61,6 +66,8 @@ export class LootBoxScreen {
     this.itemsElement = this.root.querySelector('.stage-items');
     this.hintElement = this.root.querySelector('.stage-hint');
     this.actionsElement = this.root.querySelector('.stage-actions');
+    this.bannerElement = this.root.querySelector('.collection-banner');
+    this.root.querySelector('.collection-button').addEventListener('click', () => this.collection.open());
 
     // Klick auf die Bühne während des Öffnens = Animation überspringen
     this.stage.addEventListener('click', (event) => {
@@ -77,6 +84,8 @@ export class LootBoxScreen {
   // ---------- Linke Seite: eigene Kisten, Händler, Pity ----------
 
   renderSidePanel() {
+    const progress = this.game.guild.collection.getProgress();
+    this.root.querySelector('.collection-button').textContent = '📖 Sammelbuch (' + progress.found + ' / ' + progress.total + ')';
     this.renderBoxList();
     this.renderShop();
     this.renderPity();
@@ -192,6 +201,7 @@ export class LootBoxScreen {
     this.itemsElement.innerHTML = '';
     this.actionsElement.innerHTML = '';
     this.hintElement.textContent = '';
+    this.bannerElement.hidden = true;
     this.chestElement.classList.remove('idle');
     this.chestElement.innerHTML = '';
     this.chestElement.appendChild(createChestCanvas(this.currentBoxType, 10));
@@ -232,6 +242,12 @@ export class LootBoxScreen {
     this.itemsElement.appendChild(this.createItemCard(item));
     this.inventory.revealItem(item);
     Sound.itemReveal(item.getRarityRank());
+    if (item.collectionStatus) {
+      Sound.collectionEntry(item.collectionStatus === 'improved');
+    }
+    if (item.completedPage) {
+      this.showPageBanner(item.completedPage);
+    }
 
     // Phase 4: Legendär = großes Spektakel
     if (item.rarityId === 'legendary') {
@@ -267,7 +283,24 @@ export class LootBoxScreen {
     stats.textContent = formatItemValues(item);
     card.appendChild(stats);
 
+    // Boss-Item: Was hat es im Sammelbuch bewirkt?
+    if (item.collectionStatus) {
+      const chip = document.createElement('div');
+      chip.className = 'collection-chip ' + item.collectionStatus;
+      chip.textContent = item.collectionStatus === 'new' ? 'Neu im Sammelbuch!' : 'Sammelbuch verbessert!';
+      card.appendChild(chip);
+    }
     return card;
+  }
+
+  // Großes Banner, wenn eine Sammelbuch-Seite gerade voll geworden ist
+  showPageBanner(page) {
+    this.bannerElement.innerHTML = '<div class="collection-banner-title">Seite vollständig!</div><div class="collection-banner-text"></div>';
+    this.bannerElement.querySelector('.collection-banner-text').textContent =
+      'Neuer Titel: „' + page.title + '“ · +' + Math.round(page.goldBonus * 100) + ' % Gold in diesem Dungeon';
+    this.bannerElement.hidden = false;
+    Sound.collectionPage();
+    showToast('Sammelbuch: Titel „' + page.title + '“ freigeschaltet!', '#ffd23f');
   }
 
   finishOpening() {

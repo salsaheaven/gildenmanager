@@ -66,6 +66,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tag
                DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe als Szene, danach Zusammenfassung mit Beute.
                LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden, während des Tagesabschlusses zurückgehalten).
                InventoryOverlay = Inventar als Vollbild-Fenster mit Kategorien (Knopf „Inventar“ in der Reiterleiste).
+               CollectionOverlay = Sammelbuch als Vollbild-Fenster (Knopf in der Schatzkammer): Seiten pro Dungeon, Sterne, „???“, Titel-Auswahl.
                CombatReport = Ergebnis, Schadensmesser und Kampfbericht (wiederverwendbar).
                DefeatCausesView = Kasten „Woran es lag“ (Ursachen mit Balken, Hinweise, Tipp) im Tagesabschluss und im Bericht.
                BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken, großer Skill-Name, Tempo 1x/2x/4x); läuft über update(sekunden).

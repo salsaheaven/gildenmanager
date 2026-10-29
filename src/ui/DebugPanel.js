@@ -28,6 +28,12 @@ export class DebugPanel {
         game.guild.addBox(boxType.id);
       }
     });
+    // Zum Ausprobieren des Sammelbuchs: genug Boss-Kisten, um eine Seite zu füllen (mit etwas Glück)
+    this.addButton('+3 Boss-Kisten Bärenhöhle', () => {
+      for (let i = 0; i < 3; i++) {
+        game.guild.addBox('chestGrimfang', 1);
+      }
+    });
     this.addButton('Neue Bewerber (gratis)', () => {
       game.refreshCandidates();
     });
