@@ -151,6 +151,27 @@ export const Sound = {
     }
   },
 
+  // Zerlegen: kurzes Knirschen nach unten
+  salvage() {
+    playTone(260, 0, 0.05, 'sawtooth', 0.04);
+    playTone(180, 0.05, 0.08, 'sawtooth', 0.04);
+  },
+
+  // Verbessern geklappt: zwei Hammerschläge auf den Amboss, dann ein heller Klang.
+  // level = neue Stufe (je höher, desto höher der Schlussklang)
+  upgradeSuccess(level) {
+    playTone(1400, 0, 0.04, 'square', 0.05);
+    playTone(1400, 0.12, 0.04, 'square', 0.05);
+    playTone(NOTES[Math.min(level, NOTES.length - 1)], 0.24, 0.35, 'triangle', 0.08);
+  },
+
+  // Verbessern fehlgeschlagen: Hammerschlag, dann ein dumpfer Ton nach unten
+  upgradeFail() {
+    playTone(1400, 0, 0.04, 'square', 0.05);
+    playTone(160, 0.12, 0.2, 'triangle', 0.09);
+    playTone(110, 0.3, 0.35, 'triangle', 0.08);
+  },
+
   // Eine Sammelbuch-Seite ist voll: kleine Fanfare
   collectionPage() {
     const melody = [2, 4, 6, 9];

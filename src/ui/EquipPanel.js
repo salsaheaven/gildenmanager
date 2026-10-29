@@ -1,7 +1,7 @@
 // ============================================================
 // EQUIPPANEL – rechte Seite im Heldenbildschirm: die Ausrüstungsliste für EINEN Platz.
 // Sie erscheint, wenn man links auf einen Ausrüstungsplatz tippt (belegt oder leer).
-//   - oben: was der Held in diesem Platz gerade trägt
+//   - oben: was der Held in diesem Platz gerade trägt, mit Knopf zum Verbessern
 //   - darunter: alle passenden Items aus dem Inventar, höchstes Item-Level zuerst
 //   - pro Item der Unterschied zu dem angelegten Teil, Wert für Wert (z.B. "+3 Angriff · −2 Rüstung")
 // Bewusst ohne "bestes Item" und ohne Gesamtnote: Welches Teil besser passt, entscheidet der Spieler.
@@ -12,6 +12,7 @@ import { createItemCanvas } from './PixelArt.js';
 import { formatItemValues, describeItemKind, describeClassArmor, describeStatDifferences } from './format.js';
 import { compareByItemLevel } from './InventoryOverlay.js';
 import { Sound } from './Sound.js';
+import { createUpgradeButton, applyUpgradeGlow } from './UpgradeControls.js';
 
 export class EquipPanel {
   // inventory = das InventoryOverlay (weiß, welche Items "neu" sind)
@@ -66,7 +67,7 @@ export class EquipPanel {
     }
   }
 
-  // "Angelegt: …" mit den Werten des getragenen Items, oder "Angelegt: nichts"
+  // "Angelegt: …" mit den Werten des getragenen Items und dem Verbessern-Knopf, oder "Angelegt: nichts"
   renderCurrentItem(container, currentItem) {
     if (!currentItem) {
       container.innerHTML = '<span class="equip-current-label">Angelegt:</span> <span class="hint">nichts</span>';
@@ -74,10 +75,12 @@ export class EquipPanel {
     }
     container.innerHTML = '<span class="equip-current-label">Angelegt:</span> <b></b><div class="equip-stats"></div>';
     const name = container.querySelector('b');
-    name.textContent = currentItem.name;
+    name.textContent = currentItem.getDisplayName();
     name.style.color = currentItem.getRarity().color;
     container.querySelector('.equip-stats').textContent =
       describeItemKind(currentItem) + ' · Stufe ' + currentItem.itemLevel + ' · ' + formatItemValues(currentItem);
+    // Funken oder Riss erscheinen über der ganzen rechten Seite (die bleibt beim Neuzeichnen erhalten)
+    container.appendChild(createUpgradeButton(this.game, currentItem, this.root));
   }
 
   // Alle Items für den gewählten Platz, die der Held tragen darf: höchstes Item-Level zuerst
@@ -93,6 +96,7 @@ export class EquipPanel {
     row.className = 'equip-row';
     row.style.setProperty('--rarity', item.getRarity().color);
     row.appendChild(createItemCanvas(item, 3));
+    applyUpgradeGlow(row, item);
     row.insertAdjacentHTML('beforeend', `
       <span class="equip-text">
         <span class="equip-name"></span>
@@ -100,7 +104,7 @@ export class EquipPanel {
         <span class="equip-compare"></span>
       </span>
     `);
-    row.querySelector('.equip-name').textContent = item.name;
+    row.querySelector('.equip-name').textContent = item.getDisplayName();
     if (this.inventory.isNew(item.id)) {
       row.querySelector('.equip-name').insertAdjacentHTML('beforeend', ' <span class="new-chip">neu</span>');
     }

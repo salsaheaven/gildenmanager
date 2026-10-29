@@ -82,6 +82,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tag
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
                SupplyPicker = Vorrats-Plätze einer Gruppe (Dungeon-Bildschirm + Tagesplan).
                NewsLine = eine Zeile aus dem Neuigkeiten-Ticker (Tagesplan + Tagesabschluss).
+               UpgradeControls = Zerlegen und Verbessern in der Oberfläche (Verbessern-Knopf mit Kosten und Chance, Material-Text, Funken/Riss, Leuchten und „+3“ an verbesserten Items; Inventar + Ausrüstungsliste).
                TalentPanel = die 3 Talentreihen eines Helden zum Auswählen (Heldenbildschirm + Kampf-Labor).
                RiskBadge = Einschätzung eines Runs in Worten („Riskant · Gefallene: oft“).
                OrdersPanel = Auswahllisten für Anweisungen mit Vorteil (grün) und Nachteil (rot) (Labor, Dungeon, Tagesplan, Heldenbildschirm).

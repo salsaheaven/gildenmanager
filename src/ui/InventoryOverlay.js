@@ -2,7 +2,8 @@
 // INVENTORYOVERLAY – das Inventar als Vollbild-Fenster
 // Wird über den Knopf "Inventar" in der Reiterleiste geöffnet, von jedem Bildschirm aus.
 // Oben: Kategorien (Alle, Waffe, Nebenhand, Kopf …). Darunter alle Items als Raster.
-// Klick auf ein Item zeigt Details und einen Verkaufen-Knopf.
+// Klick auf ein Item zeigt Details mit Verkaufen, Zerlegen und Verbessern.
+// Oben steht der Materialbestand (Arkanstaub, Kristalle), unten "Schrott verkaufen" und "Schrott zerlegen".
 // Schließen mit dem X oder der Escape-Taste.
 // ============================================================
 
@@ -14,6 +15,8 @@ import { createItemCanvas } from './PixelArt.js';
 import { describeItemKind, describeSuitableClasses } from './format.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
+import { describeMaterials, createUpgradeButton, applyUpgradeGlow } from './UpgradeControls.js';
+import { getSalvageYield } from '../systems/CraftingSystem.js';
 
 export class InventoryOverlay {
   // onNewItemsChanged = Funktion, die bei neuen/gesehenen Items aufgerufen wird
@@ -33,6 +36,7 @@ export class InventoryOverlay {
     this.root.innerHTML = `
       <div class="inventory-header">
         <h2>Inventar <span class="inventory-count"></span></h2>
+        <span class="inventory-materials" title="Material zum Verbessern. Du bekommst es durchs Zerlegen."></span>
         <button class="close-button" title="Schließen (Esc)">✕</button>
       </div>
       <div class="inventory-categories"></div>
@@ -40,7 +44,10 @@ export class InventoryOverlay {
         <div class="inventory-grid"></div>
         <div class="inventory-side">
           <div class="item-details"></div>
-          <button class="sell-junk-button"></button>
+          <div class="junk-buttons">
+            <button class="sell-junk-button"></button>
+            <button class="salvage-junk-button"></button>
+          </div>
         </div>
       </div>
     `;
@@ -53,6 +60,14 @@ export class InventoryOverlay {
       if (gold > 0) {
         Sound.coin();
         showToast('Schrott verkauft: +' + gold + ' Gold');
+      }
+    });
+
+    this.root.querySelector('.salvage-junk-button').addEventListener('click', () => {
+      const materials = this.game.salvageAllOfRarity('poor');
+      if (materials.dust > 0 || materials.crystal > 0) {
+        Sound.salvage();
+        showToast('Schrott zerlegt: +' + describeMaterials(materials));
       }
     });
 
@@ -150,6 +165,7 @@ export class InventoryOverlay {
 
     const items = this.getVisibleItems();
     this.root.querySelector('.inventory-count').textContent = '(' + items.length + ')';
+    this.root.querySelector('.inventory-materials').textContent = describeMaterials(this.game.guild.materials, true);
     this.renderCategories(items);
 
     const shownItems = this.getItemsInCategory(items, this.category);
@@ -165,7 +181,7 @@ export class InventoryOverlay {
     }
 
     this.renderDetails();
-    this.renderSellJunkButton(items);
+    this.renderJunkButtons(items);
   }
 
   // Knöpfe für die Kategorien, jeweils mit Anzahl und Punkt für neue Items
@@ -198,8 +214,9 @@ export class InventoryOverlay {
     const slot = document.createElement('button');
     slot.className = 'inventory-slot rarity-' + item.rarityId;
     slot.style.setProperty('--rarity', item.getRarity().color);
-    slot.title = item.name;
+    slot.title = item.getDisplayName();
     slot.appendChild(createItemCanvas(item, 3));
+    applyUpgradeGlow(slot, item);
     // Kleine Zahl unten links: die Stufe (Item-Level)
     slot.insertAdjacentHTML('beforeend', '<span class="item-level">' + item.itemLevel + '</span>');
 
@@ -236,9 +253,18 @@ export class InventoryOverlay {
       <div class="detail-sub">${rarity.name} · ${describeItemKind(item)} · Stufe ${item.itemLevel}</div>
       <div class="detail-for">${describeSuitableClasses(item)}</div>
       <ul class="detail-stats"></ul>
-      <button class="sell-button">Verkaufen (${item.getSellValue()} Gold)</button>
+      <div class="detail-actions">
+        <button class="sell-button">Verkaufen (${item.getSellValue()} Gold)</button>
+        <button class="salvage-button"></button>
+      </div>
+      <p class="hint detail-upgrade-hint"></p>
     `;
-    details.querySelector('.detail-name').textContent = item.name;
+    details.querySelector('.detail-name').textContent = item.getDisplayName();
+    details.querySelector('.salvage-button').textContent = 'Zerlegen (' + describeMaterials(getSalvageYield(item)) + ')';
+    details.querySelector('.detail-actions').appendChild(createUpgradeButton(this.game, item, details));
+    details.querySelector('.detail-upgrade-hint').textContent = item.upgradeLevel > 0
+      ? 'Verkaufen und Zerlegen bringen nur den Grundwert, die Verbesserung geht verloren.'
+      : 'Jede Stufe gibt +6 % auf alle Werte. Ab +6 kann es fehlschlagen.';
 
     const statList = details.querySelector('.detail-stats');
     const itemStats = item.getStats();
@@ -258,18 +284,36 @@ export class InventoryOverlay {
     details.querySelector('.sell-button').addEventListener('click', () => {
       const gold = this.game.sellItem(item.id);
       Sound.coin();
-      showToast(item.name + ' verkauft: +' + gold + ' Gold', rarity.color);
+      showToast(item.getDisplayName() + ' verkauft: +' + gold + ' Gold', rarity.color);
       this.selectedItemId = null;
       this.render();
     });
+
+    details.querySelector('.salvage-button').addEventListener('click', () => {
+      this.selectedItemId = null;
+      const materials = this.game.salvageItem(item.id);
+      Sound.salvage();
+      showToast(item.getDisplayName() + ' zerlegt: +' + describeMaterials(materials), rarity.color);
+    });
   }
 
-  renderSellJunkButton(items) {
-    const button = this.root.querySelector('.sell-junk-button');
+  // Allen grauen Schrott auf einmal verkaufen (Gold) oder zerlegen (Staub)
+  renderJunkButtons(items) {
     const junk = items.filter((item) => item.rarityId === 'poor');
+    const sellButton = this.root.querySelector('.sell-junk-button');
     const goldValue = junk.length * getRarity('poor').sellValue;
-    button.textContent = 'Schrott verkaufen (' + junk.length + ' = ' + goldValue + ' Gold)';
-    button.disabled = junk.length === 0;
+    sellButton.textContent = 'Schrott verkaufen (' + junk.length + ' = ' + goldValue + ' Gold)';
+    sellButton.disabled = junk.length === 0;
+
+    const salvageButton = this.root.querySelector('.salvage-junk-button');
+    const total = { dust: 0, crystal: 0 };
+    for (const item of junk) {
+      const materials = getSalvageYield(item);
+      total.dust += materials.dust;
+      total.crystal += materials.crystal;
+    }
+    salvageButton.textContent = 'Schrott zerlegen (' + junk.length + ' = ' + (describeMaterials(total) || '✧ 0') + ')';
+    salvageButton.disabled = junk.length === 0;
   }
 }
 

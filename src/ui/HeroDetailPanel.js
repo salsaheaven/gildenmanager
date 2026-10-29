@@ -15,6 +15,7 @@ import { createTraitChip } from './TraitChip.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 import { renderOrders } from './OrdersPanel.js';
+import { applyUpgradeGlow } from './UpgradeControls.js';
 
 export class HeroDetailPanel {
   // callbacks = { onSlotClicked(slot), onDismissed(), onGoToTavern() }
@@ -199,8 +200,9 @@ export class HeroDetailPanel {
       if (item) {
         slotElement.style.setProperty('--rarity', item.getRarity().color);
         slotElement.classList.add('filled');
-        slotElement.title = item.name;
+        slotElement.title = item.getDisplayName();
         slotElement.querySelector('.slot-icon').appendChild(createItemCanvas(item, 3));
+        applyUpgradeGlow(slotElement, item);
 
         const removeButton = document.createElement('button');
         removeButton.className = 'unequip-button';

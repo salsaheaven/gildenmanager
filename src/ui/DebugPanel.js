@@ -34,6 +34,10 @@ export class DebugPanel {
         game.guild.addBox('chestGrimfang', 1);
       }
     });
+    // Zum Ausprobieren des Verbesserns: genug Material für einige Stufen
+    this.addButton('+100 Staub, +20 Kristalle', () => {
+      game.guild.addMaterials({ dust: 100, crystal: 20 });
+    });
     this.addButton('Neue Bewerber (gratis)', () => {
       game.refreshCandidates();
     });

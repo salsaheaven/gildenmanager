@@ -674,6 +674,117 @@ body.overlay-open {
   margin-bottom: 8px;
 }
 
+/* ---------- Zerlegen & Verbessern (UpgradeControls.js) ---------- */
+
+.inventory-materials {
+  margin-left: auto;
+  margin-right: 12px;
+  color: #c9b8ff;
+  font-size: 20px;
+}
+
+.junk-buttons,
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.upgrade-button {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* Ab +6 kann es fehlschlagen: Knopf in Orange */
+.upgrade-button.risky {
+  border-color: #ff9f40;
+  color: #ff9f40;
+}
+
+.equip-current .upgrade-button {
+  margin-top: 6px;
+}
+
+/* Verbesserte Items leuchten stärker, je höher die Stufe (--upgrade-glow = 1 bis 10) */
+.upgraded {
+  box-shadow: 0 0 calc(3px + var(--upgrade-glow) * 1.5px) var(--rarity);
+}
+
+.equip-row.upgraded {
+  position: relative;
+}
+
+.upgrade-badge {
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  font-size: 14px;
+  color: var(--gold);
+  text-shadow: 1px 1px 0 #0c0914;
+  pointer-events: none;
+}
+
+/* Effekt-Bereich: Funken und Riss liegen als Schicht darüber */
+.item-details,
+.equip-panel {
+  position: relative;
+}
+
+.upgrade-sparks::after,
+.upgrade-crack::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Geklappt: goldene Funken sprühen nach außen und verblassen */
+.upgrade-sparks::after {
+  background:
+    radial-gradient(circle at 30% 40%, #fff6c0 0 5px, transparent 6px),
+    radial-gradient(circle at 70% 30%, #ffd23f 0 5px, transparent 6px),
+    radial-gradient(circle at 55% 70%, #fff6c0 0 4px, transparent 5px),
+    radial-gradient(circle at 20% 75%, #ffd23f 0 4px, transparent 5px),
+    radial-gradient(circle at 85% 65%, #fff6c0 0 5px, transparent 6px),
+    radial-gradient(circle at 45% 15%, #ffd23f 0 4px, transparent 5px),
+    radial-gradient(circle at 12% 30%, #fff6c0 0 3px, transparent 4px),
+    radial-gradient(circle at 88% 12%, #ffd23f 0 3px, transparent 4px),
+    radial-gradient(circle at 65% 90%, #fff6c0 0 4px, transparent 5px),
+    radial-gradient(circle at 50% 45%, rgba(255, 210, 63, 0.5), transparent 65%);
+  animation: upgrade-sparks 0.9s ease-out forwards;
+}
+
+@keyframes upgrade-sparks {
+  0% { opacity: 1; transform: scale(0.6); }
+  60% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.3); }
+}
+
+/* Fehlgeschlagen: ein roter Riss quer über das Feld, das Feld wackelt kurz */
+.upgrade-crack {
+  animation: upgrade-shake 0.3s steps(3);
+}
+
+.upgrade-crack::after {
+  /* gezackte Linie von oben nach unten, als kleines Bild direkt im CSS */
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolyline points='58,0 50,14 61,27 46,41 57,55 43,70 54,84 47,100' fill='none' stroke='%23ff5a5a' stroke-width='2.5' vector-effect='non-scaling-stroke'/%3E%3Cpolyline points='61,27 75,33 83,31' fill='none' stroke='%23ff5a5a' stroke-width='2' vector-effect='non-scaling-stroke'/%3E%3Cpolyline points='43,70 30,74 22,80' fill='none' stroke='%23ff5a5a' stroke-width='2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat,
+    rgba(255, 60, 60, 0.15);
+  animation: upgrade-crack 0.9s ease-in forwards;
+}
+
+@keyframes upgrade-crack {
+  0% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes upgrade-shake {
+  0% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
 /* ---------- Benachrichtigungen ---------- */
 
 #toasts {
