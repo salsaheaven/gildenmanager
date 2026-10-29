@@ -14,7 +14,7 @@ Faustregel: Unterschiede bis etwa ±4 Prozentpunkte sind Zufall.
 | `anweisungen.mjs` | Was bewirkt jedes Extrem einer Anweisung gegenüber „Ausgewogen“, in 4 Gruppen (zusammen alle 15 Klassen) und allen Dungeons? Am Ende: welche Optionen situativ sind, nie helfen oder immer helfen | `node tools/anweisungen.mjs 300` (etwa 1–2 Minuten), schneller für einen Dungeon: `node tools/anweisungen.mjs 200 bearCave` |
 | `zielwerte.mjs` | Liegen die Siegchancen bei den Zielwerten aus KONZEPT.md („Schwierigkeit“)? | `node tools/zielwerte.mjs` |
 | `resistenzen.mjs` | Was bringen 1–3 Rüstungsteile mit Resistenz gegen die Schadensart eines Dungeons? | `node tools/resistenzen.mjs` |
-| `kampfdauer.mjs` | Wie lange dauert ein Run in Runden und Minuten (Tempo 1x)? | `node tools/kampfdauer.mjs` |
+| `kampfdauer.mjs` | Wie lange dauert ein Run in Runden und Minuten (Tempo 1x), mit Zeitraffer und zum Vergleich ohne? | `node tools/kampfdauer.mjs` |
 
 `messhilfen.mjs` enthält die gemeinsamen Bausteine (Testgruppe bauen, viele Runs messen).
 

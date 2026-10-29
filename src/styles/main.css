@@ -2229,6 +2229,65 @@ h3 {
   margin-bottom: 6px;
 }
 
+/* ---------- Woran es lag (Ursachen nach Niederlage oder Gefallenen) ---------- */
+
+.defeat-causes {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 2px solid #6b2f3a;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.defeat-title {
+  font-family: var(--font-title);
+  font-size: 11px;
+  color: #ff6b6b;
+  margin-bottom: 2px;
+}
+
+.defeat-cause {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.defeat-cause-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.defeat-cause-bar {
+  height: 10px;
+  background: #120d1c;
+  border: 1px solid var(--border);
+}
+
+.defeat-cause-bar span {
+  display: block;
+  height: 100%;
+}
+
+.defeat-cause-percent {
+  text-align: right;
+  color: var(--text-dim);
+}
+
+.defeat-note {
+  font-size: 15px;
+  color: var(--gold);
+}
+
+.defeat-tip {
+  font-size: 15px;
+  color: var(--text-dim);
+}
+
 /* ---------- Dungeons ---------- */
 
 .dungeon-screen {

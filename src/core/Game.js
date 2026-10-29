@@ -16,6 +16,7 @@
 //   'heroHealed'           → ein verletzter Held ist wieder fit (Daten: der Held)
 // ============================================================
 
+import { needsDefeatAnalysis, analyzeRun } from '../systems/combat/DefeatAnalysis.js';
 import { Random } from './Random.js';
 import { Guild } from '../entities/Guild.js';
 import { LootSystem } from '../systems/LootSystem.js';
@@ -215,6 +216,8 @@ export class Game {
       chestBonusItems: 0,   // Extra-Items durch "Glückspilz"
       chestBonusHero: null,
       firstClear: false,
+      // "Woran es lag": Top-Ursachen, Tipp und Hinweise (nur bei Niederlage oder Gefallenen, sonst null)
+      analysis: needsDefeatAnalysis(result) ? analyzeRun(result) : null,
       expedition: expedition.toSaveData(), // zum erneuten Ansehen
     };
 

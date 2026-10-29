@@ -4,6 +4,7 @@
 // (Die Kampfszenen am Tagesende kommen im nächsten Schritt dazu.)
 // ============================================================
 
+import { createDefeatCausesView } from './DefeatCausesView.js';
 import { Expedition } from '../entities/Expedition.js';
 import { renderCombatReport } from './CombatReport.js';
 
@@ -24,6 +25,8 @@ export class RunViewer {
     const result = expedition.getResult();
 
     this.container.innerHTML = '';
+    // Oben: "Woran es lag" (nur bei Niederlage oder Gefallenen)
+    this.container.appendChild(createDefeatCausesView(report.analysis));
     for (let i = 0; i < result.encounters.length; i++) {
       const encounterResult = result.encounters[i];
       const heading = document.createElement('h3');

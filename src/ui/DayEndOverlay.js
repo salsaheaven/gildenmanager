@@ -9,6 +9,7 @@
 //      Erst jetzt erscheinen die Level-Up-Banner, damit sie das Ergebnis nicht vorher verraten.
 // ============================================================
 
+import { createDefeatCausesView } from './DefeatCausesView.js';
 import { Hero } from '../entities/Hero.js';
 import { Expedition } from '../entities/Expedition.js';
 import { getDungeon } from '../data/dungeons.js';
@@ -206,6 +207,8 @@ export class DayEndOverlay {
     for (const heroResult of report.heroResults || []) {
       heroList.appendChild(this.createHeroRow(heroResult));
     }
+    // Bei Niederlage oder Gefallenen: "Woran es lag"
+    card.appendChild(createDefeatCausesView(report.analysis));
     return card;
   }
 

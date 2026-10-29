@@ -246,6 +246,7 @@ function warnIfOutOfMana(battle, hero) {
   const manaPercent = hero.getManaPercent();
   if (manaPercent < COMBAT_RULES.lowManaWarning && !hero.warnedLowMana) {
     hero.warnedLowMana = true;
+    battle.causes.addOutOfMana(hero.name);
     battle.addLog(hero.name + ' hat kaum noch Mana!', 'warning', { labels: [{ targetId: hero.id, text: 'Kein Mana!' }] });
   } else if (manaPercent > 0.5) {
     hero.warnedLowMana = false;
@@ -348,6 +349,10 @@ function tickDamageOverTime(battle, target, effect, everyone) {
   if (source) {
     source.damageDone += result.damage;
   }
+  // Flüche von Bossen zählen für "Woran es lag" zu ihrer Mechanik
+  if (target.side === 'hero' && effect.cause) {
+    battle.causes.addDamage(effect.cause, result.damage);
+  }
   battle.addLog(effect.name + ' verletzt ' + target.name + ' um ' + result.damage + '.', 'damage',
     { hits: [target.describeHit(result.damage, 'damage', false, 0, effect.damageType || 'physical')] });
   if (!target.alive) {
@@ -433,5 +438,6 @@ function createResult(battle, encounter, encounterName, bossData, maxRounds) {
     })),
     log: battle.log,
     snapshots: battle.snapshots,
+    causes: battle.causes.toResult(), // woher der Schaden kam (siehe CauseTracker.js)
   };
 }

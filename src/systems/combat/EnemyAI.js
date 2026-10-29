@@ -34,7 +34,8 @@ function minionAttack(battle, minion) {
     target = battle.random.pick(battle.getLivingHeroes());
   }
   battle.logAction(minion, null, minionData.attackFx, [target], false);
-  enemyHits(battle, minion, target, 'greift an', 1.0, minionData.attackDamageType || 'physical', true);
+  const source = { key: 'minion:' + minion.minionId, name: minionData.name, type: 'minion' };
+  enemyHits(battle, minion, target, 'greift an', 1.0, minionData.attackDamageType || 'physical', source, true);
 }
 
 function takeBossTurn(battle, boss) {
@@ -74,35 +75,50 @@ function takeBossTurn(battle, boss) {
 
   const target = battle.getBossTarget();
   battle.logAction(boss, null, bossData.attackFx, [target], false);
-  enemyHits(battle, boss, target, 'schlägt zu', 1.0, bossData.attackDamageType || 'physical', true);
+  const source = { key: 'attack:' + bossData.id, name: 'Angriffe von ' + boss.name, type: 'attack' };
+  enemyHits(battle, boss, target, 'schlägt zu', 1.0, bossData.attackDamageType || 'physical', source, true);
 }
 
 function isMechanicDue(mechanic, round) {
   return round >= mechanic.firstAt && (round - mechanic.firstAt) % mechanic.every === 0;
 }
 
+// Quelle für "Woran es lag" (siehe CauseTracker.js)
+function getMechanicSource(mechanic) {
+  return { key: 'mechanic:' + mechanic.name, name: mechanic.name, type: 'mechanic', hint: mechanic.hint };
+}
+
 function resolveMechanic(battle, boss, mechanic) {
+  const source = getMechanicSource(mechanic);
+  // Ein unterbrechbarer Zauber ist durchgekommen: in der Szene "Verpasst!" zeigen und merken
+  const missed = mechanic.interruptible === true && mechanic.castTime > 0;
+  if (missed) {
+    battle.causes.addMissedInterrupt(mechanic.name);
+  }
+  const missedLabels = missed ? [{ targetId: boss.id, text: 'Verpasst!' }] : [];
   switch (mechanic.type) {
     case 'tankBuster': {
       const target = battle.getBossTarget();
       battle.logAction(boss, mechanic.name, mechanic.fx, [target], true);
-      battle.addLog(boss.name + ': ' + mechanic.name + '!', 'mechanic', { cast: { state: 'end' } });
-      enemyHits(battle, boss, target, 'trifft mit voller Wucht', mechanic.power, mechanic.damageType || 'physical');
+      battle.addLog(boss.name + ': ' + mechanic.name + '!', 'mechanic', { cast: { state: 'end' }, labels: missedLabels });
+      enemyHits(battle, boss, target, 'trifft mit voller Wucht', mechanic.power, mechanic.damageType || 'physical', source);
       break;
     }
     case 'groupCast':
       battle.logAction(boss, mechanic.name, mechanic.fx, battle.getLivingHeroes(), true);
-      battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die ganze Gruppe!', 'mechanic', { cast: { state: 'end' } });
+      battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die ganze Gruppe!', 'mechanic',
+        { cast: { state: 'end' }, labels: missedLabels });
       for (const hero of battle.getLivingHeroes()) {
-        enemyHits(battle, boss, hero, 'trifft', mechanic.power, mechanic.damageType || 'physical');
+        enemyHits(battle, boss, hero, 'trifft', mechanic.power, mechanic.damageType || 'physical', source);
       }
       break;
     case 'frontWave': {
       const frontRow = battle.getLivingHeroes().filter((hero) => hero.row === 'front');
       battle.logAction(boss, mechanic.name, mechanic.fx, frontRow, true);
-      battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die vordere Reihe!', 'mechanic', { cast: { state: 'end' } });
+      battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die vordere Reihe!', 'mechanic',
+        { cast: { state: 'end' }, labels: missedLabels });
       for (const hero of frontRow) {
-        enemyHits(battle, boss, hero, 'trifft', mechanic.power, mechanic.damageType || 'physical');
+        enemyHits(battle, boss, hero, 'trifft', mechanic.power, mechanic.damageType || 'physical', source);
       }
       break;
     }
@@ -126,6 +142,7 @@ function resolveMechanic(battle, boss, mechanic) {
         damageType: mechanic.damageType || 'physical',
         remaining: mechanic.duration,
         isDebuff: true,
+        cause: source, // für "Woran es lag"
       });
       battle.logAction(boss, mechanic.name, mechanic.fx, [target], true);
       battle.addLog(boss.name + ' belegt ' + target.name + ' mit ' + mechanic.name + '.', 'mechanic',
@@ -138,8 +155,9 @@ function resolveMechanic(battle, boss, mechanic) {
 }
 
 // Ein Gegner trifft einen Helden. damageType = Schadensart (siehe data/damageTypes.js)
+// source = woher der Schaden kommt (für "Woran es lag", siehe CauseTracker.js)
 // dodgeable = true bei normalen Angriffen: Dann kann der Held ausweichen (Mönch).
-function enemyHits(battle, enemy, target, verb, power, damageType, dodgeable = false) {
+function enemyHits(battle, enemy, target, verb, power, damageType, source, dodgeable = false) {
   if (!target) {
     return;
   }
@@ -154,6 +172,12 @@ function enemyHits(battle, enemy, target, verb, power, damageType, dodgeable = f
   const critFactor = crit ? COMBAT_RULES.critMultiplier : 1;
   const result = target.takeDamage(enemy.attack * power * variation * enrageFactor * critFactor, false, damageType);
   enemy.damageDone += result.damage;
+  // In Raserei zählt der Schaden zur Raserei: Der Kampf hat zu lange gedauert
+  if (enemy.enraged) {
+    battle.causes.addDamage({ key: 'enrage:' + enemy.name, name: 'Raserei von ' + enemy.name, type: 'enrage' }, result.damage);
+  } else {
+    battle.causes.addDamage(source, result.damage);
+  }
 
   const critText = crit ? ' kritisch' : '';
   let text = enemy.name + ' ' + verb + critText + ': ' + target.name + ' verliert ' + result.damage + ' Leben';

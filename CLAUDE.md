@@ -45,7 +45,8 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
                simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug),
                BattleTimeline (wann passiert was → Dauer eines Runs, mit Zeitraffer für Trash und ruhige Runden), Battle (Zustand + Zielwahl),
                Combatant (ein Kämpfer), HeroAI (welcher Skill?), EnemyAI (Boss-Mechaniken),
-               AbilityEffects (was ein Skill bewirkt), OrderSettings (gewählte Anweisungen → ein Paket mit Wirkungen für den Kampf), ChanceEstimator (200 Kämpfe → Siegchance; estimateRunChances = ganzer Dungeon),
+               AbilityEffects (was ein Skill bewirkt), OrderSettings (gewählte Anweisungen → ein Paket mit Wirkungen für den Kampf),
+               CauseTracker (woher der Schaden an den Helden kommt), DefeatAnalysis („Woran es lag“: Top 3 Ursachen + Tipp), ChanceEstimator (200 Kämpfe → Siegchance; estimateRunChances = ganzer Dungeon),
                TestGroup (Testgruppe fürs Labor, Klassen frei wählbar)
 src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes, balancing, sprites (Pixel-Art als Text),
                heroClasses (15 Klassen inkl. Rüstungsart, nützliche Werte, Dauer-Fähigkeit `passive` und Begleiter `pet`), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
@@ -55,7 +56,8 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),
                heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus),
                riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben),
-               damageTypes (Schadensarten mit Farbe, Obergrenze für Resistenzen)
+               damageTypes (Schadensarten mit Farbe, Obergrenze für Resistenzen),
+               defeatCauses (Tipps und Hinweise für „Woran es lag“)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tagesplan, Startseite), LootBoxScreen (Schatzkammer),
                HeroScreen (+ HeroDetailPanel, EquipPanel = Ausrüstungsliste für den angetippten Platz, nach Item-Level sortiert,
                Vergleich pro Wert, bewusst ohne „bestes Item“), TavernScreen, CombatLabScreen,
@@ -64,6 +66,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tag
                LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden, während des Tagesabschlusses zurückgehalten).
                InventoryOverlay = Inventar als Vollbild-Fenster mit Kategorien (Knopf „Inventar“ in der Reiterleiste).
                CombatReport = Ergebnis, Schadensmesser und Kampfbericht (wiederverwendbar).
+               DefeatCausesView = Kasten „Woran es lag“ (Ursachen mit Balken, Hinweise, Tipp) im Tagesabschluss und im Bericht.
                BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken, großer Skill-Name, Tempo 1x/2x/4x); läuft über update(sekunden).
                SkillTooltip = Fenster mit Skills und Abklingzeiten, wenn die Maus über einem Helden der Szene steht (Handy: antippen).
                Tempo der Szene: `pacing` (inkl. Zeitraffer `trashSpeed`, `quietRoundSpeed`), `sceneSpeeds` und `sceneAnimationRate` in `combatRules.js`.

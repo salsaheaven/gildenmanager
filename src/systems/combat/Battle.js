@@ -11,6 +11,7 @@ import { getEnemyLevelFactors, getDefenseConstant } from '../../data/scaling.js'
 import { Combatant } from './Combatant.js';
 import { MINIONS } from '../../data/enemies.js';
 import { getHeroClass } from '../../data/heroClasses.js';
+import { CauseTracker } from './CauseTracker.js';
 
 export class Battle {
   // recordLog = false spart Zeit, wenn nur das Ergebnis zählt (z.B. bei 200 Simulationen)
@@ -28,6 +29,7 @@ export class Battle {
     this.nextMinionNumber = 1;
     this.enemyLevel = enemyLevel;
     this.forcedTarget = null;  // Herausforderungsruf: { combatant, rounds }
+    this.causes = new CauseTracker(); // woher der Schaden an den Helden kommt (für "Woran es lag")
 
     // Rückzug: läuft gerade? wie viele Runden noch? geschafft?
     this.retreating = false;
