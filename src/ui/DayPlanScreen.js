@@ -7,6 +7,7 @@
 //   - alle Helden, die heute nicht kämpfen: freie Helden bekommen eine Aufgabe (Ausruhen, Training, Kräuter,
 //     Erkunden mit Dungeon-Auswahl), Verletzte einen Knopf für Verbandszeug
 //   - "Wie gestern" plant die Gruppen vom Vortag noch einmal ein
+//   - Server: die neuesten Meldungen aus dem Ticker und eine aufklappbare Rangliste aller Gilden
 // Die Aufgaben selbst stehen in data/heroTasks.js, die Rechnung in systems/DayPlan.js.
 // ============================================================
 
@@ -18,6 +19,7 @@ import { createHeroCanvas } from './PixelArt.js';
 import { describeInjury } from './DungeonScreen.js';
 import { createRiskBadge } from './RiskBadge.js';
 import { renderOrders } from './OrdersPanel.js';
+import { createNewsLine } from './NewsLine.js';
 import { createSupplyPicker } from './SupplyPicker.js';
 import { getConsumable } from '../data/consumables.js';
 import { DUNGEONS } from '../data/dungeons.js';
@@ -45,6 +47,14 @@ export class DayPlanScreen {
             <button class="go-dungeons-button">Gruppe einplanen</button>
             <button class="big-button plan-end-day-button">Tag beenden ▶</button>
           </div>
+        </section>
+        <section class="panel day-plan-server">
+          <h2>Neues vom Server</h2>
+          <div class="news-ticker"></div>
+          <details class="leaderboard">
+            <summary>Rangliste</summary>
+            <div class="leaderboard-list"></div>
+          </details>
         </section>
         <section class="panel">
           <h2>Im Dungeon</h2>
@@ -86,6 +96,37 @@ export class DayPlanScreen {
     this.renderHeader(plan);
     this.renderRuns();
     this.renderOthers(plan);
+    this.renderServer();
+  }
+
+  // ---------- Server: Ticker und Rangliste ----------
+
+  renderServer() {
+    const ticker = this.root.querySelector('.news-ticker');
+    ticker.innerHTML = '';
+    const latest = this.game.guild.news.slice(0, TICKER_LINES);
+    for (const news of latest) {
+      ticker.appendChild(createNewsLine(news));
+    }
+    if (latest.length === 0) {
+      ticker.innerHTML = '<p class="empty">Noch ist es ruhig auf dem Server.</p>';
+    }
+
+    const list = this.root.querySelector('.leaderboard-list');
+    list.innerHTML = '';
+    const board = this.game.getLeaderboard();
+    board.forEach((entry, index) => {
+      const row = document.createElement('div');
+      row.className = 'leaderboard-row' + (entry.isPlayer ? ' player' : '');
+      row.style.setProperty('--guild-color', entry.color);
+      row.innerHTML = '<span class="leaderboard-rank"></span><span class="leaderboard-name"></span><span class="leaderboard-progress"></span>';
+      row.querySelector('.leaderboard-rank').textContent = (index + 1) + '.';
+      row.querySelector('.leaderboard-name').textContent = entry.name;
+      row.querySelector('.leaderboard-progress').textContent = entry.best === 0
+        ? 'noch kein Dungeon'
+        : entry.best + ' / ' + DUNGEONS.length + ' Dungeons · zuletzt Tag ' + entry.bestDay;
+      list.appendChild(row);
+    });
   }
 
   // ---------- Überblick ----------
@@ -312,6 +353,9 @@ export class DayPlanScreen {
     return button;
   }
 }
+
+// So viele Meldungen zeigt der Tagesplan
+const TICKER_LINES = 4;
 
 // Kleines farbiges Schild für eine Aufgabe
 function createTaskChip(taskId) {

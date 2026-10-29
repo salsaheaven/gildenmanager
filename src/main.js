@@ -156,7 +156,7 @@ game.on('dayEnding', () => levelUpBanner.hold());
 
 game.on('dayEnded', (data) => {
   // Ohne Kämpfe und ohne Aufgaben (alle ruhen sich aus) reicht eine kurze Meldung
-  const somethingHappened = data.summary.tasks.some((task) => task.taskId !== 'rest');
+  const somethingHappened = data.summary.tasks.some((task) => task.taskId !== 'rest') || data.summary.news.length > 0;
   if (data.reports.length === 0 && !somethingHappened) {
     Sound.click();
     showToast('Ein ruhiger Tag. Sold: −' + data.summary.wages.paid + ' Gold. Tag ' + game.day + ' beginnt.', '#ffd23f');

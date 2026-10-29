@@ -9,6 +9,9 @@
 //      Erst jetzt erscheinen die Level-Up-Banner, damit sie das Ergebnis nicht vorher verraten.
 // ============================================================
 
+import { createNewsLine } from './NewsLine.js';
+import { getServerFirstTitle } from '../systems/RivalSystem.js';
+import { showToast } from './Toast.js';
 import { HERO_TASKS } from '../data/heroTasks.js';
 import { getConsumable } from '../data/consumables.js';
 import { describeSupplies } from './SupplyPicker.js';
@@ -174,6 +177,9 @@ export class DayEndOverlay {
       summary.appendChild(this.createRunCard(run.report));
     }
     summary.appendChild(this.createHomeCard(this.daySummary));
+    if (this.daySummary.news.length > 0) {
+      summary.appendChild(this.createNewsCard(this.daySummary.news));
+    }
 
     const nextButton = body.querySelector('.next-day-button');
     nextButton.textContent = 'Weiter zu Tag ' + (this.day + 1);
@@ -182,12 +188,28 @@ export class DayEndOverlay {
       this.close();
     });
 
-    // Fanfare für den besten Erfolg des Tages
+    // Fanfare für den besten Erfolg des Tages (Server-First am größten)
+    const serverFirst = this.runs.find((run) => run.report.serverFirst);
     const best = this.runs.find((run) => run.report.firstClear) || this.runs.find((run) => run.report.outcome === 'success');
-    if (best) {
+    if (serverFirst) {
+      Sound.collectionPage();
+      showToast('Server-First! Neuer Titel: „' + getServerFirstTitle(serverFirst.report.dungeonId) + '“', '#ffd23f');
+    } else if (best) {
       Sound.itemReveal(best.report.firstClear ? 4 : 3);
     }
     this.callbacks.onSummaryShown();
+  }
+
+  // Karte "Neues vom Server": alle Meldungen dieses Abends (deine und die der KI-Gilden),
+  // in der Reihenfolge, in der sie passiert sind (deine Runs zuerst)
+  createNewsCard(newsList) {
+    const card = document.createElement('div');
+    card.className = 'day-run-card day-news-card';
+    card.innerHTML = '<div class="day-run-head"><b class="day-run-name">Neues vom Server</b></div><div class="day-news-lines"></div>';
+    for (const news of newsList.slice().reverse()) {
+      card.querySelector('.day-news-lines').appendChild(createNewsLine(news));
+    }
+    return card;
   }
 
   // Karte "Daheim": was die Helden ohne Kampf erledigt haben, und der Sold
@@ -231,7 +253,7 @@ export class DayEndOverlay {
     `;
     card.querySelector('.day-run-name').textContent = dungeon.name;
     card.querySelector('.day-run-outcome').textContent = outcomeText(report.outcome) +
-      (report.firstClear ? ' Zum ersten Mal geschafft!' : '');
+      (report.serverFirst ? ' Server-First: als erste Gilde geschafft!' : (report.firstClear ? ' Zum ersten Mal geschafft!' : ''));
 
     this.renderRewards(card.querySelector('.day-run-rewards'), report);
 

@@ -78,6 +78,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tag
                Tempo der Szene: `pacing` (inkl. Zeitraffer `trashSpeed`, `quietRoundSpeed`), `sceneSpeeds` und `sceneAnimationRate` in `combatRules.js`.
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
                SupplyPicker = Vorrats-Plätze einer Gruppe (Dungeon-Bildschirm + Tagesplan).
+               NewsLine = eine Zeile aus dem Neuigkeiten-Ticker (Tagesplan + Tagesabschluss).
                RiskBadge = Einschätzung eines Runs in Worten („Riskant · Gefallene: oft“).
                OrdersPanel = Auswahllisten für Anweisungen mit Vorteil (grün) und Nachteil (rot) (Labor, Dungeon, Tagesplan, Heldenbildschirm).
                Leisten: TopBar, NavBar. Helfer: PixelArt, Sound, Toast, format, TraitChip.

@@ -2230,6 +2230,71 @@ h3 {
   margin-bottom: 6px;
 }
 
+/* ---------- Server: Ticker und Rangliste ---------- */
+
+.news-ticker {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.news-line {
+  --news-color: var(--text);
+  display: flex;
+  gap: 8px;
+  font-size: 15px;
+  border-left: 3px solid var(--news-color);
+  padding-left: 6px;
+}
+
+.news-day {
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.news-text {
+  color: var(--news-color);
+}
+
+.news-line.server-first .news-text {
+  font-weight: bold;
+  text-shadow: 0 0 6px var(--news-color);
+}
+
+.leaderboard {
+  margin-top: 8px;
+}
+
+.leaderboard summary {
+  cursor: pointer;
+  color: var(--gold);
+}
+
+.leaderboard-row {
+  --guild-color: var(--text);
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 3px 6px;
+  font-size: 15px;
+}
+
+.leaderboard-name {
+  color: var(--guild-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-progress {
+  color: var(--text-dim);
+}
+
+.leaderboard-row.player {
+  background: rgba(255, 210, 63, 0.12);
+  border: 1px solid var(--gold);
+}
+
 /* ---------- Tagesaufgaben ---------- */
 
 .task-picker {
