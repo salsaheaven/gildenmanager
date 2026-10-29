@@ -40,7 +40,7 @@ src/
   data/                   # reine Inhalte, Werte ändern ohne Programmierkenntnisse
     heroClasses.js        # Krieger, Priester, Magier, Jäger ...
     items.js              # Item-Vorlagen
-    sets.js               # Klassen-Sets + Boni (2/4/6 Teile)
+    sets.js               # Klassen-Sets + Boni (4 Teile pro Set, aus Heroisch)
     dungeons.js           # Dungeons: Stufe, Dauer, Gegner, Loot-Tabelle
     rarities.js           # Grau/Weiß/Grün/Blau/Lila/Orange: Farbe, Chance, Wertebonus
   ui/                     # je Bildschirm eine Datei
@@ -60,7 +60,7 @@ src/
 - **Seltenheiten** wie im klassischen MMO: Grau, Weiß, Grün, **Blau**, **Lila**, **Orange (legendär)**, jeweils mit eigener Farbe, eigenem Sound und eigenem Effekt
 - **Lootboxen** in Stufen (Holz/Silber/Gold/Episch). Das Öffnen ist inszeniert: wackeln, aufspringen, Items erscheinen nacheinander, das seltenste zuletzt.
 - **Pity-System:** Nach X Kisten ohne Lila gibt es garantiert eins, damit Pechsträhnen nicht frustrieren
-- **Klassen-Sets** (z.B. 6 Teile pro Klasse) mit 2/4/6-Teile-Boni, dazu ein **Sammelbuch**, das fehlende Teile als Silhouette zeigt
+- **Klassen-Sets** (4 Teile pro Set, gefarmt in Heroisch auf Max-Level), dazu Seiten im **Sammelbuch**, das fehlende Teile als Silhouette zeigt
 - **Ständiges Feedback:** Level-Up-Fanfare, aufsteigende Zahlen, Fortschrittsbalken überall (XP, Set-Sammlung, Gildenrang)
 - **Schnelle erste Erfolge:** Schon die ersten Tage bringen Kisten und Level-Ups
 - **Mehrere Ziele pro Tag:** Gruppen im Dungeon, andere Helden farmen oder sammeln, dazu Bau und Crafting. Der Tagesabschluss bringt alles auf einmal.
@@ -109,7 +109,7 @@ In kleinen, jeweils online testbaren Schritten:
 
 - **Ziel:** Nach 10 Minuten Spielen will man „noch einen Run“
 
-**M2 – Progression:** ~~Gildenkurier abschalten~~ (✅ schon erledigt und beim Umbau auf Runden ganz entfernt), Kisten aus dem Händler nehmen; der Laden verkauft Verbrauchsgüter und Mats, dazu der Wanderhändler. Talente, Zerlegen und Verbessern (+1 bis +10), Klassen-Sets + Sammelbuch, Heroisch-Modus mit Permadeath + Ehrenhalle.
+**M2 – Progression:** ~~Gildenkurier abschalten~~ (✅ schon erledigt und beim Umbau auf Runden ganz entfernt), Kisten aus dem Händler nehmen; der Laden verkauft Verbrauchsgüter und Mats, dazu der Wanderhändler. **Talente** und **Zerlegen + Verbessern** (+1 bis +10). (Entschieden 2026-10-29: Heroisch mit Permadeath, Ehrenhalle und den Klassen-Sets kommt erst später als Endgame auf Max-Level.)
 
 **M3 – Rivalen & Gildenhalle:** KI-Gilden, Rangliste, News-Ticker, Gebäude (Kaserne, Lazarett, Schmiede), Crafting.
 

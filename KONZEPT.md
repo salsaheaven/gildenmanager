@@ -18,7 +18,7 @@ Das gilt für Anweisungen, Klassen, Eigenschaften, Talente, Ausrüstungswerte un
 Tag planen (jedem Helden eine Aufgabe geben, Gruppen zusammenstellen) → **„Tag beenden“** → Kämpfe laufen als Szene ab → Tagesabschluss mit Beute, EP und Level-Ups → **Boss-Kisten öffnen** → zerlegen, verbessern, ausrüsten → nächster Tag
 
 **Stunden-Loop:**
-Helden leveln und Talente vergeben · Klassen-Sets vervollständigen (2/4/6-Boni, Sammelbuch) · Gildenhalle ausbauen ·
+Helden leveln und Talente vergeben · Klassen-Sets in Heroisch farmen (4 Teile pro Set, Sammelbuch) · Gildenhalle ausbauen ·
 neue Dungeon-Stufen freischalten · Hardcore-Risiko abwägen
 
 **Spiel-Loop:**
@@ -32,6 +32,7 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
 | Helden-Seltenheit | Bewirkt mehr Wachstum pro Level und mehr Eigenschafts- bzw. Talentplätze. Gute Ausrüstung kann eine niedrige Seltenheit ausgleichen. |
 | Klassen | **Entschieden 2026-10-25** (Design-Review, P9): **15 Klassen**, je **3 pro Position**: Tank, Heiler, Nahkampf-DD, Fernkampf-DD, Support. Jede Klasse hat etwas, das nur sie kann, und eine klare Schwäche. Details siehe [Klassen](#klassen). Alle 15 sind im Spiel. |
 | Dungeons | MMO-Klassiker: 5er-Gruppe aus Tank, Heiler und 3 DD. Stufen Normal → Heroisch. Jede Stufe hat ein empfohlenes Ausrüstungsniveau. |
+| Heroisch und Klassen-Sets | **Entschieden 2026-10-29.** **Heroisch kommt erst auf Max-Level** (Endgame, nicht in M2): Dann gibt es jeden Dungeon, auch die frühen, als **heroische Variante mit stärkeren Gegnern**. In Heroisch **farmt man die Klassen-Sets**: **4 Teile pro Set** (statt der früher geplanten 2/4/6-Boni). Permadeath und Ehrenhalle gehören zu Heroisch und kommen mit ihm. Sets bekommen später eigene Sammelbuch-Seiten. |
 | Aufbau eines Dungeons | Immer **mindestens eine Trash-Gruppe und ein Boss**. Spätere Dungeons haben mehrere Trash-Gruppen und 2 bis 3 Bosse. Leben und Mana werden zwischen den Begegnungen nur teilweise aufgefüllt. Man muss also mit seinen Kräften haushalten. |
 | Raids | **Zwei 40-Mann-Raids**, der letzte Raid ist der Endboss (entschieden 2026-10-25). Details werden später gesondert geplant. |
 | Umfang (Zielbild) | **Entschieden 2026-10-25:** Roster von etwa **60 Helden**, **10+ Dungeons**, **zwei 40-Mann-Raids**. Der jetzige Stand (10 Helden, 3 Dungeons) ist nur ein Testballon für Loops und Features. Balancing und eine sinnvolle Progression kommen erst, wenn dieser Umfang steht. |
@@ -133,7 +134,7 @@ Regel für Raids: **Gleiche Buffs zählen nicht doppelt** (zwei Barden geben nic
 | Thema | Entscheidung |
 |---|---|
 | Level-Obergrenze | **Level 30** für die erste Version. Jedes Level zählt spürbar, und es gibt weniger Balancing-Arbeit. Eine spätere Erweiterung (z.B. auf 40 oder 60) ist möglich, weil alle Formeln in `src/data/` stehen. |
-| Tempo | Die ersten Helden erreichen Level 30 **etwa zur Hälfte des Spiels**. Danach zählen Ausrüstung, Sets, Verbessern und Heroisch (Endgame). |
+| Tempo | Die ersten Helden erreichen Level 30 **etwa zur Hälfte des Spiels**. Danach zählen Ausrüstung, Verbessern und Heroisch mit den Klassen-Sets (Endgame). |
 | Item-Level | Jedes Item hat ein **Item-Level nach Herkunft**: Jeder Dungeon hat eine Stufe und lässt Items dieser Stufe fallen. Ein grünes Item aus einem späteren Dungeon schlägt ein blaues aus einem frühen. Neue Dungeons lohnen sich so immer, und alte Ausrüstung wird ersetzt. |
 | Gewicht der Ausrüstung | Am Ende macht die Ausrüstung **etwa die Hälfte** der Stärke eines Helden aus. Am Anfang ist es deutlich weniger (etwa ein Drittel), weil Item-Werte schneller mit dem Item-Level wachsen als die Grundwerte mit dem Helden-Level. |
 | Gegner | Gegner wachsen mit der Stufe des Dungeons statt über eine feste Gegnerstärke |
