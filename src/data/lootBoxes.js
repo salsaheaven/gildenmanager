@@ -5,7 +5,8 @@
 //
 // id          = interner Name
 // name        = Anzeigename
-// price       = Kaufpreis in Gold (null = nicht kaufbar, z.B. Boss-Kisten)
+// price       = Kaufpreis in Gold (null = nicht kaufbar). Seit P6 sind alle Kisten nicht mehr kaufbar:
+//               Kisten kommen nur aus Dungeons (und als Start-Kisten). Der Händler verkauft Verbrauchsgüter.
 // itemCount   = wie viele Items darin sind
 // mainColor   = Hauptfarbe der Kiste (Pixelbild)
 // darkColor   = dunkle Farbe für Schatten und Beschläge
@@ -22,7 +23,7 @@ export const LOOT_BOXES = [
   {
     id: 'wood',
     name: 'Holzkiste',
-    price: 25,
+    price: null,
     itemCount: 2,
     mainColor: '#a0652d',
     darkColor: '#6b3f17',
@@ -32,7 +33,7 @@ export const LOOT_BOXES = [
   {
     id: 'silver',
     name: 'Silberkiste',
-    price: 90,
+    price: null,
     itemCount: 3,
     mainColor: '#b8c4d6',
     darkColor: '#6d7a8f',
@@ -42,7 +43,7 @@ export const LOOT_BOXES = [
   {
     id: 'gold',
     name: 'Goldkiste',
-    price: 300,
+    price: null,
     itemCount: 3,
     mainColor: '#f2c14e',
     darkColor: '#a87b16',
@@ -52,7 +53,7 @@ export const LOOT_BOXES = [
   {
     id: 'epic',
     name: 'Epische Kiste',
-    price: 1000,
+    price: null,
     itemCount: 4,
     mainColor: '#9b4dff',
     darkColor: '#5a1fa8',

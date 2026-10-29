@@ -128,14 +128,6 @@ describe('LootSystem', () => {
 });
 
 describe('Game', () => {
-  it('Kiste kaufen kostet Gold und klappt nicht ohne Gold', () => {
-    const game = new Game(1);
-    game.guild.gold = 30;
-    expect(game.buyBox('wood')).toBe(true);
-    expect(game.guild.gold).toBe(30 - getLootBoxType('wood').price);
-    expect(game.buyBox('gold')).toBe(false);
-  });
-
   it('Kiste öffnen legt Items ins Inventar, verkaufen bringt Gold', () => {
     const game = new Game(1);
     const items = game.openBox('wood');

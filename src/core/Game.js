@@ -16,13 +16,13 @@
 //   'heroHealed'           → ein verletzter Held ist wieder fit (Daten: der Held)
 // ============================================================
 
+import { CONSUMABLES, DAILY_OFFER_COUNT, SUPPLY_SLOTS, getConsumable } from '../data/consumables.js';
 import { needsDefeatAnalysis, analyzeRun } from '../systems/combat/DefeatAnalysis.js';
 import { Random } from './Random.js';
 import { Guild } from '../entities/Guild.js';
 import { LootSystem } from '../systems/LootSystem.js';
 import { RecruitmentSystem } from '../systems/RecruitmentSystem.js';
 import { BALANCING } from '../data/balancing.js';
-import { getLootBoxType } from '../data/lootBoxes.js';
 import { getDungeon } from '../data/dungeons.js';
 import { Expedition } from '../entities/Expedition.js';
 import { applyRunResults } from '../systems/ExperienceSystem.js';
@@ -38,6 +38,7 @@ export class Game {
     this.listeners = {};
 
     this.recruitmentSystem.refreshCandidates(this.guild);
+    this.refreshDailyOffer();
   }
 
   // ---------- Ereignisse ----------
@@ -79,9 +80,10 @@ export class Game {
       reports.push(this.finishExpedition(expedition));
     }
 
-    // 3. Der nächste Tag beginnt: neue Bewerber in der Taverne
+    // 3. Der nächste Tag beginnt: neue Bewerber in der Taverne, neues Tagesangebot beim Händler
     this.day++;
     this.refreshCandidates();
+    this.refreshDailyOffer();
 
     this.emit('dayEnded', { day: endedDay, reports: reports });
     this.emit('changed');
@@ -94,17 +96,97 @@ export class Game {
     this.emit('changed');
   }
 
-  // ---------- Aktionen: Kisten & Items ----------
+  // ---------- Aktionen: Händler & Vorräte (siehe data/consumables.js) ----------
 
-  buyBox(boxTypeId) {
-    const boxType = getLootBoxType(boxTypeId);
-    if (!this.guild.spendGold(boxType.price)) {
+  // Würfelt das Tagesangebot neu: DAILY_OFFER_COUNT verschiedene Waren mit stock 'daily'
+  refreshDailyOffer() {
+    const remaining = CONSUMABLES.filter((consumable) => consumable.stock === 'daily').map((consumable) => consumable.id);
+    const offer = [];
+    while (offer.length < DAILY_OFFER_COUNT && remaining.length > 0) {
+      const picked = this.random.pick(remaining);
+      offer.push(picked);
+      remaining.splice(remaining.indexOf(picked), 1);
+    }
+    this.guild.dailyOffer = offer;
+  }
+
+  // Kann man diese Ware heute kaufen? (Grundware immer, sonst nur im Tagesangebot)
+  isOnSale(consumableId) {
+    const consumable = getConsumable(consumableId);
+    return consumable.stock === 'always' || this.guild.dailyOffer.includes(consumableId);
+  }
+
+  // Kauft eine Ware in die Vorratskammer. Gibt true zurück, wenn es geklappt hat.
+  buySupply(consumableId) {
+    if (!this.isOnSale(consumableId)) {
       return false;
     }
-    this.guild.addBox(boxTypeId);
+    if (!this.guild.spendGold(getConsumable(consumableId).price)) {
+      return false;
+    }
+    this.guild.addSupply(consumableId);
     this.emit('changed');
     return true;
   }
+
+  // Benutzt Verbandszeug (oder eine andere Sofort-Ware) auf einem verletzten Helden
+  useSupplyOnHero(consumableId, heroId) {
+    const consumable = getConsumable(consumableId);
+    const hero = this.guild.findHero(heroId);
+    if (consumable.use !== 'instant' || !hero || !hero.isInjured() || this.guild.countSupply(consumableId) === 0) {
+      return false;
+    }
+    this.guild.takeSupply(consumableId);
+    hero.injuryDays = Math.max(0, hero.injuryDays - consumable.effects.injuryDays);
+    this.emit('changed');
+    return true;
+  }
+
+  // Ändert die Vorräte einer geplanten Gruppe. Die alten kommen zurück in die Vorratskammer,
+  // die neuen werden herausgenommen. Gibt 'ok' oder einen Grund zurück.
+  setExpeditionSupplies(expeditionId, supplyIds) {
+    const expedition = this.guild.findExpedition(expeditionId);
+    if (!expedition) {
+      return 'notFound';
+    }
+    for (const supplyId of expedition.supplies) {
+      this.guild.addSupply(supplyId);
+    }
+    expedition.supplies = [];
+    const check = this.takeSuppliesForRun(supplyIds);
+    if (check !== 'ok') {
+      return check;
+    }
+    expedition.supplies = supplyIds.slice();
+    this.emit('changed');
+    return 'ok';
+  }
+
+  // Nimmt Vorräte für einen Run aus der Vorratskammer. Klappt es nicht ganz, wird nichts genommen.
+  takeSuppliesForRun(supplyIds) {
+    if (supplyIds.length > SUPPLY_SLOTS) {
+      return 'tooManySupplies';
+    }
+    const needed = {};
+    for (const supplyId of supplyIds) {
+      if (getConsumable(supplyId).use !== 'run') {
+        return 'notForRuns';
+      }
+      needed[supplyId] = (needed[supplyId] || 0) + 1;
+    }
+    for (const supplyId in needed) {
+      if (this.guild.countSupply(supplyId) < needed[supplyId]) {
+        return 'noSupplies';
+      }
+    }
+    for (const supplyId of supplyIds) {
+      this.guild.takeSupply(supplyId);
+    }
+    return 'ok';
+  }
+
+  // ---------- Aktionen: Kisten & Items ----------
+
 
   // Öffnet eine Kiste. Gibt die Items zurück (seltenstes zuletzt) oder null, wenn keine da ist.
   openBox(boxTypeId) {
@@ -160,7 +242,8 @@ export class Game {
   // Gibt 'ok' oder einen Grund zurück:
   // 'locked' (Dungeon gesperrt), 'noHeroes', 'tooMany', 'busy' (ein Held ist heute schon eingeplant),
   // 'injured' (ein Held ist verletzt)
-  startExpedition(dungeonId, heroIds, retreatRuleId) {
+  // supplyIds = mitgenommene Verbrauchsgüter (freiwillig, höchstens SUPPLY_SLOTS)
+  startExpedition(dungeonId, heroIds, retreatRuleId, supplyIds = []) {
     if (!this.isDungeonUnlocked(dungeonId)) {
       return 'locked';
     }
@@ -180,8 +263,14 @@ export class Game {
       }
     }
 
+    const supplyCheck = this.takeSuppliesForRun(supplyIds);
+    if (supplyCheck !== 'ok') {
+      return supplyCheck;
+    }
+
     const seed = Math.floor(this.random.next() * 2147483647);
-    const expedition = new Expedition(this.guild.nextExpeditionId, dungeonId, heroIds.slice(), retreatRuleId, seed);
+    const expedition = new Expedition(this.guild.nextExpeditionId, dungeonId, heroIds.slice(), retreatRuleId, seed,
+      supplyIds.slice());
     this.guild.nextExpeditionId++;
     this.guild.expeditions.push(expedition);
     this.emit('changed');
@@ -193,6 +282,10 @@ export class Game {
     const expedition = this.guild.findExpedition(expeditionId);
     if (!expedition) {
       return false;
+    }
+    // Die Vorräte kommen zurück in die Vorratskammer
+    for (const supplyId of expedition.supplies) {
+      this.guild.addSupply(supplyId);
     }
     this.guild.expeditions = this.guild.expeditions.filter((e) => e.id !== expeditionId);
     this.emit('changed');
@@ -219,6 +312,7 @@ export class Game {
       bonusGold: 0,         // Extra-Gold durch "Gierig"
       bonusGoldHero: null,  // wer es gebracht hat
       collectionGold: 0,    // Extra-Gold durch die volle Sammelbuch-Seite dieses Dungeons
+      supplies: expedition.supplies.slice(), // verbrauchte Vorräte
       chest: null,
       chestBonusItems: 0,   // Extra-Items durch "Glückspilz"
       chestBonusHero: null,

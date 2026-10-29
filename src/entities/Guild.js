@@ -29,6 +29,8 @@ export class Guild {
     this.dungeonAttempts = {}; // Dungeon-id → wie oft versucht (egal wie es ausging)
     this.reports = [];         // Berichte über abgeschlossene Runs (neueste zuerst)
     this.collection = new CollectionBook(); // Sammelbuch: welche Boss-Items schon gefunden wurden
+    this.supplies = {};        // Vorratskammer: Verbrauchsgut-id → Anzahl (siehe data/consumables.js)
+    this.dailyOffer = [];      // heutiges Tagesangebot des Händlers (Liste von Verbrauchsgut-ids)
 
     // Pity-Zähler: Items seit dem letzten epischen oder legendären Item
     this.itemsSinceEpic = 0;
@@ -176,6 +178,28 @@ export class Guild {
 
   // ---------- Speichern ----------
 
+  // ---------- Vorratskammer ----------
+
+  countSupply(consumableId) {
+    return this.supplies[consumableId] || 0;
+  }
+
+  addSupply(consumableId, amount = 1) {
+    this.supplies[consumableId] = this.countSupply(consumableId) + amount;
+  }
+
+  // Nimmt eine Ware heraus. Gibt false zurück, wenn keine da ist.
+  takeSupply(consumableId) {
+    if (this.countSupply(consumableId) <= 0) {
+      return false;
+    }
+    this.supplies[consumableId]--;
+    if (this.supplies[consumableId] === 0) {
+      delete this.supplies[consumableId];
+    }
+    return true;
+  }
+
   toSaveData() {
     return {
       name: this.name,
@@ -194,6 +218,8 @@ export class Guild {
       dungeonAttempts: this.dungeonAttempts,
       reports: this.reports,
       collection: this.collection.toSaveData(),
+      supplies: this.supplies,
+      dailyOffer: this.dailyOffer,
     };
   }
 
@@ -216,6 +242,8 @@ export class Guild {
     guild.dungeonAttempts = data.dungeonAttempts || {};
     guild.reports = data.reports || [];
     guild.collection = CollectionBook.fromSaveData(data.collection);
+    guild.supplies = data.supplies;
+    guild.dailyOffer = data.dailyOffer;
     return guild;
   }
 }

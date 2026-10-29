@@ -2,7 +2,7 @@
 // EXPEDITION – ein Dungeon-Run, der für heute geplant ist
 //
 // Ablauf (rundenbasiert, 1 Runde = 1 Tag):
-//   1. Tagsüber plant man den Run: Dungeon, Helden, Rückzugsregel.
+//   1. Tagsüber plant man den Run: Dungeon, Helden, Rückzugsregel und Vorräte (Verbrauchsgüter).
 //      Bis zum Tagesende darf man die Helden noch umrüsten und ihre Anweisungen ändern.
 //   2. Bei "Tag beenden" wird der Run ausgekämpft (resolve): Die Helden werden so,
 //      wie sie gerade sind, als Abbild festgehalten, und der Run wird mit festem Seed berechnet.
@@ -16,12 +16,14 @@ import { simulateRun } from '../systems/combat/CombatSimulator.js';
 
 export class Expedition {
   // heroIds = die Helden der Gruppe, seed = fester Zufall für diesen Run
-  constructor(id, dungeonId, heroIds, retreatRuleId, seed) {
+  // supplies = mitgenommene Verbrauchsgüter (Liste von ids, höchstens SUPPLY_SLOTS)
+  constructor(id, dungeonId, heroIds, retreatRuleId, seed, supplies = []) {
     this.id = id;
     this.dungeonId = dungeonId;
     this.heroIds = heroIds;
     this.retreatRuleId = retreatRuleId;
     this.seed = seed;
+    this.supplies = supplies;
     this.heroSnapshots = null; // Abbild der Helden beim Auskämpfen (null = noch nicht ausgekämpft)
     this.result = null;        // berechnetes Ergebnis (wird nicht gespeichert, sondern neu berechnet)
   }
@@ -49,6 +51,7 @@ export class Expedition {
         retreatRuleId: this.retreatRuleId,
         seed: this.seed,
         recordLog: true,
+        supplies: this.supplies,
       });
     }
     return this.result;
@@ -61,6 +64,7 @@ export class Expedition {
       heroIds: this.heroIds,
       retreatRuleId: this.retreatRuleId,
       seed: this.seed,
+      supplies: this.supplies,
       heroSnapshots: this.heroSnapshots,
     };
   }
@@ -68,7 +72,7 @@ export class Expedition {
   static fromSaveData(data) {
     // Alte Spielstände (Echtzeit) hatten nur das Abbild vom Start, aber keine heroIds
     const heroIds = data.heroIds || data.heroSnapshots.map((snapshot) => snapshot.id);
-    const expedition = new Expedition(data.id, data.dungeonId, heroIds, data.retreatRuleId, data.seed);
+    const expedition = new Expedition(data.id, data.dungeonId, heroIds, data.retreatRuleId, data.seed, data.supplies);
     // Ein alter, noch laufender Run steht jetzt einfach in der Planung und wird am Tagesende
     // neu ausgekämpft (resolve). Alte Berichte behalten ihr Abbild, damit man sie weiter ansehen kann.
     expedition.heroSnapshots = data.heroSnapshots || null;

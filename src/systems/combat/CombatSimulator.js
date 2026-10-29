@@ -30,6 +30,7 @@ import { getBoss, MINIONS } from '../../data/enemies.js';
 import { getHeroClass } from '../../data/heroClasses.js';
 import { getDungeon } from '../../data/dungeons.js';
 import { getRetreatRule } from '../../data/retreatRules.js';
+import { combineSupplyEffects, applySupplyEffects, applyManaAtStart, applyRestHealth } from './SupplyEffects.js';
 
 // Macht aus einem Helden (entities/Hero.js) einen Kämpfer
 export function createHeroCombatant(hero) {
@@ -72,7 +73,8 @@ export function simulateBattle(options) {
 }
 
 // Ein ganzer Dungeon-Run.
-// options = { heroes, dungeonId, retreatRuleId, seed, recordLog }
+// options = { heroes, dungeonId, retreatRuleId, seed, recordLog, supplies }
+//   supplies = freiwillig: mitgenommene Verbrauchsgüter (Liste von ids, siehe data/consumables.js)
 // Gibt { dungeonId, outcome, encounters, heroes } zurück.
 //   outcome = 'success', 'defeat', 'retreat' oder 'timeout'
 export function simulateRun(options) {
@@ -80,6 +82,8 @@ export function simulateRun(options) {
   const retreatRule = getRetreatRule(options.retreatRuleId || 'never');
   const random = new Random(options.seed);
   const heroes = options.heroes.map((hero) => createHeroCombatant(hero));
+  const supplyEffects = combineSupplyEffects(options.supplies || []);
+  applySupplyEffects(heroes, supplyEffects);
 
   const encounters = [];
   let outcome = 'success';
@@ -92,7 +96,9 @@ export function simulateRun(options) {
     }
     if (i > 0) {
       restBetweenEncounters(heroes);
+      applyRestHealth(heroes, supplyEffects);
     }
+    applyManaAtStart(heroes, supplyEffects);
 
     const retreatOptions = { rule: retreatRule };
     const result = runEncounter(heroes, dungeon.encounters[i], random, options.recordLog, retreatOptions,
