@@ -41,8 +41,9 @@ src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen, Tageszä
 src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, CollectionBook (Sammelbuch: beste gefundene Seltenheit je Boss-Item, Titel, Gold-Bonus),
                RivalGuild (eine KI-Gilde: welche Dungeons an welchem Tag), Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft)
 src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem (EP, Aufhol-Erfahrung, Verletzungen nach einem Run),
-               DayPlan (welcher Held hat heute welche Aufgabe), HeroTaskSystem (Training, Kräuter sammeln, Erkunden, Sold bei endDay),
+               DayPlan (welcher Held hat heute welche Aufgabe), HeroTaskSystem (Training, Kräuter sammeln, Aufträge, Erkunden, Sold bei endDay),
                RivalSystem (KI-Gilden kommen voran, Neuigkeiten-Ticker, Server-First, Rangliste),
+               StartTeam (prüft die Starttruppe: Rolle pro Platz, alle Rüstungsarten),
                CraftingSystem (Zerlegen → Staub/Kristalle, Verbessern +1 bis +10 mit Fehlschlag ab +6), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
                simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug),
@@ -57,7 +58,8 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                dungeons (Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),
-               heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus, Training, Kräuter sammeln, Erkunden; Zahlen in TASK_RULES),
+               heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus, Training, Kräuter sammeln, Aufträge erledigen, Erkunden; Zahlen in TASK_RULES),
+               startTeam (Plätze der Starttruppe, Pflicht-Rüstungsarten, Standard-Gildenname),
                riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben),
                damageTypes (Schadensarten mit Farbe, Obergrenze für Resistenzen),
                defeatCauses (Tipps und Hinweise für „Woran es lag“),
@@ -82,6 +84,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tag
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
                SupplyPicker = Vorrats-Plätze einer Gruppe (Dungeon-Bildschirm + Tagesplan).
                NewsLine = eine Zeile aus dem Neuigkeiten-Ticker (Tagesplan + Tagesabschluss).
+               FoundingScreen = Startbildschirm „Gründe deine Gilde“ (Name + 5 Klassen, alle Rüstungsarten), nur bei neuem Spielstand.
                UpgradeControls = Zerlegen und Verbessern in der Oberfläche (Verbessern-Knopf mit Kosten und Chance, Material-Text, Funken/Riss, Leuchten und „+3“ an verbesserten Items; Inventar + Ausrüstungsliste).
                TalentPanel = die 3 Talentreihen eines Helden zum Auswählen (Heldenbildschirm + Kampf-Labor).
                RiskBadge = Einschätzung eines Runs in Worten („Riskant · Gefallene: oft“).

@@ -20,6 +20,7 @@ import { DebugPanel } from './ui/DebugPanel.js';
 import { InventoryOverlay } from './ui/InventoryOverlay.js';
 import { CollectionOverlay } from './ui/CollectionOverlay.js';
 import { LevelUpBanner } from './ui/LevelUpBanner.js';
+import { FoundingScreen } from './ui/FoundingScreen.js';
 import { Sound } from './ui/Sound.js';
 import { showToast } from './ui/Toast.js';
 
@@ -171,6 +172,14 @@ game.on('dayEnded', (data) => {
 });
 
 showScreen('plan');
+
+// Neuer Spielstand: zuerst die Gilde gründen (Name und Starttruppe). Danach geht es im Tagesplan los.
+if (!game.guild.founded) {
+  new FoundingScreen(game, () => {
+    saveManager.save(game);
+    showScreen('plan');
+  });
+}
 
 // ---------- Bild-Schleife ----------
 // Läuft etwa 60-mal pro Sekunde. Sie treibt nur Animationen an (Kampfszenen im Labor und am Tagesende)

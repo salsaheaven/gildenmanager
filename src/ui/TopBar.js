@@ -30,7 +30,6 @@ export class TopBar {
     `;
 
     this.root.querySelector('.gold-icon').appendChild(createSpriteCanvas('coin', 3));
-    this.root.querySelector('.guild-name-text').textContent = game.guild.name;
 
     this.root.querySelector('.end-day-button').addEventListener('click', () => {
       Sound.click();
@@ -68,6 +67,8 @@ export class TopBar {
 
   // Aktualisiert die Anzeigen (bei jeder Änderung am Spielstand)
   update() {
+    // Der Name kann sich ändern (beim Gründen der Gilde), deshalb hier und nicht nur beim Start
+    this.root.querySelector('.guild-name-text').textContent = this.game.guild.name;
     const guild = this.game.guild;
     const title = guild.selectedTitle;
     this.root.querySelector('.guild-title').textContent = title ? ' · ' + title : '';

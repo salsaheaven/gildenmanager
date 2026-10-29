@@ -17,6 +17,8 @@
 // ============================================================
 
 import { getSalvageYield, upgradeItem } from '../systems/CraftingSystem.js';
+import { checkStartTeam } from '../systems/StartTeam.js';
+import { START_TEAM_RULES } from '../data/startTeam.js';
 import { advanceRivals, recordPlayerClear, getLeaderboard } from '../systems/RivalSystem.js';
 import { getDayPlan } from '../systems/DayPlan.js';
 import { HERO_TASKS } from '../data/heroTasks.js';
@@ -95,6 +97,10 @@ export class Game {
     const reports = [];
     for (const expedition of this.guild.expeditions.slice()) {
       reports.push(this.finishExpedition(expedition));
+    }
+    // Erkundungen der Dungeons, in denen heute gekämpft wurde, sind jetzt verbraucht
+    for (const report of reports) {
+      delete this.guild.scoutedDungeons[report.dungeonId];
     }
 
     // 3. Aufgaben der anderen Helden (Training, Kräuter, Erkunden), danach der Sold für alle
@@ -368,9 +374,9 @@ export class Game {
   // Die Helden kämpfen so, wie sie jetzt ausgerüstet sind.
   finishExpedition(expedition) {
     const heroes = expedition.getHeroIds().map((heroId) => this.guild.findHero(heroId)).filter((hero) => hero);
-    // Erkundet? Dann ist dieser Run vorbereitet, und die Erkundung ist danach verbraucht
+    // Erkundet? Dann ist dieser Run vorbereitet. Verbraucht wird die Erkundung erst in endDay,
+    // wenn alle Gruppen des Tages gekämpft haben (so profitieren alle Gruppen im selben Dungeon).
     expedition.scouted = this.guild.scoutedDungeons[expedition.dungeonId] === true;
-    delete this.guild.scoutedDungeons[expedition.dungeonId];
     const result = expedition.resolve(heroes);
     const dungeon = getDungeon(expedition.dungeonId);
     const success = result.outcome === 'success';
@@ -466,6 +472,27 @@ export class Game {
 
   // Heuert einen Bewerber an. Gibt einen Grund zurück, falls es nicht klappt:
   // 'ok', 'noRoom' (Gilde voll), 'noGold' oder 'notFound'
+  // Gründet die Gilde: Name und Starttruppe (eine Klasse pro Platz, siehe data/startTeam.js).
+  // Geht nur einmal pro Spielstand. Gibt 'ok', 'alreadyFounded' oder den Grund aus checkStartTeam zurück.
+  foundGuild(guildName, classIds) {
+    if (this.guild.founded) {
+      return 'alreadyFounded';
+    }
+    const check = checkStartTeam(classIds);
+    if (check !== 'ok') {
+      return check;
+    }
+    const cleanName = (guildName || '').trim().slice(0, START_TEAM_RULES.maxGuildNameLength);
+    this.guild.name = cleanName || START_TEAM_RULES.defaultGuildName;
+    for (const classId of classIds) {
+      const hero = this.recruitmentSystem.createHero(this.guild.createHeroId(), classId, START_TEAM_RULES.rarityId);
+      this.guild.heroes.push(hero);
+    }
+    this.guild.founded = true;
+    this.emit('changed');
+    return 'ok';
+  }
+
   hireHero(candidateId) {
     const candidate = this.guild.findCandidate(candidateId);
     if (!candidate) {

@@ -16,7 +16,7 @@ export const TRAITS = [
   { id: 'sturdy',   name: 'Standfest',    description: '+10 % Rüstung',               statBonus: { defense: 0.1 } },
   { id: 'hothead',  name: 'Hitzkopf',     description: '+20 % Angriff, −10 % Rüstung', statBonus: { attack: 0.2, defense: -0.1 } },
   { id: 'fragile',  name: 'Zerbrechlich', description: '+15 % Magie, −10 % Leben',    statBonus: { magic: 0.15, health: -0.1 } },
-  { id: 'greedy',   name: 'Gierig',       description: '+20 % Gold aus dem Dungeon, wenn er mitkämpft', statBonus: {}, goldBonus: 0.2 },
+  { id: 'greedy',   name: 'Gierig',       description: '+20 % Gold aus dem Dungeon, wenn er mitkämpft, und aus Aufträgen', statBonus: {}, goldBonus: 0.2 },
   { id: 'lucky',    name: 'Glückspilz',   description: '+1 Item in der Boss-Kiste, wenn er mitkämpft',  statBonus: {}, extraChestItems: 1 },
 ];
 

@@ -124,7 +124,7 @@ export class DungeonScreen {
     panel.querySelector('h2').textContent = dungeon.name;
     if (this.game.isDungeonScouted(dungeon.id)) {
       panel.querySelector('h2').insertAdjacentHTML('beforeend',
-        ' <span class="scouted-chip" title="Der nächste Run hier ist vorbereitet: Mechaniken bekannt, etwas mehr Schaden">Erkundet ✓</span>');
+        ' <span class="scouted-chip" title="Die nächsten Runs hier (alle Gruppen eines Tages) sind vorbereitet: Mechaniken bekannt, etwas mehr Schaden">Erkundet ✓</span>');
     }
     panel.querySelector('.dungeon-description').textContent = dungeon.description;
 

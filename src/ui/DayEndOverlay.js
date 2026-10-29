@@ -359,8 +359,12 @@ function describeTaskResult(task) {
     return task.name + ' sammelt Kräuter: ' +
       (task.foundSupply ? getConsumable(task.foundSupply).name + ' gefunden!' : 'heute nichts gefunden');
   }
+  if (task.taskId === 'jobs') {
+    return task.name + ' ' + task.jobText + ': +' + task.gold + ' Gold' +
+      (task.greedyGold > 0 ? ' (davon ' + task.greedyGold + ' durch Gierig)' : '');
+  }
   if (task.taskId === 'scouting' && task.scoutedDungeonId) {
-    return task.name + ' erkundet ' + getDungeon(task.scoutedDungeonId).name + ': Der nächste Run dort ist vorbereitet';
+    return task.name + ' erkundet ' + getDungeon(task.scoutedDungeonId).name + ': Die nächsten Runs dort sind vorbereitet';
   }
   return null;
 }

@@ -13,6 +13,7 @@
 
 import { getDayPlan } from '../systems/DayPlan.js';
 import { HERO_TASKS } from '../data/heroTasks.js';
+import { getJobGold } from '../systems/HeroTaskSystem.js';
 import { getDungeon } from '../data/dungeons.js';
 import { RETREAT_RULES } from '../data/retreatRules.js';
 import { createHeroCanvas } from './PixelArt.js';
@@ -327,6 +328,12 @@ export class DayPlanScreen {
         this.game.setHeroTask(hero.id, 'scouting', dungeonSelect.value);
       });
       picker.appendChild(dungeonSelect);
+    }
+    if (hero.task.taskId === 'jobs') {
+      const hint = document.createElement('span');
+      hint.className = 'task-hint';
+      hint.textContent = '≈ ' + getJobGold(hero) + ' Gold';
+      picker.appendChild(hint);
     }
     return picker;
   }

@@ -42,9 +42,15 @@ export const HERO_TASKS = {
     color: '#9be15d',
     choosable: true,
   },
+  jobs: {
+    name: 'Aufträge erledigen',
+    description: 'Verdient sicheres Gold in der Stadt, bekommt dafür keine EP',
+    color: '#ffb347',
+    choosable: true,
+  },
   scouting: {
     name: 'Erkunden',
-    description: 'Erkundet einen Dungeon: Der nächste Run dort ist vorbereitet',
+    description: 'Erkundet einen Dungeon: Die nächsten Runs dort (alle Gruppen eines Tages) sind vorbereitet',
     color: '#c77dff',
     choosable: true,
   },
@@ -61,6 +67,25 @@ export const TASK_RULES = {
   herbFindChance: 0.5,
   herbFinds: { healingPotions: 45, manaPotions: 45, shadowWard: 2, acidWard: 2, frostWard: 2, fireWard: 2, lightWard: 2 },
 
-  // Erkunden: Wirkung auf den nächsten Run im erkundeten Dungeon (nur dieser eine Run)
+  // Aufträge erledigen: Gold = jobGoldBase + jobGoldPerLevel × Level, zufällig ± jobGoldSpread (0.25 = ±25 %).
+  // "Gierig" bringt hier denselben Bonus wie im Dungeon.
+  jobGoldBase: 8,
+  jobGoldPerLevel: 2,
+  jobGoldSpread: 0.25,
+
+  // Erkunden: Wirkung auf die Runs im erkundeten Dungeon am nächsten Tag, an dem dort jemand kämpft
+  // (gilt für alle Gruppen dieses Tages, danach ist die Erkundung verbraucht)
   scoutingDamageBonus: 0.05,
 };
+
+// Was ein Held bei "Aufträge erledigen" tut (eine Zeile wird zufällig gewählt, nur für die Anzeige)
+export const JOB_TEXTS = [
+  'begleitet eine Karawane',
+  'hält Wache am Stadttor',
+  'vertreibt Wölfe von einem Bauernhof',
+  'treibt Schulden für einen Händler ein',
+  'räumt einen Rattenkeller aus',
+  'beschützt einen reisenden Magier',
+  'hilft beim Bau der Stadtmauer',
+  'jagt einen Taschendieb',
+];

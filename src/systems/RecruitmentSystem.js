@@ -28,13 +28,19 @@ export class RecruitmentSystem {
   createCandidate(heroId, forcedRarityId = null) {
     const rarityId = forcedRarityId || this.rollRarity();
     const heroClass = this.random.pick(HERO_CLASSES);
+    return this.createHero(heroId, heroClass.id, rarityId);
+  }
+
+  // Ein Held mit fester Klasse und Seltenheit; Eigenschaften, Name und Aussehen werden gewürfelt
+  // (für Bewerber und für die Starttruppe)
+  createHero(heroId, classId, rarityId) {
     const traitIds = this.rollTraits(HERO_RARITIES[rarityId].traitCount);
     const name = this.random.pick(FIRST_NAMES) + ' ' + this.random.pick(LAST_NAMES);
     const looks = {
       skin: this.random.pick(SKIN_TONES),
       hair: this.random.pick(HAIR_COLORS),
     };
-    return new Hero(heroId, name, heroClass.id, rarityId, traitIds, looks);
+    return new Hero(heroId, name, classId, rarityId, traitIds, looks);
   }
 
   rollRarity() {
