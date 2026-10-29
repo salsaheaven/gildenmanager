@@ -21,6 +21,10 @@ export class Item {
     this.stats = stats;
     this.itemLevel = itemLevel;
     this.resistances = resistances;
+    this.bossItemId = null; // Boss-Items: feste Kennung aus lootBoxes.js (für das Sammelbuch), sonst null
+    // Nur direkt nach dem Öffnen einer Kiste, wird nicht gespeichert (siehe Game.openBox):
+    this.collectionStatus = null; // 'new' / 'improved' / null: was das Item im Sammelbuch bewirkt hat
+    this.completedPage = null;    // Sammelbuch-Seite, die durch dieses Item gerade voll wurde
   }
 
   getTemplate() {
@@ -74,10 +78,13 @@ export class Item {
       stats: this.stats,
       itemLevel: this.itemLevel,
       resistances: this.resistances,
+      bossItemId: this.bossItemId,
     };
   }
 
   static fromSaveData(data) {
-    return new Item(data.id, data.templateId, data.rarityId, data.name, data.stats, data.itemLevel, data.resistances);
+    const item = new Item(data.id, data.templateId, data.rarityId, data.name, data.stats, data.itemLevel, data.resistances);
+    item.bossItemId = data.bossItemId;
+    return item;
   }
 }

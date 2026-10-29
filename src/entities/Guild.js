@@ -4,6 +4,7 @@
 // (Später kommen hier Gebäude dazu.)
 // ============================================================
 
+import { CollectionBook } from './CollectionBook.js';
 import { Item } from './Item.js';
 import { LootBox } from './LootBox.js';
 import { Hero } from './Hero.js';
@@ -27,6 +28,7 @@ export class Guild {
     this.dungeonClears = {};   // Dungeon-id → wie oft geschafft
     this.dungeonAttempts = {}; // Dungeon-id → wie oft versucht (egal wie es ausging)
     this.reports = [];         // Berichte über abgeschlossene Runs (neueste zuerst)
+    this.collection = new CollectionBook(); // Sammelbuch: welche Boss-Items schon gefunden wurden
 
     // Pity-Zähler: Items seit dem letzten epischen oder legendären Item
     this.itemsSinceEpic = 0;
@@ -191,6 +193,7 @@ export class Guild {
       dungeonClears: this.dungeonClears,
       dungeonAttempts: this.dungeonAttempts,
       reports: this.reports,
+      collection: this.collection.toSaveData(),
     };
   }
 
@@ -212,6 +215,7 @@ export class Guild {
     guild.dungeonClears = data.dungeonClears || {};
     guild.dungeonAttempts = data.dungeonAttempts || {};
     guild.reports = data.reports || [];
+    guild.collection = CollectionBook.fromSaveData(data.collection);
     return guild;
   }
 }

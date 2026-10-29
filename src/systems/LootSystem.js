@@ -81,8 +81,10 @@ export class LootSystem {
     if (getRarityRank(rarityId) < getRarityRank(entry.minRarity)) {
       rarityId = entry.minRarity;
     }
-    return this.createItem(rarityId, guild.createItemId(), itemLevel, getItemTemplate(entry.templateId), entry.name,
+    const item = this.createItem(rarityId, guild.createItemId(), itemLevel, getItemTemplate(entry.templateId), entry.name,
       boxType.bossResistance || null);
+    item.bossItemId = entry.id; // damit das Sammelbuch das Item erkennt
+    return item;
   }
 
   // Baut ein fertiges Item: zufällige Vorlage, passender Name, Werte mit leichter Streuung.

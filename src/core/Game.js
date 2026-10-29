@@ -113,6 +113,12 @@ export class Game {
       return null;
     }
     const items = box.open(this.lootSystem, this.guild);
+    // Boss-Items ins Sammelbuch eintragen. Was neu oder besser ist, steht danach am Item (für die Anzeige).
+    for (const item of items) {
+      const entry = this.guild.collection.record(item);
+      item.collectionStatus = entry.status;
+      item.completedPage = entry.completedPage;
+    }
     this.emit('changed');
     return items;
   }
@@ -212,6 +218,7 @@ export class Game {
       trashGold: 0,
       bonusGold: 0,         // Extra-Gold durch "Gierig"
       bonusGoldHero: null,  // wer es gebracht hat
+      collectionGold: 0,    // Extra-Gold durch die volle Sammelbuch-Seite dieses Dungeons
       chest: null,
       chestBonusItems: 0,   // Extra-Items durch "Glückspilz"
       chestBonusHero: null,
@@ -248,6 +255,10 @@ export class Game {
     report.bonusGold = Math.round((report.gold + report.trashGold) * goldBonus.bonus);
     report.bonusGoldHero = report.bonusGold > 0 ? goldBonus.heroName : null;
     this.guild.addGold(report.bonusGold);
+
+    // Volle Sammelbuch-Seite dieses Dungeons: mehr Gold (auf Boss- und Trash-Gold)
+    report.collectionGold = Math.round((report.gold + report.trashGold) * this.guild.collection.getGoldBonus(dungeon.id));
+    this.guild.addGold(report.collectionGold);
 
     // Erfahrung für alle gewonnenen Begegnungen, Verletzungen für Gefallene
     report.heroResults = applyRunResults(this.guild, result, dungeon);
@@ -356,6 +367,15 @@ export class Game {
       }
     }
     return count;
+  }
+
+  // Wählt einen Gildentitel aus dem Sammelbuch (null = keinen Titel tragen)
+  selectGuildTitle(title) {
+    if (!this.guild.collection.selectTitle(title)) {
+      return false;
+    }
+    this.emit('changed');
+    return true;
   }
 
   // Ändert eine Kampf-Anweisung eines Helden (siehe data/heroOrders.js)

@@ -12,7 +12,8 @@
 // shakeTime   = wie lange die Kiste vor dem Öffnen wackelt (Sekunden), mehr = spannender
 // chances     = Prozent-Chance pro Seltenheit
 // bossLoot    = nur Boss-Kisten: besondere Items des Bosses. Eines davon ist garantiert in der Kiste,
-//               mindestens in der Seltenheit minRarity. { templateId, name, minRarity }
+//               mindestens in der Seltenheit minRarity. { id, templateId, name, minRarity }
+//               id = feste Kennung des Boss-Items (für das Sammelbuch, muss einmalig sein)
 // bossResistance = nur Boss-Kisten: Resistenz, die alle Boss-Items tragen (Schadensart des Bosses,
 //               siehe damageTypes.js). Fehlt sie, haben die Boss-Items keine feste Resistenz.
 // ============================================================
@@ -70,9 +71,9 @@ export const LOOT_BOXES = [
     shakeTime: 1.3,
     chances: { poor: 10, common: 30, uncommon: 35, rare: 19, epic: 5, legendary: 1 },
     bossLoot: [
-      { templateId: 'attackRing', name: 'Grimmzahns Fangzahn', minRarity: 'rare' },
-      { templateId: 'leatherArmor', name: 'Bärenfell-Harnisch', minRarity: 'rare' },
-      { templateId: 'plateHelmet', name: 'Prankenhelm', minRarity: 'rare' },
+      { id: 'grimfangFang', templateId: 'attackRing', name: 'Grimmzahns Fangzahn', minRarity: 'rare' },
+      { id: 'bearhideArmor', templateId: 'leatherArmor', name: 'Bärenfell-Harnisch', minRarity: 'rare' },
+      { id: 'pawHelmet', templateId: 'plateHelmet', name: 'Prankenhelm', minRarity: 'rare' },
     ],
   },
   {
@@ -86,9 +87,9 @@ export const LOOT_BOXES = [
     shakeTime: 1.5,
     chances: { poor: 5, common: 25, uncommon: 35, rare: 25, epic: 8, legendary: 2 },
     bossLoot: [
-      { templateId: 'staff', name: 'Stab der Schattenruferin', minRarity: 'rare' },
-      { templateId: 'clothHelmet', name: 'Kapuze der Schwester', minRarity: 'rare' },
-      { templateId: 'magicRing', name: 'Gebetsring der Kapelle', minRarity: 'rare' },
+      { id: 'shadowcallerStaff', templateId: 'staff', name: 'Stab der Schattenruferin', minRarity: 'rare' },
+      { id: 'sisterHood', templateId: 'clothHelmet', name: 'Kapuze der Schwester', minRarity: 'rare' },
+      { id: 'chapelRing', templateId: 'magicRing', name: 'Gebetsring der Kapelle', minRarity: 'rare' },
     ],
   },
   {
@@ -102,9 +103,9 @@ export const LOOT_BOXES = [
     shakeTime: 1.7,
     chances: { poor: 0, common: 20, uncommon: 35, rare: 30, epic: 12, legendary: 3 },
     bossLoot: [
-      { templateId: 'shield', name: 'Chitinschild', minRarity: 'rare' },
-      { templateId: 'sword', name: 'Brutklinge', minRarity: 'rare' },
-      { templateId: 'leatherBoots', name: 'Säurestiefel', minRarity: 'rare' },
+      { id: 'chitinShield', templateId: 'shield', name: 'Chitinschild', minRarity: 'rare' },
+      { id: 'broodBlade', templateId: 'sword', name: 'Brutklinge', minRarity: 'rare' },
+      { id: 'acidBoots', templateId: 'leatherBoots', name: 'Säurestiefel', minRarity: 'rare' },
     ],
   },
   {
@@ -118,9 +119,9 @@ export const LOOT_BOXES = [
     shakeTime: 1.8,
     chances: { poor: 0, common: 15, uncommon: 35, rare: 32, epic: 14, legendary: 4 },
     bossLoot: [
-      { templateId: 'mace', name: 'Gletscherhammer', minRarity: 'rare' },
-      { templateId: 'holyPlateArmor', name: 'Harnisch des Frostriesen', minRarity: 'rare' },
-      { templateId: 'fistWeapon', name: 'Eiskrallen', minRarity: 'rare' },
+      { id: 'glacierHammer', templateId: 'mace', name: 'Gletscherhammer', minRarity: 'rare' },
+      { id: 'frostGiantArmor', templateId: 'holyPlateArmor', name: 'Harnisch des Frostriesen', minRarity: 'rare' },
+      { id: 'iceClaws', templateId: 'fistWeapon', name: 'Eiskrallen', minRarity: 'rare' },
     ],
   },
   {
@@ -134,9 +135,9 @@ export const LOOT_BOXES = [
     shakeTime: 1.9,
     chances: { poor: 0, common: 12, uncommon: 33, rare: 34, epic: 16, legendary: 5 },
     bossLoot: [
-      { templateId: 'wildLeatherArmor', name: 'Moorrindenwams', minRarity: 'rare' },
-      { templateId: 'bow', name: 'Irrlichtbogen', minRarity: 'rare' },
-      { templateId: 'clothHelmet', name: 'Hexenhut', minRarity: 'rare' },
+      { id: 'moorbarkVest', templateId: 'wildLeatherArmor', name: 'Moorrindenwams', minRarity: 'rare' },
+      { id: 'wispBow', templateId: 'bow', name: 'Irrlichtbogen', minRarity: 'rare' },
+      { id: 'witchHat', templateId: 'clothHelmet', name: 'Hexenhut', minRarity: 'rare' },
     ],
   },
   {
@@ -150,10 +151,10 @@ export const LOOT_BOXES = [
     shakeTime: 2.1,
     chances: { poor: 0, common: 10, uncommon: 30, rare: 35, epic: 18, legendary: 7 },
     bossLoot: [
-      { templateId: 'katana', name: 'Sonnenklinge', minRarity: 'rare' },
-      { templateId: 'lute', name: 'Laute des Sonnenchors', minRarity: 'rare' },
-      { templateId: 'axe', name: 'Tempelbrecher', minRarity: 'rare' },
-      { templateId: 'magicRing', name: 'Siegel des Hohepriesters', minRarity: 'rare' },
+      { id: 'sunBlade', templateId: 'katana', name: 'Sonnenklinge', minRarity: 'rare' },
+      { id: 'sunChoirLute', templateId: 'lute', name: 'Laute des Sonnenchors', minRarity: 'rare' },
+      { id: 'templeBreaker', templateId: 'axe', name: 'Tempelbrecher', minRarity: 'rare' },
+      { id: 'highPriestSeal', templateId: 'magicRing', name: 'Siegel des Hohepriesters', minRarity: 'rare' },
     ],
   },
 ];

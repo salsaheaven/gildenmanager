@@ -38,7 +38,7 @@ Eine Option, die immer die beste ist, ist keine Wahl. Geprüft wird das per Simu
 ## Aufbau
 ```
 src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen, Tageszähler, endDay), Random, SaveManager
-src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft)
+src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, CollectionBook (Sammelbuch: beste gefundene Seltenheit je Boss-Item, Titel, Gold-Bonus), Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft)
 src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem (EP, Aufhol-Erfahrung, Verletzungen nach einem Run),
                DayPlan (welcher Held hat heute welche Aufgabe), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
@@ -57,7 +57,8 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus),
                riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben),
                damageTypes (Schadensarten mit Farbe, Obergrenze für Resistenzen),
-               defeatCauses (Tipps und Hinweise für „Woran es lag“)
+               defeatCauses (Tipps und Hinweise für „Woran es lag“),
+               collectionBook (Sammelbuch-Seiten pro Dungeon mit Titel und Gold-Bonus; die Items kommen aus `bossLoot` in lootBoxes)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tagesplan, Startseite), LootBoxScreen (Schatzkammer),
                HeroScreen (+ HeroDetailPanel, EquipPanel = Ausrüstungsliste für den angetippten Platz, nach Item-Level sortiert,
                Vergleich pro Wert, bewusst ohne „bestes Item“), TavernScreen, CombatLabScreen,
