@@ -91,6 +91,8 @@ Jeder Boss hat 1 bis 3 **Mechaniken mit Konter**, sodass die Gruppenzusammenstel
 | Fluch oder Furcht | Runenwirker (Lösungsrune), Barde (Weckruf) |
 | Flammenwelle auf die vordere Reihe | Weniger Nahkämpfer mitnehmen, Feuerresistenz |
 
+**Ausrüstungs-Check-Bosse** (Idee vom 2026-10-29, **wird später umgesetzt**, mit den letzten Dungeons und den Raids): Ein oder zwei Bosse ganz ohne Mechaniken, nach dem Vorbild klassischer MMO-„Gear-Check“-Bosse. Sie haben sehr viel Leben, schlagen den Tank hart und gleichmäßig und haben eine **feste Raserei-Grenze**. Es gibt nichts zu kontern. Man besteht nur mit genug Schaden, Heilung und Rüstung, also mit Ausrüstung, Level und einer guten Gruppenmischung. Sie prüfen, ob die Gilde bereit ist für das, was danach kommt (z.B. vor dem Endboss). Die Anweisungen werden hier zur Rechenaufgabe: Reicht „Haushalten“ beim Mana, oder muss man „Überladen“, um die Raserei-Grenze zu schaffen?
+
 ### Klassen
 Jeder Skill hat eine Abklingzeit und kostet bei Zauberern Mana. Alle Zahlen stehen später in `src/data/abilities.js`.
 **M1** = in Meilenstein 1 enthalten.
