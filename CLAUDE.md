@@ -69,7 +69,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tag
                Tempo der Szene: `pacing`, `sceneSpeeds` und `sceneAnimationRate` in `combatRules.js`.
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
                RiskBadge = Einschätzung eines Runs in Worten („Riskant · Gefallene: oft“).
-               OrdersPanel = Auswahllisten für Anweisungen (Labor + Heldenbildschirm).
+               OrdersPanel = Auswahllisten für Anweisungen mit Vorteil (grün) und Nachteil (rot) (Labor, Dungeon, Tagesplan, Heldenbildschirm).
                Leisten: TopBar, NavBar. Helfer: PixelArt, Sound, Toast, format, TraitChip.
                DebugPanel = Test-Menü (Taste F2)
 tests/         Vitest-Tests (prüfen auch, ob die Daten gültig sind)

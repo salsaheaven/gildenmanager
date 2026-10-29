@@ -153,6 +153,7 @@ export class BattleScene {
     this.units[info.id] = {
       element: unit, maxHp: info.maxHp, maxMana: info.maxMana, isMinion: Boolean(info.minionId),
       name: info.name, classId: info.classId, mana: info.mana, usedRounds: {},
+      manaCostFactor: info.manaCostFactor || 1,
     };
     // Skill-Fenster nur für Helden, Begleiter haben keine Skills
     if (info.side === 'hero' && !info.isPet) {
@@ -194,7 +195,7 @@ export class BattleScene {
   getTooltipState(unitId) {
     const unit = this.units[unitId];
     return { name: unit.name, classId: unit.classId, mana: unit.maxMana > 0 ? unit.mana : null,
-      round: this.round, usedRounds: unit.usedRounds };
+      round: this.round, usedRounds: unit.usedRounds, manaCostFactor: unit.manaCostFactor };
   }
 
   createUnitCanvas(info) {

@@ -100,6 +100,7 @@ export class Combatant {
       minionId: this.minionId,
       isPet: this.isPet,
       petSprite: this.petSprite,
+      manaCostFactor: 1 + this.orderSettings.manaCost, // Anweisungen ändern die Mana-Kosten (Skill-Fenster)
     };
   }
 

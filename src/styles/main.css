@@ -2205,6 +2205,22 @@ h3 {
   border-color: var(--gold);
 }
 
+/* Vorteil und Nachteil der gewählten Option, eingerückt unter die Auswahl */
+.order-effects {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 4px 138px;
+  font-size: 15px;
+  color: var(--text-dim);
+}
+
+/* Anweisungen im Tagesplan: aufklappbar unter der Risiko-Einschätzung */
+.day-plan-orders summary {
+  cursor: pointer;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
 /* ---------- Dungeons ---------- */
 
 .dungeon-screen {
@@ -2654,6 +2670,10 @@ h3 {
 
   .order-row {
     grid-template-columns: 105px minmax(0, 1fr);
+  }
+
+  .order-effects {
+    margin-left: 113px;
   }
 
   /* Inventar: Raster oben, Details unten als feste Leiste */

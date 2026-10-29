@@ -1,7 +1,8 @@
 // ============================================================
 // DAYPLANSCREEN – der Tagesplan: Wer macht heute was?
 //   - oben: Tag, Überblick (wie viele im Dungeon, verletzt, frei) und "Tag beenden"
-//   - Gruppen, die heute in einen Dungeon ziehen (mit "Absagen")
+//   - Gruppen, die heute in einen Dungeon ziehen (mit Risiko-Einschätzung, aufklappbaren Anweisungen
+//     und "Absagen"). Ändert man eine Anweisung, rechnet die Einschätzung sofort neu.
 //   - alle Helden, die heute nicht kämpfen (verletzt oder ohne Aufgabe)
 // Die Aufgaben selbst stehen in data/heroTasks.js, die Rechnung in systems/DayPlan.js.
 // ============================================================
@@ -13,6 +14,7 @@ import { RETREAT_RULES } from '../data/retreatRules.js';
 import { createHeroCanvas } from './PixelArt.js';
 import { describeInjury } from './DungeonScreen.js';
 import { createRiskBadge } from './RiskBadge.js';
+import { renderOrders } from './OrdersPanel.js';
 import { Sound } from './Sound.js';
 
 export class DayPlanScreen {
@@ -21,6 +23,7 @@ export class DayPlanScreen {
     this.root = rootElement;
     this.game = game;
     this.onGoTo = onGoTo;
+    this.openOrders = new Set(); // ids der Gruppen, deren Anweisungen gerade aufgeklappt sind
 
     this.root.innerHTML = `
       <div class="day-plan-screen">
@@ -127,12 +130,33 @@ export class DayPlanScreen {
         heroList.appendChild(this.createHeroRow(hero, null));
       }
       heroList.before(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId));
+      heroList.after(this.createOrdersSection(expedition, heroes));
       card.querySelector('.cancel-button').addEventListener('click', () => {
         Sound.click();
         this.game.cancelExpedition(expedition.id);
       });
       list.appendChild(card);
     }
+  }
+
+  // Aufklappbare Anweisungen der Gruppe. Bleibt nach einer Änderung offen (die Seite wird dabei neu gebaut).
+  createOrdersSection(expedition, heroes) {
+    const section = document.createElement('details');
+    section.className = 'day-plan-orders';
+    section.open = this.openOrders.has(expedition.id);
+    section.innerHTML = '<summary>Anweisungen für diesen Dungeon</summary><div class="orders-list"></div>';
+    section.addEventListener('toggle', () => {
+      if (section.open) {
+        this.openOrders.add(expedition.id);
+      } else {
+        this.openOrders.delete(expedition.id);
+      }
+    });
+    renderOrders(section.querySelector('.orders-list'), heroes, (hero, orderId, optionId) => {
+      Sound.click();
+      this.game.setHeroOrder(hero.id, orderId, optionId);
+    });
+    return section;
   }
 
   // ---------- Helden ohne Kampf ----------

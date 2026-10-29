@@ -1,6 +1,7 @@
 // ============================================================
 // ORDERSPANEL – Anweisungen für Helden einstellen (Auswahllisten)
-// Wird im Kampf-Labor (für die ganze Gruppe) und im Heldenbildschirm (für einen Helden) benutzt.
+// Wird im Kampf-Labor, im Tagesplan (für die ganze Gruppe) und im Heldenbildschirm (für einen Helden) benutzt.
+// Unter jeder Auswahl stehen Vorteil (grün) und Nachteil (rot) der gewählten Option.
 // ============================================================
 
 import { getOrdersForClass } from '../data/heroOrders.js';
@@ -47,7 +48,26 @@ export function renderOrders(container, heroes, onChange, showHeroNames = true) 
       }
       select.addEventListener('change', () => onChange(hero, order.id, select.value));
       block.appendChild(row);
+      block.appendChild(createEffectsLine(chosen));
     }
     container.appendChild(block);
   }
+}
+
+// Zeile unter der Auswahl: "+ Vorteil" in Grün und "− Nachteil" in Rot
+function createEffectsLine(option) {
+  const line = document.createElement('div');
+  line.className = 'order-effects';
+  if (!option.pro && !option.contra) {
+    line.textContent = 'keine Vor- und Nachteile';
+    return line;
+  }
+  const pro = document.createElement('span');
+  pro.className = 'stat-change up';
+  pro.textContent = '+ ' + option.pro;
+  const contra = document.createElement('span');
+  contra.className = 'stat-change down';
+  contra.textContent = '− ' + option.contra;
+  line.append(pro, contra);
+  return line;
 }

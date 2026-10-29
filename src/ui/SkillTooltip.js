@@ -46,14 +46,16 @@ export class SkillTooltip {
     }
   }
 
-  // state = { name, classId, mana, round, usedRounds }
+  // state = { name, classId, mana, round, usedRounds, manaCostFactor }
   //   usedRounds = Skill-id → Runde, in der der Skill zuletzt benutzt wurde
+  //   manaCostFactor = Faktor auf die Mana-Kosten aus den Anweisungen (1 = unverändert)
   render(state) {
     const heroClass = getHeroClass(state.classId);
     let html = '<div class="tooltip-title"></div>';
     for (const abilityId of heroClass.abilities) {
       const ability = ABILITIES[abilityId];
-      const status = getSkillStatus(ability, state.usedRounds[abilityId], state.round, state.mana);
+      const manaCost = Math.round(ability.manaCost * (state.manaCostFactor || 1));
+      const status = getSkillStatus(ability, state.usedRounds[abilityId], state.round, state.mana, manaCost);
       html += `
         <div class="tooltip-skill ${status.ready ? 'ready' : 'waiting'}">
           <div class="tooltip-skill-head">
@@ -61,7 +63,7 @@ export class SkillTooltip {
             <span class="tooltip-status">${status.text}</span>
           </div>
           <div class="tooltip-desc">${ability.description}</div>
-          <div class="tooltip-costs">${describeCosts(ability)}</div>
+          <div class="tooltip-costs">${describeCosts(ability, manaCost)}</div>
         </div>
       `;
     }
@@ -96,7 +98,8 @@ export class SkillTooltip {
 // Ist der Skill bereit? Sonst: Wie viele Runden noch?
 // Ein Skill mit Abklingzeit 2, benutzt in Runde 5, ist ab Runde 8 wieder bereit
 // (so zählt auch Combatant.startCooldown).
-export function getSkillStatus(ability, usedRound, currentRound, mana) {
+// manaCost = echte Kosten für diesen Helden (Anweisungen können sie ändern), sonst die normalen
+export function getSkillStatus(ability, usedRound, currentRound, mana, manaCost = ability.manaCost) {
   if (usedRound !== undefined && ability.oncePerFight) {
     return { ready: false, text: 'schon benutzt' };
   }
@@ -106,17 +109,17 @@ export function getSkillStatus(ability, usedRound, currentRound, mana) {
       return { ready: false, text: 'noch ' + roundsLeft + (roundsLeft === 1 ? ' Runde' : ' Runden') };
     }
   }
-  if (mana !== null && mana !== undefined && mana < ability.manaCost) {
+  if (mana !== null && mana !== undefined && mana < manaCost) {
     return { ready: false, text: 'zu wenig Mana' };
   }
   return { ready: true, text: 'bereit' };
 }
 
 // "28 Mana · Abklingzeit 2 Runden"
-function describeCosts(ability) {
+function describeCosts(ability, manaCost) {
   const parts = [];
-  if (ability.manaCost > 0) {
-    parts.push(ability.manaCost + ' Mana');
+  if (manaCost > 0) {
+    parts.push(manaCost + ' Mana');
   }
   if (ability.oncePerFight) {
     parts.push('einmal pro Kampf');
