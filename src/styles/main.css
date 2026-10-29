@@ -1382,6 +1382,14 @@ h3 {
   text-align: right;
 }
 
+/* Steht oben unter Name und Eigenschaften, klein und unauffällig */
+.detail-info .dismiss-button {
+  align-self: flex-start;
+  margin-top: 6px;
+  font-size: 14px;
+  padding: 2px 8px;
+}
+
 .dismiss-button.confirm {
   background: #8b1e1e;
   border-color: #ff6b6b;

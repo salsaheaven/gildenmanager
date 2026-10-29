@@ -1,6 +1,6 @@
 // ============================================================
 // HERODETAILPANEL – zeigt alles über einen Helden:
-// Bild, Name, Klasse, Eigenschaften, Werte, Skills und die 6 Ausrüstungsplätze.
+// Bild, Name, Klasse, Eigenschaften (darunter der Knopf "Entlassen"), Werte, Skills und die 6 Ausrüstungsplätze.
 // Klick auf einen Ausrüstungsplatz zeigt rechts die Ausrüstungsliste für diesen Platz.
 // ============================================================
 
@@ -56,6 +56,7 @@ export class HeroDetailPanel {
           <div class="detail-xp">${hero.isMaxLevel() ? 'Höchstes Level erreicht!' : hero.xp + ' / ' + hero.getXpForNextLevel() + ' EP'}</div>
           <div class="detail-injury"></div>
           <div class="trait-list"></div>
+          <button class="dismiss-button" title="Der Held verlässt die Gilde, seine Ausrüstung kommt ins Inventar">Entlassen</button>
         </div>
       </div>
 
@@ -80,10 +81,6 @@ export class HeroDetailPanel {
 
       <h3>Anweisungen für den Kampf</h3>
       <div class="hero-orders"></div>
-
-      <div class="detail-actions">
-        <button class="dismiss-button">Entlassen</button>
-      </div>
     `;
 
     this.root.querySelector('.detail-portrait').appendChild(createHeroCanvas(hero, 9));
