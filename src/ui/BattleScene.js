@@ -9,6 +9,8 @@
 //
 // Die Szene läuft nicht von selbst: Wer sie benutzt, ruft in jedem Bild update(sekunden) auf.
 // Mit den Knöpfen 1x / 2x / 4x läuft sie schneller. Die Wahl wird im Browser gemerkt.
+// Zeitraffer: Trash und ruhige Runden laufen zusätzlich schneller (siehe BattleTimeline.js),
+// dann steht oben "Zeitraffer ⏩".
 // ============================================================
 
 import { getBoss, MINIONS } from '../data/enemies.js';
@@ -48,6 +50,7 @@ export class BattleScene {
     this.finished = false;
     this.units = {}; // Kämpfer-id → Elemente der Figur
     this.round = 0;  // aktuelle Kampfrunde (für die Abklingzeiten im Skill-Fenster)
+    this.timeLapse = 1; // Zeitraffer-Faktor der aktuellen Runde (1 = normal)
 
     this.buildLayout();
     this.renderSpeedButtons();
@@ -66,6 +69,7 @@ export class BattleScene {
       <div class="battle-scene">
         <div class="scene-top">
           <span class="scene-round">Bereit …</span>
+          <span class="scene-timelapse" hidden>Zeitraffer ⏩</span>
           <span class="scene-speeds"></span>
           <button class="scene-skip">Überspringen</button>
         </div>
@@ -105,9 +109,14 @@ export class BattleScene {
     }
   }
 
+  // Wie schnell die Szene gerade wirklich läuft: gewähltes Tempo × Zeitraffer
+  getPlaybackSpeed() {
+    return this.speed * this.timeLapse;
+  }
+
   // Wie schnell CSS-Animationen (Effekte, Zahlen) gerade laufen sollen
   getAnimationRate() {
-    return COMBAT_RULES.sceneAnimationRate * this.speed;
+    return COMBAT_RULES.sceneAnimationRate * this.getPlaybackSpeed();
   }
 
   // Alle laufenden CSS-Animationen eines Elements an das Tempo anpassen
@@ -236,8 +245,9 @@ export class BattleScene {
 
   // Jedes Ereignis bekommt einen Zeitpunkt (dieselbe Rechnung wie für die Dauer eines Runs)
   scheduleEntries() {
-    const timeline = computeEncounterTimeline(this.result.log);
+    const timeline = computeEncounterTimeline(this.result.log, this.result.encounterType);
     this.entryTimes = timeline.times;
+    this.entrySpeeds = timeline.speeds;
     this.endTime = timeline.duration;
   }
 
@@ -258,12 +268,22 @@ export class BattleScene {
     const quiet = targetTime - this.time > CATCH_UP_SECONDS * this.speed;
     this.time = targetTime;
     while (this.entryIndex < this.result.log.length && this.entryTimes[this.entryIndex] <= this.time) {
+      this.setTimeLapse(this.entrySpeeds[this.entryIndex]);
       this.playEntry(this.result.log[this.entryIndex], quiet);
       this.entryIndex++;
     }
     if (this.entryIndex >= this.result.log.length && this.time >= this.endTime) {
       this.finish();
     }
+  }
+
+  // Zeitraffer an oder aus (Schild oben in der Szene)
+  setTimeLapse(factor) {
+    if (factor === this.timeLapse) {
+      return;
+    }
+    this.timeLapse = factor;
+    this.container.querySelector('.scene-timelapse').hidden = factor <= 1;
   }
 
   // Alles Restliche sofort und ohne Effekte abspielen
@@ -282,6 +302,7 @@ export class BattleScene {
     this.finished = true;
     this.container.querySelector('.scene-skip').disabled = true;
     this.container.querySelector('.cast-bar').hidden = true;
+    this.container.querySelector('.scene-timelapse').hidden = true;
     this.onFinished(this.result);
   }
 
@@ -349,7 +370,7 @@ export class BattleScene {
       }
     }
     // Das Geschoss soll ungefähr dann ankommen, wenn die Zahl aufploppt
-    const flightMilliseconds = (COMBAT_RULES.pacing.actionLead * 1000 * 0.9) / this.speed;
+    const flightMilliseconds = (COMBAT_RULES.pacing.actionLead * 1000 * 0.9) / this.getPlaybackSpeed();
     playEffect(field, action.fx, sourceSprite, targetSprites, flightMilliseconds, this.getAnimationRate());
   }
 
@@ -362,9 +383,9 @@ export class BattleScene {
     this.keepInsideField(callout);
     // Bei 1x etwa 1,6 Sekunden sichtbar, bei 4x entsprechend kürzer
     for (const animation of callout.getAnimations()) {
-      animation.playbackRate = this.speed;
+      animation.playbackRate = this.getPlaybackSpeed();
     }
-    setTimeout(() => callout.remove(), 1600 / this.speed);
+    setTimeout(() => callout.remove(), 1600 / this.getPlaybackSpeed());
   }
 
   // Ragt ein Skill-Name links oder rechts aus dem Kampffeld heraus, wird er hineingeschoben
@@ -401,7 +422,7 @@ export class BattleScene {
     for (const mark of marked) {
       mark.element.classList.add(mark.cssClass);
     }
-    const milliseconds = (COMBAT_RULES.pacing.actionLead + COMBAT_RULES.pacing.effectTime) * 1000 / this.speed + 150;
+    const milliseconds = (COMBAT_RULES.pacing.actionLead + COMBAT_RULES.pacing.effectTime) * 1000 / this.getPlaybackSpeed() + 150;
     setTimeout(() => {
       for (const mark of marked) {
         mark.element.classList.remove(mark.cssClass);

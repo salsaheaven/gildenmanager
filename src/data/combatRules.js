@@ -57,6 +57,9 @@ export const COMBAT_RULES = {
     infoTime: 0.1,     // Abstand nach reinen Textzeilen
     roundPause: 0.6,   // Pause zwischen zwei Runden
     endDelay: 1.2,     // Pause am Ende eines Kampfes
+    // Zeitraffer: So viel schneller als das gewählte Tempo laufen ...
+    trashSpeed: 4,      // ... Trash-Begegnungen (außer Runden, in denen ein Held fällt)
+    quietRoundSpeed: 3, // ... ruhige Runden im Bosskampf (keine Ankündigung, keine Mechanik, niemand fällt)
   },
 
   // Wählbare Geschwindigkeiten der Kampfszene (Knöpfe über der Szene)

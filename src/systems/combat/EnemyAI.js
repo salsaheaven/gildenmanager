@@ -166,6 +166,6 @@ function enemyHits(battle, enemy, target, verb, power, damageType, dodgeable = f
   battle.addLog(text + '.', crit ? 'crit' : 'damage',
     { hits: [target.describeHit(result.damage, 'damage', crit, result.absorbed, damageType)] });
   if (!target.alive) {
-    battle.addLog(target.name + ' fällt!', 'death');
+    battle.addLog(target.name + ' fällt!', 'death', { heroFallen: true });
   }
 }

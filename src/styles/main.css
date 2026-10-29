@@ -1531,6 +1531,14 @@ h3 {
   flex: 1;
 }
 
+/* Schild "Zeitraffer ⏩", wenn Trash oder ruhige Runden schneller laufen */
+.scene-timelapse {
+  padding: 0 6px;
+  font-size: 15px;
+  color: #7fd4ff;
+  border: 2px solid #7fd4ff;
+}
+
 .scene-speeds {
   display: flex;
   gap: 4px;

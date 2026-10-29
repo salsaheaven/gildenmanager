@@ -351,7 +351,8 @@ function tickDamageOverTime(battle, target, effect, everyone) {
   battle.addLog(effect.name + ' verletzt ' + target.name + ' um ' + result.damage + '.', 'damage',
     { hits: [target.describeHit(result.damage, 'damage', false, 0, effect.damageType || 'physical')] });
   if (!target.alive) {
-    battle.addLog(target.name + (target.side === 'hero' ? ' fällt!' : ' ist besiegt!'), 'death');
+    battle.addLog(target.name + (target.side === 'hero' ? ' fällt!' : ' ist besiegt!'), 'death',
+      { heroFallen: target.side === 'hero' });
   }
 }
 

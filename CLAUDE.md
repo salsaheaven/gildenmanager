@@ -43,7 +43,7 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                DayPlan (welcher Held hat heute welche Aufgabe), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
                simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug),
-               BattleTimeline (wann passiert was → Dauer eines Runs), Battle (Zustand + Zielwahl),
+               BattleTimeline (wann passiert was → Dauer eines Runs, mit Zeitraffer für Trash und ruhige Runden), Battle (Zustand + Zielwahl),
                Combatant (ein Kämpfer), HeroAI (welcher Skill?), EnemyAI (Boss-Mechaniken),
                AbilityEffects (was ein Skill bewirkt), OrderSettings (gewählte Anweisungen → ein Paket mit Wirkungen für den Kampf), ChanceEstimator (200 Kämpfe → Siegchance; estimateRunChances = ganzer Dungeon),
                TestGroup (Testgruppe fürs Labor, Klassen frei wählbar)
@@ -66,7 +66,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tag
                CombatReport = Ergebnis, Schadensmesser und Kampfbericht (wiederverwendbar).
                BattleScene = Kampf als Szene abspielen (Zahlen, Balken, Zauberbalken, großer Skill-Name, Tempo 1x/2x/4x); läuft über update(sekunden).
                SkillTooltip = Fenster mit Skills und Abklingzeiten, wenn die Maus über einem Helden der Szene steht (Handy: antippen).
-               Tempo der Szene: `pacing`, `sceneSpeeds` und `sceneAnimationRate` in `combatRules.js`.
+               Tempo der Szene: `pacing` (inkl. Zeitraffer `trashSpeed`, `quietRoundSpeed`), `sceneSpeeds` und `sceneAnimationRate` in `combatRules.js`.
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
                RiskBadge = Einschätzung eines Runs in Worten („Riskant · Gefallene: oft“).
                OrdersPanel = Auswahllisten für Anweisungen mit Vorteil (grün) und Nachteil (rot) (Labor, Dungeon, Tagesplan, Heldenbildschirm).

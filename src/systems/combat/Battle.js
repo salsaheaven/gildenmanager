@@ -45,6 +45,7 @@ export class Battle {
   //   labels   = Liste von { targetId, text } für aufploppende Wörter wie "UNTERBROCHEN!"
   //   cast     = { state: 'start' oder 'end', name } für den Zauberbalken des Bosses
   //   spawn    = Liste neuer Diener (siehe Combatant.describe)
+  //   heroFallen = true, wenn in diesem Eintrag ein Held fällt (die Szene schaltet dann den Zeitraffer ab)
   addLog(text, kind = 'info', details = {}) {
     if (this.recordLog) {
       this.log.push({ round: this.round, text: text, kind: kind, ...details });
