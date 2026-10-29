@@ -11,6 +11,7 @@ import { getRarity, getRarityRank } from '../data/rarities.js';
 import { getTrait } from '../data/traits.js';
 import { SLOT_NAMES } from '../data/items.js';
 import { getOrdersForClass } from '../data/heroOrders.js';
+import { combineOrderEffects } from '../systems/combat/OrderSettings.js';
 import { getXpForNextLevel } from '../data/experience.js';
 import { SCALING } from '../data/scaling.js';
 import { MAX_RESISTANCE } from '../data/damageTypes.js';
@@ -244,20 +245,10 @@ export class Hero {
     this.orders[orderId] = optionId;
   }
 
-  // Fasst alle gewählten Optionen zu einem Paket für die Kampf-KI zusammen
+  // Fasst alle gewählten Optionen zu einem Paket für den Kampf zusammen (siehe combat/OrderSettings.js)
   getOrderSettings() {
-    const settings = { abilityWhen: {} };
-    for (const order of getOrdersForClass(this.classId)) {
-      const effects = this.getChosenOption(order).effects;
-      for (const key in effects) {
-        if (key === 'abilityWhen') {
-          Object.assign(settings.abilityWhen, effects.abilityWhen);
-        } else {
-          settings[key] = effects[key];
-        }
-      }
-    }
-    return settings;
+    const effectsList = getOrdersForClass(this.classId).map((order) => this.getChosenOption(order).effects);
+    return combineOrderEffects(effectsList);
   }
 
   // ---------- Speichern ----------

@@ -201,6 +201,11 @@ export class Battle {
   }
 
   // Der Held mit dem höchsten Angriff bzw. der höchsten Magie unter den Schadensmachern, außer mir selbst
+  // Ein anderer lebender Held mit dieser Rolle ('healer' oder 'tank'), z.B. für "Beschleunigt Heiler"
+  getAllyWithRole(caster, role) {
+    return this.getLivingHeroes().find((hero) => hero !== caster && getHeroClass(hero.classId).role === role) || null;
+  }
+
   getBestDamageAlly(caster) {
     let best = null;
     let bestValue = 0;

@@ -6,6 +6,7 @@
 
 import { getDefenseConstant } from '../../data/scaling.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
+import { createEmptyOrderSettings } from './OrderSettings.js';
 
 export class Combatant {
   // options = {
@@ -27,7 +28,7 @@ export class Combatant {
     this.bossData = options.bossData || null;
     this.isMinion = options.isMinion || false;
     this.minionId = options.minionId || null;
-    this.orderSettings = options.orderSettings || { abilityWhen: {} };
+    this.orderSettings = options.orderSettings || createEmptyOrderSettings();
     this.isPet = options.isPet || false;
     this.ownerId = options.ownerId || null;
     this.petSprite = options.petSprite || null;   // { sprite, colors } für die Kampfszene
@@ -151,7 +152,8 @@ export class Combatant {
     if (this.hasEffect('immune')) {
       return 0;
     }
-    let factor = 1;
+    // Anweisung (z.B. "Bollwerk": −30 %)
+    let factor = 1 + this.orderSettings.damageTaken;
     for (const effect of this.effects) {
       if (effect.kind === 'damageTaken') {
         factor = factor * (1 + effect.value);
@@ -160,9 +162,9 @@ export class Combatant {
     return factor;
   }
 
-  // Faktor auf den eigenen Schaden: Buffs (z.B. Lied der Klingen) und Wundenzorn (Barbar)
+  // Faktor auf den eigenen Schaden: Anweisung, Buffs (z.B. Lied der Klingen) und Wundenzorn (Barbar)
   getDamageDoneFactor() {
-    let factor = 1;
+    let factor = 1 + this.orderSettings.damageDone;
     for (const effect of this.effects) {
       if (effect.kind === 'damageDone') {
         factor = factor * (1 + effect.value);
@@ -174,15 +176,37 @@ export class Combatant {
     return factor;
   }
 
-  // Chance, einem normalen Angriff auszuweichen (Mönch, Fließende Abwehr)
+  // Chance, einem normalen Angriff auszuweichen (Mönch, Fließende Abwehr, Anweisung "Kranich")
   getDodgeChance() {
-    let chance = this.baseDodgeChance;
+    let chance = this.baseDodgeChance + this.orderSettings.dodge;
     for (const effect of this.effects) {
       if (effect.kind === 'dodge') {
         chance += effect.value;
       }
     }
-    return Math.min(0.9, chance);
+    return Math.max(0, Math.min(0.9, chance));
+  }
+
+  // ---------- Anweisungen (siehe data/heroOrders.js) ----------
+
+  // Faktor auf die eigene Heilung und eigene Schilde
+  getHealingFactor() {
+    return 1 + this.orderSettings.healingDone;
+  }
+
+  // Faktor auf die Aggro, die dieser Kämpfer erzeugt
+  getThreatFactor() {
+    return 1 + this.orderSettings.threat;
+  }
+
+  // Wie viel Mana kostet dieser Skill für diesen Helden? (Anweisungen können das ändern)
+  getManaCost(ability) {
+    return Math.round(ability.manaCost * (1 + this.orderSettings.manaCost));
+  }
+
+  // Faktor auf die Stärke eines einzelnen Skills (z.B. "Natternbiss 60 % stärker")
+  getAbilityPowerFactor(abilityId) {
+    return 1 + (this.orderSettings.abilityPower[abilityId] || 0);
   }
 
   // Anteil des eigenen Schadens, der einen selbst heilt (Blutrausch)

@@ -2,7 +2,7 @@
 // HEROAI – entscheidet, was ein Held in seinem Zug tut
 // Geht die Skills nach Priorität durch und nimmt den ersten, der
 //   1. bereit ist (keine Abklingzeit),
-//   2. genug Mana hat (und die Mana-Reserve aus den Anweisungen nicht angreift) und
+//   2. genug Mana hat (die Kosten können durch Anweisungen steigen oder sinken) und
 //   3. dessen Bedingung gerade zutrifft. Die Bedingung steht unter "when" in data/abilities.js,
 //      kann aber durch eine Anweisung des Spielers ersetzt werden (data/heroOrders.js).
 // Passt nichts, gibt es einen normalen Angriff.
@@ -27,10 +27,7 @@ export function chooseAbility(battle, hero) {
     if (battle.retreating && !RETREAT_SKILL_TYPES.includes(ability.type)) {
       continue;
     }
-    if (hero.mana < ability.manaCost) {
-      continue;
-    }
-    if (breaksManaReserve(hero, ability)) {
+    if (hero.mana < hero.getManaCost(ability)) {
       continue;
     }
     const condition = hero.orderSettings.abilityWhen[abilityId] || ability.when;
@@ -41,23 +38,13 @@ export function chooseAbility(battle, hero) {
   return null;
 }
 
-// Anweisung "Mana aufheben": Schadens-Skills nur, wenn danach noch genug Mana übrig ist
-function breaksManaReserve(hero, ability) {
-  const reserve = hero.orderSettings.manaReserve;
-  if (!reserve || ability.type !== 'damage' || ability.manaCost === 0) {
-    return false;
-  }
-  return (hero.mana - ability.manaCost) / hero.maxMana < reserve;
-}
-
 // Alle Bedingungen, die in data/abilities.js unter "when" (oder in Anweisungen) stehen können
 function isConditionMet(battle, hero, condition, ability, abilityId) {
   const casting = battle.getCasting();
   const enemiesThere = battle.getLivingEnemies().length > 0 && !battle.isDummyFight();
   const bossTarget = battle.getBossTarget();
   const lowestAlly = battle.getLowestAlly();
-  // Eine Anweisung "Heilen ab …" ersetzt die normale Heilschwelle
-  const healThreshold = hero.orderSettings.healThreshold || COMBAT_RULES.healThreshold;
+  const healThreshold = COMBAT_RULES.healThreshold;
 
   switch (condition) {
     case 'always':
@@ -121,6 +108,12 @@ function isConditionMet(battle, hero, condition, ability, abilityId) {
     case 'allyOnCooldown': {
       const ally = battle.getAllyWithCooldowns(hero);
       return enemiesThere && ally !== null && ally.getTotalCooldown() >= 3;
+    }
+
+    // Irgendein anderer Held wartet auf einen Skill (Anweisung "Hüter der Zeit")
+    case 'allyWaiting': {
+      const ally = battle.getAllyWithCooldowns(hero);
+      return enemiesThere && ally !== null && ally.getTotalCooldown() >= 1;
     }
 
     // Mein Ziel hat weniger als 30 % Leben (Hinrichtung)

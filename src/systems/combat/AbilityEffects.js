@@ -28,7 +28,7 @@ export function heroDealsDamage(battle, caster, target, actionName, scaling, pow
   const damageType = options.damageType || 'physical';
   const result = target.takeDamage(output.amount * caster.getDamageDoneFactor(), false, damageType);
   caster.damageDone += result.damage;
-  caster.threat += result.damage * (options.threat || 1);
+  caster.threat += result.damage * (options.threat || 1) * caster.getThreatFactor();
 
   const critText = output.crit ? ' kritisch' : '';
   battle.addLog(caster.name + ': ' + actionName + ' trifft ' + target.name + critText + ' für ' + result.damage + '.',
@@ -60,9 +60,11 @@ export function useBasicAttack(battle, caster) {
 }
 
 // Wen trifft ein Skill? (siehe "target" in data/abilities.js)
-function getTargets(battle, caster, ability) {
+// Eine Anweisung kann das Ziel ersetzen (z.B. "Beschleunigt Heiler").
+function getTargets(battle, caster, abilityId, ability) {
+  const target = caster.orderSettings.abilityTarget[abilityId] || ability.target;
   let targets;
-  switch (ability.target) {
+  switch (target) {
     case 'focus':
       targets = [battle.getFocusTarget(caster)];
       break;
@@ -103,22 +105,30 @@ function getTargets(battle, caster, ability) {
     case 'allyWithCooldowns':
       targets = [battle.getAllyWithCooldowns(caster)];
       break;
+    case 'healerAlly':
+      targets = [battle.getAllyWithRole(caster, 'healer')];
+      break;
+    case 'tankAlly':
+      targets = [battle.getAllyWithRole(caster, 'tank')];
+      break;
     default:
-      throw new Error('Unbekanntes Skill-Ziel: ' + ability.target);
+      throw new Error('Unbekanntes Skill-Ziel: ' + target);
   }
   // Leere Einträge (z.B. kein Ziel gefunden) entfernen
   return targets.filter((target) => target && target.alive);
 }
 
 // Einen Skill ausführen. Mana und Abklingzeit werden hier abgezogen.
+// power = Stärke des Skills, eine Anweisung kann sie verändern (z.B. "Natternbiss 60 % stärker").
 export function useAbility(battle, caster, abilityId, ability) {
-  caster.mana -= ability.manaCost;
+  caster.mana -= caster.getManaCost(ability);
+  const power = (ability.power || 0) * caster.getAbilityPowerFactor(abilityId);
   caster.startCooldown(abilityId, ability.cooldown);
   if (ability.oncePerFight) {
     caster.markUsedOnce(abilityId);
   }
 
-  const targets = getTargets(battle, caster, ability);
+  const targets = getTargets(battle, caster, abilityId, ability);
   if (targets.length === 0) {
     return;
   }
@@ -128,18 +138,18 @@ export function useAbility(battle, caster, abilityId, ability) {
     case 'damage':
       for (const target of targets) {
         if (target.alive) {
-          heroDealsDamage(battle, caster, target, ability.name, ability.scaling, ability.power, ability);
+          heroDealsDamage(battle, caster, target, ability.name, ability.scaling, power, ability);
         }
       }
       break;
     case 'dot':
-      applyPoison(battle, caster, abilityId, ability, targets[0]);
+      applyPoison(battle, caster, abilityId, ability, power, targets[0]);
       break;
     case 'heal':
-      applyHeal(battle, caster, ability, targets[0]);
+      applyHeal(battle, caster, ability, power, targets[0]);
       break;
     case 'hot':
-      applyHealOverTime(battle, caster, abilityId, ability, targets);
+      applyHealOverTime(battle, caster, abilityId, ability, power, targets);
       break;
     case 'revive':
       applyRevive(battle, caster, ability, targets[0]);
@@ -150,10 +160,10 @@ export function useAbility(battle, caster, abilityId, ability) {
         { labels: [{ targetId: targets[0].id, text: 'Bereit!' }] });
       break;
     case 'shield':
-      applyShield(battle, caster, ability, targets);
+      applyShield(battle, caster, ability, power, targets);
       break;
     case 'buff':
-      applyBuff(battle, caster, abilityId, ability, targets);
+      applyBuff(battle, caster, abilityId, ability, ability.value * caster.getAbilityPowerFactor(abilityId), targets);
       break;
     case 'taunt':
       applyTaunt(battle, caster, ability);
@@ -172,7 +182,7 @@ export function useAbility(battle, caster, abilityId, ability) {
       applyStun(battle, caster, ability, targets);
       break;
     case 'interrupt':
-      applyInterrupt(battle, caster, ability, targets[0]);
+      applyInterrupt(battle, caster, ability, power, targets[0]);
       break;
     default:
       throw new Error('Unbekannter Skill-Typ: ' + ability.type);
@@ -181,8 +191,8 @@ export function useAbility(battle, caster, abilityId, ability) {
 
 // Gift oder Fluch: macht mehrere Runden lang Schaden (wird am Rundenanfang abgerechnet).
 // Mit "growth" wächst der Schaden jede Runde (Hexenmeister).
-function applyPoison(battle, caster, abilityId, ability, target) {
-  const output = rollOutput(battle, caster, ability.scaling, ability.power);
+function applyPoison(battle, caster, abilityId, ability, power, target) {
+  const output = rollOutput(battle, caster, ability.scaling, power);
   target.addEffect({
     kind: 'dot',
     name: ability.name,
@@ -201,15 +211,15 @@ function applyPoison(battle, caster, abilityId, ability, target) {
 }
 
 // Heilung über Zeit: heilt jede Runde ein Stück (wird am Rundenanfang abgerechnet)
-function applyHealOverTime(battle, caster, abilityId, ability, targets) {
+function applyHealOverTime(battle, caster, abilityId, ability, power, targets) {
   for (const target of targets) {
-    const output = rollOutput(battle, caster, ability.scaling, ability.power);
+    const output = rollOutput(battle, caster, ability.scaling, power);
     target.addEffect({
       kind: 'hot',
       name: ability.name,
       buffId: abilityId,
       sourceId: caster.id,
-      healPerRound: output.amount,
+      healPerRound: output.amount * caster.getHealingFactor(),
       remaining: ability.duration,
     });
   }
@@ -228,39 +238,40 @@ function applyRevive(battle, caster, ability, target) {
 
 // Buff: Verstärkung für sich selbst, einen Helden oder die ganze Gruppe (siehe "effect" in abilities.js).
 // buffId = Skill-id: Derselbe Buff ersetzt sich selbst, statt sich zu stapeln.
-function applyBuff(battle, caster, abilityId, ability, targets) {
+// value = Stärke des Buffs (eine Anweisung kann sie verändern, z.B. "Lied der Klingen 40 % stärker")
+function applyBuff(battle, caster, abilityId, ability, value, targets) {
   const kind = ability.effect || 'damageTaken';
   for (const target of targets) {
-    target.addEffect({ kind: kind, buffId: abilityId, value: ability.value, remaining: ability.duration });
+    target.addEffect({ kind: kind, buffId: abilityId, value: value, remaining: ability.duration });
   }
   const who = targets.length === 1 && targets[0] === caster ? '' : ' auf ' + (targets.length === 1 ? targets[0].name : 'die Gruppe');
   battle.addLog(caster.name + ' wirkt ' + ability.name + who + '.', 'shield',
     { labels: targets.map((target) => ({ targetId: target.id, text: ability.name })) });
 }
 
-function applyHeal(battle, caster, ability, target) {
-  const output = rollOutput(battle, caster, ability.scaling, ability.power);
-  const healed = target.heal(output.amount);
+function applyHeal(battle, caster, ability, power, target) {
+  const output = rollOutput(battle, caster, ability.scaling, power);
+  const healed = target.heal(output.amount * caster.getHealingFactor());
   caster.healingDone += healed;
-  caster.threat += healed * COMBAT_RULES.healThreat;
+  caster.threat += healed * COMBAT_RULES.healThreat * caster.getThreatFactor();
   const critText = output.crit ? ' kritisch' : '';
   battle.addLog(caster.name + ': ' + ability.name + ' heilt ' + target.name + critText + ' um ' + healed + '.', 'heal',
     { hits: [target.describeHit(healed, 'heal', output.crit)] });
 }
 
-function applyShield(battle, caster, ability, targets) {
+function applyShield(battle, caster, ability, power, targets) {
   let total = 0;
   const hits = [];
   for (const target of targets) {
-    const output = rollOutput(battle, caster, ability.scaling, ability.power);
-    const amount = Math.round(output.amount);
+    const output = rollOutput(battle, caster, ability.scaling, power);
+    const amount = Math.round(output.amount * caster.getHealingFactor());
     target.shield += amount;
     total += amount;
     hits.push(target.describeHit(amount, 'shield'));
   }
   // Schilde zählen in der Auswertung als "Heilung" (Schutz)
   caster.healingDone += total;
-  caster.threat += total * COMBAT_RULES.shieldThreat;
+  caster.threat += total * COMBAT_RULES.shieldThreat * caster.getThreatFactor();
   const who = targets.length === 1 ? targets[0].name : 'die Gruppe';
   battle.addLog(caster.name + ': ' + ability.name + ' schützt ' + who + ' (' + total + ').', 'shield', { hits: hits });
 }
@@ -288,7 +299,7 @@ function applyStun(battle, caster, ability, targets) {
 }
 
 // Unterbrechen: bricht einen unterbrechbaren Boss-Zauber ab
-function applyInterrupt(battle, caster, ability, target) {
+function applyInterrupt(battle, caster, ability, power, target) {
   const boss = battle.boss;
   const casting = battle.getCasting();
   if (casting && casting.interruptible) {
@@ -296,5 +307,5 @@ function applyInterrupt(battle, caster, ability, target) {
       { labels: [{ targetId: boss.id, text: 'UNTERBROCHEN!' }], cast: { state: 'end' } });
     boss.casting = null;
   }
-  heroDealsDamage(battle, caster, target, ability.name, ability.scaling, ability.power, ability);
+  heroDealsDamage(battle, caster, target, ability.name, ability.scaling, power, ability);
 }

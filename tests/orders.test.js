@@ -1,4 +1,4 @@
-// Tests für die Kampf-Anweisungen der Helden.
+// Tests für die Kampf-Anweisungen der Helden (Haltung + Eigenheit).
 
 import { describe, it, expect } from 'vitest';
 import { HERO_ORDERS } from '../src/data/heroOrders.js';
@@ -7,42 +7,50 @@ import { Hero } from '../src/entities/Hero.js';
 import { Game } from '../src/core/Game.js';
 import { createTestGroup } from '../src/systems/combat/TestGroup.js';
 import { estimateChances } from '../src/systems/combat/ChanceEstimator.js';
+import { combineOrderEffects } from '../src/systems/combat/OrderSettings.js';
 
 const LOOKS = { skin: '#f1c39b', hair: '#6b3f17' };
 
 describe('Anweisungs-Daten', () => {
+  it('jede Klasse hat genau zwei Anweisungen, die erste heißt "Haltung"', () => {
+    for (const heroClass of HERO_CLASSES) {
+      const orders = HERO_ORDERS[heroClass.id];
+      expect(orders, heroClass.name).toBeDefined();
+      expect(orders.length, heroClass.name).toBe(2);
+      expect(orders[0].name, heroClass.name).toBe('Haltung');
+    }
+  });
+
   for (const classId in HERO_ORDERS) {
-    it(`${classId}: Klasse existiert, Optionen verweisen auf eigene Skills`, () => {
+    it(`${classId}: Ausgewogen zuerst, jedes Extrem hat Vor- und Nachteil, Skills gehören zur Klasse`, () => {
       const heroClass = getHeroClass(classId);
       for (const order of HERO_ORDERS[classId]) {
-        expect(order.options.length).toBeGreaterThanOrEqual(2);
-        for (const option of order.options) {
-          for (const abilityId in option.effects.abilityWhen || {}) {
-            expect(heroClass.abilities, option.label).toContain(abilityId);
+        expect(order.options.length).toBe(3);
+        expect(order.options[0].id).toBe('balanced');
+        expect(order.options[0].effects).toEqual({});
+        for (const option of order.options.slice(1)) {
+          expect(option.pro, option.label).toBeTruthy();
+          expect(option.contra, option.label).toBeTruthy();
+          expect(Object.keys(option.effects).length, option.label).toBeGreaterThan(0);
+          for (const field of ['abilityPower', 'abilityWhen', 'abilityTarget']) {
+            for (const abilityId in option.effects[field] || {}) {
+              expect(heroClass.abilities, option.label).toContain(abilityId);
+            }
           }
         }
       }
     });
   }
 
-  it('jede Start-Klasse hat Anweisungen', () => {
+  it('alle Optionen lassen sich im Kampf benutzen (keine unbekannten Bedingungen oder Ziele)', () => {
     for (const heroClass of HERO_CLASSES) {
-      expect(HERO_ORDERS[heroClass.id], heroClass.name).toBeDefined();
-    }
-  });
-
-  it('alle Anweisungen lassen sich im Kampf benutzen (keine unbekannten Bedingungen)', () => {
-    for (const classId in HERO_ORDERS) {
-      for (const order of HERO_ORDERS[classId]) {
-        for (const option of order.options) {
-          const group = createTestGroup(1);
-          for (const hero of group) {
-            if (hero.classId === classId) {
-              hero.setOrder(order.id, option.id);
-            }
-          }
+      for (const order of HERO_ORDERS[heroClass.id]) {
+        for (const option of order.options.slice(1)) {
+          // Gruppe mit Tank, Heiler und der geprüften Klasse, damit auch Ziele wie "Heiler" existieren
+          const group = createTestGroup(3, 'uncommon', ['warrior', 'priest', heroClass.id, 'mage', 'rogue']);
+          group[2].setOrder(order.id, option.id);
           for (const bossId of ['grimfang', 'morva', 'skarrix']) {
-            expect(() => estimateChances({ heroes: group, bossId, count: 3 })).not.toThrow();
+            expect(() => estimateChances({ heroes: group, bossId, count: 3 }), option.label).not.toThrow();
           }
         }
       }
@@ -50,19 +58,29 @@ describe('Anweisungs-Daten', () => {
   });
 });
 
-describe('Hero-Anweisungen', () => {
-  it('ohne Wahl gilt die erste Option, gewählte Optionen fließen in die Einstellungen', () => {
-    const priest = new Hero(1, 'P', 'priest', 'uncommon', [], LOOKS);
-    expect(priest.getOrderSettings().healThreshold).toBeUndefined();
-    priest.setOrder('healThreshold', 'early');
-    expect(priest.getOrderSettings().healThreshold).toBe(0.8);
+describe('Anweisungen zusammenfassen', () => {
+  it('Zahlen werden zusammengezählt, Skill-Änderungen zusammengeführt', () => {
+    const settings = combineOrderEffects([
+      { damageTaken: 0.15, abilityPower: { viperBite: 0.6 } },
+      { damageTaken: 0.15, abilityPower: { viperBite: -0.2 }, abilityWhen: { shadowStab: 'never' } },
+    ]);
+    expect(settings.damageTaken).toBeCloseTo(0.3);
+    expect(settings.abilityPower.viperBite).toBeCloseTo(0.4);
+    expect(settings.abilityWhen.shadowStab).toBe('never');
+    expect(settings.damageDone).toBe(0);
+    expect(settings.targetPriority).toBeNull();
+  });
 
+  it('ohne Wahl gilt "Ausgewogen", gewählte Optionen fließen in die Einstellungen', () => {
     const mage = new Hero(2, 'M', 'mage', 'uncommon', [], LOOKS);
-    mage.setOrder('frostUse', 'asap');
-    mage.setOrder('targetPriority', 'boss');
+    expect(mage.getOrderSettings().damageDone).toBe(0);
+    mage.setOrder('stance', 'overload');
+    mage.setOrder('spells', 'boss');
     const settings = mage.getOrderSettings();
-    expect(settings.abilityWhen.iceWreath).toBe('ready');
+    expect(settings.damageDone).toBeCloseTo(0.35);
+    expect(settings.manaCost).toBeCloseTo(0.5);
     expect(settings.targetPriority).toBe('boss');
+    expect(settings.abilityWhen.ashRain).toBe('never');
   });
 
   it('Anweisungen werden gespeichert und geladen', () => {
@@ -70,18 +88,28 @@ describe('Hero-Anweisungen', () => {
     game.guild.gold = 10000;
     const candidate = game.guild.candidates[0];
     game.hireHero(candidate.id);
-    game.setHeroOrder(candidate.id, 'someOrder', 'someOption');
+    game.setHeroOrder(candidate.id, 'stance', 'someOption');
     const loaded = Game.fromSaveData(JSON.parse(JSON.stringify(game.toSaveData())));
-    expect(loaded.guild.heroes[0].orders.someOrder).toBe('someOption');
+    expect(loaded.guild.heroes[0].orders.stance).toBe('someOption');
   });
+});
 
-  it('Anweisungen verändern den Kampf: später Heilen ist gegen Skarrix schlechter als frühes', () => {
-    const early = createTestGroup(1);
-    const late = createTestGroup(1);
-    early.find((h) => h.classId === 'priest').setOrder('healThreshold', 'early');
-    late.find((h) => h.classId === 'priest').setOrder('healThreshold', 'late');
-    const earlyChance = estimateChances({ heroes: early, bossId: 'skarrix', count: 150 });
-    const lateChance = estimateChances({ heroes: late, bossId: 'skarrix', count: 150 });
-    expect(earlyChance.winRate).toBeGreaterThan(lateChance.winRate + 0.3);
+describe('Anweisungen verändern den Kampf', () => {
+  // Der Krieger ist der Tank: Bei "Bollwerk" steckt er weniger ein, bei "Wut" mehr
+  function warriorDamageTaken(optionId) {
+    const group = createTestGroup(3);
+    group[0].setOrder('stance', optionId);
+    const result = estimateChances({ heroes: group, bossId: 'grimfang', count: 40 });
+    return result;
+  }
+
+  it('Bollwerk und Wut ergeben andere Siegchancen als Ausgewogen', () => {
+    const balanced = warriorDamageTaken('balanced');
+    const bulwark = warriorDamageTaken('bulwark');
+    const fury = warriorDamageTaken('fury');
+    // Nur prüfen, dass die Anweisung überhaupt etwas bewirkt (kein Balancing)
+    const changed = bulwark.winRate !== balanced.winRate || fury.winRate !== balanced.winRate ||
+      bulwark.averageRounds !== balanced.averageRounds || fury.averageRounds !== balanced.averageRounds;
+    expect(changed).toBe(true);
   });
 });
