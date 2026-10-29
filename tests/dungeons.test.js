@@ -103,7 +103,9 @@ describe('Expeditionen (Tagesplanung)', () => {
     expect(reports[0].day).toBe(1);
     // Boss-Gold plus Gold für die besiegte Trash-Gruppe
     expect(reports[0].trashGold).toBe(DUNGEONS[0].rewards.trashGold);
-    expect(game.guild.gold).toBe(goldBefore + DUNGEONS[0].rewards.gold + DUNGEONS[0].rewards.trashGold);
+    // Abends wird außerdem der Sold bezahlt
+    expect(game.guild.gold).toBe(goldBefore + DUNGEONS[0].rewards.gold + DUNGEONS[0].rewards.trashGold -
+      game.lastDaySummary.wages.paid);
     expect(game.guild.countBoxes('chestGrimfang')).toBe(1);
     expect(game.guild.getClears('bearCave')).toBe(1);
     expect(game.guild.isHeroBusy(heroIds[0])).toBe(false);
@@ -144,7 +146,7 @@ describe('Expeditionen (Tagesplanung)', () => {
         hero.injuryDays = 0;
       }
       if (report.outcome !== 'success' && report.trashGold > 0) {
-        expect(game.guild.gold).toBe(goldBefore + report.trashGold);
+        expect(game.guild.gold).toBe(goldBefore + report.trashGold - game.lastDaySummary.wages.paid);
         expect(game.guild.countBoxes('chestMorva')).toBe(0);
         found = true;
       }

@@ -66,7 +66,8 @@ export function estimateChances(options) {
 }
 
 // Ein ganzer Dungeon-Run, viele Male simuliert.
-// options = { heroes, dungeonId, retreatRuleId, count, supplies (freiwillig: mitgenommene Verbrauchsgüter) }
+// options = { heroes, dungeonId, retreatRuleId, count, supplies (freiwillig: mitgenommene Verbrauchsgüter),
+//             scouted (freiwillig: Dungeon erkundet) }
 // Ergebnis: { winRate, fallenRate } (Anteile von 0 bis 1)
 // Die Seeds sind immer dieselben: Dieselbe Gruppe bekommt also immer dieselbe Einschätzung.
 export function estimateRunChances(options) {
@@ -80,6 +81,7 @@ export function estimateRunChances(options) {
       seed: 1 + i * 7919,
       recordLog: false,
       supplies: options.supplies || [],
+      scouted: options.scouted || false,
     });
     if (result.outcome === 'success') {
       wins++;

@@ -33,7 +33,8 @@ describe('Eigenschaften nach dem Run', () => {
     const normalGold = DUNGEONS[0].rewards.gold + DUNGEONS[0].rewards.trashGold;
     expect(report.bonusGold).toBe(Math.round(normalGold * 0.2));
     expect(report.bonusGoldHero).toBe(game.guild.heroes[0].name);
-    expect(game.guild.gold).toBe(goldBefore + normalGold + report.bonusGold);
+    // Abends wird außerdem der Sold bezahlt
+    expect(game.guild.gold).toBe(goldBefore + normalGold + report.bonusGold - game.lastDaySummary.wages.paid);
   });
 
   it('Glückspilz: 1 Item mehr in der Boss-Kiste', () => {

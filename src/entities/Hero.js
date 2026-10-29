@@ -36,6 +36,9 @@ export class Hero {
     this.level = 1;
     this.xp = 0;              // gesammelte EP auf dem aktuellen Level
     this.injuryDays = 0;      // > 0 = verletzt, noch so viele Tage (kann nicht in Dungeons)
+    // Gewählte Tagesaufgabe, wenn er nicht kämpft (siehe data/heroTasks.js). Bleibt stehen, bis man sie ändert.
+    // dungeonId nur beim Erkunden: welcher Dungeon erkundet wird
+    this.task = { taskId: 'rest', dungeonId: null };
 
     // Anweisungen für den Kampf: Anweisungs-id → gewählte Option (siehe data/heroOrders.js).
     // Fehlt eine Anweisung, gilt die Standard-Option.
@@ -271,6 +274,7 @@ export class Hero {
       injuryDays: this.injuryDays,
       equipment: equipment,
       orders: this.orders,
+      task: this.task,
     };
   }
 
@@ -284,6 +288,7 @@ export class Hero {
       hero.injuryDays = 1;
     }
     hero.orders = data.orders || {};
+    hero.task = data.task;
     for (const slot of EQUIPMENT_SLOTS) {
       const itemData = data.equipment[slot];
       hero.equipment[slot] = itemData ? Item.fromSaveData(itemData) : null;

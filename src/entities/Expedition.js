@@ -24,6 +24,7 @@ export class Expedition {
     this.retreatRuleId = retreatRuleId;
     this.seed = seed;
     this.supplies = supplies;
+    this.scouted = false;      // war der Dungeon erkundet? (wird beim Auskämpfen festgelegt, siehe Game.finishExpedition)
     this.heroSnapshots = null; // Abbild der Helden beim Auskämpfen (null = noch nicht ausgekämpft)
     this.result = null;        // berechnetes Ergebnis (wird nicht gespeichert, sondern neu berechnet)
   }
@@ -52,6 +53,7 @@ export class Expedition {
         seed: this.seed,
         recordLog: true,
         supplies: this.supplies,
+        scouted: this.scouted,
       });
     }
     return this.result;
@@ -65,6 +67,7 @@ export class Expedition {
       retreatRuleId: this.retreatRuleId,
       seed: this.seed,
       supplies: this.supplies,
+      scouted: this.scouted,
       heroSnapshots: this.heroSnapshots,
     };
   }
@@ -76,6 +79,7 @@ export class Expedition {
     // Ein alter, noch laufender Run steht jetzt einfach in der Planung und wird am Tagesende
     // neu ausgekämpft (resolve). Alte Berichte behalten ihr Abbild, damit man sie weiter ansehen kann.
     expedition.heroSnapshots = data.heroSnapshots || null;
+    expedition.scouted = data.scouted;
     return expedition;
   }
 }

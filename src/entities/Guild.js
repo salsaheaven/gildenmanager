@@ -31,6 +31,8 @@ export class Guild {
     this.collection = new CollectionBook(); // Sammelbuch: welche Boss-Items schon gefunden wurden
     this.supplies = {};        // Vorratskammer: Verbrauchsgut-id → Anzahl (siehe data/consumables.js)
     this.dailyOffer = [];      // heutiges Tagesangebot des Händlers (Liste von Verbrauchsgut-ids)
+    this.scoutedDungeons = {}; // erkundete Dungeons: Dungeon-id → true (gilt für den nächsten Run dort)
+    this.lastDayPlan = [];     // die Gruppen von gestern, für "Wie gestern": [{ dungeonId, heroIds, retreatRuleId, supplies }]
 
     // Pity-Zähler: Items seit dem letzten epischen oder legendären Item
     this.itemsSinceEpic = 0;
@@ -220,6 +222,8 @@ export class Guild {
       collection: this.collection.toSaveData(),
       supplies: this.supplies,
       dailyOffer: this.dailyOffer,
+      scoutedDungeons: this.scoutedDungeons,
+      lastDayPlan: this.lastDayPlan,
     };
   }
 
@@ -244,6 +248,8 @@ export class Guild {
     guild.collection = CollectionBook.fromSaveData(data.collection);
     guild.supplies = data.supplies;
     guild.dailyOffer = data.dailyOffer;
+    guild.scoutedDungeons = data.scoutedDungeons;
+    guild.lastDayPlan = data.lastDayPlan;
     return guild;
   }
 }

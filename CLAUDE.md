@@ -40,7 +40,7 @@ Eine Option, die immer die beste ist, ist keine Wahl. Geprüft wird das per Simu
 src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen, Tageszähler, endDay), Random, SaveManager
 src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, CollectionBook (Sammelbuch: beste gefundene Seltenheit je Boss-Item, Titel, Gold-Bonus), Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft)
 src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem (EP, Aufhol-Erfahrung, Verletzungen nach einem Run),
-               DayPlan (welcher Held hat heute welche Aufgabe), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
+               DayPlan (welcher Held hat heute welche Aufgabe), HeroTaskSystem (Training, Kräuter sammeln, Erkunden, Sold bei endDay), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
                simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug),
                BattleTimeline (wann passiert was → Dauer eines Runs, mit Zeitraffer für Trash und ruhige Runden), Battle (Zustand + Zielwahl),
@@ -54,7 +54,7 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                dungeons (Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),
-               heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus),
+               heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus, Training, Kräuter sammeln, Erkunden; Zahlen in TASK_RULES),
                riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben),
                damageTypes (Schadensarten mit Farbe, Obergrenze für Resistenzen),
                defeatCauses (Tipps und Hinweise für „Woran es lag“),

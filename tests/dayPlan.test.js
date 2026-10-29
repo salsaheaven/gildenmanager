@@ -25,7 +25,7 @@ describe('Tagesplan', () => {
 
     const plan = getDayPlan(game.guild);
     expect(plan.entries.length).toBe(5);
-    expect(plan.counts).toEqual({ dungeon: 2, injured: 1, rest: 2 });
+    expect(plan.counts).toMatchObject({ dungeon: 2, injured: 1, rest: 2, training: 0 });
     expect(getHeroTask(game.guild, heroes[0]).expedition.dungeonId).toBe('bearCave');
     expect(getHeroTask(game.guild, heroes[2]).taskId).toBe('rest');
     for (const entry of plan.entries) {

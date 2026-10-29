@@ -1,7 +1,7 @@
 // ============================================================
 // GAME – das Herz des Spiels
 // Hält alle Teile zusammen (Tag, Gilde, Systeme) und bietet die Aktionen an,
-// die die Oberfläche auslösen kann (Kiste kaufen, öffnen, Item verkaufen, Tag beenden …).
+// die die Oberfläche auslösen kann (Kiste öffnen, Item verkaufen, Trank kaufen, Aufgaben verteilen, Tag beenden …).
 //
 // Das Spiel ist rundenbasiert: 1 Runde = 1 Tag. Jeder Held hat pro Tag eine Aufgabe
 // (zurzeit: Dungeon oder Ausruhen). Erst bei "Tag beenden" (endDay) wird alles ausgekämpft.
@@ -16,6 +16,9 @@
 //   'heroHealed'           → ein verletzter Held ist wieder fit (Daten: der Held)
 // ============================================================
 
+import { getDayPlan } from '../systems/DayPlan.js';
+import { HERO_TASKS } from '../data/heroTasks.js';
+import { resolveHeroTasks, payWages, getDailyWages } from '../systems/HeroTaskSystem.js';
 import { CONSUMABLES, DAILY_OFFER_COUNT, SUPPLY_SLOTS, getConsumable } from '../data/consumables.js';
 import { needsDefeatAnalysis, analyzeRun } from '../systems/combat/DefeatAnalysis.js';
 import { Random } from './Random.js';
@@ -59,12 +62,24 @@ export class Game {
 
   // ---------- Runden (1 Runde = 1 Tag) ----------
 
-  // Beendet den Tag: Alle geplanten Runs werden ausgekämpft, Verletzte heilen,
-  // es kommen neue Bewerber, und der nächste Tag beginnt.
+  // Beendet den Tag: Alle geplanten Runs werden ausgekämpft, die anderen Helden erledigen ihre Aufgaben,
+  // Verletzte heilen, der Sold wird bezahlt, es kommen neue Bewerber, und der nächste Tag beginnt.
   // Gibt die Berichte der heutigen Runs zurück (in der Reihenfolge, in der sie geplant wurden).
+  // Was die Aufgaben und der Sold ergeben haben, steht danach in this.lastDaySummary.
   endDay() {
     const endedDay = this.day;
     this.emit('dayEnding');
+
+    // 0. Wer macht heute was? (vor allem anderen, damit Verletzte von heute nicht noch trainieren)
+    const plan = getDayPlan(this.guild);
+    const taskEntries = plan.entries.filter((entry) => entry.taskId !== 'dungeon' && entry.taskId !== 'injured');
+    // Die Gruppen von heute für "Wie gestern" merken
+    this.guild.lastDayPlan = this.guild.expeditions.map((expedition) => ({
+      dungeonId: expedition.dungeonId,
+      heroIds: expedition.getHeroIds().slice(),
+      retreatRuleId: expedition.retreatRuleId,
+      supplies: expedition.supplies.slice(),
+    }));
 
     // 1. Wer schon verletzt war, heilt einen Tag lang.
     //    (Zuerst, damit Helden, die heute fallen, morgen noch verletzt sind.)
@@ -80,12 +95,22 @@ export class Game {
       reports.push(this.finishExpedition(expedition));
     }
 
-    // 3. Der nächste Tag beginnt: neue Bewerber in der Taverne, neues Tagesangebot beim Händler
+    // 3. Aufgaben der anderen Helden (Training, Kräuter, Erkunden), danach der Sold für alle
+    const taskResults = resolveHeroTasks(this.guild, taskEntries, this.random);
+    for (const taskResult of taskResults) {
+      if (taskResult.levelsGained > 0) {
+        this.emit('heroLevelUp', { hero: this.guild.findHero(taskResult.heroId), newLevel: taskResult.newLevel });
+      }
+    }
+    const wages = payWages(this.guild);
+    this.lastDaySummary = { day: endedDay, tasks: taskResults, wages: wages };
+
+    // 4. Der nächste Tag beginnt: neue Bewerber in der Taverne, neues Tagesangebot beim Händler
     this.day++;
     this.refreshCandidates();
     this.refreshDailyOffer();
 
-    this.emit('dayEnded', { day: endedDay, reports: reports });
+    this.emit('dayEnded', { day: endedDay, reports: reports, summary: this.lastDaySummary });
     this.emit('changed');
     return reports;
   }
@@ -296,6 +321,9 @@ export class Game {
   // Die Helden kämpfen so, wie sie jetzt ausgerüstet sind.
   finishExpedition(expedition) {
     const heroes = expedition.getHeroIds().map((heroId) => this.guild.findHero(heroId)).filter((hero) => hero);
+    // Erkundet? Dann ist dieser Run vorbereitet, und die Erkundung ist danach verbraucht
+    expedition.scouted = this.guild.scoutedDungeons[expedition.dungeonId] === true;
+    delete this.guild.scoutedDungeons[expedition.dungeonId];
     const result = expedition.resolve(heroes);
     const dungeon = getDungeon(expedition.dungeonId);
     const success = result.outcome === 'success';
@@ -313,6 +341,7 @@ export class Game {
       bonusGoldHero: null,  // wer es gebracht hat
       collectionGold: 0,    // Extra-Gold durch die volle Sammelbuch-Seite dieses Dungeons
       supplies: expedition.supplies.slice(), // verbrauchte Vorräte
+      scouted: expedition.scouted,           // war der Dungeon erkundet?
       chest: null,
       chestBonusItems: 0,   // Extra-Items durch "Glückspilz"
       chestBonusHero: null,
@@ -461,6 +490,64 @@ export class Game {
       }
     }
     return count;
+  }
+
+  // ---------- Aktionen: Tagesaufgaben (siehe data/heroTasks.js) ----------
+
+  // Gibt einem Helden eine Aufgabe für die Tage, an denen er nicht kämpft.
+  // dungeonId nur beim Erkunden (muss freigeschaltet sein). Gibt 'ok' oder einen Grund zurück.
+  setHeroTask(heroId, taskId, dungeonId = null) {
+    const hero = this.guild.findHero(heroId);
+    if (!hero) {
+      return 'notFound';
+    }
+    if (!HERO_TASKS[taskId] || !HERO_TASKS[taskId].choosable) {
+      return 'notChoosable';
+    }
+    if (taskId === 'scouting' && (!dungeonId || !this.isDungeonUnlocked(dungeonId))) {
+      return 'locked';
+    }
+    hero.task = { taskId: taskId, dungeonId: taskId === 'scouting' ? dungeonId : null };
+    this.emit('changed');
+    return 'ok';
+  }
+
+  // Ist dieser Dungeon für den nächsten Run erkundet?
+  isDungeonScouted(dungeonId) {
+    return this.guild.scoutedDungeons[dungeonId] === true;
+  }
+
+  // Sold, den die Gilde jeden Abend zahlt
+  getDailyWages() {
+    return getDailyWages(this.guild);
+  }
+
+  // "Wie gestern": plant die Gruppen von gestern noch einmal ein (gleicher Dungeon, gleiche Helden,
+  // gleiche Rückzugsregel). Wer heute verletzt oder schon eingeplant ist, fehlt. Vorräte nur, soweit sie da sind.
+  // Gibt die Anzahl der eingeplanten Gruppen zurück.
+  repeatYesterday() {
+    let planned = 0;
+    for (const old of this.guild.lastDayPlan) {
+      const heroIds = old.heroIds.filter((heroId) => {
+        const hero = this.guild.findHero(heroId);
+        return hero && !hero.isInjured() && !this.guild.isHeroBusy(heroId);
+      });
+      if (heroIds.length === 0 || !this.isDungeonUnlocked(old.dungeonId)) {
+        continue;
+      }
+      const supplies = [];
+      const taken = {};
+      for (const supplyId of old.supplies) {
+        taken[supplyId] = (taken[supplyId] || 0) + 1;
+        if (taken[supplyId] <= this.guild.countSupply(supplyId)) {
+          supplies.push(supplyId);
+        }
+      }
+      if (this.startExpedition(old.dungeonId, heroIds, old.retreatRuleId, supplies) === 'ok') {
+        planned++;
+      }
+    }
+    return planned;
   }
 
   // Wählt einen Gildentitel aus dem Sammelbuch (null = keinen Titel tragen)

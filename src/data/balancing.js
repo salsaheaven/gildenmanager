@@ -29,7 +29,7 @@ export const BALANCING = {
   // ---------- Helden & Taverne ----------
 
   // Wie viele Helden die Gilde höchstens haben kann (später erweiterbar durch die Kaserne)
-  maxHeroes: 10,
+  maxHeroes: 20,
 
   // Wie viele Bewerber gleichzeitig in der Taverne warten
   candidateCount: 4,
