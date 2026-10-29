@@ -12,17 +12,24 @@
 import { TASK_RULES, JOB_TEXTS } from '../data/heroTasks.js';
 import { getGroupGoldBonus } from './TraitEffects.js';
 import { EXPERIENCE } from '../data/experience.js';
-import { HERO_RARITIES } from '../data/heroRarities.js';
+import { HERO_RARITIES, WAGE_RULES } from '../data/heroRarities.js';
 
 // Gold für einen Tag Aufträge, ohne Zufall und ohne Gierig (für die Anzeige "etwa X Gold")
 export function getJobGold(hero) {
   return TASK_RULES.jobGoldBase + TASK_RULES.jobGoldPerLevel * hero.level;
 }
 
-// EP für einen Tag Training: ein Anteil der EP eines Bosskampfs auf dem Level des Helden
-export function getTrainingXp(hero) {
+// EP für einen Tag Training: ein Anteil der EP eines Bosskampfs auf dem Level des Helden.
+// guild = freiwillig, dann zählt die Trainingshalle mit
+export function getTrainingXp(hero, guild = null) {
   const levelFactor = 1 + (hero.level - 1) * EXPERIENCE.xpGrowthPerDungeonLevel;
-  return Math.round(EXPERIENCE.encounterXp.boss * levelFactor * TASK_RULES.trainingXpShareOfBoss);
+  const hallBonus = guild ? guild.hall.getEffect('trainingXpBonus', 0) : 0;
+  return Math.round(EXPERIENCE.encounterXp.boss * levelFactor * TASK_RULES.trainingXpShareOfBoss * (1 + hallBonus));
+}
+
+// Was kostet ein Tag Training? (die Trainingshalle macht es billiger)
+export function getTrainingCost(guild) {
+  return Math.round(TASK_RULES.trainingCost * guild.hall.getEffect('trainingCostFactor', 1));
 }
 
 // Erledigt die Aufgaben. entries = [{ hero, taskId }] (nur Helden, die heute nicht kämpfen und nicht verletzt sind)
@@ -41,8 +48,8 @@ export function resolveHeroTasks(guild, entries, random) {
     };
 
     if (entry.taskId === 'training') {
-      if (guild.spendGold(TASK_RULES.trainingCost)) {
-        result.xp = getTrainingXp(hero);
+      if (guild.spendGold(getTrainingCost(guild))) {
+        result.xp = getTrainingXp(hero, guild);
         result.levelsGained = hero.addXp(result.xp);
         result.newLevel = hero.level;
       } else {
@@ -64,7 +71,8 @@ export function resolveHeroTasks(guild, entries, random) {
     } else if (entry.taskId === 'scouting') {
       const dungeonId = hero.task.dungeonId;
       if (dungeonId) {
-        guild.scoutedDungeons[dungeonId] = true;
+        // Ohne Kartenraum hält die Erkundung 1 Kampftag, mit Kartenraum länger
+        guild.scoutedDungeons[dungeonId] = guild.hall.getEffect('scoutingRunDays', 1);
         result.scoutedDungeonId = dungeonId;
       } else {
         result.skipped = 'noDungeon';
@@ -80,11 +88,31 @@ export function getDailyWages(guild) {
   return guild.heroes.reduce((sum, hero) => sum + HERO_RARITIES[hero.rarityId].dailyWage, 0);
 }
 
-// Bezahlt den Sold. Reicht das Gold nicht, wird bezahlt, was da ist.
-// Gibt { total, paid } zurück.
+// Bezahlt den Sold, Held für Held in der Reihenfolge der Heldenliste.
+// Wer nichts bekommt, ist unzufrieden (unpaidDays steigt); wer bezahlt wird, ist wieder zufrieden.
+// Nach WAGE_RULES.unpaidDaysUntilLeave Tagen ohne Sold verlässt der Held die Gilde (seine Ausrüstung bleibt da).
+// Gibt { total, paid, unpaidNames, leftNames } zurück.
 export function payWages(guild) {
   const total = getDailyWages(guild);
-  const paid = Math.min(total, guild.gold);
-  guild.spendGold(paid);
-  return { total, paid };
+  let paid = 0;
+  const unpaidNames = [];
+  const leaving = [];
+  for (const hero of guild.heroes) {
+    const wage = HERO_RARITIES[hero.rarityId].dailyWage;
+    if (guild.spendGold(wage)) {
+      paid += wage;
+      hero.unpaidDays = 0;
+      continue;
+    }
+    hero.unpaidDays++;
+    if (hero.unpaidDays >= WAGE_RULES.unpaidDaysUntilLeave) {
+      leaving.push(hero);
+    } else {
+      unpaidNames.push(hero.name);
+    }
+  }
+  for (const hero of leaving) {
+    guild.removeHero(hero.id);
+  }
+  return { total, paid, unpaidNames, leftNames: leaving.map((hero) => hero.name) };
 }

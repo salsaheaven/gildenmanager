@@ -4,7 +4,6 @@
 // Rechts: Ausrüstungsliste für den Platz, auf den man in der Mitte getippt hat.
 // ============================================================
 
-import { BALANCING } from '../data/balancing.js';
 import { createHeroCanvas } from './PixelArt.js';
 import { HeroDetailPanel } from './HeroDetailPanel.js';
 import { EquipPanel } from './EquipPanel.js';
@@ -59,7 +58,7 @@ export class HeroScreen {
       this.selectedHeroId = heroes.length > 0 ? heroes[0].id : null;
     }
 
-    this.root.querySelector('.roster-count').textContent = '(' + heroes.length + ' / ' + BALANCING.maxHeroes + ')';
+    this.root.querySelector('.roster-count').textContent = '(' + heroes.length + ' / ' + this.game.guild.getMaxHeroes() + ')';
     const list = this.root.querySelector('.roster-list');
     list.innerHTML = '';
     for (const hero of heroes) {

@@ -23,6 +23,7 @@ import { advanceRivals, recordPlayerClear, getLeaderboard } from '../systems/Riv
 import { getDayPlan } from '../systems/DayPlan.js';
 import { HERO_TASKS } from '../data/heroTasks.js';
 import { resolveHeroTasks, payWages, getDailyWages } from '../systems/HeroTaskSystem.js';
+import { startConstruction, payUpkeep, advanceConstruction, getDailyUpkeep } from '../systems/BuildingSystem.js';
 import { CONSUMABLES, DAILY_OFFER_COUNT, SUPPLY_SLOTS, getConsumable } from '../data/consumables.js';
 import { needsDefeatAnalysis, analyzeRun } from '../systems/combat/DefeatAnalysis.js';
 import { Random } from './Random.js';
@@ -98,9 +99,16 @@ export class Game {
     for (const expedition of this.guild.expeditions.slice()) {
       reports.push(this.finishExpedition(expedition));
     }
-    // Erkundungen der Dungeons, in denen heute gekämpft wurde, sind jetzt verbraucht
-    for (const report of reports) {
-      delete this.guild.scoutedDungeons[report.dungeonId];
+    // Erkundungen der Dungeons, in denen heute gekämpft wurde: ein Kampftag ist verbraucht
+    // (mit Kartenraum hält eine Erkundung mehrere Kampftage)
+    const foughtDungeonIds = new Set(reports.map((report) => report.dungeonId));
+    for (const dungeonId of foughtDungeonIds) {
+      if (this.guild.scoutedDungeons[dungeonId]) {
+        this.guild.scoutedDungeons[dungeonId]--;
+        if (this.guild.scoutedDungeons[dungeonId] <= 0) {
+          delete this.guild.scoutedDungeons[dungeonId];
+        }
+      }
     }
 
     // 3. Aufgaben der anderen Helden (Training, Kräuter, Erkunden), danach der Sold für alle
@@ -111,12 +119,19 @@ export class Game {
       }
     }
     const wages = payWages(this.guild);
+    // Danach der Unterhalt der Gebäude (Helden gehen vor: erst der Sold, dann die Gebäude)
+    const upkeep = payUpkeep(this.guild);
+    // Ein Bautag vergeht. Fertig ist ein Gebäude ab morgen nutzbar.
+    const finishedBuilding = advanceConstruction(this.guild.hall);
 
     // 4. Die KI-Gilden sind dran (nach deinen Runs: am selben Abend bist du zuerst)
     const rivalNews = advanceRivals(this.guild, endedDay, this.random);
     // Neuigkeiten des Abends: deine (schon im Ticker) und die der Rivalen
     const news = this.guild.news.filter((entry) => entry.day === endedDay);
-    this.lastDaySummary = { day: endedDay, tasks: taskResults, wages: wages, news: news, rivalNews: rivalNews };
+    this.lastDaySummary = {
+      day: endedDay, tasks: taskResults, wages: wages, upkeep: upkeep, finishedBuilding: finishedBuilding,
+      news: news, rivalNews: rivalNews,
+    };
 
     // 5. Der nächste Tag beginnt: neue Bewerber in der Taverne, neues Tagesangebot beim Händler
     this.day++;
@@ -376,7 +391,7 @@ export class Game {
     const heroes = expedition.getHeroIds().map((heroId) => this.guild.findHero(heroId)).filter((hero) => hero);
     // Erkundet? Dann ist dieser Run vorbereitet. Verbraucht wird die Erkundung erst in endDay,
     // wenn alle Gruppen des Tages gekämpft haben (so profitieren alle Gruppen im selben Dungeon).
-    expedition.scouted = this.guild.scoutedDungeons[expedition.dungeonId] === true;
+    expedition.scouted = this.isDungeonScouted(expedition.dungeonId);
     const result = expedition.resolve(heroes);
     const dungeon = getDungeon(expedition.dungeonId);
     const success = result.outcome === 'success';
@@ -443,7 +458,7 @@ export class Game {
     this.guild.addGold(report.collectionGold);
 
     // Erfahrung für alle gewonnenen Begegnungen, Verletzungen für Gefallene
-    report.heroResults = applyRunResults(this.guild, result, dungeon);
+    report.heroResults = applyRunResults(this.guild, result, dungeon, this.random);
 
     this.guild.expeditions = this.guild.expeditions.filter((e) => e.id !== expedition.id);
     this.guild.reports.unshift(report);
@@ -516,13 +531,7 @@ export class Game {
     if (!hero || this.guild.isHeroBusy(heroId)) {
       return false;
     }
-    for (const slot in hero.equipment) {
-      const item = hero.unequip(slot);
-      if (item) {
-        this.guild.addItem(item);
-      }
-    }
-    this.guild.heroes = this.guild.heroes.filter((h) => h.id !== heroId);
+    this.guild.removeHero(heroId);
     this.emit('changed');
     return true;
   }
@@ -624,12 +633,28 @@ export class Game {
 
   // Ist dieser Dungeon für den nächsten Run erkundet?
   isDungeonScouted(dungeonId) {
-    return this.guild.scoutedDungeons[dungeonId] === true;
+    return (this.guild.scoutedDungeons[dungeonId] || 0) > 0;
   }
 
   // Sold, den die Gilde jeden Abend zahlt
   getDailyWages() {
     return getDailyWages(this.guild);
+  }
+
+  // ---------- Gildenhalle (siehe data/buildings.js) ----------
+
+  // Beginnt den Bau der nächsten Stufe eines Gebäudes. Gibt 'ok', 'maxLevel', 'busy' oder 'notEnough' zurück.
+  buildBuilding(buildingId) {
+    const result = startConstruction(this.guild, buildingId);
+    if (result === 'ok') {
+      this.emit('changed');
+    }
+    return result;
+  }
+
+  // Unterhalt aller Gebäude pro Tag
+  getDailyUpkeep() {
+    return getDailyUpkeep(this.guild.hall);
   }
 
   // "Wie gestern": plant die Gruppen von gestern noch einmal ein (gleicher Dungeon, gleiche Helden,

@@ -20,6 +20,14 @@ export const HERO_RARITIES = {
   legendary: { statMultiplier: 1.2,  growthMultiplier: 1.5,  traitCount: 3, recruitChance: 0.5, hireCost: 600, dailyWage: 25 },
 };
 
+// Was passiert, wenn der Sold nicht bezahlt werden kann (siehe systems/HeroTaskSystem.js, payWages)
+export const WAGE_RULES = {
+  // Wer seinen Sold nicht bekommt, ist unzufrieden und kämpft schlechter (Wirkungen wie bei den Anweisungen)
+  unhappyEffects: { damageDone: -0.1, healingDone: -0.1 },
+  // Nach so vielen Tagen ohne Sold hintereinander verlässt der Held die Gilde
+  unpaidDaysUntilLeave: 3,
+};
+
 export function getHeroRarity(rarityId) {
   const heroRarity = HERO_RARITIES[rarityId];
   if (!heroRarity) {

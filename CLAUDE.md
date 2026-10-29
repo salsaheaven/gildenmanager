@@ -39,10 +39,12 @@ Eine Option, die immer die beste ist, ist keine Wahl. Geprüft wird das per Simu
 ```
 src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen, Tageszähler, endDay), Random, SaveManager
 src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, CollectionBook (Sammelbuch: beste gefundene Seltenheit je Boss-Item, Titel, Gold-Bonus),
-               RivalGuild (eine KI-Gilde: welche Dungeons an welchem Tag), Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft)
+               RivalGuild (eine KI-Gilde: welche Dungeons an welchem Tag),
+               GuildHall (Gildenhalle: Stufe jedes Gebäudes, laufende Baustelle, Unterhalt bezahlt?; getEffect liefert die Wirkung), Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft)
 src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem (EP, Aufhol-Erfahrung, Verletzungen nach einem Run),
-               DayPlan (welcher Held hat heute welche Aufgabe), HeroTaskSystem (Training, Kräuter sammeln, Aufträge, Erkunden, Sold bei endDay),
+               DayPlan (welcher Held hat heute welche Aufgabe), HeroTaskSystem (Training, Kräuter sammeln, Aufträge, Erkunden, Sold bei endDay Held für Held, unzufrieden/verlässt die Gilde),
                RivalSystem (KI-Gilden kommen voran, Neuigkeiten-Ticker, Server-First, Rangliste),
+               BuildingSystem (Bau starten, Bautag bei endDay, Unterhalt: alles oder nichts),
                StartTeam (prüft die Starttruppe: Rolle pro Platz, alle Rüstungsarten),
                CraftingSystem (Zerlegen → Staub/Kristalle, Verbessern +1 bis +10 mit Fehlschlag ab +6), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
@@ -59,6 +61,7 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),
                heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus, Training, Kräuter sammeln, Aufträge erledigen, Erkunden; Zahlen in TASK_RULES),
+               buildings (6 Gebäude à 3 Stufen: Kosten, Bauzeit, Unterhalt, Wirkungen),
                startTeam (Plätze der Starttruppe, Pflicht-Rüstungsarten, Standard-Gildenname),
                riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben),
                damageTypes (Schadensarten mit Farbe, Obergrenze für Resistenzen),

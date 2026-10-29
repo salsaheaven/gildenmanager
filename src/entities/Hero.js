@@ -6,7 +6,7 @@
 
 import { Item } from './Item.js';
 import { getHeroClass } from '../data/heroClasses.js';
-import { getHeroRarity } from '../data/heroRarities.js';
+import { getHeroRarity, WAGE_RULES } from '../data/heroRarities.js';
 import { getRarity, getRarityRank } from '../data/rarities.js';
 import { getTrait } from '../data/traits.js';
 import { SLOT_NAMES } from '../data/items.js';
@@ -42,6 +42,7 @@ export class Hero {
     this.task = { taskId: 'rest', dungeonId: null };
     // Gewählte Talente (Liste von Talent-ids, siehe data/talents.js)
     this.talentIds = [];
+    this.unpaidDays = 0; // Tage hintereinander ohne Sold (ab 1 unzufrieden, siehe WAGE_RULES)
 
     // Anweisungen für den Kampf: Anweisungs-id → gewählte Option (siehe data/heroOrders.js).
     // Fehlt eine Anweisung, gilt die Standard-Option.
@@ -255,6 +256,10 @@ export class Hero {
   // Fasst alle gewählten Anweisungen und Talente zu einem Paket für den Kampf zusammen (siehe combat/OrderSettings.js)
   getOrderSettings() {
     const effectsList = getOrdersForClass(this.classId).map((order) => this.getChosenOption(order).effects);
+    // Unzufrieden (Sold nicht bekommen): kämpft schlechter
+    if (this.isUnhappy()) {
+      effectsList.push(WAGE_RULES.unhappyEffects);
+    }
     const talents = this.talentIds.map((talentId) => findTalent(talentId));
     for (const talent of talents) {
       effectsList.push(talent.effects);
@@ -267,6 +272,11 @@ export class Hero {
       }
     }
     return settings;
+  }
+
+  // Hat er gestern (oder länger) keinen Sold bekommen?
+  isUnhappy() {
+    return this.unpaidDays > 0;
   }
 
   // ---------- Talente (siehe data/talents.js) ----------
@@ -344,6 +354,7 @@ export class Hero {
       orders: this.orders,
       task: this.task,
       talentIds: this.talentIds,
+      unpaidDays: this.unpaidDays,
     };
   }
 
@@ -359,6 +370,7 @@ export class Hero {
     hero.orders = data.orders || {};
     hero.task = data.task;
     hero.talentIds = data.talentIds;
+    hero.unpaidDays = data.unpaidDays;
     for (const slot of EQUIPMENT_SLOTS) {
       const itemData = data.equipment[slot];
       hero.equipment[slot] = itemData ? Item.fromSaveData(itemData) : null;

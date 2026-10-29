@@ -55,8 +55,10 @@ export function getHeroXpFactor(hero, dungeon, guild) {
 }
 
 // Verteilt EP und Verletzungen an die echten Helden der Gilde.
-// Gibt pro Held zurück: { heroId, name, xp, levelsGained, newLevel, catchUp, injured }
-export function applyRunResults(guild, result, dungeon) {
+// random = Zufall des Spiels (fürs Lazarett: Mit etwas Glück wird ein Gefallener gar nicht verletzt)
+// Gibt pro Held zurück: { heroId, name, xp, levelsGained, newLevel, catchUp, injured, savedByInfirmary }
+export function applyRunResults(guild, result, dungeon, random) {
+  const injuryAvoidChance = guild.hall.getEffect('injuryAvoidChance', 0);
   const groupXp = calculateRunXp(result, dungeon);
   const outcomes = [];
 
@@ -70,7 +72,12 @@ export function applyRunResults(guild, result, dungeon) {
     const xp = Math.round(groupXp * getHeroXpFactor(hero, dungeon, guild));
     const levelsGained = hero.addXp(xp);
 
-    const injured = !heroResult.alive;
+    let injured = !heroResult.alive;
+    let savedByInfirmary = false;
+    if (injured && injuryAvoidChance > 0 && random.next() < injuryAvoidChance) {
+      injured = false;
+      savedByInfirmary = true;
+    }
     if (injured) {
       hero.injuryDays = INJURIES.injuryDays;
     }
@@ -83,6 +90,7 @@ export function applyRunResults(guild, result, dungeon) {
       newLevel: hero.level,
       catchUp: catchUp,
       injured: injured,
+      savedByInfirmary: savedByInfirmary,
     });
   }
   return outcomes;

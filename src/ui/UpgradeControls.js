@@ -43,7 +43,7 @@ function describeUpgradeCost(cost) {
 export function createUpgradeButton(game, item, effectTarget) {
   const button = document.createElement('button');
   button.className = 'upgrade-button';
-  const cost = getUpgradeCost(item);
+  const cost = getUpgradeCost(item, game.guild.hall.getEffect('upgradeChanceBonus', 0));
 
   if (cost === null) {
     button.textContent = 'Höchste Stufe (+' + UPGRADE_RULES.maxLevel + ')';

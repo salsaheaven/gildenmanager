@@ -94,19 +94,23 @@ describe('Aufgaben verteilen', () => {
 });
 
 describe('Sold', () => {
-  it('jeder Held kostet am Abend Sold, bei zu wenig Gold wird bezahlt, was da ist', () => {
+  it('jeder Held kostet am Abend Sold; reicht das Gold nicht, wird Held für Held bezahlt, solange es reicht', () => {
     const { game, heroes } = gameWithHeroes(3);
     const total = heroes.reduce((sum, hero) => sum + HERO_RARITIES[hero.rarityId].dailyWage, 0);
     expect(game.getDailyWages()).toBe(total);
     game.guild.gold = 1000;
     game.endDay();
-    expect(game.lastDaySummary.wages).toEqual({ total, paid: total });
+    expect(game.lastDaySummary.wages).toMatchObject({ total, paid: total, unpaidNames: [], leftNames: [] });
     expect(game.guild.gold).toBe(1000 - total);
 
-    game.guild.gold = 2;
+    // Nur genug Gold für den ersten Helden: Die anderen gehen leer aus und sind unzufrieden
+    const firstWage = HERO_RARITIES[heroes[0].rarityId].dailyWage;
+    game.guild.gold = firstWage;
     game.endDay();
-    expect(game.lastDaySummary.wages).toEqual({ total, paid: 2 });
-    expect(game.guild.gold).toBe(0);
+    expect(game.lastDaySummary.wages.paid).toBe(firstWage);
+    expect(game.lastDaySummary.wages.unpaidNames).toEqual([heroes[1].name, heroes[2].name]);
+    expect(heroes[0].isUnhappy()).toBe(false);
+    expect(heroes[1].isUnhappy()).toBe(true);
   });
 });
 

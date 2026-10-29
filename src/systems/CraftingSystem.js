@@ -17,8 +17,9 @@ export function canBeUpgraded(item) {
 }
 
 // Was kostet die nächste Stufe, und wie sicher klappt sie?
+// chanceBonus = zusätzliche Chance durch die Schmiede (z.B. 0.05), höchstens bis 100 %
 // Gibt { targetLevel, dust, crystal, gold, chance } zurück (oder null, wenn schon +10).
-export function getUpgradeCost(item) {
+export function getUpgradeCost(item, chanceBonus = 0) {
   if (!canBeUpgraded(item)) {
     return null;
   }
@@ -29,7 +30,7 @@ export function getUpgradeCost(item) {
     dust: UPGRADE_RULES.dustPerLevel * targetLevel,
     crystal: crystal,
     gold: UPGRADE_RULES.goldPerLevel * targetLevel,
-    chance: UPGRADE_RULES.successChance[targetLevel] || 1,
+    chance: Math.min(1, (UPGRADE_RULES.successChance[targetLevel] || 1) + chanceBonus),
   };
 }
 
@@ -41,7 +42,7 @@ export function canAffordUpgrade(guild, cost) {
 // Versucht die nächste Stufe. Material und Gold werden immer verbraucht.
 // Gibt 'success', 'failed', 'maxLevel' oder 'notEnough' zurück.
 export function upgradeItem(guild, item, random) {
-  const cost = getUpgradeCost(item);
+  const cost = getUpgradeCost(item, guild.hall.getEffect('upgradeChanceBonus', 0));
   if (cost === null) {
     return 'maxLevel';
   }

@@ -11,6 +11,7 @@ import { Item } from './Item.js';
 import { LootBox } from './LootBox.js';
 import { Hero } from './Hero.js';
 import { Expedition } from './Expedition.js';
+import { GuildHall } from './GuildHall.js';
 import { BALANCING } from '../data/balancing.js';
 
 export class Guild {
@@ -35,8 +36,9 @@ export class Guild {
     this.materials = { dust: 0, crystal: 0 }; // Materiallager: Arkanstaub und Kristalle (siehe data/crafting.js)
     this.supplies = {};        // Vorratskammer: Verbrauchsgut-id → Anzahl (siehe data/consumables.js)
     this.dailyOffer = [];      // heutiges Tagesangebot des Händlers (Liste von Verbrauchsgut-ids)
-    this.scoutedDungeons = {}; // erkundete Dungeons: Dungeon-id → true (gilt für den nächsten Run dort)
+    this.scoutedDungeons = {}; // erkundete Dungeons: Dungeon-id → wie viele Kampftage die Erkundung noch hält
     this.lastDayPlan = [];     // die Gruppen von gestern, für "Wie gestern": [{ dungeonId, heroIds, retreatRuleId, supplies }]
+    this.hall = new GuildHall(); // Gildenhalle: Gebäude und Baustelle (siehe data/buildings.js)
     this.firstClearDays = {};  // Dungeon-id → Tag, an dem deine Gilde ihn zum ersten Mal geschafft hat (Rangliste)
 
     // KI-Gilden und Server (siehe data/rivalGuilds.js und systems/RivalSystem.js)
@@ -151,8 +153,29 @@ export class Guild {
     return id;
   }
 
+  // Ein Held verlässt die Gilde: Seine Ausrüstung kommt ins Inventar.
+  removeHero(heroId) {
+    const hero = this.findHero(heroId);
+    if (!hero) {
+      return false;
+    }
+    for (const slot in hero.equipment) {
+      const item = hero.unequip(slot);
+      if (item) {
+        this.addItem(item);
+      }
+    }
+    this.heroes = this.heroes.filter((other) => other.id !== heroId);
+    return true;
+  }
+
+  // Wie viele Helden passen in die Gilde? (Grundwert + Kaserne)
+  getMaxHeroes() {
+    return BALANCING.maxHeroes + this.hall.getEffect('extraHeroSlots', 0);
+  }
+
   hasRoomForHero() {
-    return this.heroes.length < BALANCING.maxHeroes;
+    return this.heroes.length < this.getMaxHeroes();
   }
 
   findHero(heroId) {
@@ -262,6 +285,7 @@ export class Guild {
       scoutedDungeons: this.scoutedDungeons,
       lastDayPlan: this.lastDayPlan,
       firstClearDays: this.firstClearDays,
+      hall: this.hall.toSaveData(),
       rivals: this.rivals.map((rival) => rival.toSaveData()),
       news: this.news,
       serverFirsts: this.serverFirsts,
@@ -296,6 +320,7 @@ export class Guild {
     guild.scoutedDungeons = data.scoutedDungeons;
     guild.lastDayPlan = data.lastDayPlan;
     guild.firstClearDays = data.firstClearDays;
+    guild.hall = GuildHall.fromSaveData(data.hall);
     guild.rivals = data.rivals.map((rivalData) => RivalGuild.fromSaveData(rivalData));
     guild.news = data.news;
     guild.serverFirsts = data.serverFirsts;

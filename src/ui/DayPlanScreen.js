@@ -13,7 +13,7 @@
 
 import { getDayPlan } from '../systems/DayPlan.js';
 import { HERO_TASKS } from '../data/heroTasks.js';
-import { getJobGold } from '../systems/HeroTaskSystem.js';
+import { getJobGold, getTrainingCost } from '../systems/HeroTaskSystem.js';
 import { getDungeon } from '../data/dungeons.js';
 import { RETREAT_RULES } from '../data/retreatRules.js';
 import { createHeroCanvas } from './PixelArt.js';
@@ -24,7 +24,6 @@ import { createNewsLine } from './NewsLine.js';
 import { createSupplyPicker } from './SupplyPicker.js';
 import { getConsumable } from '../data/consumables.js';
 import { DUNGEONS } from '../data/dungeons.js';
-import { TASK_RULES } from '../data/heroTasks.js';
 import { showToast } from './Toast.js';
 import { Sound } from './Sound.js';
 
@@ -148,7 +147,7 @@ export class DayPlanScreen {
     }
 
     // Sold und Trainer-Kosten heute Abend
-    const training = plan.counts.training * TASK_RULES.trainingCost;
+    const training = plan.counts.training * getTrainingCost(this.game.guild);
     this.root.querySelector('.day-plan-wages').textContent = plan.entries.length === 0 ? '' :
       'Heute Abend: Sold ' + this.game.getDailyWages() + ' Gold' + (training > 0 ? ' · Training ' + training + ' Gold' : '');
     // "Wie gestern" nur, wenn es gestern Gruppen gab und heute noch keine geplant ist

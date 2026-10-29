@@ -64,7 +64,7 @@ export class TavernScreen {
 
   render(animate) {
     const guild = this.game.guild;
-    this.root.querySelector('.hero-count').textContent = 'Helden: ' + guild.heroes.length + ' / ' + BALANCING.maxHeroes;
+    this.root.querySelector('.hero-count').textContent = 'Helden: ' + guild.heroes.length + ' / ' + guild.getMaxHeroes();
     this.root.querySelector('.reroll-button').disabled = !guild.canAfford(BALANCING.candidateRerollCost);
 
     const list = this.root.querySelector('.candidate-list');
