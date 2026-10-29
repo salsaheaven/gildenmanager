@@ -16,6 +16,7 @@
 //   'heroHealed'           → ein verletzter Held ist wieder fit (Daten: der Held)
 // ============================================================
 
+import { getSalvageYield, upgradeItem } from '../systems/CraftingSystem.js';
 import { advanceRivals, recordPlayerClear, getLeaderboard } from '../systems/RivalSystem.js';
 import { getDayPlan } from '../systems/DayPlan.js';
 import { HERO_TASKS } from '../data/heroTasks.js';
@@ -246,6 +247,46 @@ export class Game {
     this.guild.addGold(gold);
     this.emit('changed');
     return gold;
+  }
+
+  // ---------- Aktionen: Zerlegen & Verbessern (siehe data/crafting.js) ----------
+
+  // Zerlegt ein Item aus dem Inventar zu Material. Gibt das Material zurück ({ dust, crystal }) oder null.
+  salvageItem(itemId) {
+    const item = this.guild.removeItem(itemId);
+    if (!item) {
+      return null;
+    }
+    const materials = getSalvageYield(item);
+    this.guild.addMaterials(materials);
+    this.emit('changed');
+    return materials;
+  }
+
+  // Zerlegt alle Items einer Seltenheit (z.B. allen Schrott). Gibt das Material zusammen zurück.
+  salvageAllOfRarity(rarityId) {
+    const total = { dust: 0, crystal: 0 };
+    for (const item of this.guild.inventory.filter((entry) => entry.rarityId === rarityId)) {
+      this.guild.removeItem(item.id);
+      const materials = getSalvageYield(item);
+      total.dust += materials.dust;
+      total.crystal += materials.crystal;
+    }
+    this.guild.addMaterials(total);
+    this.emit('changed');
+    return total;
+  }
+
+  // Verbessert ein Item um eine Stufe (im Inventar oder bei einem Helden angelegt).
+  // Gibt 'success', 'failed', 'maxLevel', 'notEnough' oder 'notFound' zurück.
+  upgradeItem(itemId) {
+    const item = this.guild.findItemAnywhere(itemId);
+    if (!item) {
+      return 'notFound';
+    }
+    const result = upgradeItem(this.guild, item, this.random);
+    this.emit('changed');
+    return result;
   }
 
   // Verkauft alle Items einer Seltenheit (z.B. allen Schrott). Gibt das Gold zurück.

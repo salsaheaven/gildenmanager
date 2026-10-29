@@ -241,9 +241,10 @@ export class InventoryOverlay {
     details.querySelector('.detail-name').textContent = item.name;
 
     const statList = details.querySelector('.detail-stats');
-    for (const statName in item.stats) {
+    const itemStats = item.getStats();
+    for (const statName in itemStats) {
       const line = document.createElement('li');
-      line.textContent = '+' + item.stats[statName] + ' ' + STAT_NAMES[statName];
+      line.textContent = '+' + itemStats[statName] + ' ' + STAT_NAMES[statName];
       statList.appendChild(line);
     }
     for (const damageTypeId in item.resistances) {

@@ -2,6 +2,7 @@
 // ITEM – ein einzelner Gegenstand (Waffe, Rüstung, Ring …)
 // ============================================================
 
+import { UPGRADE_RULES } from '../data/crafting.js';
 import { getRarity, getRarityRank } from '../data/rarities.js';
 import { getItemTemplate, getTemplateColors, STAT_POWER_WEIGHTS } from '../data/items.js';
 
@@ -21,6 +22,7 @@ export class Item {
     this.stats = stats;
     this.itemLevel = itemLevel;
     this.resistances = resistances;
+    this.upgradeLevel = 0;  // Verbesserungsstufe 0 bis +10 (siehe data/crafting.js), erhöht alle Werte
     this.bossItemId = null; // Boss-Items: feste Kennung aus lootBoxes.js (für das Sammelbuch), sonst null
     // Nur direkt nach dem Öffnen einer Kiste, wird nicht gespeichert (siehe Game.openBox):
     this.collectionStatus = null; // 'new' / 'improved' / null: was das Item im Sammelbuch bewirkt hat
@@ -29,6 +31,22 @@ export class Item {
 
   getTemplate() {
     return getItemTemplate(this.templateId);
+  }
+
+  // Die Werte des Items mit Verbesserung (z.B. +3 = +18 % auf alle Grundwerte).
+  // this.stats sind die Grundwerte, so wie das Item aus der Kiste kam.
+  getStats() {
+    const factor = 1 + this.upgradeLevel * UPGRADE_RULES.statBonusPerLevel;
+    const stats = {};
+    for (const statName in this.stats) {
+      stats[statName] = Math.round(this.stats[statName] * factor);
+    }
+    return stats;
+  }
+
+  // Name mit Verbesserungsstufe, z.B. "Chitinschild +3"
+  getDisplayName() {
+    return this.upgradeLevel > 0 ? this.name + ' +' + this.upgradeLevel : this.name;
   }
 
   getRarity() {
@@ -57,9 +75,10 @@ export class Item {
   // usefulStats = freiwillig: nur diese Werte zählen (z.B. die Werte, die einer Klasse etwas bringen)
   getPower(usefulStats = null) {
     let power = 0;
-    for (const statName in this.stats) {
+    const stats = this.getStats();
+    for (const statName in stats) {
       if (usefulStats === null || usefulStats.includes(statName)) {
-        power += this.stats[statName] * STAT_POWER_WEIGHTS[statName];
+        power += stats[statName] * STAT_POWER_WEIGHTS[statName];
       }
     }
     return Math.round(power);
@@ -78,6 +97,7 @@ export class Item {
       stats: this.stats,
       itemLevel: this.itemLevel,
       resistances: this.resistances,
+      upgradeLevel: this.upgradeLevel,
       bossItemId: this.bossItemId,
     };
   }
@@ -85,6 +105,7 @@ export class Item {
   static fromSaveData(data) {
     const item = new Item(data.id, data.templateId, data.rarityId, data.name, data.stats, data.itemLevel, data.resistances);
     item.bossItemId = data.bossItemId;
+    item.upgradeLevel = data.upgradeLevel;
     return item;
   }
 }

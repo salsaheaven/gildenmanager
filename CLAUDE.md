@@ -42,7 +42,8 @@ src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, CollectionBook (Sammelb
                RivalGuild (eine KI-Gilde: welche Dungeons an welchem Tag), Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft)
 src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem (EP, Aufhol-Erfahrung, Verletzungen nach einem Run),
                DayPlan (welcher Held hat heute welche Aufgabe), HeroTaskSystem (Training, Kräuter sammeln, Erkunden, Sold bei endDay),
-               RivalSystem (KI-Gilden kommen voran, Neuigkeiten-Ticker, Server-First, Rangliste), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
+               RivalSystem (KI-Gilden kommen voran, Neuigkeiten-Ticker, Server-First, Rangliste),
+               CraftingSystem (Zerlegen → Staub/Kristalle, Verbessern +1 bis +10 mit Fehlschlag ab +6), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
                simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug),
                BattleTimeline (wann passiert was → Dauer eines Runs, mit Zeitraffer für Trash und ruhige Runden), Battle (Zustand + Zielwahl),
@@ -60,6 +61,7 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben),
                damageTypes (Schadensarten mit Farbe, Obergrenze für Resistenzen),
                defeatCauses (Tipps und Hinweise für „Woran es lag“),
+               crafting (Material, Ertrag beim Zerlegen, Kosten und Chancen fürs Verbessern),
                talents (pro Klasse 3 Talentreihen à 2, Doppelwahl für seltene Helden, Umskillen-Kosten),
                rivalGuilds (4 KI-Gilden mit Persönlichkeit: Versuchs- und Erfolgschance),
                consumables (Verbrauchsgüter des Händlers: Preis, Grundware/Tagesangebot, Wirkung; 2 Vorrats-Plätze pro Gruppe),

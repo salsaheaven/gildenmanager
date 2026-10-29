@@ -31,6 +31,7 @@ export class Guild {
     this.dungeonAttempts = {}; // Dungeon-id → wie oft versucht (egal wie es ausging)
     this.reports = [];         // Berichte über abgeschlossene Runs (neueste zuerst)
     this.collection = new CollectionBook(); // Sammelbuch: welche Boss-Items schon gefunden wurden
+    this.materials = { dust: 0, crystal: 0 }; // Materiallager: Arkanstaub und Kristalle (siehe data/crafting.js)
     this.supplies = {};        // Vorratskammer: Verbrauchsgut-id → Anzahl (siehe data/consumables.js)
     this.dailyOffer = [];      // heutiges Tagesangebot des Händlers (Liste von Verbrauchsgut-ids)
     this.scoutedDungeons = {}; // erkundete Dungeons: Dungeon-id → true (gilt für den nächsten Run dort)
@@ -192,6 +193,27 @@ export class Guild {
 
   // ---------- Speichern ----------
 
+  // Ein Item im Inventar ODER angelegt bei einem Helden (oder null)
+  findItemAnywhere(itemId) {
+    const inInventory = this.findItem(itemId);
+    if (inInventory) {
+      return inInventory;
+    }
+    for (const hero of this.heroes) {
+      for (const slot in hero.equipment) {
+        if (hero.equipment[slot] && hero.equipment[slot].id === itemId) {
+          return hero.equipment[slot];
+        }
+      }
+    }
+    return null;
+  }
+
+  addMaterials(materials) {
+    this.materials.dust += materials.dust || 0;
+    this.materials.crystal += materials.crystal || 0;
+  }
+
   // ---------- Vorratskammer ----------
 
   countSupply(consumableId) {
@@ -232,6 +254,7 @@ export class Guild {
       dungeonAttempts: this.dungeonAttempts,
       reports: this.reports,
       collection: this.collection.toSaveData(),
+      materials: this.materials,
       supplies: this.supplies,
       dailyOffer: this.dailyOffer,
       scoutedDungeons: this.scoutedDungeons,
@@ -264,6 +287,7 @@ export class Guild {
     guild.dungeonAttempts = data.dungeonAttempts || {};
     guild.reports = data.reports || [];
     guild.collection = CollectionBook.fromSaveData(data.collection);
+    guild.materials = data.materials;
     guild.supplies = data.supplies;
     guild.dailyOffer = data.dailyOffer;
     guild.scoutedDungeons = data.scoutedDungeons;

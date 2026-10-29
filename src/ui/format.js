@@ -29,7 +29,7 @@ export function formatResistances(resistances) {
 // Alle Werte eines Items als Text: Werte und Resistenzen, z.B. "+3 Angriff  +9 Leben  +8 % Säure"
 export function formatItemValues(item) {
   const resistanceText = formatResistances(item.resistances);
-  return formatStats(item.stats) + (resistanceText ? '  ' + resistanceText : '');
+  return formatStats(item.getStats()) + (resistanceText ? '  ' + resistanceText : '');
 }
 
 // Unterschied pro Wert zwischen einem Item und dem gerade angelegten (oder null = Platz leer).
@@ -37,19 +37,16 @@ export function formatItemValues(item) {
 // Beispiel: [{ text: '+3 Angriff', change: 'up' }, { text: '−2 Rüstung', change: 'down' }]
 // Bewusst keine Gesamtnote: Was besser ist, entscheidet der Spieler.
 export function describeStatDifferences(item, currentItem) {
-  const statNames = new Set(Object.keys(item.stats));
-  if (currentItem) {
-    for (const statName in currentItem.stats) {
-      statNames.add(statName);
-    }
-  }
+  const itemStats = item.getStats();
+  const currentStats = currentItem ? currentItem.getStats() : {};
+  const statNames = new Set(Object.keys(itemStats).concat(Object.keys(currentStats)));
   const differences = [];
   for (const statName in STAT_NAMES) {
     if (!statNames.has(statName)) {
       continue;
     }
-    const newValue = item.stats[statName] || 0;
-    const oldValue = currentItem ? (currentItem.stats[statName] || 0) : 0;
+    const newValue = itemStats[statName] || 0;
+    const oldValue = currentStats[statName] || 0;
     addDifference(differences, newValue - oldValue, STAT_NAMES[statName]);
   }
   // Resistenzen genauso, z.B. "+8 % Säure"

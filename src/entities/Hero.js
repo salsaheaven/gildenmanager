@@ -147,8 +147,9 @@ export class Hero {
     for (const slot of EQUIPMENT_SLOTS) {
       const item = this.equipment[slot];
       if (item) {
-        for (const statName in item.stats) {
-          stats[statName] = (stats[statName] || 0) + item.stats[statName];
+        const itemStats = item.getStats(); // mit Verbesserung
+        for (const statName in itemStats) {
+          stats[statName] = (stats[statName] || 0) + itemStats[statName];
         }
       }
     }
