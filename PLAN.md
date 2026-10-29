@@ -111,6 +111,8 @@ In kleinen, jeweils online testbaren Schritten:
 
 **M2 – Progression:** ~~Gildenkurier abschalten~~ (✅ schon erledigt und beim Umbau auf Runden ganz entfernt), Kisten aus dem Händler nehmen; der Laden verkauft Verbrauchsgüter und Mats, dazu der Wanderhändler. **Talente** und **Zerlegen + Verbessern** (+1 bis +10). (Entschieden 2026-10-29: Heroisch mit Permadeath, Ehrenhalle und den Klassen-Sets kommt erst später als Endgame auf Max-Level.)
 - **Talente** ✅ 90 Talente (15 Klassen × 3 Reihen × 2), Doppelwahl für epische/legendäre Helden, Umskillen gegen Gold. Neue Kampf-Bausteine: Werte-Bonus, längere Skills, tödlichen Treffer überleben, Gruppen-Auren. Talent-Auswahl im Heldenbildschirm und im Kampf-Labor, Hinweise am Reiter, in der Heldenliste und im Level-Up-Banner. Spielstand-Version 9.
+- **Zerlegen & Verbessern, Schritt 1** ✅ Logik und Daten: Arkanstaub und Kristalle, Verbesserungsstufen +1 bis +10 (+6 % pro Stufe, ab +6 mit Fehlschlag, Stufe bleibt), Materiallager der Gilde, Aktionen `salvageItem`, `salvageAllOfRarity`, `upgradeItem` in `Game`. Spielstand-Version 10.
+- **Zerlegen & Verbessern, Schritt 2** (als Nächstes): Knöpfe „Zerlegen“ und „Verbessern auf +X (Kosten, Chance)“ im Inventar, „Allen Schrott zerlegen“ neben „Schrott verkaufen“, Verbessern direkt in der Ausrüstungsliste des Helden, Materialbestand oben im Inventar, „+3“ im Namen mit stärker leuchtendem Rahmen, Hammer-Ton und Funken bzw. dumpfer Ton und Riss. Danach M2 pushen.
 
 **M3 – Rivalen & Gildenhalle:** KI-Gilden, Rangliste, News-Ticker, Gebäude (Kaserne, Lazarett, Schmiede), Crafting.
 
