@@ -91,6 +91,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tag
                SupplyPicker = Vorrats-Plätze einer Gruppe (Dungeon-Bildschirm + Tagesplan).
                NewsLine = eine Zeile aus dem Neuigkeiten-Ticker (Tagesplan + Tagesabschluss).
                FoundingScreen = Startbildschirm „Gründe deine Gilde“ (Name + 5 Klassen, alle Rüstungsarten), nur bei neuem Spielstand.
+               CraftingControls = Schmieden (Karte der Schmiede), Brauen (Karte des Alchemielabors), Umschmieden (Inventar).
                UpgradeControls = Zerlegen und Verbessern in der Oberfläche (Verbessern-Knopf mit Kosten und Chance, Material-Text, Funken/Riss, Leuchten und „+3“ an verbesserten Items; Inventar + Ausrüstungsliste).
                TalentPanel = die 3 Talentreihen eines Helden zum Auswählen (Heldenbildschirm + Kampf-Labor).
                RiskBadge = Einschätzung eines Runs in Worten („Riskant · Gefallene: oft“).

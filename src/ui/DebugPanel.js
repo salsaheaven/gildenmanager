@@ -40,6 +40,10 @@ export class DebugPanel {
     this.addButton('+100 Staub, +20 Kristalle', () => {
       game.guild.addMaterials({ dust: 100, crystal: 20 });
     });
+    // Zum Ausprobieren von Schmieden und Brauen
+    this.addButton('+50 Rohstoffe, +50 Kräuter', () => {
+      game.guild.addMaterials({ raw: 50, herbs: 50 });
+    });
     // Zum Ausprobieren der Gildenhalle: die laufende Baustelle sofort fertig (wie nach den restlichen Bautagen)
     this.addButton('Baustelle sofort fertig', () => {
       const construction = game.guild.hall.construction;

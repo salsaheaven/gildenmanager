@@ -3,6 +3,7 @@
 //   - oben: Unterhalt pro Tag, Materialbestand und die laufende Baustelle mit Fortschrittsbalken
 //   - darunter eine Karte pro Gebäude: Stufe (3 Kästchen), Wirkung jetzt und auf der nächsten Stufe,
 //     Kosten, Bauzeit, Unterhalt und der Knopf "Bauen"
+//   - an der Schmiede und am Alchemielabor (sobald gebaut): Schmieden bzw. Brauen (siehe CraftingControls.js)
 // Es gibt nur eine Baustelle gleichzeitig. Fertig wird ein Bau bei "Tag beenden".
 // Die Zahlen stehen in data/buildings.js, die Regeln in systems/BuildingSystem.js.
 // ============================================================
@@ -10,6 +11,7 @@
 import { BUILDING_ORDER, getBuilding } from '../data/buildings.js';
 import { getNextLevel, canAffordCost } from '../systems/BuildingSystem.js';
 import { describeMaterials } from './UpgradeControls.js';
+import { createForgePanel, createBrewPanel } from './CraftingControls.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 
@@ -17,6 +19,7 @@ export class GuildHallScreen {
   constructor(rootElement, game) {
     this.root = rootElement;
     this.game = game;
+    this.forgeTemplateId = null; // zuletzt gewählte Vorlage beim Schmieden
 
     this.root.innerHTML = `
       <div class="hall-screen">
@@ -48,7 +51,9 @@ export class GuildHallScreen {
     const list = this.root.querySelector('.hall-list');
     list.innerHTML = '';
     for (const buildingId of BUILDING_ORDER) {
-      list.appendChild(this.createBuildingCard(buildingId));
+      const card = this.createBuildingCard(buildingId);
+      this.addWorkshop(card, buildingId);
+      list.appendChild(card);
     }
   }
 
@@ -134,6 +139,20 @@ export class GuildHallScreen {
     button.addEventListener('click', () => this.build(buildingId));
     action.appendChild(button);
     return card;
+  }
+
+  // Schmiede und Labor sind auch Werkstätten: Sobald sie stehen und der Unterhalt bezahlt ist,
+  // kommt unter die Karte der Bereich zum Schmieden bzw. Brauen
+  addWorkshop(card, buildingId) {
+    const hall = this.game.guild.hall;
+    if (buildingId === 'forge' && hall.getEffect('forging', false)) {
+      card.appendChild(createForgePanel(this.game, this.forgeTemplateId, (templateId) => {
+        this.forgeTemplateId = templateId;
+      }));
+    }
+    if (buildingId === 'alchemyLab' && hall.getEffect('brewTier', 0) > 0) {
+      card.appendChild(createBrewPanel(this.game));
+    }
   }
 
   // Bau starten: Hammer-Ton und kurze Meldung

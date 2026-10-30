@@ -16,6 +16,7 @@ import { describeItemKind, describeSuitableClasses } from './format.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 import { describeMaterials, createUpgradeButton, applyUpgradeGlow } from './UpgradeControls.js';
+import { createReforgeControls } from './CraftingControls.js';
 import { getSalvageYield } from '../systems/CraftingSystem.js';
 
 export class InventoryOverlay {
@@ -36,7 +37,7 @@ export class InventoryOverlay {
     this.root.innerHTML = `
       <div class="inventory-header">
         <h2>Inventar <span class="inventory-count"></span></h2>
-        <span class="inventory-materials" title="Material zum Verbessern. Du bekommst es durchs Zerlegen."></span>
+        <span class="inventory-materials" title="Material zum Verbessern, Schmieden und Brauen. Staub, Kristalle und Rohstoffe gibt es durchs Zerlegen, Rohstoffe und Kräuter auch über Tagesaufgaben."></span>
         <button class="close-button" title="Schließen (Esc)">✕</button>
       </div>
       <div class="inventory-categories"></div>
@@ -262,6 +263,10 @@ export class InventoryOverlay {
     details.querySelector('.detail-name').textContent = item.getDisplayName();
     details.querySelector('.salvage-button').textContent = 'Zerlegen (' + describeMaterials(getSalvageYield(item)) + ')';
     details.querySelector('.detail-actions').appendChild(createUpgradeButton(this.game, item, details));
+    const reforgeControls = createReforgeControls(this.game, item);
+    if (reforgeControls) {
+      details.querySelector('.detail-upgrade-hint').after(reforgeControls);
+    }
     details.querySelector('.detail-upgrade-hint').textContent = item.upgradeLevel > 0
       ? 'Verkaufen und Zerlegen bringen nur den Grundwert, die Verbesserung geht verloren.'
       : 'Jede Stufe gibt +6 % auf alle Werte. Ab +6 kann es fehlschlagen.';
@@ -306,11 +311,12 @@ export class InventoryOverlay {
     sellButton.disabled = junk.length === 0;
 
     const salvageButton = this.root.querySelector('.salvage-junk-button');
-    const total = { dust: 0, crystal: 0 };
+    const total = {};
     for (const item of junk) {
       const materials = getSalvageYield(item);
-      total.dust += materials.dust;
-      total.crystal += materials.crystal;
+      for (const materialId in materials) {
+        total[materialId] = (total[materialId] || 0) + materials[materialId];
+      }
     }
     salvageButton.textContent = 'Schrott zerlegen (' + junk.length + ' = ' + (describeMaterials(total) || '✧ 0') + ')';
     salvageButton.disabled = junk.length === 0;

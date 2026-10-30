@@ -181,6 +181,14 @@ export const Sound = {
     playTone(NOTES[10], 1.0, 0.8, 'triangle', 0.07);
   },
 
+  // Brauen: aufsteigendes Blubbern
+  brew() {
+    for (let i = 0; i < 4; i++) {
+      playTone(300 + i * 90, i * 0.07, 0.06, 'sine', 0.06);
+    }
+    playTone(NOTES[6], 0.32, 0.3, 'triangle', 0.06);
+  },
+
   // Bau beginnt: drei Hammerschläge
   buildStart() {
     for (let i = 0; i < 3; i++) {

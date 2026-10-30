@@ -78,6 +78,8 @@ const inventory = new InventoryOverlay(game, (newItemCount) => {
   navBar.setBadge('inventory', newItemCount > 0 ? String(newItemCount) : '');
 });
 navBar.addExtraButton('inventory', 'Inventar', () => inventory.toggle());
+// Geschmiedete Items bekommen wie Beute den "neu"-Punkt im Inventar
+game.on('itemForged', (item) => inventory.revealItem(item));
 
 const collection = new CollectionOverlay(game);
 const lootBoxScreen = new LootBoxScreen(screenElements.treasury, game, inventory, collection);

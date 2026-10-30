@@ -3468,6 +3468,55 @@ h3 {
   color: var(--gold);
 }
 
+/* Werkstatt auf der Karte von Schmiede und Labor (Schmieden, Brauen) */
+.workshop-panel {
+  border-top: 2px solid var(--border);
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.workshop-title {
+  font-family: var(--font-title);
+  font-size: 11px;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.workshop-row,
+.reforge-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.forge-select,
+.reforge-select {
+  flex: 1;
+  min-width: 140px;
+}
+
+.brew-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+  font-size: 16px;
+}
+
+.brew-button {
+  white-space: nowrap;
+}
+
+.brew-row.locked .brew-name {
+  opacity: 0.45;
+}
+
+.reforge-controls {
+  margin-top: 6px;
+}
+
 /* Unzufrieden (kein Sold) */
 .unhappy-chip,
 .detail-unhappy {

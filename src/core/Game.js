@@ -320,6 +320,7 @@ export class Game {
   forgeItem(templateId) {
     const outcome = forgeItem(this.guild, this.lootSystem, templateId);
     if (outcome.result === 'ok') {
+      this.emit('itemForged', outcome.item);
       this.emit('changed');
     }
     return outcome;
