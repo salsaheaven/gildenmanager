@@ -10,7 +10,8 @@ import { getRiskLevel, getFallLevel, RISK_SIMULATION_COUNT } from '../data/riskL
 // heroes = Hero-Objekte der Gruppe, retreatRuleId = gewählte Rückzugsregel
 // supplies = mitgenommene Verbrauchsgüter (freiwillig), scouted = Dungeon erkundet (freiwillig).
 // Beides fließt in die Einschätzung ein.
-export function createRiskBadge(heroes, dungeonId, retreatRuleId, supplies = [], scouted = false) {
+// forecast = true zeigt zusätzlich, woran die Gruppe wohl scheitern würde (Kartenraum Stufe 3)
+export function createRiskBadge(heroes, dungeonId, retreatRuleId, supplies = [], scouted = false, forecast = false) {
   const chances = estimateRunChances({ heroes, dungeonId, retreatRuleId, supplies, scouted, count: RISK_SIMULATION_COUNT });
   const risk = getRiskLevel(chances.winRate);
   const fall = getFallLevel(chances.fallenRate);
@@ -21,5 +22,11 @@ export function createRiskBadge(heroes, dungeonId, retreatRuleId, supplies = [],
   badge.innerHTML = '<span class="risk-label">Einschätzung:</span> <b class="risk-name"></b> <span class="risk-fall"></span>';
   badge.querySelector('.risk-name').textContent = risk.name;
   badge.querySelector('.risk-fall').textContent = '· Gefallene: ' + fall.name;
+  if (forecast && chances.likelyCause) {
+    const forecastLine = document.createElement('div');
+    forecastLine.className = 'risk-forecast';
+    forecastLine.textContent = 'Kartenraum: Größte Gefahr ist „' + chances.likelyCause.name + '“';
+    badge.appendChild(forecastLine);
+  }
   return badge;
 }

@@ -180,4 +180,21 @@ export const Sound = {
     }
     playTone(NOTES[10], 1.0, 0.8, 'triangle', 0.07);
   },
+
+  // Bau beginnt: drei Hammerschläge
+  buildStart() {
+    for (let i = 0; i < 3; i++) {
+      playTone(900 - i * 120, i * 0.13, 0.05, 'square', 0.05);
+    }
+  },
+
+  // Gebäude fertig: Fanfare mit Schlussakkord
+  buildingDone() {
+    const melody = [0, 4, 7, 4, 7];
+    for (let i = 0; i < melody.length; i++) {
+      playTone(NOTES[melody[i]], i * 0.1, 0.15, 'square', 0.05);
+    }
+    playTone(NOTES[7], 0.55, 0.8, 'triangle', 0.07);
+    playTone(NOTES[11] || NOTES[NOTES.length - 1], 0.55, 0.8, 'triangle', 0.05);
+  },
 };

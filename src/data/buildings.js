@@ -11,7 +11,8 @@
 //     extraHeroSlots      = so viele Helden mehr in der Gilde (Kaserne)
 //     injuryAvoidChance   = Chance, dass ein Gefallener gar nicht verletzt wird (Lazarett)
 //     upgradeChanceBonus  = mehr Erfolgschance beim Verbessern ab +6 (Schmiede, 0.05 = +5 Prozentpunkte)
-//     forging, reforging, bossRecipes = schaltet Schmieden / Umschmieden / Boss-Rezepte frei (Schmiede, ab M3 Schritt 4)
+//     forging, reforging  = schaltet Schmieden / Umschmieden frei (Schmiede, ab M3 Schritt 4)
+//     forgeCostFactor     = Anteil der Schmiede-Kosten (0.75 = 25 % billiger, ab M3 Schritt 4)
 //     brewTier            = welche Rezepte das Labor brauen kann (Alchemielabor, ab M3 Schritt 4)
 //     brewCostFactor      = Anteil der Brau-Kosten (0.8 = 20 % billiger)
 //     trainingXpBonus     = mehr EP beim Training (Trainingshalle, 0.25 = +25 %)
@@ -49,8 +50,8 @@ export const BUILDINGS = {
     description: 'Ausrüstung herstellen und sicherer verbessern',
     levels: [
       { cost: { gold: 250, dust: 20, crystal: 0 }, buildDays: 2, upkeep: 4, effects: { forging: true, upgradeChanceBonus: 0.05 }, text: 'Schmieden, +5 % Chance beim Verbessern' },
-      { cost: { gold: 550, dust: 40, crystal: 5 }, buildDays: 3, upkeep: 8, effects: { forging: true, reforging: true, bossRecipes: true, upgradeChanceBonus: 0.1 }, text: 'Umschmieden und Boss-Rezepte, +10 % Chance' },
-      { cost: { gold: 1000, dust: 80, crystal: 12 }, buildDays: 4, upkeep: 14, effects: { forging: true, reforging: true, bossRecipes: true, upgradeChanceBonus: 0.15 }, text: 'Bessere Seltenheit beim Schmieden, +15 % Chance' },
+      { cost: { gold: 550, dust: 40, crystal: 5 }, buildDays: 3, upkeep: 8, effects: { forging: true, reforging: true, upgradeChanceBonus: 0.1 }, text: 'Umschmieden, +10 % Chance' },
+      { cost: { gold: 1000, dust: 80, crystal: 12 }, buildDays: 4, upkeep: 14, effects: { forging: true, reforging: true, forgeCostFactor: 0.75, upgradeChanceBonus: 0.15 }, text: 'Schmieden 25 % billiger, +15 % Chance' },
     ],
   },
   alchemyLab: {

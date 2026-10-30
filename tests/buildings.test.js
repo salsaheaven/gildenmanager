@@ -208,3 +208,17 @@ describe('Unbezahlter Sold', () => {
     expect(game.guild.heroes.every((hero) => !hero.isUnhappy())).toBe(true);
   });
 });
+
+describe('Kartenraum-Vorhersage', () => {
+  it('erst mit Kartenraum Stufe 3 und bezahltem Unterhalt', () => {
+    const game = new Game(42);
+    game.foundGuild('', START_TEAM);
+    expect(game.hasDefeatForecast()).toBe(false);
+    game.guild.hall.levels.mapRoom = 2;
+    expect(game.hasDefeatForecast()).toBe(false);
+    game.guild.hall.levels.mapRoom = 3;
+    expect(game.hasDefeatForecast()).toBe(true);
+    game.guild.hall.upkeepPaid = false;
+    expect(game.hasDefeatForecast()).toBe(false);
+  });
+});

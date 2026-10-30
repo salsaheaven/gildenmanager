@@ -74,7 +74,8 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tagesplan, Startseite), LootBoxScreen (Schatzkammer: Kisten, Händler, Vorratskammer),
                HeroScreen (+ HeroDetailPanel, EquipPanel = Ausrüstungsliste für den angetippten Platz, nach Item-Level sortiert,
                Vergleich pro Wert, bewusst ohne „bestes Item“), TavernScreen, CombatLabScreen,
-               DungeonScreen (+ RunViewer = Bericht eines beendeten Runs zeigen).
+               DungeonScreen (+ RunViewer = Bericht eines beendeten Runs zeigen),
+               GuildHallScreen (Gildenhalle: Karte pro Gebäude, Bauen, Baustelle mit Balken).
                DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe als Szene, danach Zusammenfassung mit Beute.
                LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden, während des Tagesabschlusses zurückgehalten).
                InventoryOverlay = Inventar als Vollbild-Fenster mit Kategorien (Knopf „Inventar“ in der Reiterleiste).

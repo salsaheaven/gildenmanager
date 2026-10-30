@@ -3370,6 +3370,131 @@ h3 {
    HANDY (schmale Bildschirme)
    ============================================================ */
 
+/* ---------- Gildenhalle ---------- */
+
+.hall-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hall-info {
+  color: var(--text-dim);
+}
+
+.hall-warning {
+  color: #ff6b6b;
+  margin-top: 6px;
+}
+
+.hall-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.hall-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hall-card.built {
+  border-color: var(--gold);
+}
+
+.hall-card.under-construction {
+  border-style: dashed;
+}
+
+.hall-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hall-card-name {
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: normal;
+}
+
+/* Stufe als 3 Kästchen */
+.hall-pips {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.hall-pip {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border);
+  background: #0c0914;
+}
+
+.hall-pip.filled {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+.hall-pip.building {
+  animation: hall-pip-blink 1s steps(2) infinite;
+}
+
+@keyframes hall-pip-blink {
+  50% { background: var(--gold); }
+}
+
+.hall-card-next {
+  color: #1eff00;
+}
+
+.hall-card-action {
+  margin-top: auto;
+}
+
+.hall-cost {
+  color: var(--text-dim);
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.hall-construction-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--gold);
+}
+
+/* Unzufrieden (kein Sold) */
+.unhappy-chip,
+.detail-unhappy {
+  color: #ff9f43;
+}
+
+.detail-unhappy:empty {
+  display: none;
+}
+
+/* Tagesabschluss: Gebäude fertig */
+.day-building-card {
+  border-color: var(--gold);
+  animation: card-pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) backwards;
+}
+
+.day-building-effect {
+  color: #1eff00;
+}
+
+/* Kartenraum Stufe 3: Vorhersage in der Einschätzung */
+.risk-forecast {
+  color: #ff9f43;
+  font-size: 16px;
+  margin-top: 2px;
+}
+
 @media (max-width: 700px) {
   #screen {
     padding: 10px;

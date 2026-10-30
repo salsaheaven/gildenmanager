@@ -657,6 +657,11 @@ export class Game {
     return getDailyUpkeep(this.guild.hall);
   }
 
+  // Zeigt die Einschätzung, woran eine Gruppe wohl scheitern würde? (Kartenraum Stufe 3)
+  hasDefeatForecast() {
+    return this.guild.hall.getEffect('defeatForecast', false);
+  }
+
   // "Wie gestern": plant die Gruppen von gestern noch einmal ein (gleicher Dungeon, gleiche Helden,
   // gleiche Rückzugsregel). Wer heute verletzt oder schon eingeplant ist, fehlt. Vorräte nur, soweit sie da sind.
   // Gibt die Anzahl der eingeplanten Gruppen zurück.

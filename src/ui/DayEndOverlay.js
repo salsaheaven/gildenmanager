@@ -19,6 +19,7 @@ import { createDefeatCausesView } from './DefeatCausesView.js';
 import { Hero } from '../entities/Hero.js';
 import { Expedition } from '../entities/Expedition.js';
 import { getDungeon } from '../data/dungeons.js';
+import { getBuilding } from '../data/buildings.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
 import { BattleScene } from './BattleScene.js';
 import { createHeroCanvas, createSpriteCanvas, createChestCanvas } from './PixelArt.js';
@@ -176,6 +177,9 @@ export class DayEndOverlay {
     for (const run of this.runs) {
       summary.appendChild(this.createRunCard(run.report));
     }
+    if (this.daySummary.finishedBuilding) {
+      summary.appendChild(this.createBuildingCard(this.daySummary.finishedBuilding));
+    }
     summary.appendChild(this.createHomeCard(this.daySummary));
     if (this.daySummary.news.length > 0) {
       summary.appendChild(this.createNewsCard(this.daySummary.news));
@@ -212,6 +216,21 @@ export class DayEndOverlay {
     return card;
   }
 
+  // Karte "Gebäude fertig!": großes Schild mit der neuen Wirkung, dazu eine Fanfare
+  createBuildingCard(finished) {
+    const building = getBuilding(finished.buildingId);
+    const card = document.createElement('div');
+    card.className = 'day-run-card day-building-card';
+    card.innerHTML = '<div class="day-run-head"><b class="day-run-name"></b><span class="day-run-outcome"></span></div>' +
+      '<div class="day-building-effect"></div>';
+    card.querySelector('.day-run-name').textContent = 'Gebäude fertig: ' + building.name + ' Stufe ' + finished.level;
+    card.querySelector('.day-run-outcome').textContent = '⚒';
+    card.querySelector('.day-building-effect').textContent = 'Ab morgen: ' + building.levels[finished.level - 1].text;
+    // Kurz nach der Fanfare des besten Runs, damit sich die Töne nicht überlagern
+    setTimeout(() => Sound.buildingDone(), this.runs.length > 0 ? 900 : 0);
+    return card;
+  }
+
   // Karte "Daheim": was die Helden ohne Kampf erledigt haben, und der Sold
   createHomeCard(daySummary) {
     const card = document.createElement('div');
@@ -232,9 +251,21 @@ export class DayEndOverlay {
     const wageLine = document.createElement('div');
     wageLine.className = 'day-home-line wages' + (wages.paid < wages.total ? ' unpaid' : '');
     wageLine.textContent = wages.paid < wages.total
-      ? 'Sold nicht voll bezahlt: ' + wages.paid + ' von ' + wages.total + ' Gold'
+      ? 'Sold nicht voll bezahlt: ' + wages.paid + ' von ' + wages.total + ' Gold. Unzufrieden (weniger Schaden): ' +
+        wages.unpaidNames.join(', ')
       : 'Sold: −' + wages.total + ' Gold';
     lines.appendChild(wageLine);
+
+    // Unterhalt der Gebäude: alles oder nichts
+    const upkeep = daySummary.upkeep;
+    if (upkeep.total > 0) {
+      const upkeepLine = document.createElement('div');
+      upkeepLine.className = 'day-home-line wages' + (upkeep.paid < upkeep.total ? ' unpaid' : '');
+      upkeepLine.textContent = upkeep.paid < upkeep.total
+        ? 'Unterhalt nicht bezahlt (' + upkeep.total + ' Gold): Morgen wirkt kein Gebäude!'
+        : 'Unterhalt der Gebäude: −' + upkeep.total + ' Gold';
+      lines.appendChild(upkeepLine);
+    }
     return card;
   }
 

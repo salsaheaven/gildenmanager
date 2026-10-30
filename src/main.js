@@ -14,6 +14,7 @@ import { HeroScreen } from './ui/HeroScreen.js';
 import { TavernScreen } from './ui/TavernScreen.js';
 import { CombatLabScreen } from './ui/CombatLabScreen.js';
 import { DungeonScreen } from './ui/DungeonScreen.js';
+import { GuildHallScreen } from './ui/GuildHallScreen.js';
 import { DayPlanScreen } from './ui/DayPlanScreen.js';
 import { DayEndOverlay } from './ui/DayEndOverlay.js';
 import { DebugPanel } from './ui/DebugPanel.js';
@@ -34,6 +35,7 @@ const TABS = [
   { id: 'heroes', name: 'Helden' },
   { id: 'tavern', name: 'Taverne' },
   { id: 'dungeons', name: 'Dungeons' },
+  { id: 'hall', name: 'Gildenhalle' },
   { id: 'lab', name: 'Kampf-Labor' },
 ];
 
@@ -83,6 +85,7 @@ new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'), inventor
 new TavernScreen(screenElements.tavern, game);
 const combatLabScreen = new CombatLabScreen(screenElements.lab, game);
 new DungeonScreen(screenElements.dungeons, game);
+new GuildHallScreen(screenElements.hall, game);
 new DayPlanScreen(screenElements.plan, game, showScreen);
 new DebugPanel(game);
 
@@ -116,6 +119,9 @@ function updateBadges() {
   navBar.setBadge('heroes', freeTalents > 0 ? '★' : '');
   const planned = guild.expeditions.length;
   navBar.setBadge('dungeons', dungeonHasNews ? '!' : (planned > 0 ? String(planned) : ''));
+  // Gildenhalle: Hammer, solange gebaut wird; "!", wenn der Unterhalt fehlt
+  const hall = guild.hall;
+  navBar.setBadge('hall', !hall.upkeepPaid ? '!' : (hall.construction !== null ? '⚒' : ''));
 }
 
 game.on('changed', updateBadges);
@@ -160,7 +166,9 @@ game.on('dayEnding', () => levelUpBanner.hold());
 
 game.on('dayEnded', (data) => {
   // Ohne Kämpfe und ohne Aufgaben (alle ruhen sich aus) reicht eine kurze Meldung
-  const somethingHappened = data.summary.tasks.some((task) => task.taskId !== 'rest') || data.summary.news.length > 0;
+  const summary = data.summary;
+  const somethingHappened = summary.tasks.some((task) => task.taskId !== 'rest') || summary.news.length > 0 ||
+    summary.finishedBuilding !== null || summary.wages.paid < summary.wages.total || summary.upkeep.paid < summary.upkeep.total;
   if (data.reports.length === 0 && !somethingHappened) {
     Sound.click();
     showToast('Ein ruhiger Tag. Sold: −' + data.summary.wages.paid + ' Gold. Tag ' + game.day + ' beginnt.', '#ffd23f');

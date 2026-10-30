@@ -40,4 +40,12 @@ describe('Einschätzung eines ganzen Runs', () => {
     const b = estimateRunChances({ heroes: createTestGroup(2), dungeonId: 'ruinedChapel', retreatRuleId: 'never', count: 20 });
     expect(a).toEqual(b);
   });
+
+  it('nennt die wahrscheinlichste Ursache, wenn etwas schiefgeht (für den Kartenraum)', () => {
+    const weak = estimateRunChances({ heroes: createTestGroup(1), dungeonId: 'broodNests', retreatRuleId: 'never', count: 20 });
+    expect(weak.likelyCause).not.toBeNull();
+    expect(typeof weak.likelyCause.name).toBe('string');
+    expect(weak.likelyCause.share).toBeGreaterThan(0);
+    expect(weak.likelyCause.share).toBeLessThanOrEqual(1);
+  });
 });

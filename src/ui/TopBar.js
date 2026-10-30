@@ -80,10 +80,13 @@ export class TopBar {
       this.root.querySelector('.gold-amount').textContent = guild.gold;
     }
 
-    // Sold, der heute Abend fällig wird
+    // Sold und Unterhalt, die heute Abend fällig werden
     const wages = this.game.getDailyWages();
-    this.root.querySelector('.gold-wages').textContent = wages > 0 ? ' (−' + wages + '/Tag)' : '';
-    this.root.querySelector('.gold-wages').title = 'Sold für alle Helden, wird jeden Abend bezahlt';
+    const upkeep = this.game.getDailyUpkeep();
+    const costs = wages + upkeep;
+    this.root.querySelector('.gold-wages').textContent = costs > 0 ? ' (−' + costs + '/Tag)' : '';
+    this.root.querySelector('.gold-wages').title = 'Jeden Abend fällig: Sold ' + wages + ' Gold' +
+      (upkeep > 0 ? ' + Unterhalt der Gebäude ' + upkeep + ' Gold' : '');
 
     // Tag: hüpft ebenfalls, wenn ein neuer Tag beginnt
     if (this.game.day !== this.shownDay) {

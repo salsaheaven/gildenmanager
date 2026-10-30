@@ -203,7 +203,7 @@ export class DayPlanScreen {
         heroList.appendChild(this.createHeroRow(hero, null));
       }
       heroList.before(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies,
-        this.game.isDungeonScouted(expedition.dungeonId)));
+        this.game.isDungeonScouted(expedition.dungeonId), this.game.hasDefeatForecast()));
       heroList.after(this.createOrdersSection(expedition, heroes));
       heroList.after(this.createSupplySection(expedition));
       card.querySelector('.cancel-button').addEventListener('click', () => {

@@ -159,7 +159,7 @@ export class DungeonScreen {
     // Einschätzung in Worten, neu berechnet bei jeder Änderung an Gruppe, Ausrüstung, Rückzug oder Vorräten
     if (unlocked && group.length > 0) {
       panel.querySelector('.risk-line').appendChild(createRiskBadge(group, dungeon.id, this.retreatRuleId, this.chosenSupplies,
-        this.game.isDungeonScouted(dungeon.id)));
+        this.game.isDungeonScouted(dungeon.id), this.game.hasDefeatForecast()));
     }
     renderOrders(panel.querySelector('.orders-list'), group, (hero, orderId, optionId) => {
       this.game.setHeroOrder(hero.id, orderId, optionId);
@@ -366,7 +366,7 @@ export class DungeonScreen {
         (expedition.supplies.length > 0 ? ' · Vorräte: ' + describeSupplies(expedition.supplies) : '');
       const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
       row.querySelector('.run-head').after(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId,
-        expedition.supplies, this.game.isDungeonScouted(expedition.dungeonId)));
+        expedition.supplies, this.game.isDungeonScouted(expedition.dungeonId), this.game.hasDefeatForecast()));
       row.querySelector('.cancel-button').addEventListener('click', () => {
         Sound.click();
         this.game.cancelExpedition(expedition.id);

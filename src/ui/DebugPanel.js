@@ -9,6 +9,8 @@ import { HERO_RARITIES } from '../data/heroRarities.js';
 import { getRarity } from '../data/rarities.js';
 import { SCALING } from '../data/scaling.js';
 import { showToast } from './Toast.js';
+import { Sound } from './Sound.js';
+import { advanceConstruction } from '../systems/BuildingSystem.js';
 
 export class DebugPanel {
   constructor(game) {
@@ -37,6 +39,15 @@ export class DebugPanel {
     // Zum Ausprobieren des Verbesserns: genug Material für einige Stufen
     this.addButton('+100 Staub, +20 Kristalle', () => {
       game.guild.addMaterials({ dust: 100, crystal: 20 });
+    });
+    // Zum Ausprobieren der Gildenhalle: die laufende Baustelle sofort fertig (wie nach den restlichen Bautagen)
+    this.addButton('Baustelle sofort fertig', () => {
+      const construction = game.guild.hall.construction;
+      if (construction !== null) {
+        construction.daysLeft = 1;
+        advanceConstruction(game.guild.hall);
+        Sound.buildingDone();
+      }
     });
     this.addButton('Neue Bewerber (gratis)', () => {
       game.refreshCandidates();

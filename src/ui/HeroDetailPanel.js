@@ -16,6 +16,7 @@ import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 import { renderOrders } from './OrdersPanel.js';
 import { applyUpgradeGlow } from './UpgradeControls.js';
+import { WAGE_RULES } from '../data/heroRarities.js';
 
 export class HeroDetailPanel {
   // callbacks = { onSlotClicked(slot), onDismissed(), onGoToTavern() }
@@ -55,6 +56,7 @@ export class HeroDetailPanel {
           </div>
           <div class="detail-xp">${hero.isMaxLevel() ? 'Höchstes Level erreicht!' : hero.xp + ' / ' + hero.getXpForNextLevel() + ' EP'}</div>
           <div class="detail-injury"></div>
+          <div class="detail-unhappy"></div>
           <div class="trait-list"></div>
           <button class="dismiss-button" title="Der Held verlässt die Gilde, seine Ausrüstung kommt ins Inventar">Entlassen</button>
         </div>
@@ -88,6 +90,11 @@ export class HeroDetailPanel {
     if (hero.isInjured()) {
       const days = hero.injuryDays === 1 ? '1 Tag' : hero.injuryDays + ' Tage';
       this.root.querySelector('.detail-injury').textContent = 'Verletzt, noch ' + days + ' – kann nicht in Dungeons';
+    }
+    if (hero.isUnhappy()) {
+      const percent = Math.round(-WAGE_RULES.unhappyEffects.damageDone * 100);
+      this.root.querySelector('.detail-unhappy').textContent = 'Unzufrieden: hat keinen Sold bekommen, macht ' + percent +
+        ' % weniger Schaden, bis er wieder bezahlt wird';
     }
 
     const traitList = this.root.querySelector('.trait-list');
