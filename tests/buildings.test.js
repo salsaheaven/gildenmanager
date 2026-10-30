@@ -21,7 +21,7 @@ function richGame(seed = 31) {
   const game = new Game(seed);
   game.foundGuild('', START_TEAM);
   game.guild.gold = 100000;
-  game.guild.materials = { dust: 10000, crystal: 1000 };
+  game.guild.materials = { dust: 10000, crystal: 1000, raw: 0, herbs: 0 };
   return game;
 }
 
@@ -78,7 +78,7 @@ describe('Bauen', () => {
   it('ohne Gold oder Material geht es nicht, nach Stufe 3 ist Schluss; wird gespeichert', () => {
     const poor = new Game(32);
     poor.foundGuild('', START_TEAM);
-    poor.guild.materials = { dust: 0, crystal: 0 };
+    poor.guild.materials = { dust: 0, crystal: 0, raw: 0, herbs: 0 };
     expect(poor.buildBuilding('forge')).toBe('notEnough');
 
     const game = richGame(33);

@@ -11,10 +11,10 @@
 //     extraHeroSlots      = so viele Helden mehr in der Gilde (Kaserne)
 //     injuryAvoidChance   = Chance, dass ein Gefallener gar nicht verletzt wird (Lazarett)
 //     upgradeChanceBonus  = mehr Erfolgschance beim Verbessern ab +6 (Schmiede, 0.05 = +5 Prozentpunkte)
-//     forging, reforging  = schaltet Schmieden / Umschmieden frei (Schmiede, ab M3 Schritt 4)
-//     forgeCostFactor     = Anteil der Schmiede-Kosten (0.75 = 25 % billiger, ab M3 Schritt 4)
-//     brewTier            = welche Rezepte das Labor brauen kann (Alchemielabor, ab M3 Schritt 4)
-//     brewCostFactor      = Anteil der Brau-Kosten (0.8 = 20 % billiger)
+//     forging, reforging  = schaltet Schmieden / Umschmieden frei (Schmiede, siehe systems/ForgeSystem.js)
+//     forgeCostFactor     = Anteil der Schmiede-Kosten (0.75 = 25 % billiger)
+//     brewTier            = welche Rezepte das Labor brauen kann (Alchemielabor, siehe data/alchemy.js)
+//     brewCostFactor      = Anteil der Kräuter beim Brauen (0.85 = 15 % weniger, siehe data/alchemy.js)
 //     trainingXpBonus     = mehr EP beim Training (Trainingshalle, 0.25 = +25 %)
 //     trainingCostFactor  = Anteil der Trainingskosten (0.8 = 20 % billiger)
 //     scoutingRunDays     = für wie viele Kampftage eine Erkundung hält (Kartenraum; ohne Kartenraum 1)
@@ -58,9 +58,9 @@ export const BUILDINGS = {
     name: 'Alchemielabor',
     description: 'Braut Tränke aus gesammelten Kräutern',
     levels: [
-      { cost: { gold: 150, dust: 5, crystal: 0 }, buildDays: 1, upkeep: 3, effects: { brewTier: 1, brewCostFactor: 1 }, text: 'Heil- und Manatränke brauen' },
-      { cost: { gold: 400, dust: 20, crystal: 2 }, buildDays: 2, upkeep: 6, effects: { brewTier: 2, brewCostFactor: 0.85 }, text: 'Auch Schutztränke, 15 % billiger' },
-      { cost: { gold: 800, dust: 40, crystal: 6 }, buildDays: 3, upkeep: 10, effects: { brewTier: 3, brewCostFactor: 0.7 }, text: 'Auch Wutelixier und Steinhaut, 30 % billiger' },
+      { cost: { gold: 150, dust: 5, crystal: 0 }, buildDays: 1, upkeep: 3, effects: { brewTier: 1, brewCostFactor: 1 }, text: 'Heil-, Manatränke und Verbandszeug brauen' },
+      { cost: { gold: 400, dust: 20, crystal: 2 }, buildDays: 2, upkeep: 6, effects: { brewTier: 2, brewCostFactor: 0.85 }, text: 'Auch Schutztränke, 15 % weniger Kräuter' },
+      { cost: { gold: 800, dust: 40, crystal: 6 }, buildDays: 3, upkeep: 10, effects: { brewTier: 3, brewCostFactor: 0.7 }, text: 'Auch Wutelixier und Steinhaut, 30 % weniger Kräuter' },
     ],
   },
   trainingHall: {

@@ -33,7 +33,7 @@ export class Guild {
     this.dungeonAttempts = {}; // Dungeon-id → wie oft versucht (egal wie es ausging)
     this.reports = [];         // Berichte über abgeschlossene Runs (neueste zuerst)
     this.collection = new CollectionBook(); // Sammelbuch: welche Boss-Items schon gefunden wurden
-    this.materials = { dust: 0, crystal: 0 }; // Materiallager: Arkanstaub und Kristalle (siehe data/crafting.js)
+    this.materials = { dust: 0, crystal: 0, raw: 0, herbs: 0 }; // Materiallager: Staub, Kristalle, Rohstoffe, Kräuter (siehe data/crafting.js)
     this.supplies = {};        // Vorratskammer: Verbrauchsgut-id → Anzahl (siehe data/consumables.js)
     this.dailyOffer = [];      // heutiges Tagesangebot des Händlers (Liste von Verbrauchsgut-ids)
     this.scoutedDungeons = {}; // erkundete Dungeons: Dungeon-id → wie viele Kampftage die Erkundung noch hält
@@ -233,9 +233,32 @@ export class Guild {
     return null;
   }
 
+  // Legt Material ins Lager, z.B. addMaterials({ dust: 3, raw: 1 }). Fehlende Sorten zählen als 0.
   addMaterials(materials) {
-    this.materials.dust += materials.dust || 0;
-    this.materials.crystal += materials.crystal || 0;
+    for (const materialId in this.materials) {
+      this.materials[materialId] += materials[materialId] || 0;
+    }
+  }
+
+  // Ist genug Material da? cost = z.B. { raw: 10, dust: 4 } (Gold zählt hier nicht)
+  hasMaterials(cost) {
+    for (const materialId in this.materials) {
+      if (this.materials[materialId] < (cost[materialId] || 0)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // Nimmt Material aus dem Lager. Gibt false zurück (und nimmt nichts), wenn es nicht reicht.
+  spendMaterials(cost) {
+    if (!this.hasMaterials(cost)) {
+      return false;
+    }
+    for (const materialId in this.materials) {
+      this.materials[materialId] -= cost[materialId] || 0;
+    }
+    return true;
   }
 
   // ---------- Vorratskammer ----------

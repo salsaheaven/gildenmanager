@@ -17,6 +17,8 @@
 // ============================================================
 
 import { getSalvageYield, upgradeItem } from '../systems/CraftingSystem.js';
+import { forgeItem, reforgeItem } from '../systems/ForgeSystem.js';
+import { brew } from '../systems/AlchemySystem.js';
 import { checkStartTeam } from '../systems/StartTeam.js';
 import { START_TEAM_RULES } from '../data/startTeam.js';
 import { advanceRivals, recordPlayerClear, getLeaderboard } from '../systems/RivalSystem.js';
@@ -272,7 +274,7 @@ export class Game {
 
   // ---------- Aktionen: Zerlegen & Verbessern (siehe data/crafting.js) ----------
 
-  // Zerlegt ein Item aus dem Inventar zu Material. Gibt das Material zurück ({ dust, crystal }) oder null.
+  // Zerlegt ein Item aus dem Inventar zu Material. Gibt das Material zurück ({ dust, crystal, raw }) oder null.
   salvageItem(itemId) {
     const item = this.guild.removeItem(itemId);
     if (!item) {
@@ -286,12 +288,13 @@ export class Game {
 
   // Zerlegt alle Items einer Seltenheit (z.B. allen Schrott). Gibt das Material zusammen zurück.
   salvageAllOfRarity(rarityId) {
-    const total = { dust: 0, crystal: 0 };
+    const total = {};
     for (const item of this.guild.inventory.filter((entry) => entry.rarityId === rarityId)) {
       this.guild.removeItem(item.id);
       const materials = getSalvageYield(item);
-      total.dust += materials.dust;
-      total.crystal += materials.crystal;
+      for (const materialId in materials) {
+        total[materialId] = (total[materialId] || 0) + materials[materialId];
+      }
     }
     this.guild.addMaterials(total);
     this.emit('changed');
@@ -307,6 +310,41 @@ export class Game {
     }
     const result = upgradeItem(this.guild, item, this.random);
     this.emit('changed');
+    return result;
+  }
+
+  // ---------- Aktionen: Schmieden und Brauen (siehe systems/ForgeSystem.js und AlchemySystem.js) ----------
+
+  // Schmiedet ein weißes Item nach einer Vorlage (Platz + Rüstungsart). Gibt { result, item } zurück,
+  // result = 'ok', 'noForge' (keine Schmiede) oder 'notEnough' (Material fehlt).
+  forgeItem(templateId) {
+    const outcome = forgeItem(this.guild, this.lootSystem, templateId);
+    if (outcome.result === 'ok') {
+      this.emit('changed');
+    }
+    return outcome;
+  }
+
+  // Schmiedet ein Rüstungsteil aus dem Inventar in eine andere Rüstungsart um.
+  // Gibt 'ok', 'notFound', 'noReforge', 'notArmor', 'wrongTarget' oder 'notEnough' zurück.
+  reforgeItem(itemId, targetTemplateId) {
+    const item = this.guild.findItem(itemId);
+    if (!item) {
+      return 'notFound';
+    }
+    const result = reforgeItem(this.guild, this.lootSystem, item, targetTemplateId);
+    if (result === 'ok') {
+      this.emit('changed');
+    }
+    return result;
+  }
+
+  // Braut einmal ein Rezept im Alchemielabor. Gibt 'ok', 'noLab' oder 'notEnough' zurück.
+  brewRecipe(recipeId) {
+    const result = brew(this.guild, recipeId);
+    if (result === 'ok') {
+      this.emit('changed');
+    }
     return result;
   }
 

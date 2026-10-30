@@ -13,8 +13,8 @@ import { createNewsLine } from './NewsLine.js';
 import { getServerFirstTitle } from '../systems/RivalSystem.js';
 import { showToast } from './Toast.js';
 import { HERO_TASKS } from '../data/heroTasks.js';
-import { getConsumable } from '../data/consumables.js';
 import { describeSupplies } from './SupplyPicker.js';
+import { describeMaterials } from './UpgradeControls.js';
 import { createDefeatCausesView } from './DefeatCausesView.js';
 import { Hero } from '../entities/Hero.js';
 import { Expedition } from '../entities/Expedition.js';
@@ -386,9 +386,8 @@ function describeTaskResult(task) {
     }
     return task.name + ' trainiert: +' + task.xp + ' EP' + (task.levelsGained > 0 ? ' · Level ' + task.newLevel + '!' : '');
   }
-  if (task.taskId === 'herbs') {
-    return task.name + ' sammelt Kräuter: ' +
-      (task.foundSupply ? getConsumable(task.foundSupply).name + ' gefunden!' : 'heute nichts gefunden');
+  if (task.taskId === 'herbs' || task.taskId === 'gatherRaw') {
+    return task.name + ': ' + HERO_TASKS[task.taskId].name + ' +' + describeMaterials(task.gathered);
   }
   if (task.taskId === 'jobs') {
     return task.name + ' ' + task.jobText + ': +' + task.gold + ' Gold' +

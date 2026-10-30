@@ -14,7 +14,7 @@ const LOOKS = { skin: '#f1c39b', hair: '#6b3f17' };
 function gameWithItem(rarityId = 'rare') {
   const game = new Game(9);
   game.guild.gold = 100000;
-  game.guild.materials = { dust: 10000, crystal: 1000 };
+  game.guild.materials = { dust: 10000, crystal: 1000, raw: 0, herbs: 0 };
   const item = new Item(game.guild.createItemId(), 'sword', rarityId, 'Testklinge', { attack: 50, health: 20 });
   game.guild.addItem(item);
   return { game, item };

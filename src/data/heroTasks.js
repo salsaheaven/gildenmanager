@@ -38,8 +38,14 @@ export const HERO_TASKS = {
   },
   herbs: {
     name: 'Kräuter sammeln',
-    description: 'Findet mit etwas Glück einen Trank für die Vorratskammer',
+    description: 'Sammelt Kräuter, aus denen das Alchemielabor Tränke braut',
     color: '#9be15d',
+    choosable: true,
+  },
+  gatherRaw: {
+    name: 'Rohstoffe sammeln',
+    description: 'Sammelt Erz, Leder und Stoff, aus denen die Schmiede Ausrüstung herstellt',
+    color: '#c08a52',
     choosable: true,
   },
   jobs: {
@@ -63,9 +69,9 @@ export const TASK_RULES = {
   trainingCost: 15,
   trainingXpShareOfBoss: 0.33,
 
-  // Kräuter sammeln: Chance auf einen Fund, und welcher Trank es wird (Gewichte, zusammen beliebig)
-  herbFindChance: 0.5,
-  herbFinds: { healingPotions: 45, manaPotions: 45, shadowWard: 2, acidWard: 2, frostWard: 2, fireWard: 2, lightWard: 2 },
+  // Kräuter sammeln / Rohstoffe sammeln: zufällig zwischen min und max Stück pro Tag
+  herbYield: { min: 1, max: 3 },
+  rawYield: { min: 1, max: 3 },
 
   // Aufträge erledigen: Gold = jobGoldBase + jobGoldPerLevel × Level, zufällig ± jobGoldSpread (0.25 = ±25 %).
   // "Gierig" bringt hier denselben Bonus wie im Dungeon.

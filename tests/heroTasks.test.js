@@ -4,7 +4,6 @@ import { describe, it, expect } from 'vitest';
 import { Game } from '../src/core/Game.js';
 import { TASK_RULES, HERO_TASKS } from '../src/data/heroTasks.js';
 import { HERO_RARITIES } from '../src/data/heroRarities.js';
-import { CONSUMABLES } from '../src/data/consumables.js';
 import { BALANCING } from '../src/data/balancing.js';
 import { getTrainingXp } from '../src/systems/HeroTaskSystem.js';
 
@@ -24,12 +23,13 @@ function gameWithHeroes(count, seed = 11) {
 }
 
 describe('Aufgaben-Daten', () => {
-  it('jede Seltenheit hat Sold, Kräuter-Funde sind echte Waren, Grenze 20', () => {
+  it('jede Seltenheit hat Sold, Sammel-Mengen sind gültig, Grenze 20', () => {
     for (const rarityId in HERO_RARITIES) {
       expect(HERO_RARITIES[rarityId].dailyWage).toBeGreaterThan(0);
     }
-    for (const supplyId in TASK_RULES.herbFinds) {
-      expect(CONSUMABLES.some((consumable) => consumable.id === supplyId)).toBe(true);
+    for (const yieldRule of [TASK_RULES.herbYield, TASK_RULES.rawYield]) {
+      expect(yieldRule.min).toBeGreaterThan(0);
+      expect(yieldRule.max).toBeGreaterThanOrEqual(yieldRule.min);
     }
     expect(BALANCING.maxHeroes).toBe(20);
   });
@@ -66,19 +66,23 @@ describe('Aufgaben verteilen', () => {
     expect(game.lastDaySummary.tasks[0].xp).toBe(0);
   });
 
-  it('Kräuter sammeln: nach einigen Tagen liegt etwas in der Vorratskammer', () => {
-    const { game, heroes } = gameWithHeroes(1);
+  it('Kräuter und Rohstoffe sammeln: jeden Tag etwas im Materiallager', () => {
+    const { game, heroes } = gameWithHeroes(2);
     game.setHeroTask(heroes[0].id, 'herbs');
-    let found = 0;
-    for (let day = 0; day < 10; day++) {
+    game.setHeroTask(heroes[1].id, 'gatherRaw');
+    let herbs = 0;
+    let raw = 0;
+    for (let day = 0; day < 5; day++) {
       game.endDay();
-      if (game.lastDaySummary.tasks[0].foundSupply) {
-        found++;
+      for (const task of game.lastDaySummary.tasks) {
+        herbs += task.gathered.herbs || 0;
+        raw += task.gathered.raw || 0;
       }
     }
-    expect(found).toBeGreaterThan(0);
-    const total = Object.values(game.guild.supplies).reduce((sum, count) => sum + count, 0);
-    expect(total).toBe(found);
+    expect(herbs).toBeGreaterThanOrEqual(5 * TASK_RULES.herbYield.min);
+    expect(raw).toBeGreaterThanOrEqual(5 * TASK_RULES.rawYield.min);
+    expect(game.guild.materials.herbs).toBe(herbs);
+    expect(game.guild.materials.raw).toBe(raw);
   });
 
   it('Verletzte und Helden im Dungeon erledigen keine Aufgabe', () => {

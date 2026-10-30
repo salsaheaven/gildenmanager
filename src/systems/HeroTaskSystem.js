@@ -2,7 +2,8 @@
 // HEROTASKSYSTEM – erledigt bei "Tag beenden" die Aufgaben der Helden, die nicht kämpfen,
 // und bezahlt den Sold aller Helden.
 //   Training        = EP ohne Risiko, kostet Gold (fehlt das Gold, fällt es aus)
-//   Kräuter sammeln = mit etwas Glück ein Trank für die Vorratskammer
+//   Kräuter sammeln = Kräuter fürs Alchemielabor
+//   Rohstoffe sammeln = Rohstoffe für die Schmiede
 //   Aufträge        = sicheres Gold, abhängig vom Level (Gierig bringt mehr)
 //   Erkunden        = der gewählte Dungeon ist für die nächsten Runs dort vorbereitet
 //   Ausruhen        = nichts
@@ -34,7 +35,8 @@ export function getTrainingCost(guild) {
 
 // Erledigt die Aufgaben. entries = [{ hero, taskId }] (nur Helden, die heute nicht kämpfen und nicht verletzt sind)
 // random = Zufall des Spiels. Gibt pro Held ein Ergebnis zurück:
-//   { heroId, name, taskId, xp, levelsGained, newLevel, foundSupply, scoutedDungeonId, gold, jobText, greedyGold, skipped }
+//   { heroId, name, taskId, xp, levelsGained, newLevel, gathered, scoutedDungeonId, gold, jobText, greedyGold, skipped }
+//   gathered = gesammeltes Material, z.B. { herbs: 2 } (sonst null)
 //   gold = verdientes Gold bei Aufträgen (greedyGold = davon durch "Gierig"), jobText = was er getan hat
 //   skipped = Grund, warum die Aufgabe ausfiel (z.B. 'noGold'), sonst null
 export function resolveHeroTasks(guild, entries, random) {
@@ -43,7 +45,7 @@ export function resolveHeroTasks(guild, entries, random) {
     const hero = entry.hero;
     const result = {
       heroId: hero.id, name: hero.name, taskId: entry.taskId,
-      xp: 0, levelsGained: 0, newLevel: hero.level, foundSupply: null, scoutedDungeonId: null,
+      xp: 0, levelsGained: 0, newLevel: hero.level, gathered: null, scoutedDungeonId: null,
       gold: 0, jobText: null, greedyGold: 0, skipped: null,
     };
 
@@ -56,10 +58,11 @@ export function resolveHeroTasks(guild, entries, random) {
         result.skipped = 'noGold';
       }
     } else if (entry.taskId === 'herbs') {
-      if (random.next() < TASK_RULES.herbFindChance) {
-        result.foundSupply = random.pickWeighted(TASK_RULES.herbFinds);
-        guild.addSupply(result.foundSupply);
-      }
+      result.gathered = { herbs: random.integer(TASK_RULES.herbYield.min, TASK_RULES.herbYield.max) };
+      guild.addMaterials(result.gathered);
+    } else if (entry.taskId === 'gatherRaw') {
+      result.gathered = { raw: random.integer(TASK_RULES.rawYield.min, TASK_RULES.rawYield.max) };
+      guild.addMaterials(result.gathered);
     } else if (entry.taskId === 'jobs') {
       // Zufall: zwischen (1 − spread) und (1 + spread) des normalen Lohns
       const spreadFactor = 1 - TASK_RULES.jobGoldSpread + random.next() * 2 * TASK_RULES.jobGoldSpread;

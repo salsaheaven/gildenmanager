@@ -4,7 +4,7 @@
 // Jeder Held hat genau eine Aufgabe pro Tag (siehe data/heroTasks.js):
 //   'dungeon' = er ist für einen Dungeon-Run eingeplant
 //   'injured' = er ist verletzt und kuriert sich aus
-//   sonst seine gewählte Aufgabe (hero.task): 'rest', 'training', 'herbs' oder 'scouting'
+//   sonst seine gewählte Aufgabe (hero.task): z.B. 'rest', 'training', 'herbs', 'gatherRaw', 'jobs' oder 'scouting'
 // Diese Datei rechnet nur nach, sie ändert nichts am Spielstand.
 // ============================================================
 
