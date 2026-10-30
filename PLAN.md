@@ -129,7 +129,9 @@ In kleinen, jeweils online testbaren Schritten:
 
 **M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.
 
-**M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie, New Game+.
+**M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie.
+
+**Nach dem ersten Release:** New Game+ / Incremental-Teil (entschieden 2026-10-30).
 
 Jetzt (nach M1 und dem Umbau auf Runden) testen wir zusammen, ob der Loop Spaß macht, und passen dann an.
 

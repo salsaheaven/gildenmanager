@@ -64,7 +64,7 @@ Raids → Endboss · Rangliste gegen KI-Gilden · Endauswertung
 | Verbrauchsgüter | **Entschieden 2026-10-29** (Design-Review P6). Der Händler verkauft **Grundware**, die es immer gibt (Heiltränke, Manatränke, Verbandszeug), und ein **Tagesangebot** aus 3 wechselnden Waren (Schutztränke gegen eine Schadensart, Wutelixier, Steinhaut). Gekauftes liegt in der **Vorratskammer**. Jede Gruppe nimmt beim Einplanen **bis zu 2 Vorräte** mit (Dungeon-Bildschirm oder Tagesplan). Sie wirken auf alle Helden einen ganzen Run lang und sind danach verbraucht, auch bei einer Niederlage. Die Risiko-Einschätzung rechnet sie mit. Verbandszeug wirkt sofort und verkürzt eine Verletzung um 1 Tag. **Bewusst nicht billig:** Ein Trank kostet am Anfang etwa so viel, wie ein Run in der Bärenhöhle einbringt. Die Wahl liegt in Gold und den 2 Plätzen. Passt zu „Woran es lag“: Säure schuld → Säureschutz kaufen. Waren und Zahlen in `src/data/consumables.js`. |
 | Wanderhändler | Taucht ab und zu für kurze Zeit auf und bietet 1 bis 2 feste Items zu hohen Preisen an. Das hilft gegen Pech in einem einzelnen Ausrüstungsplatz, ersetzt aber keine Dungeons. |
 | Pity-System | Bleibt im Hintergrund exakt, wird dem Spieler aber **bewusst ungenau** angezeigt: keine Zahlen und kein Balken, nur eine Stimmung, die stärker leuchtet („Etwas Großes kündigt sich an!“) |
-| Später | New Game+ (die Endauswertung bereitet es vor), Diplomatie |
+| Später | **New Game+ / Incremental-Teil kommt erst nach dem ersten richtigen Release** (entschieden 2026-10-30; die Endauswertung bereitet es vor). Ebenso Diplomatie. |
 
 ## Kampf
 
