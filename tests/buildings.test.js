@@ -179,28 +179,22 @@ describe('Wirkungen der Gebäude', () => {
 });
 
 describe('Unbezahlter Sold', () => {
-  it('ohne Sold unzufrieden (kämpft schlechter), nach 3 Tagen verlässt der Held die Gilde, die Ausrüstung bleibt', () => {
+  it('ohne Sold unzufrieden (weniger Schaden), verlässt die Gilde aber nicht', () => {
     const game = new Game(40);
     game.foundGuild('', START_TEAM);
     const hero = game.guild.heroes[0];
-    const ring = new Item(game.guild.createItemId(), 'attackRing', 'rare', 'Ring', { attack: 5 });
-    hero.equip(ring);
     expect(hero.getOrderSettings().damageDone).toBe(0);
 
-    // Immer genug Gold für alle außer dem ersten Helden: Er steht in der Liste vorne, also Gold so setzen,
-    // dass sein Sold fehlt, dann zahlt payWages die anderen
+    // Gold so setzen, dass der Sold des ersten Helden fehlt (er steht in der Liste vorne)
     const hisWage = HERO_RARITIES[hero.rarityId].dailyWage;
-    for (let day = 1; day <= WAGE_RULES.unpaidDaysUntilLeave; day++) {
+    for (let day = 1; day <= 5; day++) {
       game.guild.gold = hisWage - 1;
       game.endDay();
-      if (day < WAGE_RULES.unpaidDaysUntilLeave) {
-        expect(hero.isUnhappy()).toBe(true);
-        expect(hero.getOrderSettings().damageDone).toBeCloseTo(WAGE_RULES.unhappyEffects.damageDone);
-      }
+      expect(hero.isUnhappy()).toBe(true);
+      expect(hero.getOrderSettings().damageDone).toBeCloseTo(WAGE_RULES.unhappyEffects.damageDone);
     }
-    expect(game.lastDaySummary.wages.leftNames).toContain(hero.name);
-    expect(game.guild.findHero(hero.id)).toBeFalsy();
-    expect(game.guild.findItem(ring.id)).toBeTruthy();
+    expect(game.guild.findHero(hero.id)).toBeTruthy();
+    expect(game.lastDaySummary.wages.unpaidNames).toContain(hero.name);
   });
 
   it('wer wieder Sold bekommt, ist wieder zufrieden', () => {

@@ -100,7 +100,7 @@ describe('Sold', () => {
     expect(game.getDailyWages()).toBe(total);
     game.guild.gold = 1000;
     game.endDay();
-    expect(game.lastDaySummary.wages).toMatchObject({ total, paid: total, unpaidNames: [], leftNames: [] });
+    expect(game.lastDaySummary.wages).toMatchObject({ total, paid: total, unpaidNames: [] });
     expect(game.guild.gold).toBe(1000 - total);
 
     // Nur genug Gold für den ersten Helden: Die anderen gehen leer aus und sind unzufrieden

@@ -22,10 +22,9 @@ export const HERO_RARITIES = {
 
 // Was passiert, wenn der Sold nicht bezahlt werden kann (siehe systems/HeroTaskSystem.js, payWages)
 export const WAGE_RULES = {
-  // Wer seinen Sold nicht bekommt, ist unzufrieden und kämpft schlechter (Wirkungen wie bei den Anweisungen)
-  unhappyEffects: { damageDone: -0.1, healingDone: -0.1 },
-  // Nach so vielen Tagen ohne Sold hintereinander verlässt der Held die Gilde
-  unpaidDaysUntilLeave: 3,
+  // Wer seinen Sold nicht bekommt, ist unzufrieden und macht weniger Schaden (Wirkungen wie bei den Anweisungen).
+  // Niemand verlässt deshalb die Gilde (entschieden 2026-10-30: Gold soll nebensächlich sein).
+  unhappyEffects: { damageDone: -0.2 },
 };
 
 export function getHeroRarity(rarityId) {

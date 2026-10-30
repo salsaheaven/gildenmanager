@@ -12,7 +12,7 @@
 import { TASK_RULES, JOB_TEXTS } from '../data/heroTasks.js';
 import { getGroupGoldBonus } from './TraitEffects.js';
 import { EXPERIENCE } from '../data/experience.js';
-import { HERO_RARITIES, WAGE_RULES } from '../data/heroRarities.js';
+import { HERO_RARITIES } from '../data/heroRarities.js';
 
 // Gold für einen Tag Aufträge, ohne Zufall und ohne Gierig (für die Anzeige "etwa X Gold")
 export function getJobGold(hero) {
@@ -90,29 +90,20 @@ export function getDailyWages(guild) {
 
 // Bezahlt den Sold, Held für Held in der Reihenfolge der Heldenliste.
 // Wer nichts bekommt, ist unzufrieden (unpaidDays steigt); wer bezahlt wird, ist wieder zufrieden.
-// Nach WAGE_RULES.unpaidDaysUntilLeave Tagen ohne Sold verlässt der Held die Gilde (seine Ausrüstung bleibt da).
-// Gibt { total, paid, unpaidNames, leftNames } zurück.
+// Niemand verlässt deshalb die Gilde. Gibt { total, paid, unpaidNames } zurück.
 export function payWages(guild) {
   const total = getDailyWages(guild);
   let paid = 0;
   const unpaidNames = [];
-  const leaving = [];
   for (const hero of guild.heroes) {
     const wage = HERO_RARITIES[hero.rarityId].dailyWage;
     if (guild.spendGold(wage)) {
       paid += wage;
       hero.unpaidDays = 0;
-      continue;
-    }
-    hero.unpaidDays++;
-    if (hero.unpaidDays >= WAGE_RULES.unpaidDaysUntilLeave) {
-      leaving.push(hero);
     } else {
+      hero.unpaidDays++;
       unpaidNames.push(hero.name);
     }
   }
-  for (const hero of leaving) {
-    guild.removeHero(hero.id);
-  }
-  return { total, paid, unpaidNames, leftNames: leaving.map((hero) => hero.name) };
+  return { total, paid, unpaidNames };
 }
