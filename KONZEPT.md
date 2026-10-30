@@ -154,7 +154,11 @@ Regel für Raids: **Gleiche Buffs zählen nicht doppelt** (zwei Barden geben nic
 Alle Formeln und Zahlen dafür stehen in `src/data/` (`scaling.js`, `experience.js`) und werden per Simulation eingestellt.
 
 ## Noch offen (nächste Sessions)
-- **Oberfläche komplett neu (nach M3):** Zurzeit zu unübersichtlich. Gegliedert in Planungsabschnitte, Helden mit neuen anlegbaren Items vom Vortag markieren. Details in `PLAN.md` unter „UI-Neubau“.
+- **Oberfläche komplett neu (nach M3):** Zurzeit zu unübersichtlich. Gegliedert in Planungsabschnitte, Helden mit neuen anlegbaren Items vom Vortag markieren. Details in `PLAN.md` unter „UI-Neubau“. **Entschieden 2026-10-30:**
+  - **Schrittweise freischalten:** Systeme erscheinen erst, wenn sie gebraucht werden (z.B. Talente ab Level 5, Verbessern nach dem ersten Fund, Gildenhalle und KI-Gilden später), jeweils mit einem kurzen Hinweis beim ersten Auftauchen. Die ersten Tage sind geführt. Das ist das Tutorial; es wird als Letztes gebaut, weil es auf der fertigen Oberfläche aufsetzt.
+  - **Dungeonwissen wird entdeckt, und zwar nur durch die Aufgabe „Erkunden“.** Ein Dungeonführer füllt sich mit Gegnern, Mechaniken und Gegnerverhalten. Nicht erkundete Einträge bleiben verdeckt. Offen: Was ist ohne Erkunden sichtbar (z.B. Stufe, Bossnamen)? Deckt eine Erkundung alles auf oder Stück für Stück? Darf „Woran es lag“ weiter Mechaniken nennen, die noch nicht erkundet sind?
+  - **Kampf-Labor ist ein Entwickler-Werkzeug** und verschwindet aus der Spieler-Oberfläche (ins Test-Menü F2). Die Risiko-Anzeige deckt ab, was der Spieler davon braucht.
+  - **Handeln und Nachschlagen trennen** (Vorschlag, noch zu bestätigen): Tagesablauf in Planungsabschnitten, daneben ein „Gildenbuch“ zum Nachschlagen (Dungeonführer, Sammelbuch, Rangliste, Ticker).
 - **Endbalancing der Anweisungen:** Jedes Extrem soll irgendwo die beste Wahl sein und irgendwo schaden. Gemessen wird das mit `tools/anweisungen.mjs`. Die Übersicht am Ende markiert Optionen als „situativ“, „nie besser“ oder „immer gut“.
 - **Kampf-Feinheiten:** Erste Version steht im Kampf-Labor. Werte: Leben, Mana, Angriff, Magie, Rüstung. Aggro entsteht durch Schaden (beim Tank ×3 bis ×4) und Heilung. Alle Zahlen stehen in `src/data/`. Noch offen: Krit als eigener Wert auf Items? Wie stark fallen Eigenschaften im Kampf ins Gewicht?
 - **Umfang:** Zielbild steht (60 Helden, 10+ Dungeons, zwei 40-Mann-Raids). Offen: Wie lange dauert ein Durchlauf bis zum Endboss, in Spieltagen und in echten Stunden?
