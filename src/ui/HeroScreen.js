@@ -2,6 +2,7 @@
 // HEROSCREEN – die Heldenübersicht
 // Links: Liste aller Helden. Mitte: Details des gewählten Helden.
 // Rechts: Ausrüstungsliste für den Platz, auf den man in der Mitte getippt hat.
+// Auf dem Handy: Heldenliste als Leiste zum Wischen, die Ausrüstungsliste öffnet sich als Fenster von unten.
 // ============================================================
 
 import { createHeroCanvas } from './PixelArt.js';
@@ -33,10 +34,6 @@ export class HeroScreen {
       onSlotClicked: (slot) => {
         this.selectedSlot = slot;
         this.render();
-        // Auf dem Handy steht die Ausrüstungsliste weit unten: dorthin scrollen
-        if (window.innerWidth <= 700) {
-          this.root.querySelector('.equip-panel').scrollIntoView({ behavior: 'smooth' });
-        }
       },
       onDismissed: () => {
         this.selectedHeroId = null;
@@ -44,7 +41,11 @@ export class HeroScreen {
       },
       onGoToTavern: onGoToTavern,
     });
-    this.equipPanel = new EquipPanel(this.root.querySelector('.equip-panel'), game, inventory);
+    // onClose: Das Fenster von unten (Handy) wird geschlossen
+    this.equipPanel = new EquipPanel(this.root.querySelector('.equip-panel'), game, inventory, () => {
+      this.selectedSlot = null;
+      this.render();
+    });
 
     game.on('changed', () => this.render());
     this.render();
@@ -69,8 +70,23 @@ export class HeroScreen {
     }
 
     const selectedHero = this.game.guild.findHero(this.selectedHeroId);
+    // Die Liste eines Platzes ist offen: Alles darin gilt jetzt als gesehen (die Markierung verschwindet).
+    // markEquipSlotSeen löst selbst ein Neuzeichnen aus, deshalb hier aufhören.
+    if (selectedHero && this.selectedSlot && this.game.getSlotsWithNewGear(selectedHero.id).includes(this.selectedSlot)) {
+      this.game.markEquipSlotSeen(selectedHero.id, this.selectedSlot);
+      return;
+    }
     this.detailPanel.showHero(selectedHero, this.selectedSlot);
     this.equipPanel.show(selectedHero, this.selectedSlot);
+    // Handy: Die Ausrüstungsliste ist ein Fenster von unten, nur offen, wenn ein Platz gewählt ist
+    this.root.querySelector('.equip-panel').classList.toggle('sheet-open', this.selectedSlot !== null);
+  }
+
+  // Einen bestimmten Helden zeigen (z.B. aus dem Tagesplan heraus)
+  selectHero(heroId) {
+    this.selectedHeroId = heroId;
+    this.selectedSlot = null;
+    this.render();
   }
 
   createRosterEntry(hero) {
@@ -83,14 +99,35 @@ export class HeroScreen {
     entry.insertAdjacentHTML('beforeend', `
       <span class="roster-text">
         <span class="roster-name"></span>
-        <span class="roster-sub">${hero.getClass().name} · Lv ${hero.level} · AW ${hero.getGearScore()}${this.game.guild.isHeroBusy(hero.id) ? ' · heute im Dungeon' : ''}${hero.isInjured() ? ' · verletzt' : ''}${hero.isUnhappy() ? ' · <span class="unhappy-chip">unzufrieden</span>' : ''}${hero.getFreeTalentPicks() > 0 ? ' · <span class="talent-free-chip">Talent frei!</span>' : ''}</span>
+        <span class="roster-sub">${hero.getClass().name} · Lv ${hero.level} · AW ${hero.getGearScore()}${this.game.guild.isHeroBusy(hero.id) ? ' · heute im Dungeon' : ''}</span>
       </span>
     `);
     entry.querySelector('.roster-name').textContent = hero.name;
+    // Kleine Zeichen (vor allem für die schmale Leiste auf dem Handy):
+    // neue Ausrüstung, freies Talent, verletzt, unzufrieden
+    const marks = document.createElement('span');
+    marks.className = 'roster-marks';
+    if (this.game.getSlotsWithNewGear(hero.id).length > 0) {
+      marks.insertAdjacentHTML('beforeend', '<span class="new-gear-badge" title="Neue Ausrüstung verfügbar">neu</span>');
+    }
+    if (hero.getFreeTalentPicks() > 0) {
+      marks.insertAdjacentHTML('beforeend', '<span class="talent-free-chip" title="Talent frei">★</span>');
+    }
+    if (hero.isInjured()) {
+      marks.insertAdjacentHTML('beforeend', '<span class="mark-injured" title="Verletzt">✚</span>');
+    }
+    if (hero.isUnhappy()) {
+      marks.insertAdjacentHTML('beforeend', '<span class="unhappy-chip" title="Unzufrieden">☹</span>');
+    }
+    entry.appendChild(marks);
 
     entry.addEventListener('click', () => {
       Sound.click();
       this.selectedHeroId = hero.id;
+      // Auf dem Handy beim Heldenwechsel das Fenster von unten schließen
+      if (window.innerWidth <= 700) {
+        this.selectedSlot = null;
+      }
       this.render();
     });
     return entry;

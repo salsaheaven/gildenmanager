@@ -83,12 +83,15 @@ game.on('itemForged', (item) => inventory.revealItem(item));
 
 const collection = new CollectionOverlay(game);
 const lootBoxScreen = new LootBoxScreen(screenElements.treasury, game, inventory, collection);
-new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'), inventory);
+const heroScreen = new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'), inventory);
 new TavernScreen(screenElements.tavern, game);
 const combatLabScreen = new CombatLabScreen(screenElements.lab, game);
 new DungeonScreen(screenElements.dungeons, game);
 new GuildHallScreen(screenElements.hall, game);
-new DayPlanScreen(screenElements.plan, game, showScreen);
+new DayPlanScreen(screenElements.plan, game, showScreen, (heroId) => {
+  showScreen('heroes');
+  heroScreen.selectHero(heroId);
+});
 new DebugPanel(game);
 
 let currentScreen = null;
@@ -118,7 +121,9 @@ function updateBadges() {
   navBar.setBadge('tavern', tavernHasNews ? '!' : '');
   // Helden mit freier Talent-Wahl
   const freeTalents = guild.heroes.filter((hero) => hero.getFreeTalentPicks() > 0).length;
-  navBar.setBadge('heroes', freeTalents > 0 ? '★' : '');
+  // Helden mit neuer, passender Ausrüstung im Inventar
+  const newGear = guild.heroes.filter((hero) => game.getSlotsWithNewGear(hero.id).length > 0).length;
+  navBar.setBadge('heroes', freeTalents > 0 ? '★' : (newGear > 0 ? '▲' : ''));
   const planned = guild.expeditions.length;
   navBar.setBadge('dungeons', dungeonHasNews ? '!' : (planned > 0 ? String(planned) : ''));
   // Gildenhalle: Hammer, solange gebaut wird; "!", wenn der Unterhalt fehlt

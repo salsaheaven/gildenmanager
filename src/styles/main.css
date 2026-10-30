@@ -3544,7 +3544,140 @@ h3 {
   margin-top: 2px;
 }
 
+/* ---------- Neue Ausrüstung (Markierung) und aufklappbare Bereiche im Heldenbildschirm ---------- */
+
+.new-gear-badge {
+  display: inline-block;
+  background: #1eff00;
+  color: #0c0914;
+  font-size: 13px;
+  line-height: 1;
+  padding: 2px 4px;
+  margin-left: 4px;
+  animation: new-gear-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes new-gear-pulse {
+  50% { box-shadow: 0 0 8px #1eff00; }
+}
+
+.new-gear-button {
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.equipment-slot .new-gear-badge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  margin: 0;
+}
+
+.equipment-slot.has-new-gear {
+  border-color: #1eff00;
+}
+
+.equipment-hint,
+.detail-section > summary .hint {
+  font-family: var(--font-text);
+  font-size: 17px;
+  text-transform: none;
+  margin: 0;
+}
+
+.roster-marks {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.mark-injured {
+  color: #ff6b6b;
+}
+
+.detail-section {
+  margin-top: 10px;
+  border-top: 2px solid var(--border);
+  padding-top: 6px;
+}
+
+.detail-section > summary {
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 11px;
+  color: var(--gold);
+  padding: 6px 0;
+}
+
+.equip-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* "Schließen" gibt es nur auf dem Handy (Fenster von unten) */
+.sheet-close-button {
+  display: none;
+}
+
 @media (max-width: 700px) {
+  /* Heldenbildschirm: Heldenliste als Leiste zum Wischen */
+  .roster-list {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .roster-entry {
+    flex-direction: column;
+    flex: 0 0 84px;
+    gap: 2px;
+    padding: 4px;
+    border-left: none;
+    border-bottom: 4px solid var(--rarity);
+    text-align: center;
+  }
+
+  .roster-sub {
+    display: none;
+  }
+
+  .roster-name {
+    font-size: 14px;
+    max-width: 76px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Ausrüstungsliste als Fenster von unten, nur wenn ein Platz gewählt ist */
+  .equip-panel {
+    display: none;
+  }
+
+  .equip-panel.sheet-open {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 75vh;
+    overflow-y: auto;
+    z-index: 60;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.7);
+    animation: sheet-up 0.2s ease-out;
+  }
+
+  @keyframes sheet-up {
+    from { transform: translateY(40%); opacity: 0; }
+  }
+
+  .sheet-close-button {
+    display: inline-block;
+  }
+
   #screen {
     padding: 10px;
   }

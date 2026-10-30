@@ -1,6 +1,7 @@
 // ============================================================
 // EQUIPPANEL – rechte Seite im Heldenbildschirm: die Ausrüstungsliste für EINEN Platz.
 // Sie erscheint, wenn man links auf einen Ausrüstungsplatz tippt (belegt oder leer).
+// Auf dem Handy ist sie ein Fenster von unten mit Knopf "Schließen" (CSS-Klasse sheet-open, siehe HeroScreen).
 //   - oben: was der Held in diesem Platz gerade trägt, mit Knopf zum Verbessern
 //   - darunter: alle passenden Items aus dem Inventar, höchstes Item-Level zuerst
 //   - pro Item der Unterschied zu dem angelegten Teil, Wert für Wert (z.B. "+3 Angriff · −2 Rüstung")
@@ -16,10 +17,12 @@ import { createUpgradeButton, applyUpgradeGlow } from './UpgradeControls.js';
 
 export class EquipPanel {
   // inventory = das InventoryOverlay (weiß, welche Items "neu" sind)
-  constructor(rootElement, game, inventory) {
+  // onClose = schließt das Fenster von unten (nur auf dem Handy sichtbar)
+  constructor(rootElement, game, inventory, onClose) {
     this.root = rootElement;
     this.game = game;
     this.inventory = inventory;
+    this.onClose = onClose;
     this.hero = null;
     this.slot = null; // gewählter Ausrüstungsplatz, null = noch keiner
   }
@@ -48,12 +51,16 @@ export class EquipPanel {
 
     const currentItem = this.hero.equipment[this.slot];
     this.root.innerHTML = `
-      <h2></h2>
+      <div class="equip-head"><h2></h2><button class="sheet-close-button">Schließen</button></div>
       <p class="hint equip-armor-hint"></p>
       <div class="equip-current"></div>
       <div class="equip-list"></div>
     `;
     this.root.querySelector('h2').textContent = SLOT_NAMES[this.slot] + ' für ' + this.hero.name;
+    this.root.querySelector('.sheet-close-button').addEventListener('click', () => {
+      Sound.click();
+      this.onClose();
+    });
     this.root.querySelector('.equip-armor-hint').textContent = describeClassArmor(this.hero.getClass()) + '. Ringe passen allen.';
     this.renderCurrentItem(this.root.querySelector('.equip-current'), currentItem);
 

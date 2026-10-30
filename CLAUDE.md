@@ -46,6 +46,7 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                RivalSystem (KI-Gilden kommen voran, Neuigkeiten-Ticker, Server-First, Rangliste),
                BuildingSystem (Bau starten, Bautag bei endDay, Unterhalt: alles oder nichts),
                StartTeam (prüft die Starttruppe: Rolle pro Platz, alle Rüstungsarten),
+               NewGear (Markierung „neue Ausrüstung“: passende Items, die in der Liste des Platzes noch nicht gesehen wurden),
                CraftingSystem (Zerlegen → Staub/Kristalle/Rohstoffe, Verbessern +1 bis +10 mit Fehlschlag ab +6),
                ForgeSystem (Schmieden: weißes Item nach Vorlage; Umschmieden: andere Rüstungsart), AlchemySystem (Brauen: Kräuter → Waren), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
@@ -74,8 +75,8 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                consumables (Verbrauchsgüter des Händlers: Preis, Grundware/Tagesangebot, Wirkung; 2 Vorrats-Plätze pro Gruppe),
                collectionBook (Sammelbuch-Seiten pro Dungeon mit Titel und Gold-Bonus; die Items kommen aus `bossLoot` in lootBoxes)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tagesplan, Startseite), LootBoxScreen (Schatzkammer: Kisten, Händler, Vorratskammer),
-               HeroScreen (+ HeroDetailPanel, EquipPanel = Ausrüstungsliste für den angetippten Platz, nach Item-Level sortiert,
-               Vergleich pro Wert, bewusst ohne „bestes Item“), TavernScreen, CombatLabScreen,
+               HeroScreen (+ HeroDetailPanel = Plätze direkt unter dem Porträt, Rest aufklappbar; EquipPanel = Ausrüstungsliste für den angetippten Platz,
+               auf dem Handy als Fenster von unten, nach Item-Level sortiert, Vergleich pro Wert, bewusst ohne „bestes Item“), TavernScreen, CombatLabScreen,
                DungeonScreen (+ RunViewer = Bericht eines beendeten Runs zeigen),
                GuildHallScreen (Gildenhalle: Karte pro Gebäude, Bauen, Baustelle mit Balken).
                DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe als Szene, danach Zusammenfassung mit Beute.

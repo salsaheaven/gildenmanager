@@ -1,7 +1,10 @@
 // ============================================================
 // HERODETAILPANEL – zeigt alles über einen Helden:
-// Bild, Name, Klasse, Eigenschaften (darunter der Knopf "Entlassen"), Werte, Skills und die 6 Ausrüstungsplätze.
-// Klick auf einen Ausrüstungsplatz zeigt rechts die Ausrüstungsliste für diesen Platz.
+//   - oben: Bild, Name, Klasse, Eigenschaften (darunter der Knopf "Entlassen")
+//   - direkt darunter die 6 Ausrüstungsplätze (Plätze mit neuer Ausrüstung sind markiert)
+//   - dann aufklappbare Bereiche: Werte und Skills, Talente, Anweisungen
+//     (auf dem Handy anfangs zu, damit die Ausrüstung ohne Scrollen zu sehen ist)
+// Klick auf einen Ausrüstungsplatz öffnet die Ausrüstungsliste für diesen Platz (EquipPanel).
 // ============================================================
 
 import { renderTalents } from './TalentPanel.js';
@@ -25,6 +28,9 @@ export class HeroDetailPanel {
     this.game = game;
     this.callbacks = callbacks;
     this.hero = null;
+    // Welche Bereiche aufgeklappt sind (bleibt beim Neuzeichnen erhalten). Auf dem Handy anfangs alle zu.
+    const startOpen = window.innerWidth > 700;
+    this.openSections = { stats: startOpen, talents: startOpen, orders: startOpen };
   }
 
   // selectedSlot = Platz, dessen Liste gerade rechts offen ist (wird hervorgehoben)
@@ -62,28 +68,36 @@ export class HeroDetailPanel {
         </div>
       </div>
 
-      <div class="detail-columns">
-        <div>
-          <h3>Werte</h3>
-          <table class="stat-table"></table>
-          <div class="gear-score">Ausrüstungswert: <b>${hero.getGearScore()}</b></div>
-          <div class="hero-resistances"></div>
-        </div>
-        <div>
-          <h3>Skills</h3>
-          <ul class="skill-list"></ul>
-        </div>
-      </div>
-
-      <h3>Ausrüstung</h3>
+      <h3>Ausrüstung <span class="hint equipment-hint">Tippe einen Platz an</span></h3>
       <div class="equipment-grid"></div>
 
-      <h3>Talente</h3>
-      <div class="hero-talents"></div>
+      <details class="detail-section" data-section="stats">
+        <summary>Werte und Skills <span class="hint">· AW ${hero.getGearScore()}</span></summary>
+        <div class="detail-columns">
+          <div>
+            <h3>Werte</h3>
+            <table class="stat-table"></table>
+            <div class="gear-score">Ausrüstungswert: <b>${hero.getGearScore()}</b></div>
+            <div class="hero-resistances"></div>
+          </div>
+          <div>
+            <h3>Skills</h3>
+            <ul class="skill-list"></ul>
+          </div>
+        </div>
+      </details>
 
-      <h3>Anweisungen für den Kampf</h3>
-      <div class="hero-orders"></div>
+      <details class="detail-section" data-section="talents">
+        <summary>Talente${hero.getFreeTalentPicks() > 0 ? ' <span class="talent-free-chip">Talent frei!</span>' : ''}</summary>
+        <div class="hero-talents"></div>
+      </details>
+
+      <details class="detail-section" data-section="orders">
+        <summary>Anweisungen für den Kampf</summary>
+        <div class="hero-orders"></div>
+      </details>
     `;
+    this.setupSections();
 
     this.root.querySelector('.detail-portrait').appendChild(createHeroCanvas(hero, 9));
     this.root.querySelector('.detail-hero-name').textContent = hero.name;
@@ -120,6 +134,18 @@ export class HeroDetailPanel {
       this.game.setHeroOrder(changedHero.id, orderId, optionId);
     }, false);
     this.setupDismissButton();
+  }
+
+  // Aufklappbare Bereiche: Zustand wiederherstellen und Änderungen merken.
+  // Ein freies Talent klappt die Talente immer auf, damit man es nicht übersieht.
+  setupSections() {
+    for (const section of this.root.querySelectorAll('.detail-section')) {
+      const name = section.dataset.section;
+      section.open = this.openSections[name] || (name === 'talents' && this.hero.getFreeTalentPicks() > 0);
+      section.addEventListener('toggle', () => {
+        this.openSections[name] = section.open;
+      });
+    }
   }
 
   // Umskillen: setzt alle Talente zurück und kostet Gold
@@ -194,12 +220,18 @@ export class HeroDetailPanel {
   // Klick auf das kleine x nimmt das Item ab.
   renderEquipment() {
     const grid = this.root.querySelector('.equipment-grid');
+    const slotsWithNewGear = this.game.getSlotsWithNewGear(this.hero.id);
     for (const slot of EQUIPMENT_SLOTS) {
       const item = this.hero.equipment[slot];
       const slotElement = document.createElement('div');
       slotElement.className = 'equipment-slot';
       slotElement.classList.toggle('selected-slot', slot === this.selectedSlot);
       slotElement.innerHTML = `<div class="slot-icon"></div><div class="slot-label">${SLOT_NAMES[slot]}</div>`;
+      // Neue, passende Ausrüstung im Inventar: grüne Markierung, bis man die Liste geöffnet hat
+      if (slotsWithNewGear.includes(slot)) {
+        slotElement.classList.add('has-new-gear');
+        slotElement.insertAdjacentHTML('beforeend', '<span class="new-gear-badge" title="Neue Ausrüstung für diesen Platz">neu</span>');
+      }
 
       if (item) {
         slotElement.style.setProperty('--rarity', item.getRarity().color);

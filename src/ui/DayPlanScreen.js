@@ -29,10 +29,12 @@ import { Sound } from './Sound.js';
 
 export class DayPlanScreen {
   // onGoTo(screenId) = zu einem anderen Reiter wechseln (z.B. 'dungeons' oder 'tavern')
-  constructor(rootElement, game, onGoTo) {
+  // onShowHero(heroId) = einen Helden im Heldenbildschirm zeigen (z.B. wegen neuer Ausrüstung)
+  constructor(rootElement, game, onGoTo, onShowHero) {
     this.root = rootElement;
     this.game = game;
     this.onGoTo = onGoTo;
+    this.onShowHero = onShowHero;
     this.openOrders = new Set(); // ids der Gruppen, deren Anweisungen gerade aufgeklappt sind
 
     this.root.innerHTML = `
@@ -271,6 +273,18 @@ export class DayPlanScreen {
     text.innerHTML = '<b></b><span class="roster-sub"></span>';
     text.querySelector('b').textContent = hero.name;
     text.querySelector('.roster-sub').textContent = hero.getClass().name + ' · Lv ' + hero.level;
+    // Neue Ausrüstung für diesen Helden: antippen springt zu ihm in den Heldenbildschirm
+    if (this.game.getSlotsWithNewGear(hero.id).length > 0) {
+      const badge = document.createElement('button');
+      badge.className = 'new-gear-badge new-gear-button';
+      badge.textContent = 'neue Ausrüstung';
+      badge.title = 'Zum Helden, um sie anzuschauen';
+      badge.addEventListener('click', () => {
+        Sound.click();
+        this.onShowHero(hero.id);
+      });
+      text.appendChild(badge);
+    }
     row.appendChild(text);
     if (taskId === 'injured') {
       const chip = createTaskChip(taskId);

@@ -18,6 +18,7 @@
 
 import { getSalvageYield, upgradeItem } from '../systems/CraftingSystem.js';
 import { forgeItem, reforgeItem } from '../systems/ForgeSystem.js';
+import { getSlotsWithNewGear, markSlotSeen, markItemSeen } from '../systems/NewGear.js';
 import { brew } from '../systems/AlchemySystem.js';
 import { checkStartTeam } from '../systems/StartTeam.js';
 import { START_TEAM_RULES } from '../data/startTeam.js';
@@ -586,9 +587,27 @@ export class Game {
     const previousItem = hero.equip(item);
     if (previousItem) {
       this.guild.addItem(previousItem);
+      // Was er gerade abgelegt hat, ist für ihn nichts Neues
+      markItemSeen(hero, previousItem.getSlot(), previousItem.id);
     }
     this.emit('changed');
     return true;
+  }
+
+  // Plätze eines Helden mit neuer, passender Ausrüstung im Inventar (siehe systems/NewGear.js)
+  getSlotsWithNewGear(heroId) {
+    const hero = this.guild.findHero(heroId);
+    return hero ? getSlotsWithNewGear(this.guild, hero) : [];
+  }
+
+  // Der Spieler hat die Ausrüstungsliste dieses Platzes geöffnet: Die Markierung verschwindet.
+  markEquipSlotSeen(heroId, slot) {
+    const hero = this.guild.findHero(heroId);
+    if (!hero) {
+      return;
+    }
+    markSlotSeen(this.guild, hero, slot);
+    this.emit('changed');
   }
 
   // Legt für jeden Platz das beste passende Item aus dem Inventar an.
@@ -771,6 +790,7 @@ export class Game {
       return false;
     }
     this.guild.addItem(item);
+    markItemSeen(hero, slot, item.id);
     this.emit('changed');
     return true;
   }

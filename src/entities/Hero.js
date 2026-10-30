@@ -43,6 +43,9 @@ export class Hero {
     // Gewählte Talente (Liste von Talent-ids, siehe data/talents.js)
     this.talentIds = [];
     this.unpaidDays = 0; // Tage hintereinander ohne Sold (ab 1 unzufrieden, siehe WAGE_RULES)
+    // Items, die der Spieler in der Ausrüstungsliste eines Platzes schon gesehen hat: Platz → Liste von Item-ids.
+    // Was passt und hier fehlt, gilt als "neue Ausrüstung" (siehe systems/NewGear.js).
+    this.seenItemIds = {};
 
     // Anweisungen für den Kampf: Anweisungs-id → gewählte Option (siehe data/heroOrders.js).
     // Fehlt eine Anweisung, gilt die Standard-Option.
@@ -355,6 +358,7 @@ export class Hero {
       task: this.task,
       talentIds: this.talentIds,
       unpaidDays: this.unpaidDays,
+      seenItemIds: this.seenItemIds,
     };
   }
 
@@ -371,6 +375,7 @@ export class Hero {
     hero.task = data.task;
     hero.talentIds = data.talentIds;
     hero.unpaidDays = data.unpaidDays;
+    hero.seenItemIds = data.seenItemIds;
     for (const slot of EQUIPMENT_SLOTS) {
       const itemData = data.equipment[slot];
       hero.equipment[slot] = itemData ? Item.fromSaveData(itemData) : null;
