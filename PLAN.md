@@ -127,7 +127,7 @@ In kleinen, jeweils online testbaren Schritten:
 - Weniger auf einmal zeigen, Wichtiges zuerst, Details aufklappbar
 - Entschieden 2026-10-30 (Details in `KONZEPT.md`): Systeme **schrittweise freischalten** als Tutorial (zuletzt bauen), **Dungeonführer**, der sich nur durch „Erkunden“ füllt, **Kampf-Labor** nur noch im Test-Menü
 
-**M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: 10+ Dungeons, Kadergröße offen (war ~60 bei 40-Mann-Raids). Ein Durchlauf etwa 2–3 Stunden.
+**M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.
 
 **M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie, New Game+.
 
