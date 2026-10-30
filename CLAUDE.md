@@ -29,7 +29,7 @@ Eine Option, die immer die beste ist, ist keine Wahl. Geprüft wird das per Simu
 - **Modular, auch um Token zu sparen:** Kleine Dateien mit einer klaren Aufgabe. Für eine Änderung nur die betroffenen Dateien lesen, nicht das ganze Projekt. Die Übersicht unten zeigt, wo was liegt.
 - Testhilfen wie ein Test-Menü oder ein Kampf-Labor sind ausdrücklich erwünscht, damit spätere Inhalte schnell prüfbar sind
 - **Kein Balancing, keine Progressions-Arbeit – aktuell ein reiner Testballon.** Ziel des fertigen Spiels: Roster von ~60 Helden, 10+ Dungeons,
-  zwei 40-Mann-Raids (der letzte Raid ist der Endboss). Mit 10 Helden und 3 Dungeons ist Balancing sinnlos.
+  zwei 20-Mann-Raids (der letzte Raid ist der Endboss). Mit 10 Helden und 3 Dungeons ist Balancing sinnlos.
   Jetzt werden **Gameplay-Loops und Features** eingebaut. Die Progression muss weder Sinn ergeben noch motivieren.
   Keine Zielwert-Messungen, keine Parameter-Suchen, kein Nachtunen von Gegnern oder Chancen, auch nicht „nur kurz“.
   Erlaubt ist nur: prüfen, dass ein neues Feature nicht kaputt ist (Tests grün, kein Absturz). Zahlen einfach grob setzen und weitermachen.

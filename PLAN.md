@@ -117,8 +117,8 @@ In kleinen, jeweils online testbaren Schritten:
 **M3 – Gildenhalle & Crafting:** (KI-Gilden, Rangliste und Ticker gibt es schon seit P5.) Plan vom 2026-10-29 in 5 Schritten:
 - **Schritt 1** ✅ Startbildschirm „Gründe deine Gilde“ (Name + 5 Klassen nach Rollen, Platte/Leder/Stoff müssen dabei sein, `FoundingScreen.js`, `StartTeam.js`, `data/startTeam.js`). Neue Tagesaufgabe **Aufträge erledigen** (sicheres Gold, keine EP, Gierig bringt mehr). Erkunden gilt für alle Gruppen eines Tages im selben Dungeon. Spielstand-Version 11.
 - **Schritt 2** ✅ Gildenhalle, Logik und Daten: 6 Gebäude mit Stufe 1–3 (Kaserne, Lazarett, Schmiede, Alchemielabor, Trainingshalle, Kartenraum), Bauen mit Gold + Material und Bauzeit in Tagen, nur eine Baustelle gleichzeitig, Unterhalt pro Tag, Wirkungen in den bestehenden Systemen. Unbezahlter Sold: unzufrieden (−10 % Schaden und Heilung), nach 3 Tagen ohne Sold verlässt der Held die Gilde. Umgesetzt mit zwei Änderungen am Plan: Das **Lazarett** verkürzt keine Verletzungen (die dauern nur 1 Tag), sondern rettet Gefallene mit 25/50/75 % Chance ganz vor der Verletzung. Der **Kartenraum** lässt eine Erkundung 2 bzw. 3 Kampftage halten, Stufe 3 zeigt die Vorhersage (Anzeige in Schritt 3). Spielstand-Version 12.
-- **Schritt 3** Gildenhalle, Oberfläche: Reiter mit Gebäudekarten, Baufortschritt, Fanfare bei „Gebäude fertig“, Unterhalt in der Leiste, Unzufriedenheit am Helden.
-- **Schritt 4** Crafting und Alchemie, Logik und Daten: Schmieden (Platz + Rüstungsart wählen, Seltenheit gewürfelt), Umschmieden (andere Rüstungsart), Boss-Trophäen und Boss-Rezepte, Kräuter statt fertiger Tränke und Brau-Rezepte im Labor.
+- **Schritt 3** Gildenhalle, Oberfläche: Reiter mit Gebäudekarten, Baufortschritt, Fanfare bei „Gebäude fertig“, Unterhalt in der Leiste, Unzufriedenheit am Helden. Dazu (2026-10-30): Unbezahlter Sold führt nicht mehr zum Weggehen, Unzufriedenheit = −20 % Schaden.
+- **Schritt 4** Crafting und Alchemie, Logik und Daten: Schmieden (Platz + Rüstungsart wählen, **nur weiße Items**, aus zerlegten Teilen oder gesammelten Ressourcen, kein Gold, langsamer als Dungeon-Beute), Umschmieden (andere Rüstungsart, teurer als den Drop zu farmen), Kräuter statt fertiger Tränke und Brau-Rezepte im Labor. Boss-Rezepte gestrichen (2026-10-30, siehe `KONZEPT.md`).
 - **Schritt 5** Crafting und Alchemie, Oberfläche, danach M3 pushen.
 
 **UI-Neubau (nach M3, vor M4; gewünscht 2026-10-29):** Die Oberfläche ist mit allen Systemen zu unübersichtlich geworden und wird **komplett neu gemacht**. Vorher gemeinsam planen. Ideen:
@@ -127,7 +127,7 @@ In kleinen, jeweils online testbaren Schritten:
 - Weniger auf einmal zeigen, Wichtiges zuerst, Details aufklappbar
 - Entschieden 2026-10-30 (Details in `KONZEPT.md`): Systeme **schrittweise freischalten** als Tutorial (zuletzt bauen), **Dungeonführer**, der sich nur durch „Erkunden“ füllt, **Kampf-Labor** nur noch im Test-Menü
 
-**M4 – Raids & Endboss:** Zwei 40-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~60 Helden im Roster, 10+ Dungeons.
+**M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: 10+ Dungeons, Kadergröße offen (war ~60 bei 40-Mann-Raids). Ein Durchlauf etwa 2–3 Stunden.
 
 **M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie, New Game+.
 
