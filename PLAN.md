@@ -126,6 +126,12 @@ In kleinen, jeweils online testbaren Schritten:
 - **Helden markieren, die seit gestern neue Items bekommen haben, die sie anziehen können** (Hinweis in der Heldenliste und im Tagesplan)
 - Weniger auf einmal zeigen, Wichtiges zuerst, Details aufklappbar
 - Entschieden 2026-10-30 (Details in `KONZEPT.md`): Systeme **schrittweise freischalten** als Tutorial (zuletzt bauen), **Dungeonführer**, der sich nur durch „Erkunden“ füllt, **Kampf-Labor** nur noch im Test-Menü
+- **Reihenfolge (entschieden 2026-10-30 nach dem Handy-Test), jeder Schritt einzeln spielbar:**
+  1. **Ausrüsten neu:** Plätze-Raster unter dem Porträt, Liste als Fenster von unten, Markierung „neue Ausrüstung“ an Plätzen, in der Heldenliste und im Tagesplan, Details aufklappbar
+  2. **Dungeonführer und Planung:** Beute-Liste, empfohlenes Niveau, Bosse im Detail; Gruppenwahl nach Rollen
+  3. **Planungsabschnitte:** Leiste unten auf dem Handy, „Tag beenden“ immer sichtbar, Kasten „Was gibt es heute zu tun?“
+  4. **Dungeonwissen durch Erkunden** (Mechaniken, Schadensarten und Risiko-Anzeige verdeckt), Kampf-Labor ins Test-Menü
+  5. **Stehende Gruppen**, zuletzt das schrittweise Freischalten als Tutorial
 
 **M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.
 
