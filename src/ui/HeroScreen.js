@@ -1,13 +1,15 @@
 // ============================================================
 // HEROSCREEN – die Heldenübersicht
-// Links: Liste aller Helden. Mitte: Details des gewählten Helden.
-// Rechts: Ausrüstungsliste für den Platz, auf den man in der Mitte getippt hat.
-// Auf dem Handy: Heldenliste als Leiste zum Wischen, die Ausrüstungsliste öffnet sich als Fenster von unten.
+// Links: Übersicht nach Position mit Gruppen-Zähler (RoleOverview). Mitte: Details des gewählten Helden
+// mit Blättern (‹ ›). Rechts: Ausrüstungsliste für den Platz, auf den man in der Mitte getippt hat.
+// Auf dem Handy gibt es zwei Ansichten: erst die Übersicht, ein Tipp auf einen Helden öffnet seine Details
+// ("‹ Übersicht" führt zurück). Die Ausrüstungsliste öffnet sich dort als Fenster von unten.
 // ============================================================
 
-import { createHeroCanvas } from './PixelArt.js';
+import { POSITIONS } from '../data/groupRules.js';
 import { HeroDetailPanel } from './HeroDetailPanel.js';
 import { EquipPanel } from './EquipPanel.js';
+import { renderRoleOverview } from './RoleOverview.js';
 import { Sound } from './Sound.js';
 
 export class HeroScreen {
@@ -17,26 +19,36 @@ export class HeroScreen {
     this.root = rootElement;
     this.game = game;
     this.selectedHeroId = null;
-    this.selectedSlot = null; // Ausrüstungsplatz, dessen Liste rechts gezeigt wird
+    this.selectedSlot = null;   // Ausrüstungsplatz, dessen Liste gerade offen ist
+    this.showingDetail = false; // Handy: true = Details eines Helden, false = Übersicht
 
     this.root.innerHTML = `
       <div class="hero-screen">
         <section class="panel roster">
           <h2>Helden <span class="roster-count"></span></h2>
-          <div class="roster-list"></div>
+          <div class="role-overview"></div>
         </section>
-        <section class="panel hero-detail"></section>
+        <section class="panel hero-detail">
+          <div class="hero-nav">
+            <button class="hero-nav-back">‹ Übersicht</button>
+            <button class="hero-nav-prev" title="Voriger Held">‹</button>
+            <span class="hero-nav-position"></span>
+            <button class="hero-nav-next" title="Nächster Held">›</button>
+          </div>
+          <div class="hero-detail-body"></div>
+        </section>
         <section class="panel equip-panel"></section>
       </div>
     `;
 
-    this.detailPanel = new HeroDetailPanel(this.root.querySelector('.hero-detail'), game, {
+    this.detailPanel = new HeroDetailPanel(this.root.querySelector('.hero-detail-body'), game, {
       onSlotClicked: (slot) => {
         this.selectedSlot = slot;
         this.render();
       },
       onDismissed: () => {
         this.selectedHeroId = null;
+        this.showingDetail = false;
         this.render();
       },
       onGoToTavern: onGoToTavern,
@@ -46,39 +58,92 @@ export class HeroScreen {
       this.selectedSlot = null;
       this.render();
     });
+    this.setupNavigation();
 
     game.on('changed', () => this.render());
+    this.render();
+  }
+
+  // Knöpfe über den Details: zurück zur Übersicht (Handy), voriger und nächster Held
+  setupNavigation() {
+    this.root.querySelector('.hero-nav-back').addEventListener('click', () => {
+      Sound.click();
+      this.showingDetail = false;
+      this.selectedSlot = null;
+      this.render();
+      window.scrollTo(0, 0);
+    });
+    this.root.querySelector('.hero-nav-prev').addEventListener('click', () => this.step(-1));
+    this.root.querySelector('.hero-nav-next').addEventListener('click', () => this.step(1));
+  }
+
+  // Alle Helden in der Reihenfolge der Übersicht (erst alle Tanks, dann alle Heiler …)
+  getOrderedHeroes() {
+    const byPosition = this.game.getHeroesByPosition();
+    const ordered = [];
+    for (const position of POSITIONS) {
+      ordered.push(...byPosition[position.id]);
+    }
+    return ordered;
+  }
+
+  // Zum vorigen (-1) oder nächsten (+1) Helden blättern, am Ende geht es vorne weiter.
+  // Der gewählte Platz bleibt offen: So kann man z.B. alle Ringe nacheinander anschauen.
+  step(direction) {
+    const ordered = this.getOrderedHeroes();
+    if (ordered.length === 0) {
+      return;
+    }
+    Sound.click();
+    const index = ordered.findIndex((hero) => hero.id === this.selectedHeroId);
+    const next = (index + direction + ordered.length) % ordered.length;
+    this.selectedHeroId = ordered[next].id;
     this.render();
   }
 
   render() {
     const heroes = this.game.guild.heroes;
 
-    // Wenn noch kein Held gewählt ist (oder er weg ist), den ersten wählen
+    // Wenn noch kein Held gewählt ist (oder er weg ist), den ersten der Übersicht wählen
     if (!this.game.guild.findHero(this.selectedHeroId)) {
-      this.selectedHeroId = heroes.length > 0 ? heroes[0].id : null;
+      const ordered = this.getOrderedHeroes();
+      this.selectedHeroId = ordered.length > 0 ? ordered[0].id : null;
     }
-
-    this.root.querySelector('.roster-count').textContent = '(' + heroes.length + ' / ' + this.game.guild.getMaxHeroes() + ')';
-    const list = this.root.querySelector('.roster-list');
-    list.innerHTML = '';
-    for (const hero of heroes) {
-      list.appendChild(this.createRosterEntry(hero));
-    }
-    if (heroes.length === 0) {
-      list.innerHTML = '<p class="empty">Noch keine Helden. Heuere welche in der Taverne an!</p>';
-    }
-
     const selectedHero = this.game.guild.findHero(this.selectedHeroId);
+
     // Die Liste eines Platzes ist offen: Alles darin gilt jetzt als gesehen (die Markierung verschwindet).
     // markEquipSlotSeen löst selbst ein Neuzeichnen aus, deshalb hier aufhören.
     if (selectedHero && this.selectedSlot && this.game.getSlotsWithNewGear(selectedHero.id).includes(this.selectedSlot)) {
       this.game.markEquipSlotSeen(selectedHero.id, this.selectedSlot);
       return;
     }
+
+    this.root.querySelector('.roster-count').textContent = '(' + heroes.length + ' / ' + this.game.guild.getMaxHeroes() + ')';
+    const overview = this.root.querySelector('.role-overview');
+    if (heroes.length === 0) {
+      overview.innerHTML = '<p class="empty">Noch keine Helden. Heuere welche in der Taverne an!</p>';
+    } else {
+      renderRoleOverview(overview, this.game, this.selectedHeroId, (heroId) => {
+        this.selectedHeroId = heroId;
+        this.showingDetail = true;
+        this.render();
+        // Auf dem Handy oben bei den Details anfangen
+        if (window.innerWidth <= 700) {
+          window.scrollTo(0, 0);
+        }
+      });
+    }
+
+    // Blättern: "3 / 12"
+    const ordered = this.getOrderedHeroes();
+    const index = ordered.findIndex((hero) => hero.id === this.selectedHeroId);
+    this.root.querySelector('.hero-nav-position').textContent = index >= 0 ? (index + 1) + ' / ' + ordered.length : '';
+    this.root.querySelector('.hero-nav').hidden = ordered.length === 0;
+
     this.detailPanel.showHero(selectedHero, this.selectedSlot);
     this.equipPanel.show(selectedHero, this.selectedSlot);
-    // Handy: Die Ausrüstungsliste ist ein Fenster von unten, nur offen, wenn ein Platz gewählt ist
+    // Handy: Übersicht oder Details, und die Ausrüstungsliste als Fenster von unten
+    this.root.querySelector('.hero-screen').classList.toggle('show-detail', this.showingDetail);
     this.root.querySelector('.equip-panel').classList.toggle('sheet-open', this.selectedSlot !== null);
   }
 
@@ -86,50 +151,7 @@ export class HeroScreen {
   selectHero(heroId) {
     this.selectedHeroId = heroId;
     this.selectedSlot = null;
+    this.showingDetail = true;
     this.render();
-  }
-
-  createRosterEntry(hero) {
-    const rarity = hero.getRarity();
-    const entry = document.createElement('button');
-    entry.className = 'roster-entry';
-    entry.style.setProperty('--rarity', rarity.color);
-    entry.classList.toggle('selected', hero.id === this.selectedHeroId);
-    entry.appendChild(createHeroCanvas(hero, 3));
-    entry.insertAdjacentHTML('beforeend', `
-      <span class="roster-text">
-        <span class="roster-name"></span>
-        <span class="roster-sub">${hero.getClass().name} · Lv ${hero.level} · AW ${hero.getGearScore()}${this.game.guild.isHeroBusy(hero.id) ? ' · heute im Dungeon' : ''}</span>
-      </span>
-    `);
-    entry.querySelector('.roster-name').textContent = hero.name;
-    // Kleine Zeichen (vor allem für die schmale Leiste auf dem Handy):
-    // neue Ausrüstung, freies Talent, verletzt, unzufrieden
-    const marks = document.createElement('span');
-    marks.className = 'roster-marks';
-    if (this.game.getSlotsWithNewGear(hero.id).length > 0) {
-      marks.insertAdjacentHTML('beforeend', '<span class="new-gear-badge" title="Neue Ausrüstung verfügbar">neu</span>');
-    }
-    if (hero.getFreeTalentPicks() > 0) {
-      marks.insertAdjacentHTML('beforeend', '<span class="talent-free-chip" title="Talent frei">★</span>');
-    }
-    if (hero.isInjured()) {
-      marks.insertAdjacentHTML('beforeend', '<span class="mark-injured" title="Verletzt">✚</span>');
-    }
-    if (hero.isUnhappy()) {
-      marks.insertAdjacentHTML('beforeend', '<span class="unhappy-chip" title="Unzufrieden">☹</span>');
-    }
-    entry.appendChild(marks);
-
-    entry.addEventListener('click', () => {
-      Sound.click();
-      this.selectedHeroId = hero.id;
-      // Auf dem Handy beim Heldenwechsel das Fenster von unten schließen
-      if (window.innerWidth <= 700) {
-        this.selectedSlot = null;
-      }
-      this.render();
-    });
-    return entry;
   }
 }
