@@ -26,6 +26,7 @@ Eine Option, die immer die beste ist, ist keine Wahl. Geprüft wird das per Simu
 
 ## Arbeitsweise
 - **Klein und spielbar:** Große Features in Schritte zerlegen, die jeweils einzeln spielbar sind. Nach jedem Schritt lokal committen. **Gepusht (und damit von GitHub Pages veröffentlicht) wird nur bei Meilensteinen**, z.B. wenn ein Review-Vorschlag komplett umgesetzt ist, nicht bei jeder kleinen Änderung.
+  **Ausnahme UI-Änderungen:** Ein fertiger, getesteter Schritt, der nur die Oberfläche ändert (z.B. im UI-Neubau), wird gleich auf `main` gepusht, damit er direkt auf dem Handy testbar ist.
 - **Modular, auch um Token zu sparen:** Kleine Dateien mit einer klaren Aufgabe. Für eine Änderung nur die betroffenen Dateien lesen, nicht das ganze Projekt. Die Übersicht unten zeigt, wo was liegt.
 - Testhilfen wie ein Test-Menü oder ein Kampf-Labor sind ausdrücklich erwünscht, damit spätere Inhalte schnell prüfbar sind
 - **Kein Balancing, keine Progressions-Arbeit – aktuell ein reiner Testballon.** Ziel des fertigen Spiels: Roster von ~30 Helden, 10+ Dungeons,
