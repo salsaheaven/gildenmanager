@@ -5,6 +5,7 @@
 //   - darunter eine Zeile pro Position mit kleinen Kacheln: Bild, Level und Zeichen
 //     (neu = neue Ausrüstung, ★ = Talent frei, ✚ = verletzt, ☹ = unzufrieden; eingeplante Helden sind blasser)
 // Tippt man eine Kachel an, wird onSelect(heroId) aufgerufen.
+// renderRoleTiles zeichnet nur die Zeilen mit den Kacheln (ohne Zähler), z.B. für die Gruppenwahl beim Dungeon.
 // Die Positionen und die Gruppenregel stehen in data/groupRules.js.
 // ============================================================
 
@@ -16,7 +17,16 @@ import { Sound } from './Sound.js';
 export function renderRoleOverview(container, game, selectedHeroId, onSelect) {
   container.innerHTML = '';
   container.appendChild(createGroupCounter(game));
+  renderRoleTiles(container, game, {
+    isSelected: (hero) => hero.id === selectedHeroId,
+    isDisabled: () => false,
+    onSelect: onSelect,
+  });
+}
 
+// Zeilen pro Position mit Kacheln, angehängt an container.
+// options = { isSelected(hero), isDisabled(hero), onSelect(heroId) }
+export function renderRoleTiles(container, game, options) {
   const byPosition = game.getHeroesByPosition();
   for (const position of POSITIONS) {
     const heroes = byPosition[position.id];
@@ -28,7 +38,7 @@ export function renderRoleOverview(container, game, selectedHeroId, onSelect) {
       (freeCount < heroes.length ? ' · ' + freeCount + ' frei' : '');
     const tiles = row.querySelector('.role-tiles');
     for (const hero of heroes) {
-      tiles.appendChild(createHeroTile(game, hero, hero.id === selectedHeroId, onSelect));
+      tiles.appendChild(createHeroTile(game, hero, options));
     }
     if (heroes.length === 0) {
       tiles.innerHTML = '<span class="hint">niemand</span>';
@@ -64,15 +74,16 @@ function createGroupCounter(game) {
 }
 
 // Eine Kachel: Bild, Vorname, Level und kleine Zeichen
-function createHeroTile(game, hero, selected, onSelect) {
+function createHeroTile(game, hero, options) {
   const tile = document.createElement('button');
   tile.className = 'hero-tile';
   tile.style.setProperty('--rarity', hero.getRarity().color);
-  tile.classList.toggle('selected', selected);
+  tile.classList.toggle('selected', options.isSelected(hero));
+  tile.disabled = options.isDisabled(hero);
   tile.classList.toggle('busy', game.guild.isHeroBusy(hero.id));
   tile.classList.toggle('injured', hero.isInjured());
   tile.title = hero.name + ' · ' + hero.getClass().name + ' · Lv ' + hero.level +
-    (game.guild.isHeroBusy(hero.id) ? ' · heute im Dungeon' : '');
+    (game.guild.isHeroBusy(hero.id) ? ' · heute im Dungeon' : '') + (hero.isInjured() ? ' · verletzt' : '');
   tile.appendChild(createHeroCanvas(hero, 3));
   tile.insertAdjacentHTML('beforeend', '<span class="hero-tile-name"></span><span class="hero-tile-level"></span><span class="hero-tile-marks"></span>');
   tile.querySelector('.hero-tile-name').textContent = hero.name.split(' ')[0];
@@ -94,7 +105,7 @@ function createHeroTile(game, hero, selected, onSelect) {
 
   tile.addEventListener('click', () => {
     Sound.click();
-    onSelect(hero.id);
+    options.onSelect(hero.id);
   });
   return tile;
 }

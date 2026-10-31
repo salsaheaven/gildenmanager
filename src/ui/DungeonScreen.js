@@ -16,11 +16,12 @@ import { createHeroCanvas, createSpriteCanvas, createChestCanvas } from './Pixel
 import { renderOrders } from './OrdersPanel.js';
 import { RunViewer } from './RunViewer.js';
 import { createRiskBadge } from './RiskBadge.js';
+import { renderRoleTiles } from './RoleOverview.js';
+import { GROUP_RULES, getPositionName } from '../data/groupRules.js';
 import { createSupplyPicker, describeSupplies } from './SupplyPicker.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 
-const GROUP_SIZE = 5;
 
 export class DungeonScreen {
   constructor(rootElement, game) {
@@ -107,7 +108,7 @@ export class DungeonScreen {
       <div class="encounter-list"></div>
       <div class="damage-type-line"></div>
       <div class="reward-line"></div>
-      <h3>Gruppe (bis zu ${GROUP_SIZE} Helden)</h3>
+      <h3 title="${GROUP_RULES.size} Helden: 1 Tank, 1 Heiler und 3 beliebige">Gruppe</h3>
       <div class="group-picker"></div>
       <div class="group-check"></div>
       <div class="risk-line"></div>
@@ -223,42 +224,77 @@ export class DungeonScreen {
     container.appendChild(name);
   }
 
+  // Gruppenwahl nach Position (wie die Heldenübersicht):
+  //   - oben die Statuszeile "Tank ✓ · Heiler ✗ · 4/5 Helden" und die gewählten Helden (antippen = wieder raus)
+  //   - darunter alle Helden als Kacheln pro Position; eingeplante und verletzte sind gesperrt
   renderGroupPicker(container) {
-    const heroes = this.game.guild.heroes;
-    if (heroes.length === 0) {
+    if (this.game.guild.heroes.length === 0) {
       container.innerHTML = '<p class="empty">Noch keine Helden. Heuere welche in der Taverne an!</p>';
       return;
     }
-    for (const hero of heroes) {
-      const busy = this.game.guild.isHeroBusy(hero.id);
-      const injured = hero.isInjured();
-      const button = document.createElement('button');
-      button.className = 'lab-hero-toggle';
-      button.style.setProperty('--rarity', hero.getRarity().color);
-      button.classList.toggle('selected', this.selectedHeroIds.has(hero.id));
-      button.disabled = busy || injured;
-      button.appendChild(createHeroCanvas(hero, 2));
-      button.insertAdjacentHTML('beforeend', '<span></span>');
-      button.querySelector('span').textContent = hero.name + ' (' + hero.getClass().name + ', Lv ' + hero.level + ', AW ' + hero.getGearScore() + ')' +
-        (busy ? ' – heute schon eingeplant' : '') + (injured ? ' – ' + describeInjury(hero) : '');
-      button.addEventListener('click', () => {
-        Sound.click();
-        if (this.selectedHeroIds.has(hero.id)) {
-          this.selectedHeroIds.delete(hero.id);
-        } else if (this.selectedHeroIds.size < GROUP_SIZE) {
-          this.selectedHeroIds.add(hero.id);
-        }
-        this.render();
-      });
-      container.appendChild(button);
+    container.appendChild(this.createGroupStatus());
+
+    const chosen = document.createElement('div');
+    chosen.className = 'group-chosen';
+    for (const hero of this.getSelectedHeroes()) {
+      const chip = document.createElement('button');
+      chip.className = 'group-chosen-hero';
+      chip.style.setProperty('--rarity', hero.getRarity().color);
+      chip.title = hero.name + ' aus der Gruppe nehmen';
+      chip.appendChild(createHeroCanvas(hero, 2));
+      chip.insertAdjacentHTML('beforeend', '<span>✕</span>');
+      chip.addEventListener('click', () => this.toggleHero(hero.id));
+      chosen.appendChild(chip);
     }
+    // Leere Plätze als gestrichelte Kästchen
+    for (let i = this.selectedHeroIds.size; i < GROUP_RULES.size; i++) {
+      chosen.insertAdjacentHTML('beforeend', '<span class="group-empty-slot"></span>');
+    }
+    container.appendChild(chosen);
+
+    renderRoleTiles(container, this.game, {
+      isSelected: (hero) => this.selectedHeroIds.has(hero.id),
+      isDisabled: (hero) => this.game.guild.isHeroBusy(hero.id) || hero.isInjured(),
+      onSelect: (heroId) => this.toggleHero(heroId),
+    });
+  }
+
+  // Held in die Gruppe nehmen oder wieder heraus (höchstens GROUP_RULES.size Helden)
+  toggleHero(heroId) {
+    Sound.click();
+    if (this.selectedHeroIds.has(heroId)) {
+      this.selectedHeroIds.delete(heroId);
+    } else if (this.selectedHeroIds.size < GROUP_RULES.size) {
+      this.selectedHeroIds.add(heroId);
+    }
+    this.render();
+  }
+
+  // "Tank ✓ · Heiler ✗ · 4/5 Helden": grün = erfüllt, rot = fehlt
+  createGroupStatus() {
+    const check = this.game.checkGroup([...this.selectedHeroIds]);
+    const status = document.createElement('div');
+    status.className = 'group-status' + (check.complete ? ' complete' : '');
+    for (const positionId in check.required) {
+      const part = check.required[positionId];
+      const ok = part.have >= part.need;
+      status.insertAdjacentHTML('beforeend', '<span class="group-status-part ' + (ok ? 'ok' : 'missing') + '">' +
+        getPositionName(positionId) + ' ' + (ok ? '✓' : '✗') + '</span>');
+    }
+    const full = check.count === check.size;
+    status.insertAdjacentHTML('beforeend', '<span class="group-status-part ' + (full ? 'ok' : 'missing') + '">' +
+      check.count + '/' + check.size + ' Helden</span>');
+    if (check.complete) {
+      status.insertAdjacentHTML('beforeend', '<span class="group-status-done">Gruppe komplett!</span>');
+    }
+    return status;
   }
 
   getSelectedHeroes() {
     return this.game.guild.heroes.filter((hero) => this.selectedHeroIds.has(hero.id));
   }
 
-  // Hinweise statt Siegchance: Level, Ausrüstungswert und fehlende Rollen
+  // Hinweise zur Stärke: Ø Level und Ø Ausrüstungswert (fehlende Rollen zeigt die Statuszeile der Gruppenwahl)
   renderGroupCheck(container, dungeon) {
     const group = this.getSelectedHeroes();
     if (group.length === 0) {
@@ -267,17 +303,6 @@ export class DungeonScreen {
     }
     const averageGear = Math.round(group.reduce((sum, hero) => sum + hero.getGearScore(), 0) / group.length);
     const averageLevel = Math.round(group.reduce((sum, hero) => sum + hero.level, 0) / group.length * 10) / 10;
-    const roles = group.map((hero) => hero.getClass().role);
-    const warnings = [];
-    if (!roles.includes('tank')) {
-      warnings.push('Kein Tank in der Gruppe!');
-    }
-    if (!roles.includes('healer')) {
-      warnings.push('Kein Heiler in der Gruppe!');
-    }
-    if (group.length < GROUP_SIZE) {
-      warnings.push('Nur ' + group.length + ' von ' + GROUP_SIZE + ' Helden.');
-    }
 
     const levelClass = averageLevel >= dungeon.level ? 'good' : 'bad';
     const gearClass = averageGear >= dungeon.recommendedGearScore ? 'good' : 'bad';
@@ -285,9 +310,6 @@ export class DungeonScreen {
       '<div class="gear-check ' + levelClass + '">Ø Level: ' + averageLevel + ' (Stufe des Dungeons: ' + dungeon.level + ')</div>' +
       '<div class="gear-check ' + gearClass + '">Ø Ausrüstungswert: ' + averageGear +
       ' (empfohlen: ' + dungeon.recommendedGearScore + ')</div>';
-    for (const warning of warnings) {
-      container.insertAdjacentHTML('beforeend', '<div class="group-warning">⚠ ' + warning + '</div>');
-    }
   }
 
   fillButtonRow(container, options, isActive, onClick) {

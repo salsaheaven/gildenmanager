@@ -19,7 +19,7 @@
 import { getSalvageYield, upgradeItem } from '../systems/CraftingSystem.js';
 import { forgeItem, reforgeItem } from '../systems/ForgeSystem.js';
 import { getSlotsWithNewGear, markSlotSeen, markItemSeen } from '../systems/NewGear.js';
-import { countPossibleGroups, groupHeroesByPosition } from '../systems/GroupCounter.js';
+import { countPossibleGroups, groupHeroesByPosition, checkGroup } from '../systems/GroupCounter.js';
 import { brew } from '../systems/AlchemySystem.js';
 import { checkStartTeam } from '../systems/StartTeam.js';
 import { START_TEAM_RULES } from '../data/startTeam.js';
@@ -603,6 +603,12 @@ export class Game {
   // Wie viele vollständige Gruppen gehen heute noch aus den freien Helden? (siehe systems/GroupCounter.js)
   countPossibleGroups() {
     return countPossibleGroups(this.guild);
+  }
+
+  // Prüft eine Gruppe (Liste von Helden-ids): Pflicht-Positionen besetzt, Gruppe voll? (siehe systems/GroupCounter.js)
+  checkGroup(heroIds) {
+    const heroes = heroIds.map((heroId) => this.guild.findHero(heroId)).filter((hero) => hero);
+    return checkGroup(heroes);
   }
 
   // Plätze eines Helden mit neuer, passender Ausrüstung im Inventar (siehe systems/NewGear.js)

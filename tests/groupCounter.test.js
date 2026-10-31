@@ -4,7 +4,7 @@ import { describe, it, expect } from 'vitest';
 import { Game } from '../src/core/Game.js';
 import { HERO_CLASSES } from '../src/data/heroClasses.js';
 import { POSITIONS, getPositionId } from '../src/data/groupRules.js';
-import { countPossibleGroups } from '../src/systems/GroupCounter.js';
+import { countPossibleGroups, checkGroup } from '../src/systems/GroupCounter.js';
 
 // Starttruppe: Paladin (Tank), Schurke (Nahkampf), Magier (Fernkampf), Barde (Unterstützer), Druide (Heiler)
 const START_TEAM = ['paladin', 'rogue', 'mage', 'bard', 'druid'];
@@ -43,5 +43,21 @@ describe('Gruppen-Zähler', () => {
     game.startExpedition('bearCave', [rogue.id], 'never');
     expect(countPossibleGroups(game.guild).groups).toBe(0);
     expect(countPossibleGroups(game.guild).missing).toEqual({ any: 1 });
+  });
+});
+
+describe('Gruppe prüfen', () => {
+  it('meldet fehlende Pflicht-Positionen und ob die Gruppe voll ist', () => {
+    const game = new Game(3);
+    game.foundGuild('', START_TEAM);
+    const heroes = game.guild.heroes;
+    const full = checkGroup(heroes);
+    expect(full.complete).toBe(true);
+    expect(full.required.tank).toEqual({ have: 1, need: 1 });
+
+    const withoutHealer = checkGroup(heroes.filter((hero) => hero.classId !== 'druid'));
+    expect(withoutHealer.complete).toBe(false);
+    expect(withoutHealer.count).toBe(4);
+    expect(withoutHealer.required.healer).toEqual({ have: 0, need: 1 });
   });
 });

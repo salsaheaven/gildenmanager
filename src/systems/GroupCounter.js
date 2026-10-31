@@ -60,3 +60,28 @@ export function countPossibleGroups(guild) {
   }
   return { groups, free, missing };
 }
+
+// Prüft eine (auch unfertige) Gruppe gegen GROUP_RULES.
+// Gibt { count, size, required, complete } zurück:
+//   count    = so viele Helden sind gewählt, size = so viele passen hinein
+//   required = pro Pflicht-Position { have, need }, z.B. { tank: { have: 1, need: 1 }, healer: { have: 0, need: 1 } }
+//   complete = alle Plätze voll und alle Pflicht-Positionen besetzt
+export function checkGroup(heroes) {
+  const byPosition = groupHeroesByPosition(heroes);
+  const required = {};
+  let allRequired = true;
+  for (const positionId in GROUP_RULES.required) {
+    const need = GROUP_RULES.required[positionId];
+    const have = byPosition[positionId].length;
+    required[positionId] = { have, need };
+    if (have < need) {
+      allRequired = false;
+    }
+  }
+  return {
+    count: heroes.length,
+    size: GROUP_RULES.size,
+    required: required,
+    complete: allRequired && heroes.length === GROUP_RULES.size,
+  };
+}
