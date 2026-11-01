@@ -79,8 +79,8 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                collectionBook (Sammelbuch-Seiten pro Dungeon mit Titel und Gold-Bonus; die Items kommen aus `bossLoot` in lootBoxes)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Bildschirme: DayPlanScreen (Tagesplan, Startseite), LootBoxScreen (Schatzkammer: Kisten, Händler, Vorratskammer),
                HeroScreen (+ RoleOverview = Kacheln nach Position mit Gruppen-Zähler; HeroDetailPanel = Plätze direkt unter dem Porträt, Rest aufklappbar, Blättern ‹ ›; EquipPanel = Ausrüstungsliste für den angetippten Platz,
-               auf dem Handy als Fenster von unten, nach Item-Level sortiert, Vergleich pro Wert, bewusst ohne „bestes Item“), TavernScreen, CombatLabScreen,
-               DungeonScreen (Gruppenwahl mit Kacheln nach Position und Statuszeile; + RunViewer = Bericht eines beendeten Runs zeigen),
+               auf dem Handy als Fenster von unten, nach Item-Level sortiert, Vergleich pro Wert; „Bestes anlegen“ am Helden), TavernScreen, CombatLabScreen,
+               DungeonScreen (Gruppenwahl mit Kacheln nach Position und Statuszeile, „Gruppe ausrüsten“; + RunViewer = Bericht eines beendeten Runs zeigen),
                GuildHallScreen (Gildenhalle: Karte pro Gebäude, Bauen, Baustelle mit Balken).
                DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe als Szene, danach Zusammenfassung mit Beute.
                LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden, während des Tagesabschlusses zurückgehalten).

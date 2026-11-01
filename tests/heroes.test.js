@@ -267,3 +267,20 @@ describe('Item-Stärke pro Klasse', () => {
     expect(mage.getUpgradeValue(magicRing)).toBeGreaterThan(mage.getUpgradeValue(attackRing));
   });
 });
+
+describe('Gruppe ausrüsten', () => {
+  it('wer zuerst dran ist, bekommt das bessere Teil', () => {
+    const game = new Game(12);
+    game.foundGuild('', ['paladin', 'rogue', 'mage', 'bard', 'druid']);
+    game.guild.inventory = [];
+    const mage = game.guild.heroes.find((hero) => hero.classId === 'mage');
+    const druid = game.guild.heroes.find((hero) => hero.classId === 'druid');
+    const strong = new Item(game.guild.createItemId(), 'magicRing', 'epic', 'Starker Ring', { magic: 20 });
+    const weak = new Item(game.guild.createItemId(), 'magicRing', 'rare', 'Schwacher Ring', { magic: 5 });
+    game.guild.addItem(weak);
+    game.guild.addItem(strong);
+    expect(game.equipBestForGroup([druid.id, mage.id])).toBe(2);
+    expect(druid.equipment.ring.id).toBe(strong.id);
+    expect(mage.equipment.ring.id).toBe(weak.id);
+  });
+});

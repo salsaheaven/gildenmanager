@@ -3625,6 +3625,19 @@ h3 {
   gap: 8px;
 }
 
+/* "Bestes anlegen" neben der Überschrift, "Gruppe ausrüsten" unter der Gruppenwahl */
+.equipment-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.equip-group-button {
+  margin: 6px 0;
+}
+
 /* Heldenübersicht nach Position (RoleOverview) */
 .group-counter {
   display: flex;

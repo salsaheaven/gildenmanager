@@ -17,6 +17,7 @@ import { renderOrders } from './OrdersPanel.js';
 import { RunViewer } from './RunViewer.js';
 import { createRiskBadge } from './RiskBadge.js';
 import { renderRoleTiles } from './RoleOverview.js';
+import { announceEquipBest } from './HeroDetailPanel.js';
 import { GROUP_RULES, getPositionName } from '../data/groupRules.js';
 import { createSupplyPicker, describeSupplies } from './SupplyPicker.js';
 import { Sound } from './Sound.js';
@@ -111,6 +112,7 @@ export class DungeonScreen {
       <h3 title="${GROUP_RULES.size} Helden: 1 Tank, 1 Heiler und 3 beliebige">Gruppe</h3>
       <div class="group-picker"></div>
       <div class="group-check"></div>
+      <button class="equip-group-button" title="Rüstet die Gruppe mit dem Besten aus dem Inventar aus. Wer zuerst gewählt wurde, ist zuerst dran.">Gruppe ausrüsten</button>
       <div class="risk-line"></div>
       <h3>Rückzug</h3>
       <div class="button-row retreat-buttons"></div>
@@ -146,6 +148,13 @@ export class DungeonScreen {
     this.renderReward(panel.querySelector('.reward-line'), dungeon);
     this.renderGroupPicker(panel.querySelector('.group-picker'));
     this.renderGroupCheck(panel.querySelector('.group-check'), dungeon);
+    const equipGroupButton = panel.querySelector('.equip-group-button');
+    equipGroupButton.hidden = this.selectedHeroIds.size === 0;
+    equipGroupButton.addEventListener('click', () => {
+      // Reihenfolge der Auswahl = Reihenfolge beim Ausrüsten (ein Set merkt sich, was zuerst kam)
+      const count = this.game.equipBestForGroup([...this.selectedHeroIds]);
+      announceEquipBest(count, 'Gruppe');
+    });
     this.fillButtonRow(panel.querySelector('.retreat-buttons'), RETREAT_RULES.map((r) => ({ label: r.name, value: r.id })),
       (value) => value === this.retreatRuleId, (value) => { this.retreatRuleId = value; });
 

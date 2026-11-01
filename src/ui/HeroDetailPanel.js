@@ -68,7 +68,10 @@ export class HeroDetailPanel {
         </div>
       </div>
 
-      <h3>Ausrüstung <span class="hint equipment-hint">Tippe einen Platz an</span></h3>
+      <div class="equipment-head">
+        <h3>Ausrüstung <span class="hint equipment-hint">Tippe einen Platz an</span></h3>
+        <button class="equip-best-button" title="Legt für jeden Platz das Item mit den meisten nützlichen Werten an (Resistenzen zählen nicht)">Bestes anlegen</button>
+      </div>
       <div class="equipment-grid"></div>
 
       <details class="detail-section" data-section="stats">
@@ -134,6 +137,10 @@ export class HeroDetailPanel {
       this.game.setHeroOrder(changedHero.id, orderId, optionId);
     }, false);
     this.setupDismissButton();
+    this.root.querySelector('.equip-best-button').addEventListener('click', () => {
+      const count = this.game.equipBestItems(this.hero.id);
+      announceEquipBest(count, this.hero.name);
+    });
   }
 
   // Aufklappbare Bereiche: Zustand wiederherstellen und Änderungen merken.
@@ -279,5 +286,16 @@ export class HeroDetailPanel {
       button.classList.add('confirm');
       button.textContent = 'Wirklich entlassen?';
     });
+  }
+}
+
+// Rückmeldung nach "Bestes anlegen" (auch für "Gruppe ausrüsten" im Dungeon-Bildschirm)
+export function announceEquipBest(count, name) {
+  if (count > 0) {
+    Sound.itemReveal(2);
+    showToast(name + ': ' + count + (count === 1 ? ' Teil' : ' Teile') + ' angelegt', '#1eff00');
+  } else {
+    Sound.click();
+    showToast(name + ': Nichts Besseres im Inventar', '#9d9d9d');
   }
 }

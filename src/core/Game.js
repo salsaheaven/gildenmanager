@@ -627,7 +627,8 @@ export class Game {
     this.emit('changed');
   }
 
-  // Legt für jeden Platz das beste passende Item aus dem Inventar an.
+  // Legt für jeden Platz das beste passende Item aus dem Inventar an ("Bestes anlegen").
+  // "Bestes" = höchste Summe der Werte, die der Klasse nützen (Hero.getUpgradeValue); Resistenzen zählen nicht.
   // Gibt zurück, wie viele Items angelegt wurden.
   equipBestItems(heroId) {
     const hero = this.guild.findHero(heroId);
@@ -652,6 +653,17 @@ export class Game {
         this.equipItem(heroId, bestItem.id);
         count++;
       }
+    }
+    return count;
+  }
+
+  // Rüstet mehrere Helden nacheinander mit dem Besten aus dem Inventar aus (z.B. eine Dungeon-Gruppe).
+  // Die Reihenfolge zählt: Wer zuerst dran ist, bekommt bei Ringen und gleicher Rüstungsart das Beste.
+  // Gibt zurück, wie viele Items insgesamt angelegt wurden.
+  equipBestForGroup(heroIds) {
+    let count = 0;
+    for (const heroId of heroIds) {
+      count += this.equipBestItems(heroId);
     }
     return count;
   }
