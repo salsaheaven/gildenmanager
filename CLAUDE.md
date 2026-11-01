@@ -49,7 +49,8 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                BuildingSystem (Bau starten, Bautag bei endDay, Unterhalt: alles oder nichts),
                StartTeam (prüft die Starttruppe: Rolle pro Platz, alle Rüstungsarten),
                NewGear (Markierung „neue Ausrüstung“: passende Items, die in der Liste des Platzes noch nicht gesehen wurden),
-               DailyTodo („Was gibt es heute zu tun?“: Einträge mit Anzahl und Ziel-Bildschirm),
+               DailyTodo („Was gibt es heute zu tun?“: Einträge mit Anzahl und Ziel-Bildschirm, neu Freigeschaltetes zuerst),
+               Unlocks (schrittweises Freischalten = Tutorial: Bedingungen prüfen, Freigeschaltetes und gesehene Hinweise merken),
                StandingGroups (stehende Gruppen: Name, fehlende Mitglieder, Ersatz derselben Position, verfügbare Vorräte),
                DungeonKnowledge (Dungeonwissen: Erkunden deckt Boss für Boss auf; none/partial/full; bekannte Schadensarten, verdeckte Mechaniken),
                GroupCounter (Helden nach Position, wie viele vollständige Gruppen die freien Helden ergeben, was fehlt; checkGroup prüft eine Gruppe),
@@ -80,6 +81,7 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                talents (pro Klasse 3 Talentreihen à 2, Doppelwahl für seltene Helden, Umskillen-Kosten),
                rivalGuilds (4 KI-Gilden mit Persönlichkeit: Versuchs- und Erfolgschance),
                consumables (Verbrauchsgüter des Händlers: Preis, Grundware/Tagesangebot, Wirkung; 2 Vorrats-Plätze pro Gruppe),
+               unlocks (Tutorial: welche Teile des Spiels wann freigeschaltet werden, mit Erklärungstext),
                collectionBook (Sammelbuch-Seiten pro Dungeon mit Titel und Gold-Bonus; die Items kommen aus `bossLoot` in lootBoxes)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute · Helden · Dungeons · Beute · Gilde mit Unterreitern (Liste SECTIONS in main.js).
                Bildschirme: DayPlanScreen (Tagesplan, Startseite, oben TodoBox = „Was gibt es heute zu tun?“), LootBoxScreen (Kisten öffnen), ShopScreen (Händler + Vorratskammer),
@@ -107,6 +109,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                TalentPanel = die 3 Talentreihen eines Helden zum Auswählen (Heldenbildschirm + Kampf-Labor).
                RiskBadge = Einschätzung eines Runs in Worten, je nach Dungeonwissen „Unbekannt“, „Eher leicht/schwer“ oder genau („Riskant · Gefallene: oft“).
                OrdersPanel = Auswahllisten für Anweisungen mit Vorteil (grün) und Nachteil (rot) (Labor, Dungeon, Tagesplan, Heldenbildschirm).
+               Gesperrtes (Tutorial) blendet applyUnlocks in main.js aus: Reiter über NavBar.setHidden, sonst CSS-Klassen locked-… am <body>.
                Leisten: TopBar, NavBar (Abschnitte + Unterreiter, auf dem Handy unten). Helfer: PixelArt, Sound, Toast, format, TraitChip.
                DebugPanel = Test-Menü (Taste F2), öffnet auch das Kampf-Labor
 tests/         Vitest-Tests (prüfen auch, ob die Daten gültig sind)

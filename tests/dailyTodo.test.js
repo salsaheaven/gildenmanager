@@ -26,6 +26,7 @@ describe('Was gibt es heute zu tun?', () => {
     game.guild.addBox('wood');
     game.guild.addItem(new Item(game.guild.createItemId(), 'attackRing', 'rare', 'Ring', { attack: 5 }));
     game.guild.hall.upkeepPaid = false;
+    game.unlockEverything(); // Unterhalt gibt es erst mit freigeschalteter Gildenhalle
     const todos = game.getDailyTodos();
     expect(todos.find((todo) => todo.id === 'boxes')).toEqual({ id: 'boxes', count: 1, screenId: 'treasury' });
     expect(todos.find((todo) => todo.id === 'newGear').screenId).toBe('heroes');

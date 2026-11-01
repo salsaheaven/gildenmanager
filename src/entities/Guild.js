@@ -40,6 +40,8 @@ export class Guild {
     this.scoutedDungeons = {}; // vorbereitete Dungeons: Dungeon-id → wie viele Kampftage die Erkundung noch hält
     this.dungeonKnowledge = {}; // Dungeonwissen: Dungeon-id → wie viele Bosse aufgedeckt sind (siehe systems/DungeonKnowledge.js)
     this.standingGroups = [];  // stehende Gruppen, ziehen jeden Tag los (StandingGroup-Objekte)
+    this.unlockedFeatures = [];   // freigeschaltete Teile des Spiels (ids aus data/unlocks.js)
+    this.acknowledgedUnlocks = []; // Freischaltungen, deren Hinweis der Spieler schon angeschaut hat
     this.nextStandingGroupId = 1;
     this.hall = new GuildHall(); // Gildenhalle: Gebäude und Baustelle (siehe data/buildings.js)
     this.firstClearDays = {};  // Dungeon-id → Tag, an dem deine Gilde ihn zum ersten Mal geschafft hat (Rangliste)
@@ -312,6 +314,8 @@ export class Guild {
       dungeonKnowledge: this.dungeonKnowledge,
       standingGroups: this.standingGroups.map((group) => group.toSaveData()),
       nextStandingGroupId: this.nextStandingGroupId,
+      unlockedFeatures: this.unlockedFeatures,
+      acknowledgedUnlocks: this.acknowledgedUnlocks,
       firstClearDays: this.firstClearDays,
       hall: this.hall.toSaveData(),
       rivals: this.rivals.map((rival) => rival.toSaveData()),
@@ -349,6 +353,8 @@ export class Guild {
     guild.dungeonKnowledge = data.dungeonKnowledge;
     guild.standingGroups = data.standingGroups.map((groupData) => StandingGroup.fromSaveData(groupData));
     guild.nextStandingGroupId = data.nextStandingGroupId;
+    guild.unlockedFeatures = data.unlockedFeatures;
+    guild.acknowledgedUnlocks = data.acknowledgedUnlocks;
     guild.firstClearDays = data.firstClearDays;
     guild.hall = GuildHall.fromSaveData(data.hall);
     guild.rivals = data.rivals.map((rivalData) => RivalGuild.fromSaveData(rivalData));

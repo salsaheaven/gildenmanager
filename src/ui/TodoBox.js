@@ -3,9 +3,11 @@
 // Zeigt nur Dinge, die eine Entscheidung brauchen (siehe systems/DailyTodo.js).
 // Jede Zeile ist ein Knopf, der direkt an die richtige Stelle springt.
 // Ist nichts zu tun, steht dort "Alles erledigt", und man kann den Tag beenden.
+// Neu freigeschaltete Teile des Spiels stehen ganz oben mit kurzer Erklärung (das Tutorial).
 // ============================================================
 
 import { Sound } from './Sound.js';
+import { getUnlock } from '../data/unlocks.js';
 
 // Text pro Eintrag, abhängig von der Anzahl
 const TODO_TEXTS = {
@@ -36,6 +38,10 @@ export function createTodoBox(game, onGoTo) {
     return box;
   }
   for (const todo of todos) {
+    if (todo.id === 'unlock') {
+      list.appendChild(createUnlockEntry(game, todo, onGoTo));
+      continue;
+    }
     const button = document.createElement('button');
     button.className = 'todo-entry' + (WARNING_IDS.includes(todo.id) ? ' warning' : '');
     button.textContent = TODO_TEXTS[todo.id](todo.count) + ' ›';
@@ -46,4 +52,23 @@ export function createTodoBox(game, onGoTo) {
     list.appendChild(button);
   }
   return box;
+}
+
+// Neu freigeschaltet (Tutorial): Name, kurze Erklärung und "Ansehen ›".
+// Antippen springt hin, danach verschwindet der Hinweis.
+function createUnlockEntry(game, todo, onGoTo) {
+  const unlock = getUnlock(todo.unlockId);
+  const entry = document.createElement('div');
+  entry.className = 'todo-unlock';
+  entry.innerHTML = '<b class="todo-unlock-name"></b><span class="todo-unlock-text"></span><button class="todo-unlock-button">Ansehen ›</button>';
+  entry.querySelector('.todo-unlock-name').textContent = 'Neu: ' + unlock.name;
+  entry.querySelector('.todo-unlock-text').textContent = unlock.text;
+  entry.querySelector('.todo-unlock-button').addEventListener('click', () => {
+    Sound.click();
+    game.acknowledgeUnlock(unlock.id);
+    if (unlock.screenId) {
+      onGoTo(unlock.screenId);
+    }
+  });
+  return entry;
 }

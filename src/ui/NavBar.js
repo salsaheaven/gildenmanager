@@ -4,6 +4,7 @@
 // Auf dem Handy steht die Abschnitts-Leiste unten am Bildschirm (siehe main.css).
 // Abzeichen ("3", "!", "★") hängen an einem Bildschirm. Der Abschnitt zeigt das erste Abzeichen seiner Bildschirme.
 // Ein Abschnitt kann zusätzlich Knöpfe haben, die ein Fenster öffnen statt einen Bildschirm (z.B. Inventar).
+// Noch nicht freigeschaltete Bildschirme und Knöpfe sind ausgeblendet (setHidden), ein Abschnitt ohne Sichtbares ebenfalls.
 // ============================================================
 
 import { Sound } from './Sound.js';
@@ -19,6 +20,7 @@ export class NavBar {
     this.badges = {};        // Bildschirm-id → Text des Abzeichens
     this.extraButtons = {};  // Abschnitt-id → [{ id, name, onClick }]
     this.activeScreenId = null;
+    this.hiddenIds = [];     // ausgeblendete Bildschirme und Extra-Knöpfe (noch nicht freigeschaltet)
     this.sectionButtons = {};
 
     for (const section of sections) {
@@ -30,7 +32,7 @@ export class NavBar {
         Sound.click();
         // Ein Abschnitt öffnet seinen ersten Bildschirm (bleibt, wenn man schon darin ist)
         if (this.getSectionOf(this.activeScreenId) !== section) {
-          this.onSelect(section.screens[0].id);
+          this.onSelect(this.getVisibleScreens(section)[0].id);
         }
       });
       this.sectionRoot.appendChild(button);
@@ -57,6 +59,21 @@ export class NavBar {
     this.render();
   }
 
+  // Blendet Bildschirme und Extra-Knöpfe aus (ids), z.B. ['tavern', 'hall'] solange sie gesperrt sind
+  setHidden(ids) {
+    this.hiddenIds = ids;
+    this.render();
+  }
+
+  // Sichtbare Bildschirme und Extra-Knöpfe eines Abschnitts
+  getVisibleScreens(section) {
+    return section.screens.filter((screen) => !this.hiddenIds.includes(screen.id));
+  }
+
+  getVisibleExtras(section) {
+    return (this.extraButtons[section.id] || []).filter((extra) => !this.hiddenIds.includes(extra.id));
+  }
+
   // text = was im Abzeichen steht (z.B. "3" oder "!"). Leer = Abzeichen ausblenden.
   setBadge(id, text) {
     this.badges[id] = text || '';
@@ -70,7 +87,8 @@ export class NavBar {
     for (const section of this.sections) {
       const button = this.sectionButtons[section.id];
       button.classList.toggle('active', section === activeSection);
-      const ids = section.screens.map((screen) => screen.id).concat((this.extraButtons[section.id] || []).map((extra) => extra.id));
+      button.hidden = this.getVisibleScreens(section).length === 0;
+      const ids = this.getVisibleScreens(section).map((screen) => screen.id).concat(this.getVisibleExtras(section).map((extra) => extra.id));
       const badgeText = ids.map((id) => this.badges[id]).find((text) => text) || '';
       setBadgeElement(button.querySelector('.nav-badge'), badgeText);
     }
@@ -81,9 +99,10 @@ export class NavBar {
       this.subRoot.hidden = true;
       return;
     }
-    const extras = this.extraButtons[activeSection.id] || [];
-    this.subRoot.hidden = activeSection.screens.length + extras.length <= 1;
-    for (const screen of activeSection.screens) {
+    const screens = this.getVisibleScreens(activeSection);
+    const extras = this.getVisibleExtras(activeSection);
+    this.subRoot.hidden = screens.length + extras.length <= 1;
+    for (const screen of screens) {
       const button = this.createSubButton(screen.name, this.badges[screen.id]);
       button.classList.toggle('active', screen.id === this.activeScreenId);
       button.addEventListener('click', () => {

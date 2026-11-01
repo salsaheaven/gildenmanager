@@ -298,7 +298,9 @@ export class DayPlanScreen {
 
     const select = document.createElement('select');
     for (const taskId in HERO_TASKS) {
-      if (!HERO_TASKS[taskId].choosable) {
+      // Nicht wählbar, oder noch nicht freigeschaltet (z.B. Rohstoffe sammeln erst mit der Gildenhalle)
+      const unlock = HERO_TASKS[taskId].unlock;
+      if (!HERO_TASKS[taskId].choosable || (unlock && !this.game.isFeatureUnlocked(unlock) && hero.task.taskId !== taskId)) {
         continue;
       }
       const option = document.createElement('option');

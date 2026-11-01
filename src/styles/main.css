@@ -3810,6 +3810,41 @@ h3 {
   border-color: #ff6b6b;
 }
 
+/* Tutorial: Hinweis auf neu Freigeschaltetes in "Was gibt es heute zu tun?" */
+.todo-unlock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 8px;
+  border: 2px solid #1eff00;
+  background: rgba(30, 255, 0, 0.08);
+  animation: card-pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) backwards;
+}
+
+.todo-unlock-name {
+  color: #1eff00;
+  font-weight: normal;
+  font-family: var(--font-title);
+  font-size: 10px;
+}
+
+.todo-unlock-text {
+  flex-basis: 100%;
+  font-size: 17px;
+}
+
+/* Noch gesperrte Teile des Spiels ausblenden (Klassen am <body>, siehe applyUnlocks in main.js) */
+body.locked-crafting .upgrade-button,
+body.locked-crafting .salvage-button,
+body.locked-crafting .salvage-junk-button,
+body.locked-rivals .day-plan-server,
+body.locked-rivals .day-news-card,
+body.locked-talents .detail-section[data-section="talents"],
+body.locked-collection .collection-button {
+  display: none;
+}
+
 /* Heldenübersicht nach Position (RoleOverview) */
 .group-counter {
   display: flex;
@@ -3980,8 +4015,7 @@ h3 {
     right: 0;
     bottom: 0;
     z-index: 40;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    display: flex;
     gap: 4px;
     padding: 6px 6px 8px;
     border-bottom: none;
@@ -3990,6 +4024,7 @@ h3 {
   }
 
   .nav-tab {
+    flex: 1;
     padding: 12px 2px;
     font-size: 8px;
     border-bottom: 2px solid var(--border);

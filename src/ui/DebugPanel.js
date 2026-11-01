@@ -29,6 +29,10 @@ export class DebugPanel {
       this.root.hidden = true;
       onOpenLab();
     });
+    // Tutorial überspringen: alle Teile des Spiels sofort frei
+    this.addButton('Alles freischalten', () => {
+      game.unlockEverything();
+    });
     // Zum Ausprobieren des Dungeonführers: alle Bosse aller Dungeons aufgedeckt
     this.addButton('Alle Dungeons erkunden', () => {
       for (const dungeon of DUNGEONS) {

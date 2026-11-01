@@ -25,6 +25,7 @@ import { LevelUpBanner } from './ui/LevelUpBanner.js';
 import { FoundingScreen } from './ui/FoundingScreen.js';
 import { Sound } from './ui/Sound.js';
 import { showToast } from './ui/Toast.js';
+import { UNLOCKS, getUnlock } from './data/unlocks.js';
 
 // Alle 5 Sekunden automatisch speichern
 const AUTOSAVE_SECONDS = 5;
@@ -144,6 +145,33 @@ function updateBadges() {
 }
 
 game.on('changed', updateBadges);
+
+// ---------- Schrittweises Freischalten (Tutorial, siehe data/unlocks.js) ----------
+
+// Welcher Bildschirm bzw. Knopf gehört zu welcher Freischaltung?
+const SCREENS_BY_UNLOCK = { tavern: 'tavern', shop: 'shop', guildHall: 'hall', collection: 'collection' };
+
+// Blendet aus, was noch gesperrt ist: Reiter über die NavBar, alles andere über CSS-Klassen am <body>
+// (z.B. "locked-crafting" versteckt Zerlegen und Verbessern, siehe main.css)
+function applyUnlocks() {
+  const hidden = [];
+  for (const unlock of UNLOCKS) {
+    const locked = !game.isFeatureUnlocked(unlock.id);
+    document.body.classList.toggle('locked-' + unlock.id, locked);
+    if (locked && SCREENS_BY_UNLOCK[unlock.id]) {
+      hidden.push(SCREENS_BY_UNLOCK[unlock.id]);
+    }
+  }
+  navBar.setHidden(hidden);
+}
+game.on('changed', applyUnlocks);
+applyUnlocks();
+
+// Etwas Neues ist frei: kurze Fanfare und Meldung (der Hinweis steht dann in "Was gibt es heute zu tun?")
+game.on('featureUnlocked', (unlockId) => {
+  Sound.collectionPage();
+  showToast('Neu freigeschaltet: ' + getUnlock(unlockId).name, '#1eff00');
+});
 
 game.on('candidatesRefreshed', () => {
   if (currentScreen !== 'tavern') {

@@ -1,6 +1,8 @@
 // ============================================================
 // DAILYTODO – "Was gibt es heute zu tun?": nur Dinge, die eine Entscheidung brauchen
 // Jeder Eintrag sagt, worum es geht (id), wie viele es sind (count) und wo man es erledigt (screenId).
+// Ganz oben stehen neu freigeschaltete Teile des Spiels: { id: 'unlock', unlockId, count: 1, screenId } (Tutorial).
+// Einträge zu noch gesperrten Teilen fallen weg (z.B. Bewerber, solange die Taverne gesperrt ist).
 // Die Texte macht die Oberfläche (ui/TodoBox.js). Reihenfolge = Wichtigkeit.
 //   groupMissing = stehende Gruppen, die heute losziehen, denen aber jemand fehlt (verletzt, noch kein Ersatz) → Tagesplan
 //   boxes      = ungeöffnete Kisten                         → Beute
@@ -16,6 +18,8 @@
 import { getSlotsWithNewGear } from './NewGear.js';
 import { countPossibleGroups } from './GroupCounter.js';
 import { getMissingMembers } from './StandingGroups.js';
+import { getUnannouncedUnlocks } from './Unlocks.js';
+import { getUnlock } from '../data/unlocks.js';
 
 // Ab diesem Rang ist ein Bewerber eine Meldung wert (4 = Episch, siehe rarities.js)
 const NOTABLE_CANDIDATE_RANK = 4;
@@ -29,15 +33,27 @@ export function getDailyTodos(guild, lastDaySummary) {
     }
   };
 
+  // Neu freigeschaltet (Hinweis noch nicht angeschaut)
+  for (const unlockId of getUnannouncedUnlocks(guild)) {
+    todos.push({ id: 'unlock', unlockId, count: 1, screenId: getUnlock(unlockId).screenId });
+  }
+  const unlocked = (unlockId) => guild.unlockedFeatures.includes(unlockId);
+
   add('groupMissing', countGroupsWithMissingMembers(guild), 'plan');
   add('boxes', guild.boxes.length, 'treasury');
   add('newGear', guild.heroes.filter((hero) => getSlotsWithNewGear(guild, hero).length > 0).length, 'heroes');
-  add('talents', guild.heroes.filter((hero) => hero.getFreeTalentPicks() > 0).length, 'heroes');
-  add('building', lastDaySummary && lastDaySummary.finishedBuilding ? 1 : 0, 'hall');
-  add('upkeep', guild.hall.upkeepPaid ? 0 : 1, 'hall');
+  if (unlocked('talents')) {
+    add('talents', guild.heroes.filter((hero) => hero.getFreeTalentPicks() > 0).length, 'heroes');
+  }
+  if (unlocked('guildHall')) {
+    add('building', lastDaySummary && lastDaySummary.finishedBuilding ? 1 : 0, 'hall');
+    add('upkeep', guild.hall.upkeepPaid ? 0 : 1, 'hall');
+  }
   add('unhappy', guild.heroes.filter((hero) => hero.isUnhappy()).length, 'heroes');
   add('groups', countPossibleGroups(guild).groups, 'dungeons');
-  add('candidate', guild.candidates.filter((candidate) => candidate.getRarityRank() >= NOTABLE_CANDIDATE_RANK).length, 'tavern');
+  if (unlocked('tavern')) {
+    add('candidate', guild.candidates.filter((candidate) => candidate.getRarityRank() >= NOTABLE_CANDIDATE_RANK).length, 'tavern');
+  }
   return todos;
 }
 

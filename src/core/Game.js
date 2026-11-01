@@ -24,6 +24,8 @@ import { getPositionId } from '../data/groupRules.js';
 import { getDailyTodos } from '../systems/DailyTodo.js';
 import { getFreeGroupName, getMissingMembers, findSubstitute, getAvailableSupplies } from '../systems/StandingGroups.js';
 import { StandingGroup } from '../entities/StandingGroup.js';
+import { updateUnlocks, getUnannouncedUnlocks } from '../systems/Unlocks.js';
+import { UNLOCKS } from '../data/unlocks.js';
 import { getKnownCount, getKnowledgeTotal, getKnowledgeLevel, isEncounterKnown, getKnownDamageTypes, getHiddenMechanicNames } from '../systems/DungeonKnowledge.js';
 import { brew } from '../systems/AlchemySystem.js';
 import { checkStartTeam } from '../systems/StartTeam.js';
@@ -141,6 +143,8 @@ export class Game {
     this.refreshDailyOffer();
     // Die stehenden Gruppen ziehen auch heute los (Verletzte fehlen)
     this.planStandingGroups();
+    // Neue Teile des Spiels freischalten (Tutorial)
+    this.updateUnlocks();
 
     this.emit('dayEnded', { day: endedDay, reports: reports, summary: this.lastDaySummary });
     this.emit('changed');
@@ -263,6 +267,8 @@ export class Game {
       item.collectionStatus = entry.status;
       item.completedPage = entry.completedPage;
     }
+    // Das erste Boss-Item schaltet das Sammelbuch frei
+    this.updateUnlocks();
     this.emit('changed');
     return items;
   }
@@ -552,6 +558,7 @@ export class Game {
       this.guild.heroes.push(hero);
     }
     this.guild.founded = true;
+    this.updateUnlocks();
     this.emit('changed');
     return 'ok';
   }
@@ -787,6 +794,44 @@ export class Game {
   // Zeigt die Einschätzung, woran eine Gruppe wohl scheitern würde? (Kartenraum Stufe 3)
   hasDefeatForecast() {
     return this.guild.hall.getEffect('defeatForecast', false);
+  }
+
+  // ---------- Schrittweises Freischalten (siehe data/unlocks.js) ----------
+
+  // Ist dieser Teil des Spiels schon freigeschaltet? (z.B. 'tavern', 'guildHall')
+  isFeatureUnlocked(unlockId) {
+    return this.guild.unlockedFeatures.includes(unlockId);
+  }
+
+  // Prüft die Bedingungen und schaltet frei, was dran ist. Meldet Neues mit dem Ereignis 'featureUnlocked'.
+  updateUnlocks() {
+    for (const unlockId of updateUnlocks(this.guild, this.day)) {
+      this.emit('featureUnlocked', unlockId);
+    }
+  }
+
+  // Freischaltungen, deren Hinweis noch nicht angeschaut wurde (für "Was gibt es heute zu tun?")
+  getUnannouncedUnlocks() {
+    return getUnannouncedUnlocks(this.guild);
+  }
+
+  // Der Spieler hat den Hinweis angeschaut: Er verschwindet aus "Was gibt es heute zu tun?"
+  acknowledgeUnlock(unlockId) {
+    if (!this.guild.acknowledgedUnlocks.includes(unlockId)) {
+      this.guild.acknowledgedUnlocks.push(unlockId);
+      this.emit('changed');
+    }
+  }
+
+  // Test-Menü: alles auf einmal freischalten (ohne Hinweise)
+  unlockEverything() {
+    for (const unlock of UNLOCKS) {
+      if (!this.guild.unlockedFeatures.includes(unlock.id)) {
+        this.guild.unlockedFeatures.push(unlock.id);
+      }
+      this.acknowledgeUnlock(unlock.id);
+    }
+    this.emit('changed');
   }
 
   // ---------- Stehende Gruppen (siehe systems/StandingGroups.js) ----------

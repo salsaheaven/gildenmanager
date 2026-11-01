@@ -5,6 +5,7 @@
 // description = kurze Erklärung
 // color       = Farbe des Aufgaben-Schilds
 // choosable   = true: Der Spieler kann sie einem freien Helden geben (im Tagesplan).
+// unlock      = freiwillig: erst wählbar, wenn dieser Teil des Spiels freigeschaltet ist (siehe data/unlocks.js)
 //               'dungeon' und 'injured' ergeben sich von selbst (eingeplant bzw. verletzt).
 //
 // Gewählte Aufgaben bleiben stehen, bis man sie ändert (wer heute trainiert, trainiert morgen weiter).
@@ -41,12 +42,14 @@ export const HERO_TASKS = {
     description: 'Sammelt Kräuter, aus denen das Alchemielabor Tränke braut',
     color: '#9be15d',
     choosable: true,
+    unlock: 'guildHall',
   },
   gatherRaw: {
     name: 'Rohstoffe sammeln',
     description: 'Sammelt Erz, Leder und Stoff, aus denen die Schmiede Ausrüstung herstellt',
     color: '#c08a52',
     choosable: true,
+    unlock: 'guildHall',
   },
   jobs: {
     name: 'Aufträge erledigen',
