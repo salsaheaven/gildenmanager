@@ -23,6 +23,9 @@ export const GROUP_RULES = {
   required: { tank: 1, healer: 1 },
 };
 
+// Namen für stehende Gruppen (siehe systems/StandingGroups.js), der erste freie wird genommen
+export const GROUP_NAMES = ['Gruppe A', 'Gruppe B', 'Gruppe C', 'Gruppe D', 'Gruppe E', 'Gruppe F', 'Gruppe G', 'Gruppe H'];
+
 // Position einer Klasse, z.B. 'melee' für den Schurken (Schaden, steht vorne)
 export function getPositionId(heroClass) {
   if (heroClass.role === 'damage') {

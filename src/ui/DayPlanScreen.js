@@ -24,9 +24,9 @@ import { createNewsLine } from './NewsLine.js';
 import { createSupplyPicker } from './SupplyPicker.js';
 import { getConsumable } from '../data/consumables.js';
 import { DUNGEONS } from '../data/dungeons.js';
-import { showToast } from './Toast.js';
 import { Sound } from './Sound.js';
 import { createTodoBox } from './TodoBox.js';
+import { getRunTitle, createRunControls, createPausedGroupRows } from './StandingGroupControls.js';
 
 export class DayPlanScreen {
   // onGoTo(screenId) = zu einem anderen Reiter wechseln (z.B. 'dungeons' oder 'tavern')
@@ -47,7 +47,6 @@ export class DayPlanScreen {
           <div class="day-plan-hint"></div>
           <div class="day-plan-wages hint"></div>
           <div class="day-plan-actions">
-            <button class="repeat-button">↻ Wie gestern</button>
             <button class="go-dungeons-button">Gruppe einplanen</button>
             <button class="big-button plan-end-day-button">Tag beenden ▶</button>
           </div>
@@ -61,7 +60,7 @@ export class DayPlanScreen {
           </details>
         </section>
         <section class="panel">
-          <h2>Im Dungeon</h2>
+          <h2>Gruppen</h2>
           <div class="day-plan-runs"></div>
         </section>
         <section class="panel">
@@ -75,16 +74,6 @@ export class DayPlanScreen {
       Sound.click();
       // Ohne Helden geht es zur Taverne, sonst zu den Dungeons (siehe renderHeader)
       this.onGoTo(this.root.querySelector('.go-dungeons-button').dataset.target);
-    });
-    this.root.querySelector('.repeat-button').addEventListener('click', () => {
-      const planned = this.game.repeatYesterday();
-      if (planned > 0) {
-        Sound.boxArrived();
-        showToast(planned === 1 ? '1 Gruppe wie gestern eingeplant' : planned + ' Gruppen wie gestern eingeplant', '#ffd23f');
-      } else {
-        Sound.click();
-        showToast('Keine Gruppe von gestern kann heute los.', '#ff6b6b');
-      }
     });
     this.root.querySelector('.plan-end-day-button').addEventListener('click', () => {
       Sound.click();
@@ -158,9 +147,6 @@ export class DayPlanScreen {
     const training = plan.counts.training * getTrainingCost(this.game.guild);
     this.root.querySelector('.day-plan-wages').textContent = plan.entries.length === 0 ? '' :
       'Heute Abend: Sold ' + this.game.getDailyWages() + ' Gold' + (training > 0 ? ' · Training ' + training + ' Gold' : '');
-    // "Wie gestern" nur, wenn es gestern Gruppen gab und heute noch keine geplant ist
-    const repeatButton = this.root.querySelector('.repeat-button');
-    repeatButton.hidden = this.game.guild.lastDayPlan.length === 0 || this.game.guild.expeditions.length > 0;
 
     // Hinweis, was man als Nächstes tun könnte
     const hint = this.root.querySelector('.day-plan-hint');
@@ -184,8 +170,12 @@ export class DayPlanScreen {
   renderRuns() {
     const list = this.root.querySelector('.day-plan-runs');
     list.innerHTML = '';
-    if (this.game.guild.expeditions.length === 0) {
-      list.innerHTML = '<p class="empty">Heute zieht keine Gruppe los.</p>';
+    // Gruppen, die heute nicht losziehen (ausgesetzt oder alle verletzt), stehen oben
+    for (const row of createPausedGroupRows(this.game)) {
+      list.appendChild(row);
+    }
+    if (this.game.guild.expeditions.length === 0 && this.game.guild.standingGroups.length === 0) {
+      list.innerHTML = '<p class="empty">Heute zieht keine Gruppe los. Bilde eine Gruppe im Abschnitt Dungeons, sie zieht dann jeden Tag los.</p>';
       return;
     }
     for (const expedition of this.game.guild.expeditions) {
@@ -199,9 +189,8 @@ export class DayPlanScreen {
           <span class="run-status"></span>
         </div>
         <div class="day-plan-heroes"></div>
-        <div class="run-buttons"><button class="cancel-button">Absagen</button></div>
       `;
-      card.querySelector('.run-name').textContent = dungeon.name;
+      card.querySelector('.run-name').textContent = getRunTitle(this.game, expedition);
       card.querySelector('.run-status').textContent = 'Stufe ' + dungeon.level +
         (retreatRule ? ' · Rückzug: ' + retreatRule.name : '');
 
@@ -213,10 +202,8 @@ export class DayPlanScreen {
       heroList.before(createRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies));
       heroList.after(this.createOrdersSection(expedition, heroes));
       heroList.after(this.createSupplySection(expedition));
-      card.querySelector('.cancel-button').addEventListener('click', () => {
-        Sound.click();
-        this.game.cancelExpedition(expedition.id);
-      });
+      // Fehlende Mitglieder, Ersatz, Heute aussetzen, Auflösen (bzw. Absagen bei einmaligen Runs)
+      card.appendChild(createRunControls(this.game, expedition));
       list.appendChild(card);
     }
   }

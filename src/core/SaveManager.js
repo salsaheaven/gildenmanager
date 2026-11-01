@@ -6,7 +6,7 @@ const SAVE_KEY = 'gildenmanager-save';
 
 // Wenn sich der Aufbau des Spielstands ändert, wird diese Zahl erhöht.
 // Alte Spielstände mit anderer Version werden dann nicht geladen.
-const SAVE_VERSION = 15; // 3 = Resistenzen auf Items, 4 = neue Anweisungen (Haltung + Eigenheit), 5 = Sammelbuch, 6 = Vorräte und Händler, 7 = Tagesaufgaben und Sold, 8 = KI-Gilden und Ticker, 9 = Talente, 10 = Zerlegen und Verbessern, 11 = Starttruppe und Aufträge, 12 = Gildenhalle und unbezahlter Sold, 13 = Schmieden, Kräuter und Rohstoffe, 14 = Markierung neuer Ausrüstung, 15 = Dungeonwissen durch Erkunden
+const SAVE_VERSION = 16; // 3 = Resistenzen auf Items, 4 = neue Anweisungen (Haltung + Eigenheit), 5 = Sammelbuch, 6 = Vorräte und Händler, 7 = Tagesaufgaben und Sold, 8 = KI-Gilden und Ticker, 9 = Talente, 10 = Zerlegen und Verbessern, 11 = Starttruppe und Aufträge, 12 = Gildenhalle und unbezahlter Sold, 13 = Schmieden, Kräuter und Rohstoffe, 14 = Markierung neuer Ausrüstung, 15 = Dungeonwissen durch Erkunden, 16 = stehende Gruppen
 
 export class SaveManager {
   // storage = wo gespeichert wird. Normalerweise localStorage des Browsers,

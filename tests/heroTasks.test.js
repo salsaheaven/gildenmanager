@@ -137,23 +137,3 @@ describe('Erkunden', () => {
   });
 });
 
-describe('Wie gestern', () => {
-  it('plant die Gruppen von gestern noch einmal ein, ohne Verletzte, Vorräte nur soweit vorhanden', () => {
-    const { game, heroes } = gameWithHeroes(3);
-    game.buySupply('healingPotions');
-    game.startExpedition('bearCave', [heroes[0].id, heroes[1].id], 'never', ['healingPotions']);
-    game.endDay();
-    for (const hero of heroes) {
-      hero.injuryDays = 0;
-    }
-    heroes[1].injuryDays = 1;
-
-    expect(game.repeatYesterday()).toBe(1);
-    const expedition = game.guild.expeditions[0];
-    expect(expedition.dungeonId).toBe('bearCave');
-    expect(expedition.getHeroIds()).toEqual([heroes[0].id]);
-    expect(expedition.supplies).toEqual([]); // die Heiltränke von gestern sind verbraucht
-    // Zweimal drücken plant nichts doppelt
-    expect(game.repeatYesterday()).toBe(0);
-  });
-});

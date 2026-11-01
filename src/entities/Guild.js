@@ -11,6 +11,7 @@ import { Item } from './Item.js';
 import { LootBox } from './LootBox.js';
 import { Hero } from './Hero.js';
 import { Expedition } from './Expedition.js';
+import { StandingGroup } from './StandingGroup.js';
 import { GuildHall } from './GuildHall.js';
 import { BALANCING } from '../data/balancing.js';
 
@@ -38,7 +39,8 @@ export class Guild {
     this.dailyOffer = [];      // heutiges Tagesangebot des Händlers (Liste von Verbrauchsgut-ids)
     this.scoutedDungeons = {}; // vorbereitete Dungeons: Dungeon-id → wie viele Kampftage die Erkundung noch hält
     this.dungeonKnowledge = {}; // Dungeonwissen: Dungeon-id → wie viele Bosse aufgedeckt sind (siehe systems/DungeonKnowledge.js)
-    this.lastDayPlan = [];     // die Gruppen von gestern, für "Wie gestern": [{ dungeonId, heroIds, retreatRuleId, supplies }]
+    this.standingGroups = [];  // stehende Gruppen, ziehen jeden Tag los (StandingGroup-Objekte)
+    this.nextStandingGroupId = 1;
     this.hall = new GuildHall(); // Gildenhalle: Gebäude und Baustelle (siehe data/buildings.js)
     this.firstClearDays = {};  // Dungeon-id → Tag, an dem deine Gilde ihn zum ersten Mal geschafft hat (Rangliste)
 
@@ -308,7 +310,8 @@ export class Guild {
       dailyOffer: this.dailyOffer,
       scoutedDungeons: this.scoutedDungeons,
       dungeonKnowledge: this.dungeonKnowledge,
-      lastDayPlan: this.lastDayPlan,
+      standingGroups: this.standingGroups.map((group) => group.toSaveData()),
+      nextStandingGroupId: this.nextStandingGroupId,
       firstClearDays: this.firstClearDays,
       hall: this.hall.toSaveData(),
       rivals: this.rivals.map((rival) => rival.toSaveData()),
@@ -344,7 +347,8 @@ export class Guild {
     guild.dailyOffer = data.dailyOffer;
     guild.scoutedDungeons = data.scoutedDungeons;
     guild.dungeonKnowledge = data.dungeonKnowledge;
-    guild.lastDayPlan = data.lastDayPlan;
+    guild.standingGroups = data.standingGroups.map((groupData) => StandingGroup.fromSaveData(groupData));
+    guild.nextStandingGroupId = data.nextStandingGroupId;
     guild.firstClearDays = data.firstClearDays;
     guild.hall = GuildHall.fromSaveData(data.hall);
     guild.rivals = data.rivals.map((rivalData) => RivalGuild.fromSaveData(rivalData));

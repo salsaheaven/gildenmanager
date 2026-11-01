@@ -20,7 +20,10 @@ import { getSalvageYield, upgradeItem } from '../systems/CraftingSystem.js';
 import { forgeItem, reforgeItem } from '../systems/ForgeSystem.js';
 import { getSlotsWithNewGear, markSlotSeen, markItemSeen } from '../systems/NewGear.js';
 import { countPossibleGroups, groupHeroesByPosition, checkGroup } from '../systems/GroupCounter.js';
+import { getPositionId } from '../data/groupRules.js';
 import { getDailyTodos } from '../systems/DailyTodo.js';
+import { getFreeGroupName, getMissingMembers, findSubstitute, getAvailableSupplies } from '../systems/StandingGroups.js';
+import { StandingGroup } from '../entities/StandingGroup.js';
 import { getKnownCount, getKnowledgeTotal, getKnowledgeLevel, isEncounterKnown, getKnownDamageTypes, getHiddenMechanicNames } from '../systems/DungeonKnowledge.js';
 import { brew } from '../systems/AlchemySystem.js';
 import { checkStartTeam } from '../systems/StartTeam.js';
@@ -84,13 +87,6 @@ export class Game {
     // 0. Wer macht heute was? (vor allem anderen, damit Verletzte von heute nicht noch trainieren)
     const plan = getDayPlan(this.guild);
     const taskEntries = plan.entries.filter((entry) => entry.taskId !== 'dungeon' && entry.taskId !== 'injured');
-    // Die Gruppen von heute für "Wie gestern" merken
-    this.guild.lastDayPlan = this.guild.expeditions.map((expedition) => ({
-      dungeonId: expedition.dungeonId,
-      heroIds: expedition.getHeroIds().slice(),
-      retreatRuleId: expedition.retreatRuleId,
-      supplies: expedition.supplies.slice(),
-    }));
 
     // 1. Wer schon verletzt war, heilt einen Tag lang.
     //    (Zuerst, damit Helden, die heute fallen, morgen noch verletzt sind.)
@@ -139,10 +135,12 @@ export class Game {
       news: news, rivalNews: rivalNews,
     };
 
-    // 5. Der nächste Tag beginnt: neue Bewerber in der Taverne, neues Tagesangebot beim Händler
+    // 5. Der nächste Tag beginnt: neue Bewerber in der Taverne, neues Tagesangebot beim Händler, stehende Gruppen einplanen
     this.day++;
     this.refreshCandidates();
     this.refreshDailyOffer();
+    // Die stehenden Gruppen ziehen auch heute los (Verletzte fehlen)
+    this.planStandingGroups();
 
     this.emit('dayEnded', { day: endedDay, reports: reports, summary: this.lastDaySummary });
     this.emit('changed');
@@ -217,6 +215,11 @@ export class Game {
       return check;
     }
     expedition.supplies = supplyIds.slice();
+    // Eine stehende Gruppe merkt sich die neuen Vorräte auch für die nächsten Tage
+    const group = this.findStandingGroup(expedition.standingGroupId);
+    if (group) {
+      group.supplies = supplyIds.slice();
+    }
     this.emit('changed');
     return 'ok';
   }
@@ -786,32 +789,121 @@ export class Game {
     return this.guild.hall.getEffect('defeatForecast', false);
   }
 
-  // "Wie gestern": plant die Gruppen von gestern noch einmal ein (gleicher Dungeon, gleiche Helden,
-  // gleiche Rückzugsregel). Wer heute verletzt oder schon eingeplant ist, fehlt. Vorräte nur, soweit sie da sind.
-  // Gibt die Anzahl der eingeplanten Gruppen zurück.
-  repeatYesterday() {
-    let planned = 0;
-    for (const old of this.guild.lastDayPlan) {
-      const heroIds = old.heroIds.filter((heroId) => {
-        const hero = this.guild.findHero(heroId);
-        return hero && !hero.isInjured() && !this.guild.isHeroBusy(heroId);
-      });
-      if (heroIds.length === 0 || !this.isDungeonUnlocked(old.dungeonId)) {
-        continue;
-      }
-      const supplies = [];
-      const taken = {};
-      for (const supplyId of old.supplies) {
-        taken[supplyId] = (taken[supplyId] || 0) + 1;
-        if (taken[supplyId] <= this.guild.countSupply(supplyId)) {
-          supplies.push(supplyId);
-        }
-      }
-      if (this.startExpedition(old.dungeonId, heroIds, old.retreatRuleId, supplies) === 'ok') {
-        planned++;
+  // ---------- Stehende Gruppen (siehe systems/StandingGroups.js) ----------
+
+  // Bildet eine stehende Gruppe und plant sie gleich für heute ein. Ab morgen zieht sie jeden Tag von selbst los.
+  // Gibt 'ok' oder einen Grund aus startExpedition zurück. Die Helden verlassen dabei ihre bisherige stehende Gruppe.
+  createStandingGroup(dungeonId, heroIds, retreatRuleId, supplyIds = []) {
+    const result = this.startExpedition(dungeonId, heroIds, retreatRuleId, supplyIds);
+    if (result !== 'ok') {
+      return result;
+    }
+    for (const other of this.guild.standingGroups) {
+      other.heroIds = other.heroIds.filter((heroId) => !heroIds.includes(heroId));
+    }
+    this.guild.standingGroups = this.guild.standingGroups.filter((other) => other.heroIds.length > 0);
+    const group = new StandingGroup(this.guild.nextStandingGroupId, getFreeGroupName(this.guild), dungeonId,
+      heroIds.slice(), retreatRuleId, supplyIds.slice());
+    this.guild.nextStandingGroupId++;
+    this.guild.standingGroups.push(group);
+    const expedition = this.guild.expeditions[this.guild.expeditions.length - 1];
+    expedition.standingGroupId = group.id;
+    this.emit('changed');
+    return 'ok';
+  }
+
+  findStandingGroup(groupId) {
+    return this.guild.standingGroups.find((group) => group.id === groupId) || null;
+  }
+
+  // Der heutige Run einer stehenden Gruppe (null, wenn sie heute aussetzt)
+  getTodaysExpedition(groupId) {
+    return this.guild.expeditions.find((expedition) => expedition.standingGroupId === groupId) || null;
+  }
+
+  // Plant eine stehende Gruppe für heute ein, mit allen Mitgliedern, die heute können (nicht verletzt, nicht schon eingeplant),
+  // und den gewohnten Vorräten, soweit da. Gibt true zurück, wenn sie heute loszieht.
+  planStandingGroup(groupId) {
+    const group = this.findStandingGroup(groupId);
+    if (!group || this.getTodaysExpedition(groupId) || !this.isDungeonUnlocked(group.dungeonId)) {
+      return false;
+    }
+    const heroIds = group.heroIds.filter((heroId) => {
+      const hero = this.guild.findHero(heroId);
+      return hero && !hero.isInjured() && !this.guild.isHeroBusy(heroId);
+    });
+    if (heroIds.length === 0) {
+      return false;
+    }
+    const supplies = getAvailableSupplies(this.guild, group.supplies);
+    if (this.startExpedition(group.dungeonId, heroIds, group.retreatRuleId, supplies) !== 'ok') {
+      return false;
+    }
+    this.guild.expeditions[this.guild.expeditions.length - 1].standingGroupId = group.id;
+    return true;
+  }
+
+  // Jeden Morgen: alle stehenden Gruppen einplanen. Entlassene Helden fallen vorher aus ihrer Gruppe,
+  // leere Gruppen lösen sich auf.
+  planStandingGroups() {
+    for (const group of this.guild.standingGroups) {
+      group.heroIds = group.heroIds.filter((heroId) => this.guild.findHero(heroId));
+    }
+    this.guild.standingGroups = this.guild.standingGroups.filter((group) => group.heroIds.length > 0);
+    for (const group of this.guild.standingGroups) {
+      this.planStandingGroup(group.id);
+    }
+  }
+
+  // Wer fehlt heute in der Gruppe? [{ hero, positionId }] (verletzte Mitglieder)
+  getMissingMembers(groupId) {
+    const group = this.findStandingGroup(groupId);
+    return group ? getMissingMembers(this.guild, group) : [];
+  }
+
+  // "Ersatz einsetzen": Für ein fehlendes Mitglied springt heute ein freier Held derselben Position ein.
+  // Nur für heute, die Gruppe selbst bleibt gleich. Gibt den Ersatz-Helden zurück oder null.
+  addSubstitute(groupId) {
+    const expedition = this.getTodaysExpedition(groupId);
+    if (!expedition || expedition.heroIds.length >= 5) {
+      return null;
+    }
+    const group = this.findStandingGroup(groupId);
+    // Wer heute schon als Ersatz dabei ist (nicht in der Gruppe), zählt pro Position
+    const substitutesByPosition = {};
+    for (const heroId of expedition.heroIds) {
+      if (!group.heroIds.includes(heroId)) {
+        const positionId = getPositionId(this.guild.findHero(heroId).getClass());
+        substitutesByPosition[positionId] = (substitutesByPosition[positionId] || 0) + 1;
       }
     }
-    return planned;
+    for (const missing of this.getMissingMembers(groupId)) {
+      // Für dieses fehlende Mitglied springt schon jemand ein? Dann das nächste fehlende
+      if (substitutesByPosition[missing.positionId] > 0) {
+        substitutesByPosition[missing.positionId]--;
+        continue;
+      }
+      const substitute = findSubstitute(this.guild, missing.positionId);
+      if (substitute) {
+        expedition.heroIds.push(substitute.id);
+        this.emit('changed');
+        return substitute;
+      }
+    }
+    return null;
+  }
+
+  // Heute aussetzen: Der heutige Run der Gruppe fällt aus, morgen zieht sie wieder los.
+  skipStandingGroupToday(groupId) {
+    const expedition = this.getTodaysExpedition(groupId);
+    return expedition ? this.cancelExpedition(expedition.id) : false;
+  }
+
+  // Auflösen: Die Gruppe gibt es nicht mehr, ihr heutiger Run fällt aus.
+  disbandStandingGroup(groupId) {
+    this.skipStandingGroupToday(groupId);
+    this.guild.standingGroups = this.guild.standingGroups.filter((group) => group.id !== groupId);
+    this.emit('changed');
   }
 
   // Alle Titel, die die Gilde tragen darf: aus vollen Sammelbuch-Seiten und aus eigenen Server-Firsts

@@ -15,6 +15,7 @@ import { renderOrders } from './OrdersPanel.js';
 import { RunViewer } from './RunViewer.js';
 import { createRiskBadge } from './RiskBadge.js';
 import { renderDungeonGuide } from './DungeonGuide.js';
+import { getRunTitle, createRunControls } from './StandingGroupControls.js';
 import { renderRoleTiles } from './RoleOverview.js';
 import { announceEquipBest } from './HeroDetailPanel.js';
 import { GROUP_RULES, getPositionName } from '../data/groupRules.js';
@@ -120,8 +121,8 @@ export class DungeonScreen {
       <div class="supply-line"></div>
       <h3>Anweisungen</h3>
       <div class="orders-list"></div>
-      <div class="lab-actions"><button class="big-button start-button">Für heute einplanen</button></div>
-      <p class="hint">Die Gruppe kämpft, wenn du oben „Tag beenden“ drückst. Bis dahin kannst du sie noch umrüsten.</p>
+      <div class="lab-actions"><button class="big-button start-button">Als feste Gruppe einplanen</button></div>
+      <p class="hint">Die Gruppe kämpft am Ende jedes Tages hier, bis du sie im Tagesplan auflöst. Verletzte fehlen, bis sie wieder fit sind.</p>
     `;
     panel.querySelector('h2').textContent = dungeon.name;
     if (this.game.isDungeonScouted(dungeon.id)) {
@@ -287,13 +288,15 @@ export class DungeonScreen {
 
   start() {
     const heroIds = [...this.selectedHeroIds];
-    const result = this.game.startExpedition(this.dungeonId, heroIds, this.retreatRuleId, this.chosenSupplies);
+    // Jede Gruppe ist eine stehende Gruppe: Sie zieht ab heute jeden Tag hierher, bis man sie auflöst
+    const result = this.game.createStandingGroup(this.dungeonId, heroIds, this.retreatRuleId, this.chosenSupplies);
     if (result !== 'ok') {
       showToast('Das geht gerade nicht.', '#ff6b6b');
       return;
     }
     Sound.boxArrived();
-    showToast('Eingeplant: ' + getDungeon(this.dungeonId).name + '. Die Gruppe kämpft am Ende des Tages.', '#ffd23f');
+    const group = this.game.guild.standingGroups[this.game.guild.standingGroups.length - 1];
+    showToast(group.name + ' zieht ab heute jeden Tag in ' + getDungeon(this.dungeonId).name + '.', '#ffd23f');
     this.selectedHeroIds.clear();
     this.chosenSupplies = [];
     this.render();
@@ -308,7 +311,6 @@ export class DungeonScreen {
       list.innerHTML = '<p class="empty">Heute ist noch keine Gruppe eingeplant. Wer nichts zu tun hat, ruht sich aus.</p>';
     }
     for (const expedition of this.game.guild.expeditions) {
-      const dungeon = getDungeon(expedition.dungeonId);
       const heroNames = expedition.getHeroIds()
         .map((heroId) => this.game.guild.findHero(heroId))
         .filter((hero) => hero)
@@ -322,21 +324,15 @@ export class DungeonScreen {
           <b class="run-name"></b>
           <span class="run-status"></span>
         </div>
-        <div class="run-buttons">
-          <button class="cancel-button">Absagen</button>
-        </div>
       `;
-      row.querySelector('.run-name').textContent = dungeon.name;
+      row.querySelector('.run-name').textContent = getRunTitle(this.game, expedition);
       row.querySelector('.run-status').textContent = heroNames.join(', ') +
         (retreatRule ? ' · Rückzug: ' + retreatRule.name : '') +
         (expedition.supplies.length > 0 ? ' · Vorräte: ' + describeSupplies(expedition.supplies) : '');
       const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
       row.querySelector('.run-head').after(createRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId,
         expedition.supplies));
-      row.querySelector('.cancel-button').addEventListener('click', () => {
-        Sound.click();
-        this.game.cancelExpedition(expedition.id);
-      });
+      row.appendChild(createRunControls(this.game, expedition));
       list.appendChild(row);
     }
   }

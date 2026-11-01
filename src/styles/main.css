@@ -3786,6 +3786,30 @@ h3 {
   margin: 0;
 }
 
+/* Stehende Gruppen: Knöpfe unter einem Run, fehlende Mitglieder, ausgesetzte Gruppen */
+.run-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.group-missing-line {
+  flex-basis: 100%;
+  color: #ff6b6b;
+}
+
+.paused-group {
+  opacity: 0.8;
+  border-style: dashed;
+}
+
+.disband-button.confirm {
+  background: #8b1e1e;
+  border-color: #ff6b6b;
+}
+
 /* Heldenübersicht nach Position (RoleOverview) */
 .group-counter {
   display: flex;

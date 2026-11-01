@@ -9,6 +9,7 @@ import { Sound } from './Sound.js';
 
 // Text pro Eintrag, abhängig von der Anzahl
 const TODO_TEXTS = {
+  groupMissing: (count) => count === 1 ? 'Einer Gruppe fehlt heute jemand (Ersatz einsetzen?)' : count + ' Gruppen fehlt heute jemand (Ersatz einsetzen?)',
   boxes: (count) => count === 1 ? '1 Kiste wartet aufs Öffnen' : count + ' Kisten warten aufs Öffnen',
   newGear: (count) => count === 1 ? '1 Held hat neue Ausrüstung' : count + ' Helden haben neue Ausrüstung',
   talents: (count) => count === 1 ? '1 Held kann ein Talent wählen' : count + ' Helden können ein Talent wählen',
@@ -20,7 +21,7 @@ const TODO_TEXTS = {
 };
 
 // Wichtige Einträge (rot statt gold)
-const WARNING_IDS = ['upkeep', 'unhappy'];
+const WARNING_IDS = ['groupMissing', 'upkeep', 'unhappy'];
 
 // onGoTo(screenId) = zu einem Bildschirm springen
 export function createTodoBox(game, onGoTo) {

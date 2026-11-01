@@ -41,7 +41,8 @@ Eine Option, die immer die beste ist, ist keine Wahl. Geprüft wird das per Simu
 src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen, Tageszähler, endDay), Random, SaveManager
 src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, CollectionBook (Sammelbuch: beste gefundene Seltenheit je Boss-Item, Titel, Gold-Bonus),
                RivalGuild (eine KI-Gilde: welche Dungeons an welchem Tag),
-               GuildHall (Gildenhalle: Stufe jedes Gebäudes, laufende Baustelle, Unterhalt bezahlt?; getEffect liefert die Wirkung), Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft)
+               GuildHall (Gildenhalle: Stufe jedes Gebäudes, laufende Baustelle, Unterhalt bezahlt?; getEffect liefert die Wirkung), Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft),
+               StandingGroup (stehende Gruppe: Name, Dungeon, feste Mitglieder, Vorräte; wird jeden Morgen eingeplant)
 src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem (EP, Aufhol-Erfahrung, Verletzungen nach einem Run),
                DayPlan (welcher Held hat heute welche Aufgabe), HeroTaskSystem (Training, Kräuter/Rohstoffe sammeln, Aufträge, Erkunden, Sold bei endDay Held für Held, unzufrieden ohne Sold),
                RivalSystem (KI-Gilden kommen voran, Neuigkeiten-Ticker, Server-First, Rangliste),
@@ -49,6 +50,7 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                StartTeam (prüft die Starttruppe: Rolle pro Platz, alle Rüstungsarten),
                NewGear (Markierung „neue Ausrüstung“: passende Items, die in der Liste des Platzes noch nicht gesehen wurden),
                DailyTodo („Was gibt es heute zu tun?“: Einträge mit Anzahl und Ziel-Bildschirm),
+               StandingGroups (stehende Gruppen: Name, fehlende Mitglieder, Ersatz derselben Position, verfügbare Vorräte),
                DungeonKnowledge (Dungeonwissen: Erkunden deckt Boss für Boss auf; none/partial/full; bekannte Schadensarten, verdeckte Mechaniken),
                GroupCounter (Helden nach Position, wie viele vollständige Gruppen die freien Helden ergeben, was fehlt; checkGroup prüft eine Gruppe),
                CraftingSystem (Zerlegen → Staub/Kristalle/Rohstoffe, Verbessern +1 bis +10 mit Fehlschlag ab +6),
@@ -69,7 +71,7 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus, Training, Kräuter sammeln, Rohstoffe sammeln, Aufträge erledigen, Erkunden; Zahlen in TASK_RULES),
                buildings (6 Gebäude à 3 Stufen: Kosten, Bauzeit, Unterhalt, Wirkungen),
                startTeam (Plätze der Starttruppe, Pflicht-Rüstungsarten, Standard-Gildenname),
-               groupRules (5 Positionen Tank/Heiler/Nahkampf/Fernkampf/Unterstützer, was eine vollständige Gruppe braucht),
+               groupRules (5 Positionen Tank/Heiler/Nahkampf/Fernkampf/Unterstützer, was eine vollständige Gruppe braucht, Namen der stehenden Gruppen),
                riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben; grobe Stufen bei teilweise erkundeten Dungeons),
                damageTypes (Schadensarten mit Farbe, Obergrenze für Resistenzen),
                defeatCauses (Tipps und Hinweise für „Woran es lag“),
@@ -99,6 +101,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                SupplyPicker = Vorrats-Plätze einer Gruppe (Dungeon-Bildschirm + Tagesplan).
                NewsLine = eine Zeile aus dem Neuigkeiten-Ticker (Tagesplan + Tagesabschluss).
                FoundingScreen = Startbildschirm „Gründe deine Gilde“ (Name + 5 Klassen, alle Rüstungsarten), nur bei neuem Spielstand.
+               StandingGroupControls = Anzeige und Knöpfe stehender Gruppen (Ersatz einsetzen, Heute aussetzen, Wieder einplanen, Auflösen).
                CraftingControls = Schmieden (Karte der Schmiede), Brauen (Karte des Alchemielabors), Umschmieden (Inventar).
                UpgradeControls = Zerlegen und Verbessern in der Oberfläche (Verbessern-Knopf mit Kosten und Chance, Material-Text, Funken/Riss, Leuchten und „+3“ an verbesserten Items; Inventar + Ausrüstungsliste).
                TalentPanel = die 3 Talentreihen eines Helden zum Auswählen (Heldenbildschirm + Kampf-Labor).
