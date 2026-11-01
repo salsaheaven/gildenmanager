@@ -138,9 +138,10 @@ In kleinen, jeweils online testbaren Schritten:
 Plan vom 2026-11-01 (Entscheidungen in `KONZEPT.md` unter „Raids“, „Klassen-Sets“, „Umfang“), jeder Schritt einzeln spielbar:
 - **Schritt 1** 1 neuer Level-Dungeon (etwa Stufe 20, zwischen Sonnentempel und Max-Level) mit neuen Bossen, Mechaniken, Boss-Beute und Sammelbuch-Seite. Damit gibt es 7 normale Dungeons (plus 3 Set-Dungeons in Schritt 2 = 10).
 - **Schritt 2** 3 Set-Dungeons auf Stufe 30 (Platte, Leder, Stoff), 15 Klassen-Sets à 3 Teile (Kopf, Brust, Füße) mit Boni bei 2 und 3 Teilen, Set-Anzeige am Helden und im Sammelbuch.
-- **Schritt 3** Raid-Kampf: 20 Helden in einem Kampf, Raid-Mechaniken (eine Gruppe, alle Heiler, zufällige Helden), Kampfszene für 20 Helden auch auf dem Handy, Raid im Kampf-Labor testbar.
-- **Schritt 4** Raid 1 (4 Bosse): Raid-Tage (Tag 6 und 7 jeder Woche), Wochen-Sperre, Raidgruppe aus 20 Helden (mind. 2 Tanks, 4 Heiler), legendäre Waffen und Ringe, Raid-Zutaten zum Umschmieden von Set-Teilen, Krit als Zusatzwert auf Items.
-- **Schritt 5** Raid 2 (5 Bosse, der letzte ist der Endboss), Endauswertung nach Spieltagen, Raid-Rennen der KI-Gilden im Ticker. Danach M4 pushen.
+- **Schritt 3** Konter verteilen über Talente (siehe „Konter verteilen“ in `KONZEPT.md`): Unterbrechen, Fluch entfernen und große Schläge abfangen zusätzlich per Talent bei je zwei weiteren Klassen; bestehende Talente werden dafür umgebaut. Dungeonführer-Tipps nennen alle Klassen, die kontern können.
+- **Schritt 4** Raid-Kampf: 20 Helden in einem Kampf, Raid-Mechaniken (eine Gruppe, alle Heiler, zufällige Helden), Kampfszene für 20 Helden auch auf dem Handy, Raid im Kampf-Labor testbar.
+- **Schritt 5** Raid 1 (4 Bosse): Raid-Tage (Tag 6 und 7 jeder Woche), Wochen-Sperre, Raidgruppe aus 20 Helden (mind. 2 Tanks, 4 Heiler), legendäre Waffen und Ringe, Raid-Zutaten zum Umschmieden von Set-Teilen, Krit als Zusatzwert auf Items.
+- **Schritt 6** Raid 2 (5 Bosse, der letzte ist der Endboss), Endauswertung nach Spieltagen, Raid-Rennen der KI-Gilden im Ticker. Danach M4 pushen.
 
 **M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie.
 
