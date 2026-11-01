@@ -1,55 +1,119 @@
 // ============================================================
-// NAVBAR – die Reiter unter der oberen Leiste (Schatzkammer, Helden, Taverne …)
-// Ganz rechts sitzt zusätzlich der Inventar-Knopf (öffnet ein Fenster, ist kein Reiter).
-// Kleine Abzeichen zeigen, wo etwas Neues wartet.
+// NAVBAR – die Leiste mit den 5 Abschnitten (Heute, Helden, Dungeons, Beute, Gilde)
+// und darunter die Unterreiter des gewählten Abschnitts (z.B. Helden: Übersicht | Taverne).
+// Auf dem Handy steht die Abschnitts-Leiste unten am Bildschirm (siehe main.css).
+// Abzeichen ("3", "!", "★") hängen an einem Bildschirm. Der Abschnitt zeigt das erste Abzeichen seiner Bildschirme.
+// Ein Abschnitt kann zusätzlich Knöpfe haben, die ein Fenster öffnen statt einen Bildschirm (z.B. Inventar).
 // ============================================================
 
 import { Sound } from './Sound.js';
 
 export class NavBar {
-  // tabs = Liste von { id, name }, onSelect = Funktion, die beim Klick aufgerufen wird
-  constructor(rootElement, tabs, onSelect) {
-    this.root = rootElement;
-    this.buttons = {};
+  // sectionRoot = Leiste der Abschnitte, subRoot = Leiste der Unterreiter
+  // sections = [{ id, name, screens: [{ id, name }] }], onSelect(screenId) = Bildschirm wechseln
+  constructor(sectionRoot, subRoot, sections, onSelect) {
+    this.sectionRoot = sectionRoot;
+    this.subRoot = subRoot;
+    this.sections = sections;
+    this.onSelect = onSelect;
+    this.badges = {};        // Bildschirm-id → Text des Abzeichens
+    this.extraButtons = {};  // Abschnitt-id → [{ id, name, onClick }]
+    this.activeScreenId = null;
+    this.sectionButtons = {};
 
-    for (const tab of tabs) {
+    for (const section of sections) {
       const button = document.createElement('button');
       button.className = 'nav-tab';
       button.innerHTML = '<span class="nav-name"></span><span class="nav-badge" hidden></span>';
-      button.querySelector('.nav-name').textContent = tab.name;
+      button.querySelector('.nav-name').textContent = section.name;
       button.addEventListener('click', () => {
         Sound.click();
-        onSelect(tab.id);
+        // Ein Abschnitt öffnet seinen ersten Bildschirm (bleibt, wenn man schon darin ist)
+        if (this.getSectionOf(this.activeScreenId) !== section) {
+          this.onSelect(section.screens[0].id);
+        }
       });
-      this.root.appendChild(button);
-      this.buttons[tab.id] = button;
+      this.sectionRoot.appendChild(button);
+      this.sectionButtons[section.id] = button;
     }
   }
 
-  // Ein Knopf, der kein Reiter ist (z.B. "Inventar"). Er bekommt auch ein Abzeichen über setBadge.
-  addExtraButton(id, name, onClick) {
-    const button = document.createElement('button');
-    button.className = 'nav-tab nav-extra';
-    button.innerHTML = '<span class="nav-name"></span><span class="nav-badge" hidden></span>';
-    button.querySelector('.nav-name').textContent = name;
-    button.addEventListener('click', () => {
-      Sound.click();
-      onClick();
-    });
-    this.root.appendChild(button);
-    this.buttons[id] = button;
+  // Zu welchem Abschnitt gehört ein Bildschirm? (null, wenn zu keinem, z.B. das Kampf-Labor)
+  getSectionOf(screenId) {
+    return this.sections.find((section) => section.screens.some((screen) => screen.id === screenId)) || null;
   }
 
-  setActive(tabId) {
-    for (const id in this.buttons) {
-      this.buttons[id].classList.toggle('active', id === tabId);
+  // Ein Knopf in den Unterreitern eines Abschnitts, der kein Bildschirm ist (z.B. "Inventar" öffnet ein Fenster)
+  addExtraButton(sectionId, id, name, onClick) {
+    if (!this.extraButtons[sectionId]) {
+      this.extraButtons[sectionId] = [];
     }
+    this.extraButtons[sectionId].push({ id, name, onClick });
+    this.render();
+  }
+
+  setActive(screenId) {
+    this.activeScreenId = screenId;
+    this.render();
   }
 
   // text = was im Abzeichen steht (z.B. "3" oder "!"). Leer = Abzeichen ausblenden.
-  setBadge(tabId, text) {
-    const badge = this.buttons[tabId].querySelector('.nav-badge');
-    badge.hidden = !text;
-    badge.textContent = text || '';
+  setBadge(id, text) {
+    this.badges[id] = text || '';
+    this.render();
   }
+
+  render() {
+    const activeSection = this.getSectionOf(this.activeScreenId);
+
+    // Abschnitte: aktiv markieren, Abzeichen = erstes Abzeichen eines Bildschirms oder Extra-Knopfs darin
+    for (const section of this.sections) {
+      const button = this.sectionButtons[section.id];
+      button.classList.toggle('active', section === activeSection);
+      const ids = section.screens.map((screen) => screen.id).concat((this.extraButtons[section.id] || []).map((extra) => extra.id));
+      const badgeText = ids.map((id) => this.badges[id]).find((text) => text) || '';
+      setBadgeElement(button.querySelector('.nav-badge'), badgeText);
+    }
+
+    // Unterreiter des aktiven Abschnitts (nur, wenn es mehr als einen Eintrag gibt)
+    this.subRoot.innerHTML = '';
+    if (!activeSection) {
+      this.subRoot.hidden = true;
+      return;
+    }
+    const extras = this.extraButtons[activeSection.id] || [];
+    this.subRoot.hidden = activeSection.screens.length + extras.length <= 1;
+    for (const screen of activeSection.screens) {
+      const button = this.createSubButton(screen.name, this.badges[screen.id]);
+      button.classList.toggle('active', screen.id === this.activeScreenId);
+      button.addEventListener('click', () => {
+        Sound.click();
+        this.onSelect(screen.id);
+      });
+      this.subRoot.appendChild(button);
+    }
+    for (const extra of extras) {
+      const button = this.createSubButton(extra.name, this.badges[extra.id]);
+      button.classList.add('sub-extra');
+      button.addEventListener('click', () => {
+        Sound.click();
+        extra.onClick();
+      });
+      this.subRoot.appendChild(button);
+    }
+  }
+
+  createSubButton(name, badgeText) {
+    const button = document.createElement('button');
+    button.className = 'sub-tab';
+    button.innerHTML = '<span class="nav-name"></span><span class="nav-badge" hidden></span>';
+    button.querySelector('.nav-name').textContent = name;
+    setBadgeElement(button.querySelector('.nav-badge'), badgeText);
+    return button;
+  }
+}
+
+function setBadgeElement(element, text) {
+  element.hidden = !text;
+  element.textContent = text || '';
 }

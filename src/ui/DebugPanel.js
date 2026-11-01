@@ -13,7 +13,8 @@ import { Sound } from './Sound.js';
 import { advanceConstruction } from '../systems/BuildingSystem.js';
 
 export class DebugPanel {
-  constructor(game) {
+  // onOpenLab = öffnet das Kampf-Labor (ein Entwickler-Werkzeug, das nur über dieses Menü erreichbar ist)
+  constructor(game, onOpenLab) {
     this.game = game;
 
     this.root = document.createElement('div');
@@ -22,6 +23,10 @@ export class DebugPanel {
     this.root.innerHTML = '<h2>Test-Menü (F2)</h2><div class="debug-buttons"></div>';
     document.body.appendChild(this.root);
 
+    this.addButton('Kampf-Labor öffnen', () => {
+      this.root.hidden = true;
+      onOpenLab();
+    });
     this.addButton('+1000 Gold', () => {
       game.guild.addGold(1000);
     });

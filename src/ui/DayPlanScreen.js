@@ -26,6 +26,7 @@ import { getConsumable } from '../data/consumables.js';
 import { DUNGEONS } from '../data/dungeons.js';
 import { showToast } from './Toast.js';
 import { Sound } from './Sound.js';
+import { createTodoBox } from './TodoBox.js';
 
 export class DayPlanScreen {
   // onGoTo(screenId) = zu einem anderen Reiter wechseln (z.B. 'dungeons' oder 'tavern')
@@ -39,6 +40,7 @@ export class DayPlanScreen {
 
     this.root.innerHTML = `
       <div class="day-plan-screen">
+        <div class="todo-slot"></div>
         <section class="panel day-plan-header">
           <h2 class="day-plan-title"></h2>
           <div class="day-plan-counts"></div>
@@ -95,6 +97,10 @@ export class DayPlanScreen {
 
   render() {
     const plan = getDayPlan(this.game.guild);
+    // Ganz oben: "Was gibt es heute zu tun?" mit Sprüngen an die richtige Stelle
+    const todoSlot = this.root.querySelector('.todo-slot');
+    todoSlot.innerHTML = '';
+    todoSlot.appendChild(createTodoBox(this.game, this.onGoTo));
     this.renderHeader(plan);
     this.renderRuns();
     this.renderOthers(plan);

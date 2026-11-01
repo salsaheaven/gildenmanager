@@ -3725,6 +3725,53 @@ h3 {
   padding: 2px 4px;
 }
 
+/* Unterreiter des gewählten Abschnitts */
+#sub-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 16px 0;
+}
+
+.sub-tab {
+  position: relative;
+  font-size: 18px;
+  padding: 4px 12px;
+  box-shadow: none;
+}
+
+.sub-tab.active {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+/* "Was gibt es heute zu tun?" */
+.todo-box {
+  margin-bottom: 16px;
+  border-color: var(--gold);
+}
+
+.todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.todo-entry {
+  text-align: left;
+  color: var(--gold);
+}
+
+.todo-entry.warning {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+}
+
+.todo-done {
+  color: #1eff00;
+  margin: 0;
+}
+
 /* Heldenübersicht nach Position (RoleOverview) */
 .group-counter {
   display: flex;
@@ -3888,16 +3935,24 @@ h3 {
     padding: 10px;
   }
 
-  /* Reiter als Raster mit 3 Spalten statt aus dem Bild zu laufen */
+  /* Abschnitte als feste Leiste unten, "Tag beenden" direkt darüber (immer erreichbar) */
   #nav-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    padding: 10px 10px 8px;
-    gap: 10px 6px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    padding: 6px 6px 8px;
+    border-bottom: none;
+    border-top: 3px solid var(--border);
+    background: var(--panel);
   }
 
   .nav-tab {
-    padding: 10px 4px;
+    padding: 12px 2px;
     font-size: 8px;
     border-bottom: 2px solid var(--border);
   }
@@ -3906,14 +3961,38 @@ h3 {
     border-bottom-color: var(--gold);
   }
 
-  .nav-extra {
-    margin-left: 0;
+  .nav-tab .nav-badge {
+    top: -10px;
+    right: -2px;
+  }
+
+  #top-bar .end-day-button {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: 60px;
+    z-index: 40;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Platz unten für die beiden festen Leisten */
+  #screen {
+    padding-bottom: 140px;
+  }
+
+  #sub-nav {
+    padding: 8px 10px 0;
+  }
+
+  /* Der Tagesplan braucht keinen eigenen "Tag beenden"-Knopf, der feste unten reicht */
+  .plan-end-day-button {
+    display: none;
   }
 
   /* Benachrichtigungen unten statt über den Reitern */
   #toasts {
     top: auto;
-    bottom: 16px;
+    bottom: 130px;
     left: 10px;
     right: 10px;
   }

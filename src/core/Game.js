@@ -20,6 +20,7 @@ import { getSalvageYield, upgradeItem } from '../systems/CraftingSystem.js';
 import { forgeItem, reforgeItem } from '../systems/ForgeSystem.js';
 import { getSlotsWithNewGear, markSlotSeen, markItemSeen } from '../systems/NewGear.js';
 import { countPossibleGroups, groupHeroesByPosition, checkGroup } from '../systems/GroupCounter.js';
+import { getDailyTodos } from '../systems/DailyTodo.js';
 import { brew } from '../systems/AlchemySystem.js';
 import { checkStartTeam } from '../systems/StartTeam.js';
 import { START_TEAM_RULES } from '../data/startTeam.js';
@@ -598,6 +599,11 @@ export class Game {
   // Alle Helden nach Position: { tank: [...], healer: [...], melee, ranged, support } (siehe data/groupRules.js)
   getHeroesByPosition() {
     return groupHeroesByPosition(this.guild.heroes);
+  }
+
+  // "Was gibt es heute zu tun?": Liste von { id, count, screenId } (siehe systems/DailyTodo.js)
+  getDailyTodos() {
+    return getDailyTodos(this.guild, this.lastDaySummary);
   }
 
   // Wie viele vollständige Gruppen gehen heute noch aus den freien Helden? (siehe systems/GroupCounter.js)

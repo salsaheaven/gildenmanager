@@ -15,6 +15,7 @@ import { TavernScreen } from './ui/TavernScreen.js';
 import { CombatLabScreen } from './ui/CombatLabScreen.js';
 import { DungeonScreen } from './ui/DungeonScreen.js';
 import { GuildHallScreen } from './ui/GuildHallScreen.js';
+import { ShopScreen } from './ui/ShopScreen.js';
 import { DayPlanScreen } from './ui/DayPlanScreen.js';
 import { DayEndOverlay } from './ui/DayEndOverlay.js';
 import { DebugPanel } from './ui/DebugPanel.js';
@@ -28,16 +29,18 @@ import { showToast } from './ui/Toast.js';
 // Alle 5 Sekunden automatisch speichern
 const AUTOSAVE_SECONDS = 5;
 
-// Die Reiter des Spiels
-const TABS = [
-  { id: 'plan', name: 'Tagesplan' },
-  { id: 'treasury', name: 'Schatzkammer' },
-  { id: 'heroes', name: 'Helden' },
-  { id: 'tavern', name: 'Taverne' },
-  { id: 'dungeons', name: 'Dungeons' },
-  { id: 'hall', name: 'Gildenhalle' },
-  { id: 'lab', name: 'Kampf-Labor' },
+// Die 5 Abschnitte des Spiels, jeder mit seinen Bildschirmen (Unterreitern).
+// Inventar und Sammelbuch sind Fenster und hängen als Extra-Knöpfe am Abschnitt "Beute" (siehe unten).
+const SECTIONS = [
+  { id: 'today', name: 'Heute', screens: [{ id: 'plan', name: 'Tagesplan' }] },
+  { id: 'heroesSection', name: 'Helden', screens: [{ id: 'heroes', name: 'Übersicht' }, { id: 'tavern', name: 'Taverne' }] },
+  { id: 'dungeonsSection', name: 'Dungeons', screens: [{ id: 'dungeons', name: 'Dungeons' }] },
+  { id: 'loot', name: 'Beute', screens: [{ id: 'treasury', name: 'Kisten' }] },
+  { id: 'guildSection', name: 'Gilde', screens: [{ id: 'hall', name: 'Gildenhalle' }, { id: 'shop', name: 'Händler' }] },
 ];
+
+// Bildschirme ohne Abschnitt: nur über das Test-Menü erreichbar (Entwickler-Werkzeug)
+const HIDDEN_SCREENS = ['lab'];
 
 // ---------- Spielstand laden ----------
 
@@ -63,36 +66,45 @@ new TopBar(document.getElementById('top-bar'), game, () => {
 // Jeder Bildschirm bekommt einen eigenen Bereich. Sichtbar ist immer nur einer.
 const screenArea = document.getElementById('screen');
 const screenElements = {};
-for (const tab of TABS) {
+const screenIds = [];
+for (const section of SECTIONS) {
+  for (const screen of section.screens) {
+    screenIds.push(screen.id);
+  }
+}
+for (const screenId of screenIds.concat(HIDDEN_SCREENS)) {
   const element = document.createElement('div');
   element.hidden = true;
   screenArea.appendChild(element);
-  screenElements[tab.id] = element;
+  screenElements[screenId] = element;
 }
 
-const navBar = new NavBar(document.getElementById('nav-bar'), TABS, showScreen);
+const navBar = new NavBar(document.getElementById('nav-bar'), document.getElementById('sub-nav'), SECTIONS, showScreen);
 
 // Das Inventar ist ein Vollbild-Fenster, das von überall geöffnet werden kann.
 // Das Abzeichen am Knopf zeigt, wie viele frische Items noch nicht angeschaut wurden.
 const inventory = new InventoryOverlay(game, (newItemCount) => {
   navBar.setBadge('inventory', newItemCount > 0 ? String(newItemCount) : '');
 });
-navBar.addExtraButton('inventory', 'Inventar', () => inventory.toggle());
+navBar.addExtraButton('loot', 'inventory', 'Inventar', () => inventory.toggle());
 // Geschmiedete Items bekommen wie Beute den "neu"-Punkt im Inventar
 game.on('itemForged', (item) => inventory.revealItem(item));
 
 const collection = new CollectionOverlay(game);
+navBar.addExtraButton('loot', 'collection', 'Sammelbuch', () => collection.open());
 const lootBoxScreen = new LootBoxScreen(screenElements.treasury, game, inventory, collection);
 const heroScreen = new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'), inventory);
 new TavernScreen(screenElements.tavern, game);
 const combatLabScreen = new CombatLabScreen(screenElements.lab, game);
 new DungeonScreen(screenElements.dungeons, game);
 new GuildHallScreen(screenElements.hall, game);
+new ShopScreen(screenElements.shop, game);
 new DayPlanScreen(screenElements.plan, game, showScreen, (heroId) => {
   showScreen('heroes');
   heroScreen.selectHero(heroId);
 });
-new DebugPanel(game);
+// Das Kampf-Labor ist ein Entwickler-Werkzeug: Es öffnet sich über das Test-Menü (F2)
+new DebugPanel(game, () => showScreen('lab'));
 
 let currentScreen = null;
 let tavernHasNews = false;
