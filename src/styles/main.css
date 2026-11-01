@@ -3638,6 +3638,93 @@ h3 {
   margin: 6px 0;
 }
 
+/* Dungeonführer (DungeonGuide) */
+.guide-level {
+  padding: 6px 10px;
+  margin: 6px 0;
+  border: 2px solid var(--border);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.guide-section {
+  margin: 8px 0;
+  border-top: 2px solid var(--border);
+}
+
+.guide-section > summary {
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 11px;
+  color: var(--gold);
+  padding: 8px 0;
+}
+
+.boss-card {
+  padding: 8px;
+  margin: 6px 0;
+  border: 2px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.boss-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.boss-mechanics {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.boss-mechanics li {
+  margin-bottom: 6px;
+}
+
+.mechanic-name {
+  color: #ff9f43;
+  font-weight: normal;
+}
+
+.mechanic-tip {
+  font-size: 16px;
+  color: #9be15d;
+}
+
+.mechanic-tip.hint {
+  color: var(--text-dim);
+}
+
+.boss-item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.boss-item-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  line-height: 1.1;
+}
+
+.boss-item-kind,
+.boss-item-for {
+  font-size: 16px;
+}
+
+.boss-item-found {
+  font-size: 18px;
+}
+
+.boss-item-missing {
+  font-size: 13px;
+  color: #0c0914;
+  background: #ffd23f;
+  padding: 2px 4px;
+}
+
 /* Heldenübersicht nach Position (RoleOverview) */
 .group-counter {
   display: flex;

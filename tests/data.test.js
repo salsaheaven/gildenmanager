@@ -9,6 +9,7 @@ import { LootSystem } from '../src/systems/LootSystem.js';
 import { Random } from '../src/core/Random.js';
 import { SPRITES, PALETTE } from '../src/data/sprites.js';
 import { BALANCING } from '../src/data/balancing.js';
+import { BOSSES, MECHANIC_TYPE_TEXTS } from '../src/data/enemies.js';
 
 describe('Kisten-Daten', () => {
   for (const box of LOOT_BOXES) {
@@ -94,6 +95,16 @@ describe('Pity-Hinweise', () => {
     expect(hints[0].fromProgress).toBe(0);
     for (let i = 1; i < hints.length; i++) {
       expect(hints[i].fromProgress).toBeGreaterThan(hints[i - 1].fromProgress);
+    }
+  });
+});
+
+describe('Dungeonführer-Daten', () => {
+  it('jede Mechanik-Art eines Bosses hat einen Text', () => {
+    for (const boss of BOSSES) {
+      for (const mechanic of boss.mechanics) {
+        expect(MECHANIC_TYPE_TEXTS[mechanic.type], boss.id + ': ' + mechanic.type).toBeDefined();
+      }
     }
   });
 });

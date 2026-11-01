@@ -6,16 +6,15 @@
 // Ausgekämpft wird erst bei "Tag beenden" (oben in der Leiste).
 // ============================================================
 
-import { DUNGEONS, getDungeon, getDungeonDamageTypes } from '../data/dungeons.js';
-import { getBoss, MINIONS } from '../data/enemies.js';
-import { getDamageType } from '../data/damageTypes.js';
+import { DUNGEONS, getDungeon } from '../data/dungeons.js';
 import { RETREAT_RULES } from '../data/retreatRules.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
 import { COMBAT_RULES } from '../data/combatRules.js';
-import { createHeroCanvas, createSpriteCanvas, createChestCanvas } from './PixelArt.js';
+import { createHeroCanvas } from './PixelArt.js';
 import { renderOrders } from './OrdersPanel.js';
 import { RunViewer } from './RunViewer.js';
 import { createRiskBadge } from './RiskBadge.js';
+import { renderDungeonGuide } from './DungeonGuide.js';
 import { renderRoleTiles } from './RoleOverview.js';
 import { announceEquipBest } from './HeroDetailPanel.js';
 import { GROUP_RULES, getPositionName } from '../data/groupRules.js';
@@ -30,6 +29,7 @@ export class DungeonScreen {
     this.game = game;
     this.dungeonId = DUNGEONS[0].id;
     this.selectedHeroIds = new Set();
+    this.guideSections = {}; // welche Bereiche des Dungeonführers aufgeklappt sind (Gegner, Beute)
     this.retreatRuleId = 'never';
     this.chosenSupplies = []; // Vorräte, die die Gruppe mitnehmen soll (siehe SupplyPicker)
 
@@ -106,9 +106,7 @@ export class DungeonScreen {
     panel.innerHTML = `
       <h2></h2>
       <p class="hint dungeon-description"></p>
-      <div class="encounter-list"></div>
-      <div class="damage-type-line"></div>
-      <div class="reward-line"></div>
+      <div class="dungeon-guide"></div>
       <h3 title="${GROUP_RULES.size} Helden: 1 Tank, 1 Heiler und 3 beliebige">Gruppe</h3>
       <div class="group-picker"></div>
       <div class="group-check"></div>
@@ -131,21 +129,8 @@ export class DungeonScreen {
     }
     panel.querySelector('.dungeon-description').textContent = dungeon.description;
 
-    this.renderEncounters(panel.querySelector('.encounter-list'), dungeon);
-    // Welche Resistenzen hier helfen, z.B. "Schadensarten: Schatten"
-    const damageTypes = getDungeonDamageTypes(dungeon.id);
-    if (damageTypes.length > 0) {
-      const line = panel.querySelector('.damage-type-line');
-      line.innerHTML = '<span class="hint">Schadensarten hier (Resistenzen helfen):</span> ';
-      for (const damageTypeId of damageTypes) {
-        const part = document.createElement('span');
-        part.className = 'resistance-chip';
-        part.style.color = getDamageType(damageTypeId).color;
-        part.textContent = getDamageType(damageTypeId).name;
-        line.appendChild(part);
-      }
-    }
-    this.renderReward(panel.querySelector('.reward-line'), dungeon);
+    // Dungeonführer: Niveau, Gegner und Beute (siehe DungeonGuide.js)
+    renderDungeonGuide(panel.querySelector('.dungeon-guide'), this.game, dungeon, this.guideSections);
     this.renderGroupPicker(panel.querySelector('.group-picker'));
     this.renderGroupCheck(panel.querySelector('.group-check'), dungeon);
     const equipGroupButton = panel.querySelector('.equip-group-button');
@@ -181,56 +166,6 @@ export class DungeonScreen {
     const startButton = panel.querySelector('.start-button');
     startButton.disabled = !unlocked || group.length === 0;
     startButton.addEventListener('click', () => this.start());
-  }
-
-  // Begegnungen mit Bildern. Boss-Mechaniken kennt man erst nach dem ersten Versuch (oder nach dem Erkunden).
-  renderEncounters(container, dungeon) {
-    const attempted = this.game.guild.getAttempts(dungeon.id) > 0 || this.game.isDungeonScouted(dungeon.id);
-    dungeon.encounters.forEach((encounter, index) => {
-      const row = document.createElement('div');
-      row.className = 'encounter-row';
-      const icons = document.createElement('div');
-      icons.className = 'encounter-icons';
-      const text = document.createElement('div');
-      text.className = 'encounter-text';
-
-      if (encounter.type === 'boss') {
-        const boss = getBoss(encounter.bossId);
-        icons.appendChild(createSpriteCanvas(boss.sprite, 3));
-        // Mechaniken mit Schadensart, z.B. "Säureschwall (Säure)": wogegen man sich rüsten kann
-        const mechanics = boss.mechanics.map((m) => {
-          const name = m.name + describeDamageType(m.damageType);
-          return attempted ? name + ': ' + m.hint : name;
-        }).join(' · ');
-        text.innerHTML = '<b></b><span></span>';
-        text.querySelector('b').textContent = (index + 1) + '. Boss: ' + boss.name + ' – ' + boss.title +
-          (boss.attackDamageType ? ' · greift mit ' + getDamageType(boss.attackDamageType).name + ' an' : '');
-        text.querySelector('span').textContent = attempted ? mechanics : mechanics + ' (Tipps nach dem ersten Versuch)';
-      } else {
-        for (const enemyId of encounter.enemies) {
-          const enemy = MINIONS[enemyId];
-          icons.appendChild(createSpriteCanvas(enemy.sprite, 2, enemy.colors || {}));
-        }
-        text.innerHTML = '<b></b><span></span>';
-        text.querySelector('b').textContent = (index + 1) + '. ' + encounter.name;
-        text.querySelector('span').textContent = encounter.enemies.length + ' Gegner: ' +
-          [...new Set(encounter.enemies.map((id) => MINIONS[id].name + describeDamageType(MINIONS[id].attackDamageType)))].join(', ');
-      }
-      row.appendChild(icons);
-      row.appendChild(text);
-      container.appendChild(row);
-    });
-  }
-
-  renderReward(container, dungeon) {
-    const chest = getLootBoxType(dungeon.rewards.chest);
-    container.innerHTML = '<span>Belohnung:</span>';
-    container.appendChild(createSpriteCanvas('coin', 2));
-    container.insertAdjacentHTML('beforeend', '<span>' + dungeon.rewards.gold + '</span>');
-    container.appendChild(createChestCanvas(chest, 2));
-    const name = document.createElement('span');
-    name.textContent = chest.name + ' (Items der Stufe ' + dungeon.level + ')';
-    container.appendChild(name);
   }
 
   // Gruppenwahl nach Position (wie die Heldenübersicht):
@@ -454,15 +389,7 @@ export function outcomeText(outcome) {
   return 'Gescheitert';
 }
 
-// "verletzt (noch 1 Tag)" bzw. "verletzt (noch 3 Tage)"
-// " (Säure)" für nicht-körperlichen Schaden, sonst nichts
-function describeDamageType(damageTypeId) {
-  if (!damageTypeId || damageTypeId === 'physical') {
-    return '';
-  }
-  return ' (' + getDamageType(damageTypeId).name + ')';
-}
-
+// Verletzung als kurzer Text, z.B. "verletzt (noch 1 Tag)"
 export function describeInjury(hero) {
   return 'verletzt (noch ' + hero.injuryDays + (hero.injuryDays === 1 ? ' Tag)' : ' Tage)');
 }

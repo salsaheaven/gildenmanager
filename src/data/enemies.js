@@ -297,6 +297,15 @@ export const MINIONS = {
   },
 };
 
+// Was eine Mechanik-Art bewirkt, in Worten (für den Dungeonführer)
+export const MECHANIC_TYPE_TEXTS = {
+  tankBuster: 'Riesiger Schlag auf den, den er angreift',
+  groupCast: 'Trifft die ganze Gruppe',
+  frontWave: 'Trifft die vordere Reihe',
+  summon: 'Ruft Diener herbei',
+  curse: 'Fluch: Schaden über Zeit auf einen Helden',
+};
+
 export function getBoss(bossId) {
   for (const boss of BOSSES) {
     if (boss.id === bossId) {
