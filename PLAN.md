@@ -131,7 +131,7 @@ In kleinen, jeweils online testbaren Schritten:
   2. **Dungeonführer und Planung:** Beute-Liste, empfohlenes Niveau, Bosse im Detail; Gruppenwahl nach Rollen
   3. **Planungsabschnitte:** Leiste unten auf dem Handy, „Tag beenden“ immer sichtbar, Kasten „Was gibt es heute zu tun?“
   4. **Dungeonwissen durch Erkunden** (Mechaniken, Schadensarten und Risiko-Anzeige verdeckt), Kampf-Labor ins Test-Menü
-  5. **Stehende Gruppen**, zuletzt das schrittweise Freischalten als Tutorial
+  5. **Stehende Gruppen** (mit Namen, Meldung im Tagesplan bei fehlenden Helden, Knopf „Ersatz einsetzen“, ersetzt „Wie gestern“), zuletzt das schrittweise Freischalten als Tutorial
 
 **M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.
 
