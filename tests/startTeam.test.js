@@ -113,7 +113,8 @@ describe('Erkunden mit mehreren Gruppen', () => {
       game.hireHero(game.guild.candidates[0].id);
     }
     const ids = game.guild.heroes.map((hero) => hero.id);
-    game.guild.scoutedDungeons.bearCave = true;
+    game.guild.scoutedDungeons.bearCave = 1;
+    game.guild.dungeonKnowledge.bearCave = 1; // Vorteil gibt es nur mit Wissen
     expect(game.startExpedition('bearCave', ids.slice(0, 4), 'never')).toBe('ok');
     expect(game.startExpedition('bearCave', ids.slice(4, 8), 'never')).toBe('ok');
     const reports = game.endDay();

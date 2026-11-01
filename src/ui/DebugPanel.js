@@ -9,6 +9,8 @@ import { HERO_RARITIES } from '../data/heroRarities.js';
 import { getRarity } from '../data/rarities.js';
 import { SCALING } from '../data/scaling.js';
 import { showToast } from './Toast.js';
+import { DUNGEONS } from '../data/dungeons.js';
+import { getKnowledgeTotal } from '../systems/DungeonKnowledge.js';
 import { Sound } from './Sound.js';
 import { advanceConstruction } from '../systems/BuildingSystem.js';
 
@@ -26,6 +28,12 @@ export class DebugPanel {
     this.addButton('Kampf-Labor öffnen', () => {
       this.root.hidden = true;
       onOpenLab();
+    });
+    // Zum Ausprobieren des Dungeonführers: alle Bosse aller Dungeons aufgedeckt
+    this.addButton('Alle Dungeons erkunden', () => {
+      for (const dungeon of DUNGEONS) {
+        game.guild.dungeonKnowledge[dungeon.id] = getKnowledgeTotal(dungeon.id);
+      }
     });
     this.addButton('+1000 Gold', () => {
       game.guild.addGold(1000);

@@ -84,7 +84,8 @@ export function simulateBattle(options) {
 // Ein ganzer Dungeon-Run.
 // options = { heroes, dungeonId, retreatRuleId, seed, recordLog, supplies }
 //   supplies = freiwillig: mitgenommene Verbrauchsgüter (Liste von ids, siehe data/consumables.js)
-//   scouted  = freiwillig: true, wenn der Dungeon erkundet wurde (etwas mehr Schaden, siehe data/heroTasks.js)
+//   scouting = freiwillig: Der Run ist durch Erkunden vorbereitet. 'partial' oder 'full' (Wissensstand, siehe
+//              systems/DungeonKnowledge.js) bestimmt den Vorteil (scoutingBonus in data/heroTasks.js), null = kein Vorteil
 // Gibt { dungeonId, outcome, encounters, heroes } zurück.
 //   outcome = 'success', 'defeat', 'retreat' oder 'timeout'
 export function simulateRun(options) {
@@ -94,8 +95,10 @@ export function simulateRun(options) {
   const heroes = options.heroes.map((hero) => createHeroCombatant(hero));
   applyGroupAuras(heroes);
   const supplyEffects = combineSupplyEffects(options.supplies || []);
-  if (options.scouted) {
-    supplyEffects.damageDone += TASK_RULES.scoutingDamageBonus;
+  if (options.scouting) {
+    const bonus = TASK_RULES.scoutingBonus[options.scouting];
+    supplyEffects.damageDone += bonus.damageDone || 0;
+    supplyEffects.damageTaken += bonus.damageTaken || 0;
   }
   applySupplyEffects(heroes, supplyEffects);
 

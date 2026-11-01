@@ -49,6 +49,7 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                StartTeam (prüft die Starttruppe: Rolle pro Platz, alle Rüstungsarten),
                NewGear (Markierung „neue Ausrüstung“: passende Items, die in der Liste des Platzes noch nicht gesehen wurden),
                DailyTodo („Was gibt es heute zu tun?“: Einträge mit Anzahl und Ziel-Bildschirm),
+               DungeonKnowledge (Dungeonwissen: Erkunden deckt Boss für Boss auf; none/partial/full; bekannte Schadensarten, verdeckte Mechaniken),
                GroupCounter (Helden nach Position, wie viele vollständige Gruppen die freien Helden ergeben, was fehlt; checkGroup prüft eine Gruppe),
                CraftingSystem (Zerlegen → Staub/Kristalle/Rohstoffe, Verbessern +1 bis +10 mit Fehlschlag ab +6),
                ForgeSystem (Schmieden: weißes Item nach Vorlage; Umschmieden: andere Rüstungsart), AlchemySystem (Brauen: Kräuter → Waren), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
@@ -69,7 +70,7 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                buildings (6 Gebäude à 3 Stufen: Kosten, Bauzeit, Unterhalt, Wirkungen),
                startTeam (Plätze der Starttruppe, Pflicht-Rüstungsarten, Standard-Gildenname),
                groupRules (5 Positionen Tank/Heiler/Nahkampf/Fernkampf/Unterstützer, was eine vollständige Gruppe braucht),
-               riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben),
+               riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben; grobe Stufen bei teilweise erkundeten Dungeons),
                damageTypes (Schadensarten mit Farbe, Obergrenze für Resistenzen),
                defeatCauses (Tipps und Hinweise für „Woran es lag“),
                crafting (Material inkl. Rohstoffe und Kräuter, Ertrag beim Zerlegen, Kosten und Chancen fürs Verbessern, Kosten fürs Schmieden/Umschmieden),
@@ -101,7 +102,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                CraftingControls = Schmieden (Karte der Schmiede), Brauen (Karte des Alchemielabors), Umschmieden (Inventar).
                UpgradeControls = Zerlegen und Verbessern in der Oberfläche (Verbessern-Knopf mit Kosten und Chance, Material-Text, Funken/Riss, Leuchten und „+3“ an verbesserten Items; Inventar + Ausrüstungsliste).
                TalentPanel = die 3 Talentreihen eines Helden zum Auswählen (Heldenbildschirm + Kampf-Labor).
-               RiskBadge = Einschätzung eines Runs in Worten („Riskant · Gefallene: oft“).
+               RiskBadge = Einschätzung eines Runs in Worten, je nach Dungeonwissen „Unbekannt“, „Eher leicht/schwer“ oder genau („Riskant · Gefallene: oft“).
                OrdersPanel = Auswahllisten für Anweisungen mit Vorteil (grün) und Nachteil (rot) (Labor, Dungeon, Tagesplan, Heldenbildschirm).
                Leisten: TopBar, NavBar (Abschnitte + Unterreiter, auf dem Handy unten). Helfer: PixelArt, Sound, Toast, format, TraitChip.
                DebugPanel = Test-Menü (Taste F2), öffnet auch das Kampf-Labor

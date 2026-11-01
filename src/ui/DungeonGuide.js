@@ -1,14 +1,13 @@
 // ============================================================
 // DUNGEONGUIDE – der Dungeonführer: alles, was man zum Planen eines Dungeons wissen muss
-//   - Niveau: Stufe, empfohlenes Level und Ausrüstungswert, Item-Level der Beute, Schadensarten
-//   - Gegner (aufklappbar): Trash-Gruppen und Bosse im Detail (Bild, Leben, Raserei, Fähigkeiten).
-//     Tipps zu den Fähigkeiten gibt es erst nach dem ersten Versuch oder nach dem Erkunden.
+//   - Niveau: Stufe, empfohlenes Level und Ausrüstungswert, Item-Level der Beute, Wissensstand, bekannte Schadensarten
+//   - Gegner (aufklappbar): Trash-Gruppen und Bosse. Details (Leben, Raserei, Fähigkeiten mit Tipps)
+//     nur für erkundete Bosse, sonst nur Bild und Name (siehe systems/DungeonKnowledge.js).
 //   - Beute (aufklappbar): Gold, Boss-Kiste und die besonderen Boss-Items mit Platz, Rüstungsart,
 //     passenden Klassen und Sammelbuch-Sternen
 // Benutzt vom Dungeon-Bildschirm. Die Daten kommen aus data/dungeons.js, enemies.js und lootBoxes.js.
 // ============================================================
 
-import { getDungeonDamageTypes } from '../data/dungeons.js';
 import { getBoss, MINIONS, MECHANIC_TYPE_TEXTS } from '../data/enemies.js';
 import { getDamageType } from '../data/damageTypes.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
@@ -25,14 +24,13 @@ const STARS = { rare: '★', epic: '★★', legendary: '★★★' };
 // openSections = { enemies: true/false, loot: true/false } (bleibt beim Neuzeichnen erhalten, wird hier geändert)
 export function renderDungeonGuide(container, game, dungeon, openSections) {
   container.innerHTML = '';
-  container.appendChild(createLevelBox(dungeon));
+  container.appendChild(createLevelBox(game, dungeon));
 
   const enemies = createSection('enemies', 'Gegner (' + dungeon.encounters.length + ' Begegnungen)', openSections);
-  // Tipps kennt man erst nach dem ersten Versuch oder nach dem Erkunden
-  const knowsTips = game.guild.getAttempts(dungeon.id) > 0 || game.isDungeonScouted(dungeon.id);
   dungeon.encounters.forEach((encounter, index) => {
     if (encounter.type === 'boss') {
-      enemies.body.appendChild(createBossCard(getBoss(encounter.bossId), dungeon.level, index, knowsTips));
+      const known = game.isEncounterKnown(dungeon.id, index);
+      enemies.body.appendChild(createBossCard(getBoss(encounter.bossId), dungeon.level, index, known));
     } else {
       enemies.body.appendChild(createTrashRow(encounter, index));
     }
@@ -58,22 +56,30 @@ function createSection(name, title, openSections) {
   return { section, body: section.querySelector('.guide-body') };
 }
 
-// Kasten "Niveau": Stufe, Empfehlung, Item-Level der Beute, Schadensarten
-function createLevelBox(dungeon) {
+// Kasten "Niveau": Stufe, Empfehlung, Item-Level der Beute, Wissensstand, bekannte Schadensarten
+function createLevelBox(game, dungeon) {
+  const knowledge = game.getDungeonKnowledge(dungeon.id);
   const box = document.createElement('div');
   box.className = 'guide-level';
   box.innerHTML = `
     <div><b>Stufe ${dungeon.level}</b> · empfohlen: Level ${dungeon.level}, Ausrüstungswert ${dungeon.recommendedGearScore}</div>
     <div class="hint">Beute hat Item-Level ${dungeon.level}</div>
+    <div class="guide-knowledge knowledge-${knowledge.level}"></div>
     <div class="guide-damage-types"></div>
   `;
-  const damageTypes = getDungeonDamageTypes(dungeon.id);
+  box.querySelector('.guide-knowledge').textContent = knowledge.level === 'full'
+    ? 'Vollständig erkundet (' + knowledge.known + ' von ' + knowledge.total + ' Bossen)'
+    : 'Erkundet: ' + knowledge.known + ' von ' + knowledge.total + ' Bossen. Schicke einen Helden zum Erkunden (Tagesplan).';
+
+  const damageTypes = game.getKnownDamageTypes(dungeon.id);
   const line = box.querySelector('.guide-damage-types');
   if (damageTypes.length > 0) {
-    line.innerHTML = '<span class="hint">Schadensarten (Resistenzen helfen):</span> ';
+    line.innerHTML = '<span class="hint">Bekannte Schadensarten (Resistenzen helfen):</span> ';
     for (const damageTypeId of damageTypes) {
       line.appendChild(createDamageTypeChip(damageTypeId));
     }
+  } else if (knowledge.level !== 'full') {
+    line.innerHTML = '<span class="hint">Schadensarten: noch unbekannt</span>';
   }
   return box;
 }
@@ -101,8 +107,9 @@ function createTrashRow(encounter, index) {
   return row;
 }
 
-// Boss im Detail: Bild, Name, Leben (auf der Stufe des Dungeons), Raserei, Angriffsart, Fähigkeiten
-function createBossCard(boss, level, index, knowsTips) {
+// Boss im Detail: Bild, Name, Leben (auf der Stufe des Dungeons), Raserei, Angriffsart, Fähigkeiten mit Tipps.
+// known = false: Nur Bild und Name, der Rest ist noch nicht erkundet.
+function createBossCard(boss, level, index, known) {
   const card = document.createElement('div');
   card.className = 'boss-card';
   card.innerHTML = `
@@ -117,6 +124,11 @@ function createBossCard(boss, level, index, knowsTips) {
   `;
   card.querySelector('.boss-card-icon').appendChild(createSpriteCanvas(boss.sprite, 4));
   card.querySelector('.boss-card-name').textContent = (index + 1) + '. Boss: ' + boss.name + ' – ' + boss.title;
+  if (!known) {
+    card.classList.add('unknown');
+    card.querySelector('.boss-card-stats').textContent = 'Noch nicht erkundet: Leben, Fähigkeiten und Schadensarten sind unbekannt.';
+    return card;
+  }
 
   const health = Math.round(boss.stats.health * getEnemyLevelFactors(level).health);
   const stats = ['Leben ' + health];
@@ -141,13 +153,7 @@ function createBossCard(boss, level, index, knowsTips) {
       what.push('unterbrechbar');
     }
     item.querySelector('.mechanic-what').textContent = '– ' + what.join(' · ');
-    const tip = item.querySelector('.mechanic-tip');
-    if (knowsTips) {
-      tip.textContent = 'Tipp: ' + mechanic.hint;
-    } else {
-      tip.textContent = 'Tipp nach dem ersten Versuch oder nach dem Erkunden';
-      tip.classList.add('hint');
-    }
+    item.querySelector('.mechanic-tip').textContent = 'Tipp: ' + mechanic.hint;
     list.appendChild(item);
   }
   return card;

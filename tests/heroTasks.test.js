@@ -133,7 +133,7 @@ describe('Erkunden', () => {
     expect(game.isDungeonScouted('bearCave')).toBe(false);
     // Der gespeicherte Run weiß, dass er erkundet war (gleiches Ergebnis beim erneuten Ansehen)
     const loaded = Game.fromSaveData(JSON.parse(JSON.stringify(game.toSaveData())));
-    expect(loaded.guild.reports[0].expedition.scouted).toBe(true);
+    expect(loaded.guild.reports[0].expedition.scouting).toBe('full');
   });
 });
 

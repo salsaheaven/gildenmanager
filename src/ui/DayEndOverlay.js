@@ -19,6 +19,7 @@ import { createDefeatCausesView } from './DefeatCausesView.js';
 import { Hero } from '../entities/Hero.js';
 import { Expedition } from '../entities/Expedition.js';
 import { getDungeon } from '../data/dungeons.js';
+import { getBoss } from '../data/enemies.js';
 import { getBuilding } from '../data/buildings.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
 import { BattleScene } from './BattleScene.js';
@@ -322,7 +323,8 @@ export class DayEndOverlay {
       container.appendChild(createTraitBonusLine('Vorräte verbraucht: ' + describeSupplies(report.supplies)));
     }
     if (report.scouted) {
-      container.appendChild(createTraitBonusLine('Erkundet: Die Gruppe war vorbereitet'));
+      container.appendChild(createTraitBonusLine('Erkundet: Die Gruppe war vorbereitet (mehr Schaden' +
+        (report.scouting === 'full' ? ', weniger erlittener Schaden)' : ')')));
     }
 
     if (report.chest) {
@@ -394,7 +396,8 @@ function describeTaskResult(task) {
       (task.greedyGold > 0 ? ' (davon ' + task.greedyGold + ' durch Gierig)' : '');
   }
   if (task.taskId === 'scouting' && task.scoutedDungeonId) {
-    return task.name + ' erkundet ' + getDungeon(task.scoutedDungeonId).name + ': Die nächsten Runs dort sind vorbereitet';
+    const found = task.revealedBossId ? getBoss(task.revealedBossId).name + ' aufgedeckt!' : 'alles schon bekannt';
+    return task.name + ' erkundet ' + getDungeon(task.scoutedDungeonId).name + ': ' + found + ' Der nächste Run dort ist vorbereitet.';
   }
   return null;
 }

@@ -68,7 +68,7 @@ export function estimateChances(options) {
 
 // Ein ganzer Dungeon-Run, viele Male simuliert.
 // options = { heroes, dungeonId, retreatRuleId, count, supplies (freiwillig: mitgenommene Verbrauchsgüter),
-//             scouted (freiwillig: Dungeon erkundet) }
+//             scouting (freiwillig: 'partial' / 'full', Run durch Erkunden vorbereitet, siehe simulateRun) }
 // Ergebnis: { winRate, fallenRate, likelyCause } (Anteile von 0 bis 1)
 //   likelyCause = die häufigste größte Ursache in den Runs mit Niederlage oder Gefallenen ("Woran es lag"),
 //                 als { name, type, share } (share = Anteil aller Runs) oder null, wenn nie etwas schiefging.
@@ -86,7 +86,7 @@ export function estimateRunChances(options) {
       seed: 1 + i * 7919,
       recordLog: false,
       supplies: options.supplies || [],
-      scouted: options.scouted || false,
+      scouting: options.scouting || null,
     });
     if (result.outcome === 'success') {
       wins++;

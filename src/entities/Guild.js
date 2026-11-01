@@ -36,7 +36,8 @@ export class Guild {
     this.materials = { dust: 0, crystal: 0, raw: 0, herbs: 0 }; // Materiallager: Staub, Kristalle, Rohstoffe, Kräuter (siehe data/crafting.js)
     this.supplies = {};        // Vorratskammer: Verbrauchsgut-id → Anzahl (siehe data/consumables.js)
     this.dailyOffer = [];      // heutiges Tagesangebot des Händlers (Liste von Verbrauchsgut-ids)
-    this.scoutedDungeons = {}; // erkundete Dungeons: Dungeon-id → wie viele Kampftage die Erkundung noch hält
+    this.scoutedDungeons = {}; // vorbereitete Dungeons: Dungeon-id → wie viele Kampftage die Erkundung noch hält
+    this.dungeonKnowledge = {}; // Dungeonwissen: Dungeon-id → wie viele Bosse aufgedeckt sind (siehe systems/DungeonKnowledge.js)
     this.lastDayPlan = [];     // die Gruppen von gestern, für "Wie gestern": [{ dungeonId, heroIds, retreatRuleId, supplies }]
     this.hall = new GuildHall(); // Gildenhalle: Gebäude und Baustelle (siehe data/buildings.js)
     this.firstClearDays = {};  // Dungeon-id → Tag, an dem deine Gilde ihn zum ersten Mal geschafft hat (Rangliste)
@@ -306,6 +307,7 @@ export class Guild {
       supplies: this.supplies,
       dailyOffer: this.dailyOffer,
       scoutedDungeons: this.scoutedDungeons,
+      dungeonKnowledge: this.dungeonKnowledge,
       lastDayPlan: this.lastDayPlan,
       firstClearDays: this.firstClearDays,
       hall: this.hall.toSaveData(),
@@ -341,6 +343,7 @@ export class Guild {
     guild.supplies = data.supplies;
     guild.dailyOffer = data.dailyOffer;
     guild.scoutedDungeons = data.scoutedDungeons;
+    guild.dungeonKnowledge = data.dungeonKnowledge;
     guild.lastDayPlan = data.lastDayPlan;
     guild.firstClearDays = data.firstClearDays;
     guild.hall = GuildHall.fromSaveData(data.hall);

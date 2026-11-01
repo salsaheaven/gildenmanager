@@ -21,6 +21,7 @@ import { forgeItem, reforgeItem } from '../systems/ForgeSystem.js';
 import { getSlotsWithNewGear, markSlotSeen, markItemSeen } from '../systems/NewGear.js';
 import { countPossibleGroups, groupHeroesByPosition, checkGroup } from '../systems/GroupCounter.js';
 import { getDailyTodos } from '../systems/DailyTodo.js';
+import { getKnownCount, getKnowledgeTotal, getKnowledgeLevel, isEncounterKnown, getKnownDamageTypes, getHiddenMechanicNames } from '../systems/DungeonKnowledge.js';
 import { brew } from '../systems/AlchemySystem.js';
 import { checkStartTeam } from '../systems/StartTeam.js';
 import { START_TEAM_RULES } from '../data/startTeam.js';
@@ -431,9 +432,9 @@ export class Game {
   // Die Helden kämpfen so, wie sie jetzt ausgerüstet sind.
   finishExpedition(expedition) {
     const heroes = expedition.getHeroIds().map((heroId) => this.guild.findHero(heroId)).filter((hero) => hero);
-    // Erkundet? Dann ist dieser Run vorbereitet. Verbraucht wird die Erkundung erst in endDay,
-    // wenn alle Gruppen des Tages gekämpft haben (so profitieren alle Gruppen im selben Dungeon).
-    expedition.scouted = this.isDungeonScouted(expedition.dungeonId);
+    // Erkundet? Dann ist dieser Run vorbereitet, der Vorteil hängt vom Wissen ab. Verbraucht wird die
+    // Vorbereitung erst in endDay, wenn alle Gruppen des Tages gekämpft haben (alle Gruppen im selben Dungeon profitieren).
+    expedition.scouting = this.getScoutingLevel(expedition.dungeonId);
     const result = expedition.resolve(heroes);
     const dungeon = getDungeon(expedition.dungeonId);
     const success = result.outcome === 'success';
@@ -451,14 +452,16 @@ export class Game {
       bonusGoldHero: null,  // wer es gebracht hat
       collectionGold: 0,    // Extra-Gold durch die volle Sammelbuch-Seite dieses Dungeons
       supplies: expedition.supplies.slice(), // verbrauchte Vorräte
-      scouted: expedition.scouted,           // war der Dungeon erkundet?
+      scouted: expedition.scouting !== null,  // war der Run durch Erkunden vorbereitet?
+      scouting: expedition.scouting,          // Vorteil: null, 'partial' oder 'full' (siehe data/heroTasks.js)
       chest: null,
       chestBonusItems: 0,   // Extra-Items durch "Glückspilz"
       chestBonusHero: null,
       firstClear: false,
       serverFirst: false,   // als erste Gilde des Servers geschafft?
       // "Woran es lag": Top-Ursachen, Tipp und Hinweise (nur bei Niederlage oder Gefallenen, sonst null)
-      analysis: needsDefeatAnalysis(result) ? analyzeRun(result) : null,
+      // Mechaniken noch nicht erkundeter Bosse bleiben dabei vage
+      analysis: needsDefeatAnalysis(result) ? analyzeRun(result, getHiddenMechanicNames(this.guild, dungeon.id)) : null,
       expedition: expedition.toSaveData(), // zum erneuten Ansehen
     };
 
@@ -727,6 +730,34 @@ export class Game {
   // Ist dieser Dungeon für den nächsten Run erkundet?
   isDungeonScouted(dungeonId) {
     return (this.guild.scoutedDungeons[dungeonId] || 0) > 0;
+  }
+
+  // Dungeonwissen: { known, total, level } mit level 'none', 'partial' oder 'full' (siehe systems/DungeonKnowledge.js)
+  getDungeonKnowledge(dungeonId) {
+    return {
+      known: getKnownCount(this.guild, dungeonId),
+      total: getKnowledgeTotal(dungeonId),
+      level: getKnowledgeLevel(this.guild, dungeonId),
+    };
+  }
+
+  // Ist diese Begegnung (Index in dungeon.encounters) schon erkundet?
+  isEncounterKnown(dungeonId, encounterIndex) {
+    return isEncounterKnown(this.guild, dungeonId, encounterIndex);
+  }
+
+  // Schadensarten, die man schon kennt (nur aus erkundeten Begegnungen)
+  getKnownDamageTypes(dungeonId) {
+    return getKnownDamageTypes(this.guild, dungeonId);
+  }
+
+  // Vorteil eines Runs dort heute: null (nicht vorbereitet), sonst der Wissensstand 'partial' oder 'full'
+  getScoutingLevel(dungeonId) {
+    if (!this.isDungeonScouted(dungeonId)) {
+      return null;
+    }
+    const level = getKnowledgeLevel(this.guild, dungeonId);
+    return level === 'none' ? null : level;
   }
 
   // Sold, den die Gilde jeden Abend zahlt

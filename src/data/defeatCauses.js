@@ -15,6 +15,13 @@ export const CAUSE_TIPS = {
   enrage: 'Der Kampf dauert zu lange, der Boss gerät in Raserei: mehr Schaden mitnehmen, z.B. Haltung „Überladen“ oder einen Schadensmacher mehr.',
 };
 
+// Mechaniken eines noch nicht erkundeten Bosses bleiben vage (siehe systems/DungeonKnowledge.js)
+export const UNKNOWN_CAUSE = {
+  name: 'Etwas Unbekanntes',
+  tip: 'Etwas hat eure Gruppe überrascht. Erkunden hilft.',
+  missedInterrupt: 'Ein unbekannter Zauber wurde {count}× nicht unterbrochen.',
+};
+
 // Zusätzliche Hinweise unter den Ursachen. {name} und {count} werden ersetzt.
 export const CAUSE_NOTES = {
   missedInterrupt: '{name} wurde {count}× nicht unterbrochen.',

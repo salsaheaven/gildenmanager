@@ -56,7 +56,7 @@ export const HERO_TASKS = {
   },
   scouting: {
     name: 'Erkunden',
-    description: 'Erkundet einen Dungeon: Die nächsten Runs dort (alle Gruppen eines Tages) sind vorbereitet',
+    description: 'Erkundet einen Dungeon: deckt den nächsten Boss auf und bereitet die nächsten Runs dort vor',
     color: '#c77dff',
     choosable: true,
   },
@@ -79,9 +79,15 @@ export const TASK_RULES = {
   jobGoldPerLevel: 2,
   jobGoldSpread: 0.25,
 
-  // Erkunden: Wirkung auf die Runs im erkundeten Dungeon am nächsten Tag, an dem dort jemand kämpft
-  // (gilt für alle Gruppen dieses Tages, danach ist die Erkundung verbraucht)
-  scoutingDamageBonus: 0.05,
+  // Erkunden: Jede Erkundung deckt einen weiteren Teil des Dungeons auf (einen Boss samt den Gegnern davor,
+  // siehe systems/DungeonKnowledge.js) und bereitet den nächsten Kampftag dort vor
+  // (gilt für alle Gruppen dieses Tages, danach ist die Erkundung verbraucht).
+  // Der Kampfvorteil wächst mit dem Wissen: teilweise erkundet (partial) oder vollständig (full).
+  // Wirkungen wie bei den Vorräten: damageDone = Schaden (+0.05 = +5 %), damageTaken = erlittener Schaden (−0.05 = −5 %)
+  scoutingBonus: {
+    partial: { damageDone: 0.05 },
+    full: { damageDone: 0.05, damageTaken: -0.05 },
+  },
 };
 
 // Was ein Held bei "Aufträge erledigen" tut (eine Zeile wird zufällig gewählt, nur für die Anzeige)

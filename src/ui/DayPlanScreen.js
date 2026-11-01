@@ -210,8 +210,7 @@ export class DayPlanScreen {
       for (const hero of heroes) {
         heroList.appendChild(this.createHeroRow(hero, null));
       }
-      heroList.before(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies,
-        this.game.isDungeonScouted(expedition.dungeonId), this.game.hasDefeatForecast()));
+      heroList.before(createRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies));
       heroList.after(this.createOrdersSection(expedition, heroes));
       heroList.after(this.createSupplySection(expedition));
       card.querySelector('.cancel-button').addEventListener('click', () => {
@@ -338,7 +337,9 @@ export class DayPlanScreen {
         }
         const option = document.createElement('option');
         option.value = dungeon.id;
-        option.textContent = dungeon.name + (this.game.isDungeonScouted(dungeon.id) ? ' ✓' : '');
+        // Wissensstand, z.B. "Sonnentempel (1/2)", damit man sieht, wo es noch etwas aufzudecken gibt
+        const knowledge = this.game.getDungeonKnowledge(dungeon.id);
+        option.textContent = dungeon.name + ' (' + knowledge.known + '/' + knowledge.total + ')';
         dungeonSelect.appendChild(option);
       }
       dungeonSelect.value = hero.task.dungeonId;

@@ -3666,6 +3666,20 @@ h3 {
   background: rgba(0, 0, 0, 0.25);
 }
 
+.boss-card.unknown {
+  opacity: 0.75;
+  border-style: dashed;
+}
+
+.guide-knowledge {
+  margin-top: 2px;
+  color: #ff9f43;
+}
+
+.guide-knowledge.knowledge-full {
+  color: #1eff00;
+}
+
 .boss-card-head {
   display: flex;
   align-items: center;

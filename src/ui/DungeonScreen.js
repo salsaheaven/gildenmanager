@@ -86,7 +86,8 @@ export class DungeonScreen {
       card.querySelector('.dungeon-name').textContent = dungeon.name;
       card.querySelector('.dungeon-sub').textContent = unlocked
         ? 'Stufe ' + dungeon.level + ' · Empf. AW ' + dungeon.recommendedGearScore + (clears > 0 ? ' · geschafft: ' + clears + '×' : ' · noch nie geschafft') +
-          (this.game.isDungeonScouted(dungeon.id) ? ' · Erkundet ✓' : '')
+          ' · Wissen ' + this.game.getDungeonKnowledge(dungeon.id).known + '/' + this.game.getDungeonKnowledge(dungeon.id).total +
+          (this.game.isDungeonScouted(dungeon.id) ? ' · Vorbereitet ✓' : '')
         : 'Gesperrt: erst ' + getDungeon(dungeon.unlockAfter).name + ' schaffen';
       card.addEventListener('click', () => {
         Sound.click();
@@ -125,7 +126,7 @@ export class DungeonScreen {
     panel.querySelector('h2').textContent = dungeon.name;
     if (this.game.isDungeonScouted(dungeon.id)) {
       panel.querySelector('h2').insertAdjacentHTML('beforeend',
-        ' <span class="scouted-chip" title="Die nächsten Runs hier (alle Gruppen eines Tages) sind vorbereitet: Mechaniken bekannt, etwas mehr Schaden">Erkundet ✓</span>');
+        ' <span class="scouted-chip" title="Durch Erkunden vorbereitet: Der nächste Kampftag hier (alle Gruppen) bekommt einen Vorteil, der mit dem Wissen wächst">Vorbereitet ✓</span>');
     }
     panel.querySelector('.dungeon-description').textContent = dungeon.description;
 
@@ -153,8 +154,7 @@ export class DungeonScreen {
     }));
     // Einschätzung in Worten, neu berechnet bei jeder Änderung an Gruppe, Ausrüstung, Rückzug oder Vorräten
     if (unlocked && group.length > 0) {
-      panel.querySelector('.risk-line').appendChild(createRiskBadge(group, dungeon.id, this.retreatRuleId, this.chosenSupplies,
-        this.game.isDungeonScouted(dungeon.id), this.game.hasDefeatForecast()));
+      panel.querySelector('.risk-line').appendChild(createRiskBadge(this.game, group, dungeon.id, this.retreatRuleId, this.chosenSupplies));
     }
     renderOrders(panel.querySelector('.orders-list'), group, (hero, orderId, optionId) => {
       this.game.setHeroOrder(hero.id, orderId, optionId);
@@ -331,8 +331,8 @@ export class DungeonScreen {
         (retreatRule ? ' · Rückzug: ' + retreatRule.name : '') +
         (expedition.supplies.length > 0 ? ' · Vorräte: ' + describeSupplies(expedition.supplies) : '');
       const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
-      row.querySelector('.run-head').after(createRiskBadge(heroes, expedition.dungeonId, expedition.retreatRuleId,
-        expedition.supplies, this.game.isDungeonScouted(expedition.dungeonId), this.game.hasDefeatForecast()));
+      row.querySelector('.run-head').after(createRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId,
+        expedition.supplies));
       row.querySelector('.cancel-button').addEventListener('click', () => {
         Sound.click();
         this.game.cancelExpedition(expedition.id);

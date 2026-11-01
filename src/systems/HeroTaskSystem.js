@@ -5,12 +5,13 @@
 //   Kräuter sammeln = Kräuter fürs Alchemielabor
 //   Rohstoffe sammeln = Rohstoffe für die Schmiede
 //   Aufträge        = sicheres Gold, abhängig vom Level (Gierig bringt mehr)
-//   Erkunden        = der gewählte Dungeon ist für die nächsten Runs dort vorbereitet
+//   Erkunden        = deckt den nächsten Boss des Dungeons auf und bereitet die nächsten Runs dort vor
 //   Ausruhen        = nichts
 // Die Zahlen stehen in data/heroTasks.js (TASK_RULES) und data/heroRarities.js (Sold).
 // ============================================================
 
 import { TASK_RULES, JOB_TEXTS } from '../data/heroTasks.js';
+import { revealNextPart } from './DungeonKnowledge.js';
 import { getGroupGoldBonus } from './TraitEffects.js';
 import { EXPERIENCE } from '../data/experience.js';
 import { HERO_RARITIES } from '../data/heroRarities.js';
@@ -35,7 +36,8 @@ export function getTrainingCost(guild) {
 
 // Erledigt die Aufgaben. entries = [{ hero, taskId }] (nur Helden, die heute nicht kämpfen und nicht verletzt sind)
 // random = Zufall des Spiels. Gibt pro Held ein Ergebnis zurück:
-//   { heroId, name, taskId, xp, levelsGained, newLevel, gathered, scoutedDungeonId, gold, jobText, greedyGold, skipped }
+//   { heroId, name, taskId, xp, levelsGained, newLevel, gathered, scoutedDungeonId, revealedBossId, gold, jobText, greedyGold, skipped }
+//   revealedBossId = beim Erkunden neu aufgedeckter Boss (null, wenn schon alles bekannt war)
 //   gathered = gesammeltes Material, z.B. { herbs: 2 } (sonst null)
 //   gold = verdientes Gold bei Aufträgen (greedyGold = davon durch "Gierig"), jobText = was er getan hat
 //   skipped = Grund, warum die Aufgabe ausfiel (z.B. 'noGold'), sonst null
@@ -45,7 +47,7 @@ export function resolveHeroTasks(guild, entries, random) {
     const hero = entry.hero;
     const result = {
       heroId: hero.id, name: hero.name, taskId: entry.taskId,
-      xp: 0, levelsGained: 0, newLevel: hero.level, gathered: null, scoutedDungeonId: null,
+      xp: 0, levelsGained: 0, newLevel: hero.level, gathered: null, scoutedDungeonId: null, revealedBossId: null,
       gold: 0, jobText: null, greedyGold: 0, skipped: null,
     };
 
@@ -74,7 +76,9 @@ export function resolveHeroTasks(guild, entries, random) {
     } else if (entry.taskId === 'scouting') {
       const dungeonId = hero.task.dungeonId;
       if (dungeonId) {
-        // Ohne Kartenraum hält die Erkundung 1 Kampftag, mit Kartenraum länger
+        // Deckt den nächsten Boss auf (mehrere Erkunder am selben Tag decken mehrere auf)
+        result.revealedBossId = revealNextPart(guild, dungeonId);
+        // Ohne Kartenraum hält die Vorbereitung 1 Kampftag, mit Kartenraum länger
         guild.scoutedDungeons[dungeonId] = guild.hall.getEffect('scoutingRunDays', 1);
         result.scoutedDungeonId = dungeonId;
       } else {
