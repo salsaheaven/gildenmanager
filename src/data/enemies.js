@@ -194,6 +194,55 @@ export const BOSSES = [
       },
     ],
   },
+  {
+    id: 'vorrak',
+    name: 'Vorrak',
+    title: 'Der Schmiedeherr',
+    sprite: 'bossForgeLord',
+    attackFx: 'bigImpact',
+    attackDamageType: 'fire',
+    stats: { health: 1300, attack: 26, defense: 10 },
+    enrageRound: 24,
+    mechanics: [
+      {
+        type: 'tankBuster', name: 'Glühender Hammer', damageType: 'fire',
+        firstAt: 4, every: 5, power: 3.4, castTime: 1, interruptible: false, fx: 'bigImpact',
+        hint: 'Schilde (Runenwirker) oder Eiserne Wacht (Krieger) fangen den Hammer ab, Feuerresistenz hilft dem Tank.',
+      },
+      {
+        type: 'frontWave', name: 'Schlackewelle', damageType: 'fire',
+        firstAt: 6, every: 6, power: 1.9, castTime: 1, interruptible: false, fx: 'fireRain',
+        hint: 'Trifft nur die vordere Reihe: weniger Nahkämpfer oder Feuerschutz-Tränke mitnehmen.',
+      },
+    ],
+  },
+  {
+    id: 'ignara',
+    name: 'Ignara',
+    title: 'Die Drachenmutter',
+    sprite: 'bossDragon',
+    attackFx: 'fireBolt',
+    attackDamageType: 'fire',
+    stats: { health: 1500, attack: 27, defense: 8 },
+    enrageRound: 26,
+    mechanics: [
+      {
+        type: 'groupCast', name: 'Feuersturm', damageType: 'fire',
+        firstAt: 3, every: 5, power: 2.2, castTime: 1, interruptible: true, fx: 'fireRain',
+        hint: 'Ein Schurke kann den Feuersturm unterbrechen. Feuerresistenz auf allen hilft.',
+      },
+      {
+        type: 'curse', name: 'Drachenbrand', damageType: 'fire',
+        firstAt: 5, every: 6, power: 0.6, duration: 5, castTime: 0, fx: 'curse',
+        hint: 'Der Runenwirker löscht den Drachenbrand mit der Lösungsrune.',
+      },
+      {
+        type: 'summon', name: 'Brut wecken',
+        firstAt: 8, every: 9, minion: 'drakeling', count: 2, castTime: 0, fx: 'summon',
+        hint: 'Die Jungdrachen greifen zufällig an: Flächenschaden räumt sie schnell weg.',
+      },
+    ],
+  },
 ];
 
 // Gegner ohne Boss-Mechaniken: Diener (vom Boss gerufen) und Trash (Gegnergruppen vor dem Boss)
@@ -285,6 +334,24 @@ export const MINIONS = {
     attackFx: 'claw',
     targeting: 'threat',
     stats: { health: 150, attack: 14, defense: 25 },
+  },
+  emberImp: {
+    name: 'Glutwicht',
+    sprite: 'minionKobold',
+    colors: { i: '#ffb03a', I: '#a02a1a' },
+    attackFx: 'fireBolt',
+    attackDamageType: 'fire',
+    targeting: 'random',
+    stats: { health: 70, attack: 13, defense: 2 },
+  },
+  drakeling: {
+    name: 'Jungdrache',
+    sprite: 'minionBroodling',
+    colors: { v: '#ff7a3a', V: '#a02a1a' },
+    attackFx: 'bite',
+    attackDamageType: 'fire',
+    targeting: 'random',
+    stats: { health: 85, attack: 14, defense: 3 },
   },
   sunAcolyte: {
     name: 'Sonnenakolyth',

@@ -18,6 +18,7 @@ export const COLLECTION_PAGES = [
   { dungeonId: 'frostPeak', title: 'Frostriesen-Fäller', goldBonus: 0.1 },
   { dungeonId: 'witchMoor', title: 'Hexenbanner', goldBonus: 0.1 },
   { dungeonId: 'sunTemple', title: 'Hüter der letzten Sonne', goldBonus: 0.1 },
+  { dungeonId: 'emberKeep', title: 'Drachentöter', goldBonus: 0.1 },
 ];
 
 // Ab dieser Seltenheit gilt ein Item als "glänzend". Sind alle Items einer Seite so selten, glänzt die Seite.

@@ -158,6 +158,24 @@ export const LOOT_BOXES = [
       { id: 'highPriestSeal', templateId: 'magicRing', name: 'Siegel des Hohepriesters', minRarity: 'rare' },
     ],
   },
+  {
+    id: 'chestIgnara',
+    bossResistance: 'fire',
+    name: 'Hort der Drachenmutter',
+    price: null,
+    itemCount: 5,
+    mainColor: '#d04020',
+    darkColor: '#6a1a0a',
+    shakeTime: 2.3,
+    chances: { poor: 0, common: 5, uncommon: 25, rare: 38, epic: 23, legendary: 9 },
+    bossLoot: [
+      { id: 'forgeHammer', templateId: 'mace', name: 'Vorraks Schmiedehammer', minRarity: 'rare' },
+      { id: 'dragonscaleHelm', templateId: 'plateHelmet', name: 'Drachenschuppenhelm', minRarity: 'rare' },
+      { id: 'emberHood', templateId: 'clothHelmet', name: 'Glutkapuze', minRarity: 'rare' },
+      { id: 'drakeboneBow', templateId: 'bow', name: 'Drachenknochenbogen', minRarity: 'rare' },
+      { id: 'heartOfIgnara', templateId: 'attackRing', name: 'Herz der Drachenmutter', minRarity: 'rare' },
+    ],
+  },
 ];
 
 // Hilfsfunktion: Kistenart anhand der id finden

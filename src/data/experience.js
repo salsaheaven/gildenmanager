@@ -8,7 +8,8 @@
 
 export const EXPERIENCE = {
   // EP pro gewonnener Begegnung auf Stufe 1
-  encounterXp: { trash: 20, boss: 50 },
+  // (2026-11-01 grob ×6 angehoben: Mit den 7 Level-Dungeons soll Level 30 in etwa 40 Tagen erreichbar sein)
+  encounterXp: { trash: 120, boss: 300 },
 
   // So viel mehr EP gibt es pro Dungeon-Stufe über 1 (0.4 = +40 % pro Stufe)
   xpGrowthPerDungeonLevel: 0.4,
@@ -21,7 +22,8 @@ export const EXPERIENCE = {
   // Zu leichte Dungeons: Bis overLevelGrace Level über der Stufe gibt es noch volle EP.
   // Danach pro weiterem Level 30 % weniger, aber mindestens 10 %.
   // Damit lohnt es sich nicht, ewig die Bärenhöhle zu wiederholen.
-  overLevelGrace: 1,
+  // (2 Level Spielraum, weil die Level-Dungeons 4 bis 5 Stufen auseinanderliegen)
+  overLevelGrace: 2,
   overLevelPenaltyPerLevel: 0.3,
   minOverLevelFactor: 0.1,
 

@@ -49,11 +49,11 @@ describe('Dungeon-Daten', () => {
 
 describe('simulateRun', () => {
   it('gleicher Seed = gleicher Run, Begegnungen laufen nacheinander', () => {
-    const options = { dungeonId: 'broodNests', retreatRuleId: 'never', seed: 5, recordLog: true };
-    const a = simulateRun({ ...options, heroes: createTestGroup(10) });
-    const b = simulateRun({ ...options, heroes: createTestGroup(10) });
+    const options = { dungeonId: 'bearCave', retreatRuleId: 'never', seed: 5, recordLog: true };
+    const a = simulateRun({ ...options, heroes: createTestGroup(5) });
+    const b = simulateRun({ ...options, heroes: createTestGroup(5) });
     expect(a.outcome).toBe('success');
-    expect(a.encounters.length).toBe(3);
+    expect(a.encounters.length).toBe(2);
     expect(a.encounters.map((e) => e.log.length)).toEqual(b.encounters.map((e) => e.log.length));
   });
 

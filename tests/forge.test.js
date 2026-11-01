@@ -9,6 +9,7 @@ import { RARITIES } from '../src/data/rarities.js';
 import { getForgeCost, getForgeItemLevel, getReforgeTargets, getReforgeCost } from '../src/systems/ForgeSystem.js';
 import { getAvailableRecipes, getBrewCost } from '../src/systems/AlchemySystem.js';
 import { getItemTemplate } from '../src/data/items.js';
+import { getDungeon } from '../src/data/dungeons.js';
 
 // Starttruppe mit allen Rüstungsarten (wie in buildings.test.js)
 const START_TEAM = ['paladin', 'rogue', 'mage', 'bard', 'druid'];
@@ -70,7 +71,7 @@ describe('Schmieden', () => {
   it('Item-Level folgt dem höchsten geschafften Dungeon, Schmiede Stufe 3 ist billiger', () => {
     const game = gameWithHall({ forge: 1 });
     game.guild.firstClearDays = { bearCave: 1, ruinedChapel: 3 };
-    expect(getForgeItemLevel(game.guild)).toBe(3);
+    expect(getForgeItemLevel(game.guild)).toBe(getDungeon('ruinedChapel').level);
     const normal = getForgeCost(game.guild);
     game.guild.hall.levels.forge = 3;
     expect(getForgeCost(game.guild).raw).toBeLessThan(normal.raw);

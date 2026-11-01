@@ -36,7 +36,7 @@ export const DUNGEONS = [
     name: 'Die verfallene Kapelle',
     description: 'Kultisten und Ghule dienen Schwester Morva bei ihren finsteren Ritualen.',
     recommendedGearScore: 12,
-    level: 3,
+    level: 5,
     unlockAfter: 'bearCave',
     encounters: [
       { type: 'trash', name: 'Kultisten am Tor', enemies: ['cultist', 'cultist', 'ghoul'] },
@@ -49,7 +49,7 @@ export const DUNGEONS = [
     name: 'Die Brutnester',
     description: 'Tief unter der Erde wimmelt es von Käfern. In der Mitte lauert die Brutmutter Skarrix.',
     recommendedGearScore: 34,
-    level: 5,
+    level: 10,
     unlockAfter: 'ruinedChapel',
     encounters: [
       { type: 'trash', name: 'Brutkammer', enemies: ['broodling', 'broodling', 'broodling', 'broodling'] },
@@ -63,7 +63,7 @@ export const DUNGEONS = [
     name: 'Die Frostzinne',
     description: 'Kobolde schwärmen über den Gletscher. Oben wartet Hrimgar, dessen Vernichtungsschlag jeden Tank zerschmettert.',
     recommendedGearScore: 55,
-    level: 7,
+    level: 15,
     unlockAfter: 'broodNests',
     encounters: [
       { type: 'trash', name: 'Koboldbande', enemies: ['iceKobold', 'iceKobold', 'iceKobold', 'iceKobold', 'iceKobold'] },
@@ -77,7 +77,7 @@ export const DUNGEONS = [
     name: 'Das Spukmoor',
     description: 'Irrlichter locken Wanderer in den Sumpf. Mutter Grezza verflucht jeden, der ihre Hütte erreicht.',
     recommendedGearScore: 80,
-    level: 9,
+    level: 20,
     unlockAfter: 'frostPeak',
     encounters: [
       { type: 'trash', name: 'Moorleichen', enemies: ['bogCorpse', 'bogCorpse', 'bogCorpse'] },
@@ -91,7 +91,7 @@ export const DUNGEONS = [
     name: 'Der versunkene Sonnentempel',
     description: 'Ein Steinwächter hütet das Tor. Dahinter beschwört Hohepriester Azhur die letzte Sonne.',
     recommendedGearScore: 110,
-    level: 11,
+    level: 24,
     unlockAfter: 'witchMoor',
     encounters: [
       { type: 'trash', name: 'Tempelwache', enemies: ['templeConstruct', 'templeConstruct', 'sunAcolyte', 'sunAcolyte'] },
@@ -100,6 +100,21 @@ export const DUNGEONS = [
       { type: 'boss', bossId: 'azhur' },
     ],
     rewards: { gold: 280, chest: 'chestAzhur', trashGold: 26 },
+  },
+  {
+    id: 'emberKeep',
+    name: 'Die Glutfeste',
+    description: 'In der Schmiede unter dem Vulkan hämmert Vorrak. Tiefer im Berg brütet Ignara, die Drachenmutter.',
+    recommendedGearScore: 230,
+    level: 28,
+    unlockAfter: 'sunTemple',
+    encounters: [
+      { type: 'trash', name: 'Glutwichte', enemies: ['emberImp', 'emberImp', 'emberImp', 'emberImp'] },
+      { type: 'boss', bossId: 'vorrak' },
+      { type: 'trash', name: 'Drachenbrut', enemies: ['drakeling', 'drakeling', 'emberImp'] },
+      { type: 'boss', bossId: 'ignara' },
+    ],
+    rewards: { gold: 420, chest: 'chestIgnara', trashGold: 36 },
   },
 ];
 
