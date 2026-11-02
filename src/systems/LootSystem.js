@@ -84,6 +84,7 @@ export class LootSystem {
     const item = this.createItem(rarityId, guild.createItemId(), itemLevel, getItemTemplate(entry.templateId), entry.name,
       boxType.bossResistance || null);
     item.bossItemId = entry.id; // damit das Sammelbuch das Item erkennt
+    item.setId = entry.setId || null; // Set-Teile der Set-Dungeons (siehe data/sets.js)
     return item;
   }
 

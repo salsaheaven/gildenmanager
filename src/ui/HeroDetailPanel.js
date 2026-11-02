@@ -19,6 +19,7 @@ import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 import { renderOrders } from './OrdersPanel.js';
 import { applyUpgradeGlow } from './UpgradeControls.js';
+import { createHeroSetView } from './SetInfo.js';
 import { WAGE_RULES } from '../data/heroRarities.js';
 
 export class HeroDetailPanel {
@@ -73,6 +74,7 @@ export class HeroDetailPanel {
         <button class="equip-best-button" title="Legt für jeden Platz das Item mit den meisten nützlichen Werten an (Resistenzen zählen nicht)">Bestes anlegen</button>
       </div>
       <div class="equipment-grid"></div>
+      <div class="hero-set-slot"></div>
 
       <details class="detail-section" data-section="stats">
         <summary>Werte und Skills <span class="hint">· AW ${hero.getGearScore()}</span></summary>
@@ -123,6 +125,10 @@ export class HeroDetailPanel {
     this.renderResistances();
     this.renderSkills();
     this.renderEquipment();
+    const setView = createHeroSetView(hero);
+    if (setView) {
+      this.root.querySelector('.hero-set-slot').appendChild(setView);
+    }
     renderTalents(this.root.querySelector('.hero-talents'), hero, {
       onChoose: (changedHero, talentId) => {
         if (this.game.chooseHeroTalent(changedHero.id, talentId)) {

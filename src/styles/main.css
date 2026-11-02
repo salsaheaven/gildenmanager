@@ -3845,6 +3845,33 @@ body.locked-collection .collection-button {
   display: none;
 }
 
+/* Klassen-Sets (SetInfo) */
+.set-line {
+  color: #1eff00;
+  font-size: 16px;
+}
+
+.hero-set {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border: 2px solid #1eff00;
+  background: rgba(30, 255, 0, 0.06);
+}
+
+.hero-set-name {
+  color: #1eff00;
+}
+
+.hero-set-bonuses {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 16px;
+}
+
+.hero-set-bonuses .inactive {
+  color: var(--text-dim);
+}
+
 /* Heldenübersicht nach Position (RoleOverview) */
 .group-counter {
   display: flex;

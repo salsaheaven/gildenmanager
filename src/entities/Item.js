@@ -24,6 +24,7 @@ export class Item {
     this.resistances = resistances;
     this.upgradeLevel = 0;  // Verbesserungsstufe 0 bis +10 (siehe data/crafting.js), erhöht alle Werte
     this.bossItemId = null; // Boss-Items: feste Kennung aus lootBoxes.js (für das Sammelbuch), sonst null
+    this.setId = null;      // Set-Teile: zu welchem Klassen-Set es gehört (data/sets.js), sonst null
     // Nur direkt nach dem Öffnen einer Kiste, wird nicht gespeichert (siehe Game.openBox):
     this.collectionStatus = null; // 'new' / 'improved' / null: was das Item im Sammelbuch bewirkt hat
     this.completedPage = null;    // Sammelbuch-Seite, die durch dieses Item gerade voll wurde
@@ -99,12 +100,14 @@ export class Item {
       resistances: this.resistances,
       upgradeLevel: this.upgradeLevel,
       bossItemId: this.bossItemId,
+      setId: this.setId,
     };
   }
 
   static fromSaveData(data) {
     const item = new Item(data.id, data.templateId, data.rarityId, data.name, data.stats, data.itemLevel, data.resistances);
     item.bossItemId = data.bossItemId;
+    item.setId = data.setId;
     item.upgradeLevel = data.upgradeLevel;
     return item;
   }

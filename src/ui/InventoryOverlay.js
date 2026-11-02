@@ -17,6 +17,7 @@ import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 import { describeMaterials, createUpgradeButton, applyUpgradeGlow } from './UpgradeControls.js';
 import { createReforgeControls } from './CraftingControls.js';
+import { createSetLine } from './SetInfo.js';
 import { getSalvageYield } from '../systems/CraftingSystem.js';
 
 export class InventoryOverlay {
@@ -261,6 +262,10 @@ export class InventoryOverlay {
       <p class="hint detail-upgrade-hint"></p>
     `;
     details.querySelector('.detail-name').textContent = item.getDisplayName();
+    const setLine = createSetLine(item);
+    if (setLine) {
+      details.querySelector('.detail-for').after(setLine);
+    }
     details.querySelector('.salvage-button').textContent = 'Zerlegen (' + describeMaterials(getSalvageYield(item)) + ')';
     details.querySelector('.detail-actions').appendChild(createUpgradeButton(this.game, item, details));
     const reforgeControls = createReforgeControls(this.game, item);

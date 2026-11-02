@@ -7,6 +7,7 @@
 import { Item } from './Item.js';
 import { getHeroClass } from '../data/heroClasses.js';
 import { getHeroRarity, WAGE_RULES } from '../data/heroRarities.js';
+import { getSet, getSetBonus, SET_BONUS_COUNTS } from '../data/sets.js';
 import { getRarity, getRarityRank } from '../data/rarities.js';
 import { getTrait } from '../data/traits.js';
 import { SLOT_NAMES } from '../data/items.js';
@@ -264,6 +265,10 @@ export class Hero {
       effectsList.push(WAGE_RULES.unhappyEffects);
     }
     const talents = this.talentIds.map((talentId) => findTalent(talentId));
+    // Set-Boni (ab 2 und ab 3 getragenen Teilen des eigenen Klassen-Sets)
+    for (const active of this.getActiveSetBonuses()) {
+      effectsList.push(active.bonus.effects);
+    }
     for (const talent of talents) {
       effectsList.push(talent.effects);
     }
@@ -275,6 +280,39 @@ export class Hero {
       }
     }
     return settings;
+  }
+
+  // ---------- Klassen-Sets (siehe data/sets.js) ----------
+
+  // Wie viele Teile welches Sets trägt er? z.B. { setWarrior: 2 }
+  getSetCounts() {
+    const counts = {};
+    for (const slot of EQUIPMENT_SLOTS) {
+      const item = this.equipment[slot];
+      if (item && item.setId) {
+        counts[item.setId] = (counts[item.setId] || 0) + 1;
+      }
+    }
+    return counts;
+  }
+
+  // Aktive Set-Boni: [{ set, count, bonus }] für jede erreichte Stufe (2 und 3 Teile).
+  // Nur das Set der eigenen Klasse wirkt (fremde Set-Teile darf er tragen, sie geben dann nur ihre Werte).
+  getActiveSetBonuses() {
+    const active = [];
+    const counts = this.getSetCounts();
+    for (const setId in counts) {
+      const set = getSet(setId);
+      if (set.classId !== this.classId) {
+        continue;
+      }
+      for (const needed of SET_BONUS_COUNTS) {
+        if (counts[setId] >= needed) {
+          active.push({ set, count: needed, bonus: getSetBonus(set, needed) });
+        }
+      }
+    }
+    return active;
   }
 
   // Hat er gestern (oder länger) keinen Sold bekommen?

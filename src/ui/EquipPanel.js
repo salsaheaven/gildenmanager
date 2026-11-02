@@ -14,6 +14,7 @@ import { formatItemValues, describeItemKind, describeClassArmor, describeStatDif
 import { compareByItemLevel } from './InventoryOverlay.js';
 import { Sound } from './Sound.js';
 import { createUpgradeButton, applyUpgradeGlow } from './UpgradeControls.js';
+import { createSetLine } from './SetInfo.js';
 
 export class EquipPanel {
   // inventory = das InventoryOverlay (weiß, welche Items "neu" sind)
@@ -116,6 +117,10 @@ export class EquipPanel {
       row.querySelector('.equip-name').insertAdjacentHTML('beforeend', ' <span class="new-chip">neu</span>');
     }
     row.querySelector('.equip-stats').textContent = describeItemKind(item) + ' · Stufe ' + item.itemLevel + ' · ' + formatItemValues(item);
+    const setLine = createSetLine(item);
+    if (setLine) {
+      row.querySelector('.equip-stats').after(setLine);
+    }
 
     // Unterschied zum angelegten Teil, Wert für Wert (grün = mehr, rot = weniger)
     const compare = row.querySelector('.equip-compare');

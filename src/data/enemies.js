@@ -3,7 +3,7 @@
 //
 // Boss:
 //   name, title  = Anzeige
-//   sprite       = Pixelbild aus sprites.js
+//   sprite       = Pixelbild aus sprites.js (colors = freiwillig andere Farben für dasselbe Bild, wie bei den Dienern)
 //   stats        = health (Leben), attack (Angriff), defense (Rüstung)
 //   attackDamageType = Schadensart des normalen Angriffs (siehe damageTypes.js), ohne Angabe 'physical'
 //   enrageRound  = ab dieser Runde rast der Boss (doppelter Schaden). null = nie.
@@ -243,6 +243,74 @@ export const BOSSES = [
       },
     ],
   },
+  // ---------- Set-Dungeons (Stufe 30) ----------
+  {
+    id: 'ferron',
+    name: 'Kommandant Ferron',
+    title: 'Der eiserne Wall',
+    sprite: 'bossForgeLord',
+    colors: { o: '#d8dee9', O: '#4a5268' },
+    attackFx: 'bigImpact',
+    stats: { health: 1500, attack: 28, defense: 16 },
+    enrageRound: 26,
+    mechanics: [
+      {
+        type: 'tankBuster', name: 'Belagerungshieb',
+        firstAt: 3, every: 4, power: 3.2, castTime: 1, interruptible: false, fx: 'bigImpact',
+        hint: 'Schilde (Runenwirker) oder Eiserne Wacht (Krieger) fangen den Hieb ab. Ein zweiter Heiler hilft.',
+      },
+      {
+        type: 'frontWave', name: 'Schildwall-Stoß',
+        firstAt: 6, every: 6, power: 1.8, castTime: 1, interruptible: false, fx: 'bigImpact',
+        hint: 'Trifft nur die vordere Reihe: weniger Nahkämpfer mitnehmen.',
+      },
+    ],
+  },
+  {
+    id: 'skaar',
+    name: 'Skaar',
+    title: 'Die Urbestie',
+    sprite: 'bossBear',
+    colors: { b: '#6f8a4a', B: '#3a4a22' },
+    attackFx: 'claw',
+    stats: { health: 1300, attack: 26, defense: 8 },
+    enrageRound: 24,
+    mechanics: [
+      {
+        type: 'groupCast', name: 'Urschrei',
+        firstAt: 4, every: 5, power: 1.9, castTime: 1, interruptible: true, fx: 'bigImpact',
+        hint: 'Ein Schurke kann den Urschrei unterbrechen.',
+      },
+      {
+        type: 'summon', name: 'Rudel rufen',
+        firstAt: 6, every: 10, minion: 'wildWolf', count: 1, castTime: 0, fx: 'summon',
+        hint: 'Der Wolf geht auf den Tank los: Flächenschaden räumt ihn weg.',
+      },
+    ],
+  },
+  {
+    id: 'mythrel',
+    name: 'Mythrel',
+    title: 'Der Archivar',
+    sprite: 'bossSunPriest',
+    colors: { o: '#7ab8ff', g: '#b07ce8', G: '#5a2a8a' },
+    attackFx: 'shadowBolt',
+    attackDamageType: 'shadow',
+    stats: { health: 1400, attack: 27, defense: 6 },
+    enrageRound: 24,
+    mechanics: [
+      {
+        type: 'groupCast', name: 'Arkane Flut', damageType: 'shadow',
+        firstAt: 3, every: 5, power: 2.0, castTime: 1, interruptible: true, fx: 'shadowWave',
+        hint: 'Ein Schurke kann die Arkane Flut unterbrechen. Schattenresistenz hilft.',
+      },
+      {
+        type: 'curse', name: 'Vergessen', damageType: 'shadow',
+        firstAt: 5, every: 5, power: 0.6, duration: 5, castTime: 0, fx: 'curse',
+        hint: 'Der Runenwirker löst den Fluch mit der Lösungsrune.',
+      },
+    ],
+  },
 ];
 
 // Gegner ohne Boss-Mechaniken: Diener (vom Boss gerufen) und Trash (Gegnergruppen vor dem Boss)
@@ -334,6 +402,31 @@ export const MINIONS = {
     attackFx: 'claw',
     targeting: 'threat',
     stats: { health: 150, attack: 14, defense: 25 },
+  },
+  ironGuard: {
+    name: 'Eisengardist',
+    sprite: 'bossGolem',
+    colors: { S: '#5a6478', s: '#a8b0c0' },
+    attackFx: 'slash',
+    targeting: 'threat',
+    stats: { health: 140, attack: 14, defense: 22 },
+  },
+  wildWolf: {
+    name: 'Wildwolf',
+    sprite: 'trashWolf',
+    colors: { B: '#5a7a3a' },
+    attackFx: 'bite',
+    targeting: 'threat',
+    stats: { health: 95, attack: 14, defense: 5 },
+  },
+  livingTome: {
+    name: 'Lebendes Buch',
+    sprite: 'minionWisp',
+    colors: { y: '#b07ce8', w: '#e8d8ff' },
+    attackFx: 'shadowBolt',
+    attackDamageType: 'shadow',
+    targeting: 'random',
+    stats: { health: 60, attack: 13, defense: 0 },
   },
   emberImp: {
     name: 'Glutwicht',

@@ -215,7 +215,8 @@ export class BattleScene {
       return createHeroCanvas(this.heroesById[info.heroId], 4);
     }
     if (info.bossId) {
-      return createSpriteCanvas(getBoss(info.bossId).sprite, 6);
+      const boss = getBoss(info.bossId);
+      return createSpriteCanvas(boss.sprite, 6, boss.colors || {});
     }
     const minion = MINIONS[info.minionId];
     return createSpriteCanvas(minion.sprite, 5, minion.colors || {});

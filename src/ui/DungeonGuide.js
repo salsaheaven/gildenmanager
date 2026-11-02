@@ -122,7 +122,7 @@ function createBossCard(boss, level, index, known) {
     </div>
     <ul class="boss-mechanics"></ul>
   `;
-  card.querySelector('.boss-card-icon').appendChild(createSpriteCanvas(boss.sprite, 4));
+  card.querySelector('.boss-card-icon').appendChild(createSpriteCanvas(boss.sprite, 4, boss.colors || {}));
   card.querySelector('.boss-card-name').textContent = (index + 1) + '. Boss: ' + boss.name + ' – ' + boss.title;
   if (!known) {
     card.classList.add('unknown');

@@ -19,6 +19,10 @@ export const COLLECTION_PAGES = [
   { dungeonId: 'witchMoor', title: 'Hexenbanner', goldBonus: 0.1 },
   { dungeonId: 'sunTemple', title: 'Hüter der letzten Sonne', goldBonus: 0.1 },
   { dungeonId: 'emberKeep', title: 'Drachentöter', goldBonus: 0.1 },
+  // Set-Dungeons: Die Seite füllt sich mit den Set-Teilen dieser Rüstungsart
+  { dungeonId: 'ironCitadel', title: 'Eiserne Garde', goldBonus: 0.1 },
+  { dungeonId: 'wildGrove', title: 'Herren der Wildnis', goldBonus: 0.1 },
+  { dungeonId: 'arcaneArchive', title: 'Hüter des Archivs', goldBonus: 0.1 },
 ];
 
 // Ab dieser Seltenheit gilt ein Item als "glänzend". Sind alle Items einer Seite so selten, glänzt die Seite.

@@ -8,6 +8,7 @@
 //                         und Items aus seiner Boss-Kiste haben dieses Item-Level.
 //                         Eine Gruppe auf diesem Heldenlevel passt zum Dungeon.
 // unlockAfter           = dieser Dungeon wird freigeschaltet, wenn jener einmal geschafft ist (null = von Anfang an)
+//                         (Die 3 Set-Dungeons öffnen alle nach der Glutfeste.)
 // encounters            = Begegnungen in Reihenfolge:
 //                         { type: 'trash', name, enemies: [Gegner-ids aus MINIONS in enemies.js] }
 //                         { type: 'boss', bossId }
@@ -115,6 +116,49 @@ export const DUNGEONS = [
       { type: 'boss', bossId: 'ignara' },
     ],
     rewards: { gold: 420, chest: 'chestIgnara', trashGold: 36 },
+  },
+  // ---------- Set-Dungeons (Stufe 30, Endgame): Hier droppen die Klassen-Sets (siehe data/sets.js) ----------
+  {
+    id: 'ironCitadel',
+    name: 'Die Eisenzitadelle',
+    description: 'Set-Dungeon für Platte: Kommandant Ferron hütet die Rüstungen der Schlachtenführer.',
+    recommendedGearScore: 260,
+    level: 30,
+    unlockAfter: 'emberKeep',
+    encounters: [
+      { type: 'trash', name: 'Torwache', enemies: ['ironGuard', 'ironGuard', 'ironGuard'] },
+      { type: 'trash', name: 'Waffenkammer', enemies: ['ironGuard', 'ironGuard', 'emberImp', 'emberImp'] },
+      { type: 'boss', bossId: 'ferron' },
+    ],
+    rewards: { gold: 450, chest: 'chestFerron', trashGold: 38 },
+  },
+  {
+    id: 'wildGrove',
+    name: 'Der Wilde Hain',
+    description: 'Set-Dungeon für Leder: Die Urbestie Skaar wacht über die Gewänder der Jäger und Hüter.',
+    recommendedGearScore: 260,
+    level: 30,
+    unlockAfter: 'emberKeep',
+    encounters: [
+      { type: 'trash', name: 'Wildwolf-Rudel', enemies: ['wildWolf', 'wildWolf', 'wildWolf', 'wildWolf'] },
+      { type: 'trash', name: 'Dornendickicht', enemies: ['wildWolf', 'wildWolf', 'bogCorpse'] },
+      { type: 'boss', bossId: 'skaar' },
+    ],
+    rewards: { gold: 450, chest: 'chestSkaar', trashGold: 38 },
+  },
+  {
+    id: 'arcaneArchive',
+    name: 'Das Arkane Archiv',
+    description: 'Set-Dungeon für Stoff: Der Archivar Mythrel bewahrt die Roben der großen Zauberer.',
+    recommendedGearScore: 260,
+    level: 30,
+    unlockAfter: 'emberKeep',
+    encounters: [
+      { type: 'trash', name: 'Fliegende Seiten', enemies: ['livingTome', 'livingTome', 'livingTome', 'livingTome'] },
+      { type: 'trash', name: 'Lesesaal', enemies: ['livingTome', 'livingTome', 'cultist', 'cultist'] },
+      { type: 'boss', bossId: 'mythrel' },
+    ],
+    rewards: { gold: 450, chest: 'chestMythrel', trashGold: 38 },
   },
 ];
 

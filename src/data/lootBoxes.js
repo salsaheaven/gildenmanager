@@ -19,6 +19,8 @@
 //               siehe damageTypes.js). Fehlt sie, haben die Boss-Items keine feste Resistenz.
 // ============================================================
 
+import { getSetLoot } from './sets.js';
+
 export const LOOT_BOXES = [
   {
     id: 'wood',
@@ -175,6 +177,42 @@ export const LOOT_BOXES = [
       { id: 'drakeboneBow', templateId: 'bow', name: 'Drachenknochenbogen', minRarity: 'rare' },
       { id: 'heartOfIgnara', templateId: 'attackRing', name: 'Herz der Drachenmutter', minRarity: 'rare' },
     ],
+  },
+  {
+    id: 'chestFerron',
+    name: 'Waffenkammer der Zitadelle',
+    price: null,
+    itemCount: 4,
+    mainColor: '#8a93a6',
+    darkColor: '#3a4050',
+    shakeTime: 2.4,
+    chances: { poor: 0, common: 5, uncommon: 20, rare: 40, epic: 25, legendary: 10 },
+    // Das garantierte Boss-Item ist immer ein Set-Teil (plate, siehe data/sets.js)
+    bossLoot: getSetLoot('plate'),
+  },
+  {
+    id: 'chestSkaar',
+    name: 'Bau der Urbestie',
+    price: null,
+    itemCount: 4,
+    mainColor: '#6f8a4a',
+    darkColor: '#2a3a1a',
+    shakeTime: 2.4,
+    chances: { poor: 0, common: 5, uncommon: 20, rare: 40, epic: 25, legendary: 10 },
+    // Das garantierte Boss-Item ist immer ein Set-Teil (leather, siehe data/sets.js)
+    bossLoot: getSetLoot('leather'),
+  },
+  {
+    id: 'chestMythrel',
+    name: 'Verbotene Regale',
+    price: null,
+    itemCount: 4,
+    mainColor: '#7a5ac8',
+    darkColor: '#2a1a5a',
+    shakeTime: 2.4,
+    chances: { poor: 0, common: 5, uncommon: 20, rare: 40, epic: 25, legendary: 10 },
+    // Das garantierte Boss-Item ist immer ein Set-Teil (cloth, siehe data/sets.js)
+    bossLoot: getSetLoot('cloth'),
   },
 ];
 

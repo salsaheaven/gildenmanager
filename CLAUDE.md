@@ -66,7 +66,7 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
 src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes, balancing, sprites (Pixel-Art als Text),
                heroClasses (15 Klassen inkl. Rüstungsart, nützliche Werte, Dauer-Fähigkeit `passive` und Begleiter `pet`), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
                enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
-               dungeons (Begegnungen, Stufe, Belohnung), retreatRules,
+               dungeons (7 Level-Dungeons + 3 Set-Dungeons: Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),
                heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus, Training, Kräuter sammeln, Rohstoffe sammeln, Aufträge erledigen, Erkunden; Zahlen in TASK_RULES),
@@ -82,6 +82,7 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                rivalGuilds (4 KI-Gilden mit Persönlichkeit: Versuchs- und Erfolgschance),
                consumables (Verbrauchsgüter des Händlers: Preis, Grundware/Tagesangebot, Wirkung; 2 Vorrats-Plätze pro Gruppe),
                unlocks (Tutorial: welche Teile des Spiels wann freigeschaltet werden, mit Erklärungstext),
+               sets (15 Klassen-Sets à 3 Teile, Boni bei 2 und 3 Teilen, Set-Teile als Boss-Beute der 3 Set-Dungeons),
                collectionBook (Sammelbuch-Seiten pro Dungeon mit Titel und Gold-Bonus; die Items kommen aus `bossLoot` in lootBoxes)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute · Helden · Dungeons · Beute · Gilde mit Unterreitern (Liste SECTIONS in main.js).
                Bildschirme: DayPlanScreen (Tagesplan, Startseite, oben TodoBox = „Was gibt es heute zu tun?“), LootBoxScreen (Kisten öffnen), ShopScreen (Händler + Vorratskammer),
@@ -104,6 +105,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                NewsLine = eine Zeile aus dem Neuigkeiten-Ticker (Tagesplan + Tagesabschluss).
                FoundingScreen = Startbildschirm „Gründe deine Gilde“ (Name + 5 Klassen, alle Rüstungsarten), nur bei neuem Spielstand.
                StandingGroupControls = Anzeige und Knöpfe stehender Gruppen (Ersatz einsetzen, Heute aussetzen, Wieder einplanen, Auflösen).
+               SetInfo = Set-Zeile an Items und Set-Kasten am Helden (getragene Teile, aktive Boni).
                CraftingControls = Schmieden (Karte der Schmiede), Brauen (Karte des Alchemielabors), Umschmieden (Inventar).
                UpgradeControls = Zerlegen und Verbessern in der Oberfläche (Verbessern-Knopf mit Kosten und Chance, Material-Text, Funken/Riss, Leuchten und „+3“ an verbesserten Items; Inventar + Ausrüstungsliste).
                TalentPanel = die 3 Talentreihen eines Helden zum Auswählen (Heldenbildschirm + Kampf-Labor).
