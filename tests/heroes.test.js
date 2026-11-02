@@ -284,3 +284,27 @@ describe('Gruppe ausrüsten', () => {
     expect(mage.equipment.ring.id).toBe(weak.id);
   });
 });
+
+describe('Bestes anlegen: Rückgängig und eigenes Set', () => {
+  it('stellt die alte Ausrüstung wieder her und behält Teile des eigenen Sets', () => {
+    const game = new Game(13);
+    game.foundGuild('', ['paladin', 'rogue', 'mage', 'bard', 'druid']);
+    game.guild.inventory = [];
+    const mage = game.guild.heroes.find((hero) => hero.classId === 'mage');
+    const weakRing = new Item(game.guild.createItemId(), 'magicRing', 'common', 'Alter Ring', { magic: 1 });
+    mage.equip(weakRing);
+    const setHood = new Item(game.guild.createItemId(), 'clothHelmet', 'epic', 'Kapuze des Sternenfeuers', { magic: 1 });
+    setHood.setId = 'setMage';
+    mage.equip(setHood);
+    game.guild.addItem(new Item(game.guild.createItemId(), 'magicRing', 'epic', 'Neuer Ring', { magic: 20 }));
+    game.guild.addItem(new Item(game.guild.createItemId(), 'clothHelmet', 'epic', 'Bessere Kapuze', { magic: 30 }));
+
+    const snapshot = game.getEquipmentSnapshot([mage.id]);
+    expect(game.equipBestItems(mage.id)).toBe(1);
+    expect(mage.equipment.ring.name).toBe('Neuer Ring');
+    expect(mage.equipment.head.id).toBe(setHood.id); // Set-Teil bleibt dran
+
+    game.restoreEquipment(snapshot);
+    expect(mage.equipment.ring.id).toBe(weakRing.id);
+  });
+});

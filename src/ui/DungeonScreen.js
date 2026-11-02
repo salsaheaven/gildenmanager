@@ -171,8 +171,10 @@ export class DungeonScreen {
     equipGroupButton.hidden = this.selectedHeroIds.size === 0;
     equipGroupButton.addEventListener('click', () => {
       // Reihenfolge der Auswahl = Reihenfolge beim Ausrüsten (ein Set merkt sich, was zuerst kam)
-      const count = this.game.equipBestForGroup([...this.selectedHeroIds]);
-      announceEquipBest(count, 'Gruppe');
+      const heroIds = [...this.selectedHeroIds];
+      const snapshot = this.game.getEquipmentSnapshot(heroIds);
+      const count = this.game.equipBestForGroup(heroIds);
+      announceEquipBest(this.game, count, 'Gruppe', snapshot);
     });
     this.fillButtonRow(panel.querySelector('.retreat-buttons'), RETREAT_RULES.map((r) => ({ label: r.name, value: r.id })),
       (value) => value === this.retreatRuleId, (value) => { this.retreatRuleId = value; });

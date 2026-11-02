@@ -71,7 +71,7 @@ export class HeroDetailPanel {
 
       <div class="equipment-head">
         <h3>Ausrüstung <span class="hint equipment-hint">Tippe einen Platz an</span></h3>
-        <button class="equip-best-button" title="Legt für jeden Platz das Item mit den meisten nützlichen Werten an (Resistenzen zählen nicht)">Bestes anlegen</button>
+        <button class="equip-best-button" title="Legt für jeden Platz das Item mit den meisten nützlichen Werten an. Resistenzen und Set-Boni zählen nicht, getragene Teile des eigenen Sets bleiben dran.">Bestes anlegen <span class="button-note">(nach Werten)</span></button>
       </div>
       <div class="equipment-grid"></div>
       <div class="hero-set-slot"></div>
@@ -144,8 +144,9 @@ export class HeroDetailPanel {
     }, false);
     this.setupDismissButton();
     this.root.querySelector('.equip-best-button').addEventListener('click', () => {
+      const snapshot = this.game.getEquipmentSnapshot([this.hero.id]);
       const count = this.game.equipBestItems(this.hero.id);
-      announceEquipBest(count, this.hero.name);
+      announceEquipBest(this.game, count, this.hero.name, snapshot);
     });
   }
 
@@ -295,11 +296,18 @@ export class HeroDetailPanel {
   }
 }
 
-// Rückmeldung nach "Bestes anlegen" (auch für "Gruppe ausrüsten" im Dungeon-Bildschirm)
-export function announceEquipBest(count, name) {
+// Rückmeldung nach "Bestes anlegen" (auch für "Gruppe ausrüsten" im Dungeon-Bildschirm),
+// mit "Rückgängig", das die vorher gemerkte Ausrüstung (snapshot) wiederherstellt
+export function announceEquipBest(game, count, name, snapshot) {
   if (count > 0) {
     Sound.itemReveal(2);
-    showToast(name + ': ' + count + (count === 1 ? ' Teil' : ' Teile') + ' angelegt', '#1eff00');
+    showToast(name + ': ' + count + (count === 1 ? ' Teil' : ' Teile') + ' angelegt', '#1eff00', {
+      label: 'Rückgängig',
+      onClick: () => {
+        Sound.click();
+        game.restoreEquipment(snapshot);
+      },
+    });
   } else {
     Sound.click();
     showToast(name + ': Nichts Besseres im Inventar', '#9d9d9d');

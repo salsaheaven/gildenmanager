@@ -26,6 +26,7 @@ import { getFreeGroupName, getMissingMembers, findSubstitute, getAvailableSuppli
 import { StandingGroup } from '../entities/StandingGroup.js';
 import { updateUnlocks, getUnannouncedUnlocks } from '../systems/Unlocks.js';
 import { UNLOCKS } from '../data/unlocks.js';
+import { getSet } from '../data/sets.js';
 import { getKnownCount, getKnowledgeTotal, getKnowledgeLevel, isEncounterKnown, getKnownDamageTypes, getHiddenMechanicNames } from '../systems/DungeonKnowledge.js';
 import { brew } from '../systems/AlchemySystem.js';
 import { checkStartTeam } from '../systems/StartTeam.js';
@@ -652,7 +653,8 @@ export class Game {
   }
 
   // Legt für jeden Platz das beste passende Item aus dem Inventar an ("Bestes anlegen").
-  // "Bestes" = höchste Summe der Werte, die der Klasse nützen (Hero.getUpgradeValue); Resistenzen zählen nicht.
+  // "Bestes" = höchste Summe der Werte, die der Klasse nützen (Hero.getUpgradeValue); Resistenzen und Set-Boni
+  // zählen nicht. Getragene Teile des eigenen Klassen-Sets bleiben aber dran.
   // Gibt zurück, wie viele Items angelegt wurden.
   equipBestItems(heroId) {
     const hero = this.guild.findHero(heroId);
@@ -663,6 +665,11 @@ export class Game {
     for (const slot in hero.equipment) {
       let bestItem = null;
       let bestValue = 0;
+      // Teile des eigenen Klassen-Sets bleiben dran (sonst gingen Set-Boni verloren)
+      const current = hero.equipment[slot];
+      if (current && current.setId && getSet(current.setId).classId === hero.classId) {
+        continue;
+      }
       for (const item of this.guild.inventory) {
         if (item.getSlot() !== slot || !hero.canEquip(item)) {
           continue;
@@ -679,6 +686,46 @@ export class Game {
       }
     }
     return count;
+  }
+
+  // Merkt sich, was diese Helden gerade tragen: { heldId: { platz: itemId oder null } } (für "Rückgängig")
+  getEquipmentSnapshot(heroIds) {
+    const snapshot = {};
+    for (const heroId of heroIds) {
+      const hero = this.guild.findHero(heroId);
+      if (!hero) {
+        continue;
+      }
+      snapshot[heroId] = {};
+      for (const slot in hero.equipment) {
+        snapshot[heroId][slot] = hero.equipment[slot] ? hero.equipment[slot].id : null;
+      }
+    }
+    return snapshot;
+  }
+
+  // Stellt die gemerkte Ausrüstung wieder her ("Rückgängig" nach "Bestes anlegen").
+  // Items, die es inzwischen nicht mehr im Inventar gibt (verkauft, zerlegt), werden übersprungen.
+  restoreEquipment(snapshot) {
+    for (const heroId in snapshot) {
+      const hero = this.guild.findHero(Number(heroId));
+      if (!hero) {
+        continue;
+      }
+      for (const slot in snapshot[heroId]) {
+        const wantedId = snapshot[heroId][slot];
+        const current = hero.equipment[slot];
+        if ((current ? current.id : null) === wantedId) {
+          continue;
+        }
+        if (wantedId === null) {
+          this.unequipItem(hero.id, slot);
+        } else if (this.guild.findItem(wantedId)) {
+          this.equipItem(hero.id, wantedId);
+        }
+      }
+    }
+    this.emit('changed');
   }
 
   // Rüstet mehrere Helden nacheinander mit dem Besten aus dem Inventar aus (z.B. eine Dungeon-Gruppe).
