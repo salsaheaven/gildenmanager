@@ -105,6 +105,8 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                SupplyPicker = Vorrats-Plätze einer Gruppe (Dungeon-Bildschirm + Tagesplan).
                NewsLine = eine Zeile aus dem Neuigkeiten-Ticker (Tagesplan + Tagesabschluss).
                FoundingScreen = Startbildschirm „Gründe deine Gilde“ (Name + 5 Klassen, alle Rüstungsarten), nur bei neuem Spielstand.
+               EndDayCheck = Nachfrage bei „Tag beenden“, wenn Helden ohne Aufgabe oder Gruppen unvollständig sind (blockiert nie).
+               NextTodoBar = Leiste „Noch X offen · Weiter: …“ unter den Unterreitern (nicht auf dem Tagesplan).
                StandingGroupControls = Anzeige und Knöpfe stehender Gruppen (Ersatz einsetzen, Heute aussetzen, Wieder einplanen, Auflösen).
                SetInfo = Set-Zeile an Items und Set-Kasten am Helden (getragene Teile, aktive Boni).
                CraftingControls = Schmieden (Karte der Schmiede), Brauen (Karte des Alchemielabors), Umschmieden (Inventar).

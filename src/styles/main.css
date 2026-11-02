@@ -3955,6 +3955,13 @@ body.locked-collection .collection-button {
   color: var(--text-dim);
 }
 
+/* Ausreichend große Tippflächen (mindestens 44 px) für Blättern und Schließen */
+.hero-nav button,
+.sheet-close-button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
 /* Heldenübersicht nach Position (RoleOverview) */
 .group-counter {
   display: flex;

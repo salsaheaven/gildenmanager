@@ -52,7 +52,7 @@ export class EquipPanel {
 
     const currentItem = this.hero.equipment[this.slot];
     this.root.innerHTML = `
-      <div class="equip-head"><h2></h2><button class="sheet-close-button">Schließen</button></div>
+      <div class="equip-head"><h2></h2><button class="sheet-close-button">✕ Schließen</button></div>
       <p class="hint equip-armor-hint"></p>
       <div class="equip-current"></div>
       <div class="equip-list"></div>

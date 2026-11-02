@@ -43,6 +43,11 @@ export class HeroScreen {
 
     this.detailPanel = new HeroDetailPanel(this.root.querySelector('.hero-detail-body'), game, {
       onSlotClicked: (slot) => {
+        // Handy: Das Fenster von unten bekommt einen Eintrag im Browser-Verlauf,
+        // damit die Zurück-Geste es schließt statt die Seite zu verlassen
+        if (this.selectedSlot === null && isPhone()) {
+          history.pushState({ equipSheet: true }, '');
+        }
         this.selectedSlot = slot;
         this.render();
       },
@@ -54,9 +59,13 @@ export class HeroScreen {
       onGoToTavern: onGoToTavern,
     });
     // onClose: Das Fenster von unten (Handy) wird geschlossen
-    this.equipPanel = new EquipPanel(this.root.querySelector('.equip-panel'), game, inventory, () => {
-      this.selectedSlot = null;
-      this.render();
+    this.equipPanel = new EquipPanel(this.root.querySelector('.equip-panel'), game, inventory, () => this.closeSheet());
+    // Zurück-Geste bzw. Zurück-Knopf im Browser schließt das Fenster von unten
+    window.addEventListener('popstate', () => {
+      if (this.selectedSlot !== null) {
+        this.selectedSlot = null;
+        this.render();
+      }
     });
     this.setupNavigation();
 
@@ -147,6 +156,16 @@ export class HeroScreen {
     this.root.querySelector('.equip-panel').classList.toggle('sheet-open', this.selectedSlot !== null);
   }
 
+  // Fenster von unten schließen. Gibt es dafür einen Verlaufs-Eintrag, über "Zurück" (dann räumt popstate auf).
+  closeSheet() {
+    if (history.state && history.state.equipSheet) {
+      history.back();
+      return;
+    }
+    this.selectedSlot = null;
+    this.render();
+  }
+
   // Einen bestimmten Helden zeigen (z.B. aus dem Tagesplan heraus)
   selectHero(heroId) {
     this.selectedHeroId = heroId;
@@ -154,4 +173,9 @@ export class HeroScreen {
     this.showingDetail = true;
     this.render();
   }
+}
+
+// Schmaler Bildschirm (Handy-Regeln in main.css gelten ab dieser Breite)
+function isPhone() {
+  return window.innerWidth <= 700;
 }
