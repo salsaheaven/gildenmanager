@@ -3909,6 +3909,19 @@ body.locked-collection .collection-button {
   flex-wrap: wrap;
 }
 
+/* Dungeon-Liste: zweite Zeile mit heutiger Gruppe und Sammelbuch-Stand */
+.dungeon-today {
+  display: block;
+  font-size: 16px;
+  color: var(--text-dim);
+}
+
+.dungeon-today .risk-badge {
+  display: block;
+  margin: 4px 0 0;
+  font-size: 15px;
+}
+
 /* Heldenübersicht nach Position (RoleOverview) */
 .group-counter {
   display: flex;

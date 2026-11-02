@@ -16,7 +16,8 @@ import { RunViewer } from './RunViewer.js';
 import { createRiskBadge } from './RiskBadge.js';
 import { renderDungeonGuide } from './DungeonGuide.js';
 import { getRunTitle, createRunControls } from './StandingGroupControls.js';
-import { renderRoleTiles } from './RoleOverview.js';
+import { renderRoleTiles, createGroupCounter } from './RoleOverview.js';
+import { getCollectionPage, getPageItems } from '../data/collectionBook.js';
 import { announceEquipBest } from './HeroDetailPanel.js';
 import { GROUP_RULES, getPositionName } from '../data/groupRules.js';
 import { createSupplyPicker, describeSupplies } from './SupplyPicker.js';
@@ -73,6 +74,10 @@ export class DungeonScreen {
   renderDungeonCards() {
     const container = this.root.querySelector('.dungeon-cards');
     container.innerHTML = '';
+    // Oben einmal: Wie viele vollständige Gruppen sind heute noch frei, was fehlt? (wie in der Heldenübersicht)
+    if (this.game.guild.heroes.length > 0) {
+      container.appendChild(createGroupCounter(this.game));
+    }
     for (const dungeon of DUNGEONS) {
       const unlocked = this.game.isDungeonUnlocked(dungeon.id);
       const clears = this.game.guild.getClears(dungeon.id);
@@ -83,6 +88,7 @@ export class DungeonScreen {
       card.innerHTML = `
         <span class="dungeon-name"></span>
         <span class="dungeon-sub"></span>
+        <span class="dungeon-today"></span>
       `;
       card.querySelector('.dungeon-name').textContent = dungeon.name;
       card.querySelector('.dungeon-sub').textContent = unlocked
@@ -90,12 +96,38 @@ export class DungeonScreen {
           ' · Wissen ' + this.game.getDungeonKnowledge(dungeon.id).known + '/' + this.game.getDungeonKnowledge(dungeon.id).total +
           (this.game.isDungeonScouted(dungeon.id) ? ' · Vorbereitet ✓' : '')
         : 'Gesperrt: erst ' + getDungeon(dungeon.unlockAfter).name + ' schaffen';
+      if (unlocked) {
+        this.fillTodayLine(card.querySelector('.dungeon-today'), dungeon);
+      }
       card.addEventListener('click', () => {
         Sound.click();
         this.dungeonId = dungeon.id;
         this.render();
       });
       container.appendChild(card);
+    }
+  }
+
+  // Zweite Zeile einer Dungeon-Karte: welche Gruppe heute dort kämpft (mit Einschätzung) und der Sammelbuch-Stand,
+  // z.B. "Heute: Gruppe A · Sammelbuch 2/3"
+  fillTodayLine(line, dungeon) {
+    const parts = [];
+    const expeditions = this.game.guild.expeditions.filter((expedition) => expedition.dungeonId === dungeon.id);
+    for (const expedition of expeditions) {
+      const group = this.game.findStandingGroup(expedition.standingGroupId);
+      parts.push('Heute: ' + (group ? group.name : 'eine Gruppe'));
+    }
+    const page = getCollectionPage(dungeon.id);
+    if (page) {
+      const book = this.game.guild.collection;
+      parts.push('Sammelbuch ' + book.countFoundOnPage(page) + '/' + getPageItems(page).length);
+    }
+    line.textContent = parts.join(' · ');
+    // Einschätzung der ersten heutigen Gruppe hier (nur, wenn eine eingeplant ist)
+    if (expeditions.length > 0) {
+      const expedition = expeditions[0];
+      const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
+      line.appendChild(createRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies));
     }
   }
 

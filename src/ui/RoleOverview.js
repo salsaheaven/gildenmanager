@@ -48,7 +48,7 @@ export function renderRoleTiles(container, game, options) {
 }
 
 // Kasten oben: wie viele Gruppen gehen, und was für die nächste fehlt
-function createGroupCounter(game) {
+export function createGroupCounter(game) {
   const result = game.countPossibleGroups();
   const box = document.createElement('div');
   box.className = 'group-counter' + (result.groups > 0 ? ' has-groups' : '');
