@@ -1005,6 +1005,12 @@ body.overlay-open {
   border: 2px solid #0c0914;
 }
 
+/* Leises Abzeichen: nur Info, keine Aufforderung */
+.nav-badge.quiet {
+  background: #4a4060;
+  color: var(--text-dim);
+}
+
 .inventory-slot .item-level {
   position: absolute;
   bottom: 0;

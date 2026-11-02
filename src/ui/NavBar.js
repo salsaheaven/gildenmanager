@@ -3,6 +3,7 @@
 // und darunter die Unterreiter des gewählten Abschnitts (z.B. Helden: Übersicht | Taverne).
 // Auf dem Handy steht die Abschnitts-Leiste unten am Bildschirm (siehe main.css).
 // Abzeichen ("3", "!", "★") hängen an einem Bildschirm. Der Abschnitt zeigt das erste Abzeichen seiner Bildschirme.
+// Rot = hier kann man jetzt etwas Sinnvolles tun. Leise (grau) = nur zur Info. Ein Abschnitt zeigt Rot vor Grau.
 // Ein Abschnitt kann zusätzlich Knöpfe haben, die ein Fenster öffnen statt einen Bildschirm (z.B. Inventar).
 // Noch nicht freigeschaltete Bildschirme und Knöpfe sind ausgeblendet (setHidden), ein Abschnitt ohne Sichtbares ebenfalls.
 // ============================================================
@@ -17,7 +18,7 @@ export class NavBar {
     this.subRoot = subRoot;
     this.sections = sections;
     this.onSelect = onSelect;
-    this.badges = {};        // Bildschirm-id → Text des Abzeichens
+    this.badges = {};        // Bildschirm-id → { text, quiet } des Abzeichens
     this.extraButtons = {};  // Abschnitt-id → [{ id, name, onClick }]
     this.activeScreenId = null;
     this.hiddenIds = [];     // ausgeblendete Bildschirme und Extra-Knöpfe (noch nicht freigeschaltet)
@@ -75,9 +76,16 @@ export class NavBar {
   }
 
   // text = was im Abzeichen steht (z.B. "3" oder "!"). Leer = Abzeichen ausblenden.
-  setBadge(id, text) {
-    this.badges[id] = text || '';
+  // quiet = true: leises, graues Abzeichen (nur Info, keine Aufforderung)
+  setBadge(id, text, quiet = false) {
+    this.badges[id] = { text: text || '', quiet: quiet };
     this.render();
+  }
+
+  // Das Abzeichen, das ein Abschnitt zeigt: zuerst ein rotes, sonst ein leises (oder keins)
+  pickSectionBadge(ids) {
+    const badges = ids.map((id) => this.badges[id]).filter((badge) => badge && badge.text);
+    return badges.find((badge) => !badge.quiet) || badges[0] || null;
   }
 
   render() {
@@ -89,8 +97,7 @@ export class NavBar {
       button.classList.toggle('active', section === activeSection);
       button.hidden = this.getVisibleScreens(section).length === 0;
       const ids = this.getVisibleScreens(section).map((screen) => screen.id).concat(this.getVisibleExtras(section).map((extra) => extra.id));
-      const badgeText = ids.map((id) => this.badges[id]).find((text) => text) || '';
-      setBadgeElement(button.querySelector('.nav-badge'), badgeText);
+      setBadgeElement(button.querySelector('.nav-badge'), this.pickSectionBadge(ids));
     }
 
     // Unterreiter des aktiven Abschnitts (nur, wenn es mehr als einen Eintrag gibt)
@@ -122,17 +129,20 @@ export class NavBar {
     }
   }
 
-  createSubButton(name, badgeText) {
+  createSubButton(name, badge) {
     const button = document.createElement('button');
     button.className = 'sub-tab';
     button.innerHTML = '<span class="nav-name"></span><span class="nav-badge" hidden></span>';
     button.querySelector('.nav-name').textContent = name;
-    setBadgeElement(button.querySelector('.nav-badge'), badgeText);
+    setBadgeElement(button.querySelector('.nav-badge'), badge);
     return button;
   }
 }
 
-function setBadgeElement(element, text) {
+// badge = { text, quiet } oder nichts
+function setBadgeElement(element, badge) {
+  const text = badge ? badge.text : '';
   element.hidden = !text;
-  element.textContent = text || '';
+  element.textContent = text;
+  element.classList.toggle('quiet', Boolean(badge && badge.quiet));
 }

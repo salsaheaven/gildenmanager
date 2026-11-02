@@ -135,17 +135,20 @@ function showScreen(screenId) {
 function updateBadges() {
   const guild = game.guild;
   navBar.setBadge('treasury', guild.boxes.length > 0 ? String(guild.boxes.length) : '');
-  navBar.setBadge('tavern', tavernHasNews ? '!' : '');
+  // Neue Bewerber sind nur eine Info (leise)
+  navBar.setBadge('tavern', tavernHasNews ? '!' : '', true);
   // Helden mit freier Talent-Wahl
   const freeTalents = guild.heroes.filter((hero) => hero.getFreeTalentPicks() > 0).length;
   // Helden mit neuer, passender Ausrüstung im Inventar
   const newGear = guild.heroes.filter((hero) => game.getSlotsWithNewGear(hero.id).length > 0).length;
   navBar.setBadge('heroes', freeTalents > 0 ? '★' : (newGear > 0 ? '▲' : ''));
   const planned = guild.expeditions.length;
-  navBar.setBadge('dungeons', dungeonHasNews ? '!' : (planned > 0 ? String(planned) : ''));
+  // Neue Berichte und eingeplante Gruppen sind nur eine Info (leise)
+  navBar.setBadge('dungeons', dungeonHasNews ? '!' : (planned > 0 ? String(planned) : ''), true);
   // Gildenhalle: Hammer, solange gebaut wird; "!", wenn der Unterhalt fehlt
   const hall = guild.hall;
-  navBar.setBadge('hall', !hall.upkeepPaid ? '!' : (hall.construction !== null ? '⚒' : ''));
+  // Fehlender Unterhalt braucht eine Entscheidung (rot), eine laufende Baustelle ist nur Info (leise)
+  navBar.setBadge('hall', !hall.upkeepPaid ? '!' : (hall.construction !== null ? '⚒' : ''), hall.upkeepPaid);
 }
 
 game.on('changed', updateBadges);
