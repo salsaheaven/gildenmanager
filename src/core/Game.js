@@ -21,7 +21,7 @@ import { forgeItem, reforgeItem } from '../systems/ForgeSystem.js';
 import { getSlotsWithNewGear, markSlotSeen, markItemSeen } from '../systems/NewGear.js';
 import { countPossibleGroups, groupHeroesByPosition, checkGroup } from '../systems/GroupCounter.js';
 import { getPositionId } from '../data/groupRules.js';
-import { getDailyTodos } from '../systems/DailyTodo.js';
+import { getDailyTodos, getEndDayWarnings } from '../systems/DailyTodo.js';
 import { getFreeGroupName, getMissingMembers, findSubstitute, getAvailableSupplies } from '../systems/StandingGroups.js';
 import { StandingGroup } from '../entities/StandingGroup.js';
 import { updateUnlocks, getUnannouncedUnlocks } from '../systems/Unlocks.js';
@@ -617,6 +617,11 @@ export class Game {
   // "Was gibt es heute zu tun?": Liste von { id, count, screenId } (siehe systems/DailyTodo.js)
   getDailyTodos() {
     return getDailyTodos(this.guild, this.lastDaySummary);
+  }
+
+  // Offene Punkte, die etwas kosten, wenn der Tag jetzt endet (Nachfrage bei "Tag beenden", blockiert nie)
+  getEndDayWarnings() {
+    return getEndDayWarnings(this.guild);
   }
 
   // Wie viele vollständige Gruppen gehen heute noch aus den freien Helden? (siehe systems/GroupCounter.js)

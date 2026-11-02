@@ -39,3 +39,13 @@ describe('Was gibt es heute zu tun?', () => {
     expect(game.getDailyTodos().some((todo) => todo.id === 'groups')).toBe(false);
   });
 });
+
+describe('Nachfrage bei „Tag beenden“', () => {
+  it('meldet freie Helden, aber keine Kisten', () => {
+    const game = foundedGame();
+    game.guild.addBox('wood');
+    expect(game.getEndDayWarnings()).toEqual([{ id: 'idleHeroes', count: 5, screenId: 'plan' }]);
+    game.setHeroTask(game.guild.heroes[0].id, 'training');
+    expect(game.getEndDayWarnings()[0].count).toBe(4);
+  });
+});

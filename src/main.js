@@ -62,7 +62,7 @@ new TopBar(document.getElementById('top-bar'), game, () => {
   isResetting = true;
   saveManager.deleteSave();
   location.reload();
-});
+}, (screenId) => showScreen(screenId));
 
 // Jeder Bildschirm bekommt einen eigenen Bereich. Sichtbar ist immer nur einer.
 const screenArea = document.getElementById('screen');

@@ -26,6 +26,7 @@ import { getConsumable } from '../data/consumables.js';
 import { DUNGEONS } from '../data/dungeons.js';
 import { Sound } from './Sound.js';
 import { createTodoBox } from './TodoBox.js';
+import { requestEndDay } from './EndDayCheck.js';
 import { getRunTitle, createRunControls, createPausedGroupRows } from './StandingGroupControls.js';
 
 export class DayPlanScreen {
@@ -77,7 +78,7 @@ export class DayPlanScreen {
     });
     this.root.querySelector('.plan-end-day-button').addEventListener('click', () => {
       Sound.click();
-      this.game.endDay();
+      requestEndDay(this.game, this.onGoTo);
     });
 
     game.on('changed', () => this.render());

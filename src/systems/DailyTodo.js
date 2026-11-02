@@ -18,6 +18,7 @@
 import { getSlotsWithNewGear } from './NewGear.js';
 import { countPossibleGroups } from './GroupCounter.js';
 import { getMissingMembers } from './StandingGroups.js';
+import { getDayPlan } from './DayPlan.js';
 import { getUnannouncedUnlocks } from './Unlocks.js';
 import { getUnlock } from '../data/unlocks.js';
 
@@ -73,4 +74,22 @@ function countGroupsWithMissingMembers(guild) {
     }
   }
   return count;
+}
+
+// Offene Punkte, die etwas kosten, wenn man den Tag jetzt beendet (für die Nachfrage bei "Tag beenden").
+// Ungeöffnete Kisten fehlen bewusst: Sie warten einfach bis morgen.
+//   idleHeroes   = Helden, die sich nur ausruhen (ein Tag ohne Nutzen)
+//   groupMissing = losziehende Gruppen, denen jemand fehlt (ohne Ersatz)
+// Gibt eine Liste von { id, count, screenId } zurück (leer = nichts Wichtiges offen).
+export function getEndDayWarnings(guild) {
+  const warnings = [];
+  const idle = getDayPlan(guild).counts.rest || 0;
+  if (idle > 0) {
+    warnings.push({ id: 'idleHeroes', count: idle, screenId: 'plan' });
+  }
+  const missing = countGroupsWithMissingMembers(guild);
+  if (missing > 0) {
+    warnings.push({ id: 'groupMissing', count: missing, screenId: 'plan' });
+  }
+  return warnings;
 }

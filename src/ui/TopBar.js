@@ -5,10 +5,12 @@
 import { createSpriteCanvas } from './PixelArt.js';
 import { Sound } from './Sound.js';
 import { getDayPlan } from '../systems/DayPlan.js';
+import { requestEndDay } from './EndDayCheck.js';
 
 export class TopBar {
   // onReset = Funktion, die aufgerufen wird, wenn ein neues Spiel gestartet werden soll
-  constructor(rootElement, game, onReset) {
+  // onGoTo  = zu einem Bildschirm springen (aus der Nachfrage bei "Tag beenden")
+  constructor(rootElement, game, onReset, onGoTo) {
     this.root = rootElement;
     this.game = game;
     this.onReset = onReset;
@@ -33,7 +35,8 @@ export class TopBar {
 
     this.root.querySelector('.end-day-button').addEventListener('click', () => {
       Sound.click();
-      this.game.endDay();
+      // Fragt kurz nach, wenn noch etwas offen ist (blockiert nie)
+      requestEndDay(this.game, onGoTo);
     });
     this.setupMenuButtons();
 
