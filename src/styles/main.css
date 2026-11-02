@@ -3922,6 +3922,19 @@ body.locked-collection .collection-button {
   font-size: 15px;
 }
 
+/* "Weiter" zum nächsten offenen Punkt (NextTodoBar) */
+#next-todo {
+  padding: 8px 16px 0;
+}
+
+.next-todo-button {
+  width: 100%;
+  text-align: left;
+  color: var(--gold);
+  border-color: var(--gold);
+  font-size: 17px;
+}
+
 /* Heldenübersicht nach Position (RoleOverview) */
 .group-counter {
   display: flex;
@@ -4131,6 +4144,10 @@ body.locked-collection .collection-button {
   }
 
   #sub-nav {
+    padding: 8px 10px 0;
+  }
+
+  #next-todo {
     padding: 8px 10px 0;
   }
 

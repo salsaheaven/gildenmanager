@@ -16,6 +16,7 @@ import { CombatLabScreen } from './ui/CombatLabScreen.js';
 import { DungeonScreen } from './ui/DungeonScreen.js';
 import { GuildHallScreen } from './ui/GuildHallScreen.js';
 import { ShopScreen } from './ui/ShopScreen.js';
+import { NextTodoBar } from './ui/NextTodoBar.js';
 import { DayPlanScreen } from './ui/DayPlanScreen.js';
 import { DayEndOverlay } from './ui/DayEndOverlay.js';
 import { DebugPanel } from './ui/DebugPanel.js';
@@ -81,6 +82,8 @@ for (const screenId of screenIds.concat(HIDDEN_SCREENS)) {
 }
 
 const navBar = new NavBar(document.getElementById('nav-bar'), document.getElementById('sub-nav'), SECTIONS, showScreen);
+// "Weiter" zum nächsten offenen Punkt aus "Was gibt es heute zu tun?"
+const nextTodoBar = new NextTodoBar(document.getElementById('next-todo'), game, (screenId) => showScreen(screenId));
 
 // Das Inventar ist ein Vollbild-Fenster, das von überall geöffnet werden kann.
 // Das Abzeichen am Knopf zeigt, wie viele frische Items noch nicht angeschaut wurden.
@@ -117,6 +120,7 @@ function showScreen(screenId) {
     screenElements[id].hidden = id !== screenId;
   }
   navBar.setActive(screenId);
+  nextTodoBar.setScreen(screenId);
   if (screenId === 'tavern') {
     tavernHasNews = false;
   }

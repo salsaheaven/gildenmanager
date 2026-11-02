@@ -72,3 +72,11 @@ function createUnlockEntry(game, todo, onGoTo) {
   });
   return entry;
 }
+
+// Kurzer Text für einen Eintrag (auch für die "Weiter"-Leiste, siehe NextTodoBar.js)
+export function describeTodo(todo) {
+  if (todo.id === 'unlock') {
+    return 'Neu: ' + getUnlock(todo.unlockId).name;
+  }
+  return TODO_TEXTS[todo.id](todo.count);
+}
