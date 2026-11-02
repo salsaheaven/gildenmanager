@@ -19,7 +19,10 @@ export function createEmptyOrderSettings() {
     abilityWhen: {},
     abilityTarget: {},
     statBonus: {},       // Wert → Anteil, z.B. { health: 0.2 }
-    abilityDuration: {}, // Skill-id → zusätzliche Runden
+    abilityDuration: {}, // Skill-id → zusätzliche Runden (negativ = kürzer, mindestens 1 Runde)
+    abilityInterrupts: {}, // Skill-id → true: der Skill unterbricht zusätzlich einen unterbrechbaren Boss-Zauber
+    abilityCleanses: {},   // Skill-id → true: der Skill löst zusätzlich Flüche von seinen Zielen
+    abilityShield: {},     // Skill-id → Stärke: der Skill gibt seinen Zielen zusätzlich einen Schild (Magie × Stärke)
     cheatDeath: false,   // einmal pro Kampf einen tödlichen Treffer überleben
     groupAuras: [],      // Auren für die ganze Gruppe: [{ id, damageDone, damageTaken }] (siehe applyGroupAuras)
   };
@@ -32,7 +35,7 @@ export function combineOrderEffects(effectsList) {
   for (const effects of effectsList) {
     for (const key in effects) {
       const value = effects[key];
-      if (key === 'abilityPower' || key === 'statBonus' || key === 'abilityDuration') {
+      if (key === 'abilityPower' || key === 'statBonus' || key === 'abilityDuration' || key === 'abilityShield') {
         // Zahlen pro Skill bzw. Wert zusammenzählen
         for (const name in value) {
           settings[key][name] = (settings[key][name] || 0) + value[name];
@@ -42,7 +45,7 @@ export function combineOrderEffects(effectsList) {
       } else if (key === 'groupAura') {
         // Auren kommen mit ihrer Talent-id über Hero.getOrderSettings in groupAuras (siehe unten)
         continue;
-      } else if (key === 'abilityWhen' || key === 'abilityTarget') {
+      } else if (key === 'abilityWhen' || key === 'abilityTarget' || key === 'abilityInterrupts' || key === 'abilityCleanses') {
         Object.assign(settings[key], value);
       } else if (key === 'targetPriority') {
         settings.targetPriority = value;

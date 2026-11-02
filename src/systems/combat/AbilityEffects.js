@@ -123,7 +123,9 @@ function getTargets(battle, caster, abilityId, ability) {
 // Ein Talent kann einen Skill auch länger halten lassen: Dann wird mit einer Kopie gerechnet, die eine längere Dauer hat.
 export function useAbility(battle, caster, abilityId, baseAbility) {
   const durationBonus = caster.getAbilityDurationBonus(abilityId);
-  const ability = durationBonus > 0 ? { ...baseAbility, duration: baseAbility.duration + durationBonus } : baseAbility;
+  // Länger oder (bei negativem Bonus) kürzer, aber immer mindestens 1 Runde
+  const ability = durationBonus !== 0 && baseAbility.duration
+    ? { ...baseAbility, duration: Math.max(1, baseAbility.duration + durationBonus) } : baseAbility;
   caster.mana -= caster.getManaCost(ability);
   const powerFactor = caster.getAbilityPowerFactor(abilityId);
   const power = (ability.power || 0) * powerFactor;
@@ -190,6 +192,41 @@ export function useAbility(battle, caster, abilityId, baseAbility) {
       break;
     default:
       throw new Error('Unbekannter Skill-Typ: ' + ability.type);
+  }
+  applyTalentExtras(battle, caster, abilityId, ability, targets);
+}
+
+// Zusätzliche Wirkungen, die ein Talent einem Skill gibt (siehe "Konter verteilen" in KONZEPT.md):
+//   abilityInterrupts = unterbricht einen unterbrechbaren Boss-Zauber
+//   abilityCleanses   = löst Flüche von den Zielen
+//   abilityShield     = gibt den Zielen einen Schild
+function applyTalentExtras(battle, caster, abilityId, ability, targets) {
+  const settings = caster.orderSettings;
+  if (settings.abilityInterrupts[abilityId]) {
+    interruptCasting(battle, caster, ability.name);
+  }
+  if (settings.abilityCleanses[abilityId]) {
+    for (const target of targets) {
+      if (target.hasDebuff && target.hasDebuff()) {
+        target.effects = target.effects.filter((effect) => !effect.isDebuff);
+        battle.addLog(caster.name + ': ' + ability.name + ' befreit ' + target.name + ' vom Fluch.', 'shield',
+          { labels: [{ targetId: target.id, text: 'Fluch gelöst' }] });
+      }
+    }
+  }
+  const shieldPower = settings.abilityShield[abilityId] || 0;
+  if (shieldPower > 0) {
+    applyShield(battle, caster, { name: ability.name, scaling: 'magic' }, shieldPower, targets);
+  }
+}
+
+// Bricht einen unterbrechbaren Boss-Zauber ab (falls gerade einer läuft)
+function interruptCasting(battle, caster, actionName) {
+  const casting = battle.getCasting();
+  if (casting && casting.interruptible) {
+    battle.addLog(caster.name + ': ' + actionName + ' unterbricht ' + casting.name + '!', 'mechanic',
+      { labels: [{ targetId: battle.boss.id, text: 'UNTERBROCHEN!' }], cast: { state: 'end' } });
+    battle.boss.casting = null;
   }
 }
 
@@ -304,12 +341,6 @@ function applyStun(battle, caster, ability, targets) {
 
 // Unterbrechen: bricht einen unterbrechbaren Boss-Zauber ab
 function applyInterrupt(battle, caster, ability, power, target) {
-  const boss = battle.boss;
-  const casting = battle.getCasting();
-  if (casting && casting.interruptible) {
-    battle.addLog(caster.name + ': ' + ability.name + ' unterbricht ' + casting.name + '!', 'mechanic',
-      { labels: [{ targetId: boss.id, text: 'UNTERBROCHEN!' }], cast: { state: 'end' } });
-    boss.casting = null;
-  }
+  interruptCasting(battle, caster, ability.name);
   heroDealsDamage(battle, caster, target, ability.name, ability.scaling, power, ability);
 }

@@ -3705,6 +3705,11 @@ h3 {
   color: #9be15d;
 }
 
+.mechanic-counter {
+  font-size: 16px;
+  color: #5aa9ff;
+}
+
 .mechanic-tip.hint {
   color: var(--text-dim);
 }

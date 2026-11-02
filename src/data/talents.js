@@ -17,6 +17,13 @@
 //   cheatDeath      = true: einmal pro Kampf überlebt der Held einen tödlichen Treffer mit 1 Leben
 //   groupAura       = { damageDone, damageTaken } wirkt auf die ganze Gruppe (auch auf ihn selbst).
 //                     Dasselbe Talent zählt in einer Gruppe nur einmal (zwei Krieger = nicht doppelt).
+//   abilityInterrupts = { skill-id: true } der Skill unterbricht zusätzlich einen unterbrechbaren Boss-Zauber
+//   abilityCleanses   = { skill-id: true } der Skill löst zusätzlich Flüche von seinen Zielen
+//   abilityShield     = { skill-id: Stärke } der Skill gibt seinen Zielen zusätzlich einen Schild
+//   (abilityDuration darf auch negativ sein: Der Skill hält dann kürzer, mindestens 1 Runde.)
+// Konter-Talente (Unterbrechen, Fluch lösen, großen Schlag abfangen) machen eine zweite Klasse zum Ersatz
+// für den Spezialisten. Sie kosten etwas: Der Skill wird dafür umgebaut und fehlt für seinen alten Zweck
+// (siehe "Konter verteilen" in KONZEPT.md).
 // Zahlen grob gesetzt, gebalanced wird am Ende.
 // ============================================================
 
@@ -61,8 +68,8 @@ export const TALENTS = {
         effects: { abilityPower: { vowOfRecovery: 0.3 } } },
     ],
     [
-      { id: 'palLongOath', name: 'Langer Schwur', description: 'Schwur der Standhaftigkeit hält 2 Runden länger',
-        effects: { abilityDuration: { oathOfSteadfastness: 2 } } },
+      { id: 'palGuardianShield', name: 'Schutzherr', description: 'Konter: Gottesschild schützt den, den ein großer Schlag treffen soll (statt nur sich selbst)',
+        effects: { abilityTarget: { divineShield: 'bossTarget' }, abilityWhen: { divineShield: 'busterIncoming' } } },
       { id: 'palHallowedShield', name: 'Geweihter Schild', description: '+15 % Rüstung',
         effects: { statBonus: { defense: 0.15 } } },
     ],
@@ -106,8 +113,8 @@ export const TALENTS = {
     [
       { id: 'priStreamOfGrace', name: 'Strom der Gnade', description: 'Strom des Lebens heilt 30 % mehr',
         effects: { abilityPower: { streamOfLife: 0.3 } } },
-      { id: 'priQuickSpark', name: 'Schneller Funke', description: 'Funke der Gnade heilt 30 % mehr',
-        effects: { abilityPower: { sparkOfGrace: 0.3 } } },
+      { id: 'priPurifyingSpark', name: 'Läuternder Funke', description: 'Konter: Funke der Gnade löst Flüche, wird dafür aber nur noch auf Verfluchte gezaubert',
+        effects: { abilityTarget: { sparkOfGrace: 'debuffedAlly' }, abilityWhen: { sparkOfGrace: 'allyDebuffed' }, abilityCleanses: { sparkOfGrace: true } } },
     ],
     [
       { id: 'priHolyGlow', name: 'Heiliger Schein', description: 'Die ganze Gruppe nimmt −5 % Schaden',
@@ -146,8 +153,8 @@ export const TALENTS = {
         effects: { abilityPower: { groveBlessing: 0.25 } } },
     ],
     [
-      { id: 'druLongGrowth', name: 'Langes Wachsen', description: 'Moosmantel und Hainsegen halten 1 Runde länger',
-        effects: { abilityDuration: { mossMantle: 1, groveBlessing: 1 } } },
+      { id: 'druBarkskin', name: 'Borkenhaut', description: 'Konter: Moosmantel fängt einen großen Schlag mit einem Schild ab, wird dafür nur noch davor gezaubert',
+        effects: { abilityTarget: { mossMantle: 'bossTarget' }, abilityWhen: { mossMantle: 'busterIncoming' }, abilityShield: { mossMantle: 2.0 } } },
       { id: 'druFrugal', name: 'Genügsam', description: '−20 % Mana-Kosten',
         effects: { manaCost: -0.2 } },
     ],
@@ -168,8 +175,8 @@ export const TALENTS = {
         effects: { abilityPower: { ashRain: 0.25 } } },
     ],
     [
-      { id: 'magEternalIce', name: 'Ewiges Eis', description: 'Eiskranz friert 1 Runde länger ein',
-        effects: { abilityDuration: { iceWreath: 1 } } },
+      { id: 'magCounterIce', name: 'Bannendes Eis', description: 'Konter: Eiskranz unterbricht Zauber (lange Abklingzeit), wird dafür nur noch gegen unterbrechbare Zauber eingesetzt',
+        effects: { abilityWhen: { iceWreath: 'bossCastingInterruptible' }, abilityInterrupts: { iceWreath: true } } },
       { id: 'magManaFlow', name: 'Manafluss', description: '+30 % Mana',
         effects: { statBonus: { mana: 0.3 } } },
     ],
@@ -252,8 +259,8 @@ export const TALENTS = {
         effects: { abilityPower: { arrowFan: 0.3 } } },
     ],
     [
-      { id: 'hunToughNet', name: 'Zähes Netz', description: 'Fangnetz hält 2 Runden länger',
-        effects: { abilityDuration: { snareNet: 2 } } },
+      { id: 'hunInterruptNet', name: 'Netzwurf', description: 'Konter: Fangnetz trifft den Boss und unterbricht seinen Zauber, fängt dafür keine Diener mehr',
+        effects: { abilityTarget: { snareNet: 'boss' }, abilityWhen: { snareNet: 'bossCastingInterruptible' }, abilityDuration: { snareNet: -2 }, abilityInterrupts: { snareNet: true } } },
       { id: 'hunMarksman', name: 'Scharfschütze', description: '+10 % Angriff',
         effects: { statBonus: { attack: 0.1 } } },
     ],
@@ -318,8 +325,8 @@ export const TALENTS = {
     [
       { id: 'shaLongRage', name: 'Langer Rausch', description: 'Kampfrausch hält 1 Runde länger',
         effects: { abilityDuration: { bloodlust: 1 } } },
-      { id: 'shaEarthbound', name: 'Erdverbunden', description: 'Felsenpfahl hält 1 Runde länger',
-        effects: { abilityDuration: { stoneTotem: 1 } } },
+      { id: 'shaCleansingTotem', name: 'Reinigender Pfahl', description: 'Konter: Felsenpfahl löst Flüche der ganzen Gruppe, wird dafür bei Flüchen statt vor Gruppenschaden gesetzt',
+        effects: { abilityWhen: { stoneTotem: 'allyDebuffed' }, abilityCleanses: { stoneTotem: true } } },
     ],
     [
       { id: 'shaAncestor', name: 'Ahnengeist', description: 'Die ganze Gruppe macht +5 % Schaden',

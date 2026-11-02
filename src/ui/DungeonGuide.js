@@ -13,7 +13,9 @@ import { getDamageType } from '../data/damageTypes.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
 import { getRarity } from '../data/rarities.js';
 import { getItemTemplate, SLOT_NAMES, getArmorTypeName } from '../data/items.js';
-import { getSuitableClasses } from '../data/heroClasses.js';
+import { getSuitableClasses, getHeroClass } from '../data/heroClasses.js';
+import { getCounterIds, getCounter } from '../data/counters.js';
+import { findTalent } from '../data/talents.js';
 import { getEnemyLevelFactors } from '../data/scaling.js';
 import { Item } from '../entities/Item.js';
 import { createSpriteCanvas, createChestCanvas, createItemCanvas } from './PixelArt.js';
@@ -154,6 +156,10 @@ function createBossCard(boss, level, index, known) {
     }
     item.querySelector('.mechanic-what').textContent = '– ' + what.join(' · ');
     item.querySelector('.mechanic-tip').textContent = 'Tipp: ' + mechanic.hint;
+    // Wer kann kontern? z.B. "Unterbrechen: Schurke · per Talent: Jäger (Netzwurf), Magier (Bannendes Eis)"
+    for (const counterId of getCounterIds(mechanic)) {
+      item.appendChild(createCounterLine(getCounter(counterId)));
+    }
     list.appendChild(item);
   }
   return card;
@@ -216,4 +222,14 @@ function createBossItemRow(entry, bestRarity) {
     found.title = 'Noch nicht gefunden (fehlt im Sammelbuch)';
   }
   return row;
+}
+
+// Zeile "Unterbrechen: Schurke · per Talent: Jäger (Netzwurf), Magier (Bannendes Eis)"
+function createCounterLine(counter) {
+  const line = document.createElement('div');
+  line.className = 'mechanic-counter';
+  const fixed = counter.classIds.map((classId) => getHeroClass(classId).name).join(', ');
+  const byTalent = counter.talents.map((entry) => getHeroClass(entry.classId).name + ' (' + findTalent(entry.talentId).name + ')').join(', ');
+  line.textContent = counter.name + ': ' + fixed + ' · per Talent: ' + byTalent;
+  return line;
 }

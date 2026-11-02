@@ -71,7 +71,9 @@ function isConditionMet(battle, hero, condition, ability, abilityId) {
     // Nur wenn ein Tank-Buster angekündigt ist (bei Selbst-Skills: nur, wenn er mich trifft)
     case 'busterIncoming': {
       const busterComing = casting !== null && casting.type === 'tankBuster';
-      return busterComing && (ability.target !== 'self' || bossTarget === hero);
+      // Ziel kann ein Talent ändern (z.B. Gottesschild auf den, den der Schlag trifft)
+      const target = hero.orderSettings.abilityTarget[abilityId] || ability.target;
+      return busterComing && (target !== 'self' || bossTarget === hero);
     }
 
     case 'allyHurt':

@@ -13,7 +13,7 @@ import { Combatant } from '../src/systems/combat/Combatant.js';
 
 const LOOKS = { skin: '#f1c39b', hair: '#6b3f17' };
 const KNOWN_EFFECTS = ['damageDone', 'damageTaken', 'healingDone', 'manaCost', 'threat', 'dodge', 'targetPriority',
-  'abilityPower', 'abilityWhen', 'abilityTarget', 'statBonus', 'abilityDuration', 'cheatDeath', 'groupAura'];
+  'abilityPower', 'abilityWhen', 'abilityTarget', 'statBonus', 'abilityDuration', 'cheatDeath', 'groupAura', 'abilityInterrupts', 'abilityCleanses', 'abilityShield'];
 
 function heroOf(classId, level, rarityId = 'uncommon') {
   const hero = new Hero(1, 'T', classId, rarityId, [], LOOKS);
@@ -49,7 +49,7 @@ describe('Talent-Daten', () => {
           for (const key in talent.effects) {
             expect(KNOWN_EFFECTS, talent.id + ': ' + key).toContain(key);
           }
-          for (const field of ['abilityPower', 'abilityWhen', 'abilityTarget', 'abilityDuration']) {
+          for (const field of ['abilityPower', 'abilityWhen', 'abilityTarget', 'abilityDuration', 'abilityInterrupts', 'abilityCleanses', 'abilityShield']) {
             for (const abilityId in talent.effects[field] || {}) {
               expect(heroClass.abilities, talent.id).toContain(abilityId);
             }
