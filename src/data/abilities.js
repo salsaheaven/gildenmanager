@@ -115,7 +115,9 @@ export const ABILITIES = {
   silencingBlow: {
     name: 'Stummschlag', description: 'Unterbricht einen Boss-Zauber',
     type: 'interrupt', target: 'boss', scaling: 'attack', power: 0.5,
-    manaCost: 0, cooldown: 4, priority: 0, when: 'bossCastingInterruptible', fx: 'interrupt',
+    // Abklingzeit 3 = alle 4 Runden bereit: So schafft ein Schurke allein jeden unterbrechbaren Zauber
+    // (der schnellste kommt alle 4 Runden, siehe Test in data.test.js)
+    manaCost: 0, cooldown: 3, priority: 0, when: 'bossCastingInterruptible', fx: 'interrupt',
   },
   viperBite: {
     name: 'Natternbiss', description: 'Gift, das über mehrere Runden Schaden macht',

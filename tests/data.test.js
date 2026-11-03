@@ -10,6 +10,8 @@ import { Random } from '../src/core/Random.js';
 import { SPRITES, PALETTE } from '../src/data/sprites.js';
 import { BALANCING } from '../src/data/balancing.js';
 import { BOSSES, MECHANIC_TYPE_TEXTS } from '../src/data/enemies.js';
+import { RAID_BOSSES } from '../src/data/raidBosses.js';
+import { ABILITIES } from '../src/data/abilities.js';
 
 describe('Kisten-Daten', () => {
   for (const box of LOOT_BOXES) {
@@ -104,6 +106,23 @@ describe('Dungeonführer-Daten', () => {
     for (const boss of BOSSES) {
       for (const mechanic of boss.mechanics) {
         expect(MECHANIC_TYPE_TEXTS[mechanic.type], boss.id + ': ' + mechanic.type).toBeDefined();
+      }
+    }
+  });
+});
+
+describe('Unterbrechen', () => {
+  // Der Spezialist (Schurke) soll jeden unterbrechbaren Zauber allein schaffen.
+  // Eine Abklingzeit von n heißt: n Runden gesperrt, also alle n + 1 Runden bereit.
+  it('Stummschlag ist rechtzeitig wieder bereit für jeden unterbrechbaren Zauber', () => {
+    const period = ABILITIES.silencingBlow.cooldown + 1;
+    const allBosses = BOSSES.concat(RAID_BOSSES);
+    for (const boss of allBosses) {
+      const mechanics = boss.mechanics.concat(...(boss.phases || []).map((phase) => phase.mechanics));
+      for (const mechanic of mechanics) {
+        if (mechanic.interruptible) {
+          expect(period, boss.id + ': ' + mechanic.name).toBeLessThanOrEqual(mechanic.every);
+        }
       }
     }
   });
