@@ -829,85 +829,35 @@ body.overlay-open {
   border: 2px solid var(--border);
 }
 
-/* 5 Spalten nebeneinander, auf dem Handy untereinander (siehe unten) */
-.founding-slots {
+/* Die 5 Helden der Starttruppe: nebeneinander, auf dem Handy untereinander (siehe unten) */
+.founding-team {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
+  margin: 10px 0;
 }
 
-.founding-slot h3 {
-  margin: 0 0 6px;
-}
-
-.founding-options {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.founding-class {
+.founding-hero {
   --class-color: var(--border);
   display: flex;
   align-items: center;
   gap: 8px;
-  text-align: left;
   padding: 6px;
+  border: 2px solid var(--border);
   border-left: 4px solid var(--class-color);
 }
 
-.founding-class.chosen {
-  background: #2a2040;
-  border-color: var(--gold);
-  box-shadow: 0 0 0 2px var(--gold);
-}
-
-.founding-class-text {
+.founding-hero-text {
   display: flex;
   flex-direction: column;
   line-height: 1.1;
   min-width: 0;
 }
 
-.founding-class-armor {
-  color: #ffe9a8;
-  font-size: 15px;
-}
-
-.founding-class-skills {
-  color: var(--text-dim);
-  font-size: 14px;
-}
-
-/* Bleibt unten am Bildschirm stehen, damit "Los geht's" immer zu sehen ist */
 .founding-footer {
-  position: sticky;
-  bottom: -20px;
-  padding: 10px 0 14px;
-  background: #0c0914;
-  border-top: 2px solid var(--border);
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.founding-armor {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.founding-armor-chip {
-  padding: 2px 8px;
-  border: 2px solid #ff6b6b;
-  color: #ff6b6b;
-}
-
-.founding-armor-chip.present {
-  border-color: #1eff00;
-  color: #1eff00;
+  justify-content: flex-end;
+  padding: 10px 0;
 }
 
 .founding-start-button {
@@ -918,13 +868,13 @@ body.overlay-open {
 }
 
 @media (max-width: 1000px) {
-  .founding-slots {
+  .founding-team {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 700px) {
-  .founding-slots {
+  .founding-team {
     grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -30,8 +30,7 @@ import { UNLOCKS } from '../data/unlocks.js';
 import { getSet } from '../data/sets.js';
 import { getKnownCount, getKnowledgeTotal, getKnowledgeLevel, isEncounterKnown, getKnownDamageTypes, getHiddenMechanicNames } from '../systems/DungeonKnowledge.js';
 import { brew } from '../systems/AlchemySystem.js';
-import { checkStartTeam } from '../systems/StartTeam.js';
-import { START_TEAM_RULES } from '../data/startTeam.js';
+import { START_TEAM_RULES, START_TEAM_CLASSES } from '../data/startTeam.js';
 import { advanceRivals, recordPlayerClear, getLeaderboard } from '../systems/RivalSystem.js';
 import { getDayPlan } from '../systems/DayPlan.js';
 import { HERO_TASKS } from '../data/heroTasks.js';
@@ -541,17 +540,12 @@ export class Game {
     return true;
   }
 
-  // Heuert einen Bewerber an. Gibt einen Grund zurück, falls es nicht klappt:
-  // 'ok', 'noRoom' (Gilde voll), 'noGold' oder 'notFound'
-  // Gründet die Gilde: Name und Starttruppe (eine Klasse pro Platz, siehe data/startTeam.js).
-  // Geht nur einmal pro Spielstand. Gibt 'ok', 'alreadyFounded' oder den Grund aus checkStartTeam zurück.
-  foundGuild(guildName, classIds) {
+  // Gründet die Gilde: Name und die feste Starttruppe (data/startTeam.js).
+  // classIds = freiwillig andere Klassen (nur für Tests).
+  // Geht nur einmal pro Spielstand. Gibt 'ok' oder 'alreadyFounded' zurück.
+  foundGuild(guildName, classIds = START_TEAM_CLASSES) {
     if (this.guild.founded) {
       return 'alreadyFounded';
-    }
-    const check = checkStartTeam(classIds);
-    if (check !== 'ok') {
-      return check;
     }
     const cleanName = (guildName || '').trim().slice(0, START_TEAM_RULES.maxGuildNameLength);
     this.guild.name = cleanName || START_TEAM_RULES.defaultGuildName;

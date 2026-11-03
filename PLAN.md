@@ -143,6 +143,7 @@ In kleinen, jeweils online testbaren Schritten:
 - Fenster von unten: „✕ Schließen“, Zurück-Geste schließt es, Tippflächen mindestens 44 px
 - Markierung „neu“ in der Gruppenwahl gab es schon
 - ✅ **Auto-Gruppe** (2026-11-03): Knopf „Auto-Gruppe · Einschätzung“ in der Gruppenwahl füllt leere Plätze (Tank/Heiler, dann Konter für bekannte Mechaniken, dann die Stärksten), nur ganz freie Helden (`systems/AutoGroup.js`, `getRiskSummary` in `RiskBadge.js`)
+- ✅ **Feste Starttruppe** (2026-11-03): Klassenwahl beim Gründen entfernt, alle starten mit Krieger, Priester, Runenwirker, Magier, Schurke (schafft die Bärenhöhle ohne Ausrüstung meist, ein Test prüft ≥ 80 %); `systems/StartTeam.js` entfernt
 Offen aus dem Bericht (größere Umbauten): Risiko live mit Konter-Symbolen, ein Dungeon = eine Karte, vorbelegte Vorräte, Ausrüstung vom Vorgänger übernehmen, Tagesabschluss mit Kernzahlen zuerst, Zerlegen im Beute-Ergebnis.
 
 **M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.

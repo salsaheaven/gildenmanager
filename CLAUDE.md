@@ -47,7 +47,6 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                DayPlan (welcher Held hat heute welche Aufgabe), HeroTaskSystem (Training, Kräuter/Rohstoffe sammeln, Aufträge, Erkunden, Sold bei endDay Held für Held, unzufrieden ohne Sold),
                RivalSystem (KI-Gilden kommen voran, Neuigkeiten-Ticker, Server-First, Rangliste),
                BuildingSystem (Bau starten, Bautag bei endDay, Unterhalt: alles oder nichts),
-               StartTeam (prüft die Starttruppe: Rolle pro Platz, alle Rüstungsarten),
                NewGear (Markierung „neue Ausrüstung“: passende Items, die in der Liste des Platzes noch nicht gesehen wurden),
                DailyTodo („Was gibt es heute zu tun?“: Einträge mit Anzahl und Ziel-Bildschirm, neu Freigeschaltetes zuerst),
                Unlocks (schrittweises Freischalten = Tutorial: Bedingungen prüfen, Freigeschaltetes und gesehene Hinweise merken),
@@ -72,7 +71,7 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),
                heroTasks (Aufgaben pro Tag: Dungeon, Kuriert sich aus, Ruht sich aus, Training, Kräuter sammeln, Rohstoffe sammeln, Aufträge erledigen, Erkunden; Zahlen in TASK_RULES),
                buildings (6 Gebäude à 3 Stufen: Kosten, Bauzeit, Unterhalt, Wirkungen),
-               startTeam (Plätze der Starttruppe, Pflicht-Rüstungsarten, Standard-Gildenname),
+               startTeam (feste Starttruppe aus 5 Klassen, Pflicht-Rüstungsarten, Standard-Gildenname),
                groupRules (5 Positionen Tank/Heiler/Nahkampf/Fernkampf/Unterstützer, was eine vollständige Gruppe braucht, Namen der stehenden Gruppen),
                riskLevels (Risiko-Einschätzung in Worten: Grenzen, Wörter, Farben; grobe Stufen bei teilweise erkundeten Dungeons),
                damageTypes (Schadensarten mit Farbe, Obergrenze für Resistenzen),
@@ -105,7 +104,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
                SupplyPicker = Vorrats-Plätze einer Gruppe (Dungeon-Bildschirm + Tagesplan).
                NewsLine = eine Zeile aus dem Neuigkeiten-Ticker (Tagesplan + Tagesabschluss).
-               FoundingScreen = Startbildschirm „Gründe deine Gilde“ (Name + 5 Klassen, alle Rüstungsarten), nur bei neuem Spielstand.
+               FoundingScreen = Startbildschirm „Gründe deine Gilde“ (Gildenname, Vorschau der festen Starttruppe), nur bei neuem Spielstand.
                EndDayCheck = Nachfrage bei „Tag beenden“, wenn Helden ohne Aufgabe oder Gruppen unvollständig sind (blockiert nie).
                NextTodoBar = Leiste „Noch X offen · Weiter: …“ unter den Unterreitern (nicht auf dem Tagesplan).
                StandingGroupControls = Anzeige und Knöpfe stehender Gruppen (Ersatz einsetzen, Heute aussetzen, Wieder einplanen, Auflösen).
