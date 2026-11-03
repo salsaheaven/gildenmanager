@@ -10,6 +10,7 @@
 
 import { ABILITIES } from '../../data/abilities.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
+import { getHeroClass } from '../../data/heroClasses.js';
 
 // Beim Rückzug machen die Helden keinen Schaden mehr, sie heilen und schützen sich nur
 const RETREAT_SKILL_TYPES = ['heal', 'shield', 'buff', 'mana', 'cleanse', 'hot', 'revive', 'resetCooldowns'];
@@ -43,7 +44,7 @@ function isConditionMet(battle, hero, condition, ability, abilityId) {
   const casting = battle.getCasting();
   const enemiesThere = battle.getLivingEnemies().length > 0 && !battle.isDummyFight();
   const bossTarget = battle.getBossTarget();
-  const lowestAlly = battle.getLowestAlly();
+  const lowestAlly = battle.getLowestAlly(hero);
   const healThreshold = COMBAT_RULES.healThreshold;
 
   switch (condition) {
@@ -58,8 +59,13 @@ function isConditionMet(battle, hero, condition, ability, abilityId) {
     case 'never':
       return false;
 
-    // Die Gegner greifen gerade jemand anderen an
+    // Die Gegner greifen gerade jemand anderen an.
+    // Raid-Boss mit Tank-Stapeln: Hält schon ein anderer Tank den Boss, wird nicht gespottet,
+    // denn den Wechsel übernimmt der automatische Tankwechsel (siehe EnemyAI.js).
     case 'notTanking':
+      if (isOtherTankHoldingRaidBoss(battle, hero, bossTarget)) {
+        return false;
+      }
       return enemiesThere && bossTarget !== hero;
 
     // Ein Tank-Buster auf mich wird vorbereitet, oder ich habe wenig Leben
@@ -96,15 +102,15 @@ function isConditionMet(battle, hero, condition, ability, abilityId) {
 
     // Ein Held ist gefallen (für Wiederbelebung)
     case 'allyFallen':
-      return battle.getFallenAlly() !== null;
+      return battle.getFallenAlly(hero) !== null;
 
     // Mindestens ein Held hat diesen Buff noch nicht (z.B. Lied der Klingen, Schwur der Standhaftigkeit)
     case 'groupBuffMissing':
-      return enemiesThere && battle.getLivingHeroes().some((ally) => !ally.hasBuff(abilityId));
+      return enemiesThere && battle.getAlliedHeroes(hero).some((ally) => !ally.hasBuff(abilityId));
 
     // Wie groupBuffMissing, aber nur im Bosskampf (Kampfrausch hebt man sich für den Boss auf)
     case 'bossFightBuffMissing':
-      return enemiesThere && battle.boss !== null && battle.getLivingHeroes().some((ally) => !ally.hasBuff(abilityId));
+      return enemiesThere && battle.boss !== null && battle.getAlliedHeroes(hero).some((ally) => !ally.hasBuff(abilityId));
 
     // Ein anderer Held wartet auf wichtige Skills (mindestens 3 Runden Abklingzeit insgesamt)
     case 'allyOnCooldown': {
@@ -149,16 +155,16 @@ function isConditionMet(battle, hero, condition, ability, abilityId) {
 
     // Gruppenschaden wird vorbereitet, oder die Gruppe ist schon angeschlagen
     case 'groupThreatened': {
-      const groupHitComing = casting !== null && (casting.type === 'groupCast' || casting.type === 'frontWave');
-      return groupHitComing || battle.getAverageHeroHpPercent() < healThreshold;
+      const groupHitComing = isGroupHitComing(battle, hero, casting);
+      return groupHitComing || battle.getAverageHeroHpPercent(hero) < healThreshold;
     }
 
     // Nur wenn Gruppenschaden angekündigt ist
     case 'groupHitIncoming':
-      return casting !== null && (casting.type === 'groupCast' || casting.type === 'frontWave');
+      return isGroupHitComing(battle, hero, casting);
 
     case 'allyDebuffed':
-      return battle.getLivingHeroes().some((ally) => ally.hasDebuff());
+      return battle.getAlliedHeroes(hero).some((ally) => ally.hasDebuff());
 
     case 'multipleEnemies':
       return battle.getLivingEnemies().length >= 2;
@@ -185,4 +191,25 @@ function isConditionMet(battle, hero, condition, ability, abilityId) {
     default:
       throw new Error('Unbekannte Skill-Bedingung: ' + condition);
   }
+}
+
+// Ist Schaden an der Gruppe dieses Helden angekündigt? Im Raid zählt ein Gruppenschlag nur,
+// wenn er die eigene Gruppe treffen wird.
+function isGroupHitComing(battle, hero, casting) {
+  if (casting === null) {
+    return false;
+  }
+  if (casting.type === 'groupStrike') {
+    return battle.boss.strikeGroupIndex === hero.groupIndex;
+  }
+  return casting.type === 'groupCast' || casting.type === 'frontWave';
+}
+
+// Hält ein anderer Tank gerade einen Raid-Boss mit Tank-Stapeln?
+function isOtherTankHoldingRaidBoss(battle, hero, bossTarget) {
+  const boss = battle.boss;
+  if (!boss || !boss.alive || !boss.bossData.tankStacks || !bossTarget || bossTarget === hero) {
+    return false;
+  }
+  return getHeroClass(bossTarget.classId).role === 'tank';
 }

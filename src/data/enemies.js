@@ -16,6 +16,7 @@
 //                   'frontWave'  (Schaden an der vorderen Reihe)
 //                   'summon'     (ruft Diener)
 //                   'curse'      (Fluch: Schaden über Zeit auf einen zufälligen Helden)
+//                   'groupStrike' (nur Raid: trifft eine ganze Raid-Gruppe, siehe raidBosses.js)
 //   name          = Anzeigename
 //   firstAt       = in welcher Runde zum ersten Mal
 //   every         = danach alle so viele Runden
@@ -29,7 +30,10 @@
 //   fx            = Animation in der Kampfszene
 //
 // attackFx = Animation des normalen Angriffs (Boss und Diener)
+// Raid-Bosse stehen in raidBosses.js.
 // ============================================================
+
+import { RAID_BOSSES } from './raidBosses.js';
 
 export const BOSSES = [
   {
@@ -464,10 +468,12 @@ export const MECHANIC_TYPE_TEXTS = {
   frontWave: 'Trifft die vordere Reihe',
   summon: 'Ruft Diener herbei',
   curse: 'Fluch: Schaden über Zeit auf einen Helden',
+  groupStrike: 'Trifft eine ganze Raid-Gruppe',
 };
 
+// Sucht einen Boss, auch unter den Raid-Bossen (siehe raidBosses.js)
 export function getBoss(bossId) {
-  for (const boss of BOSSES) {
+  for (const boss of BOSSES.concat(RAID_BOSSES)) {
     if (boss.id === bossId) {
       return boss;
     }

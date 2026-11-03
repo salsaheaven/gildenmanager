@@ -59,18 +59,28 @@ export function combineOrderEffects(effectsList) {
 
 // Zu Beginn eines Kampfes: Auren (Talente wie "Kriegsherr") wirken auf alle Helden der Gruppe.
 // Dieselbe Aura (gleiche Talent-id) zählt nur einmal, auch wenn zwei Helden sie haben.
+// Im Raid wirkt eine Aura nur in der eigenen Gruppe (groupIndex, siehe Combatant.js).
 export function applyGroupAuras(heroCombatants) {
-  const seen = {};
+  const groupIndexes = [];
   for (const hero of heroCombatants) {
-    for (const aura of hero.orderSettings.groupAuras) {
-      seen[aura.id] = aura;
+    if (!groupIndexes.includes(hero.groupIndex)) {
+      groupIndexes.push(hero.groupIndex);
     }
   }
-  for (const id in seen) {
-    const aura = seen[id];
-    for (const hero of heroCombatants) {
-      hero.orderSettings.damageDone += aura.damageDone || 0;
-      hero.orderSettings.damageTaken += aura.damageTaken || 0;
+  for (const groupIndex of groupIndexes) {
+    const group = heroCombatants.filter((hero) => hero.groupIndex === groupIndex);
+    const seen = {};
+    for (const hero of group) {
+      for (const aura of hero.orderSettings.groupAuras) {
+        seen[aura.id] = aura;
+      }
+    }
+    for (const id in seen) {
+      const aura = seen[id];
+      for (const hero of group) {
+        hero.orderSettings.damageDone += aura.damageDone || 0;
+        hero.orderSettings.damageTaken += aura.damageTaken || 0;
+      }
     }
   }
 }

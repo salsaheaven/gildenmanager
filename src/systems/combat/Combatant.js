@@ -16,7 +16,8 @@ export class Combatant {
   //   bossData (nur Bosse), isMinion + minionId (nur Diener),
   //   orderSettings (nur Helden: Anweisungen, siehe Hero.getOrderSettings),
   //   passive (nur Helden: dauerhafte Fähigkeit der Klasse, siehe heroClasses.js),
-  //   isPet + ownerId + petSprite (nur Begleiter, z.B. der Wolf des Jägers)
+  //   isPet + ownerId + petSprite (nur Begleiter, z.B. der Wolf des Jägers),
+  //   groupIndex (Helden und Begleiter: in welcher Gruppe eines Raids, 0 bis 3; im Dungeon immer 0)
   // }
   constructor(options) {
     this.id = options.id;
@@ -32,6 +33,8 @@ export class Combatant {
     this.isPet = options.isPet || false;
     this.ownerId = options.ownerId || null;
     this.petSprite = options.petSprite || null;   // { sprite, colors } für die Kampfszene
+    // Raid: Gruppe 0 bis 3. Heilung und Buffs wirken nur in der eigenen Gruppe (im Dungeon sind alle in Gruppe 0)
+    this.groupIndex = options.groupIndex || 0;
 
     // Dauerhafte Fähigkeiten der Klasse (z.B. Ausweichen beim Mönch, Wundenzorn beim Barbar)
     const passive = options.passive || {};
@@ -63,7 +66,13 @@ export class Combatant {
     this.effects = [];          // laufende Effekte (Buffs, Gift, Flüche, Betäubung)
     this.casting = null;        // Boss: Mechanik, die gerade vorbereitet wird
     this.enraged = false;       // Boss: rast bereits?
+    this.phaseIndex = 0;        // Raid-Boss: in welcher Phase (0 = erste Phase, siehe phases in data/raidBosses.js)
+    this.phaseStartRound = 0;   // Raid-Boss: in welcher Runde die aktuelle Phase begann
+    this.strikeGroupIndex = null; // Raid-Boss: welche Gruppe der angekündigte Gruppenschlag treffen wird
+    this.warnedNoSwapTank = false; // Raid-Boss: schon gewarnt, dass kein zweiter Tank da ist?
     this.warnedLowMana = false; // Held: wurde schon vor leerem Mana gewarnt?
+    this.tankStacks = 0;        // Raid-Tankwechsel: Stapel vom Boss (jeder Stapel erhöht den erlittenen Schaden)
+    this.tankStackValue = 0;    // so viel mehr Schaden pro Stapel (kommt vom Boss, siehe tankStacks in enemies.js)
 
     // Statistik für die Auswertung (wie ein "Schadensmesser" im MMO)
     this.damageDone = 0;
@@ -100,6 +109,7 @@ export class Combatant {
       minionId: this.minionId,
       isPet: this.isPet,
       petSprite: this.petSprite,
+      groupIndex: this.groupIndex,
       manaCostFactor: 1 + this.orderSettings.manaCost, // Anweisungen ändern die Mana-Kosten (Skill-Fenster)
     };
   }
@@ -160,6 +170,8 @@ export class Combatant {
         factor = factor * (1 + effect.value);
       }
     }
+    // Raid-Tankwechsel: jeder Stapel des Bosses erhöht den erlittenen Schaden
+    factor = factor * (1 + this.tankStacks * this.tankStackValue);
     return factor;
   }
 

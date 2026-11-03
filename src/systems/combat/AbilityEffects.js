@@ -85,20 +85,20 @@ function getTargets(battle, caster, abilityId, ability) {
       targets = [caster];
       break;
     case 'lowestAlly':
-      targets = [battle.getLowestAlly()];
+      targets = [battle.getLowestAlly(caster)];
       break;
     case 'bossTarget':
       targets = [battle.getBossTarget()];
       break;
     case 'allAllies':
-      targets = battle.getLivingHeroes();
+      targets = battle.getAlliedHeroes(caster);
       break;
     case 'debuffedAlly':
-      targets = [battle.getLivingHeroes().find((hero) => hero.hasDebuff())];
+      targets = [battle.getAlliedHeroes(caster).find((hero) => hero.hasDebuff())];
       break;
     case 'fallenAlly':
       // Das einzige Ziel, das tot sein darf (Wiederbelebung)
-      return [battle.getFallenAlly()].filter((target) => target !== null);
+      return [battle.getFallenAlly(caster)].filter((target) => target !== null);
     case 'bestDamageAlly':
       targets = [battle.getBestDamageAlly(caster)];
       break;

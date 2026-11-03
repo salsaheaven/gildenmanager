@@ -4,9 +4,14 @@
 // Diener und Trash: greifen je nach "targeting" den mit der meisten Aggro oder einen zufälligen Helden an.
 //   Hält ein Begleiter (Wolf des Jägers) sie fest, greifen sie nur ihn an.
 // Normalen Angriffen kann man ausweichen (Mönch), großen Schlägen und Zaubern nicht.
+// Raid-Bosse (data/raidBosses.js) können zusätzlich:
+//   - Phasen: unter einer Lebensgrenze wechseln sie in die nächste Phase mit anderen Mechaniken
+//   - Tank-Stapel: jeder normale Angriff macht den Tank anfälliger; ab einer Grenze übernimmt ein anderer Tank
+//   - Gruppenschlag ('groupStrike'): trifft alle Helden einer einzigen Raid-Gruppe
 // ============================================================
 
 import { COMBAT_RULES } from '../../data/combatRules.js';
+import { getHeroClass } from '../../data/heroClasses.js';
 import { MINIONS } from '../../data/enemies.js';
 import { getDamageType } from '../../data/damageTypes.js';
 
@@ -59,9 +64,15 @@ function takeBossTurn(battle, boss) {
       { labels: [{ targetId: boss.id, text: 'RASEREI!' }] });
   }
 
-  // Ist eine Mechanik fällig?
-  for (const mechanic of bossData.mechanics) {
-    if (isMechanicDue(mechanic, battle.round)) {
+  // Raid-Boss: Phasenwechsel?
+  checkPhaseChange(battle, boss);
+
+  // Ist eine Mechanik fällig? (gezählt wird ab dem Beginn der aktuellen Phase)
+  for (const mechanic of getActiveMechanics(boss)) {
+    if (isMechanicDue(mechanic, battle.round - boss.phaseStartRound)) {
+      if (mechanic.type === 'groupStrike') {
+        boss.strikeGroupIndex = battle.random.pick(battle.getLivingGroupIndexes());
+      }
       if (mechanic.castTime > 0) {
         boss.casting = mechanic;
         battle.addLog(boss.name + ' bereitet ' + mechanic.name + ' vor!', 'warning',
@@ -77,6 +88,88 @@ function takeBossTurn(battle, boss) {
   battle.logAction(boss, null, bossData.attackFx, [target], false);
   const source = { key: 'attack:' + bossData.id, name: 'Angriffe von ' + boss.name, type: 'attack' };
   enemyHits(battle, boss, target, 'schlägt zu', 1.0, bossData.attackDamageType || 'physical', source, true);
+  if (bossData.tankStacks) {
+    addTankStack(battle, boss, target);
+  }
+}
+
+// ---------- Raid: Phasen ----------
+
+// Die Mechaniken der aktuellen Phase (Phase 0 = die normalen mechanics des Bosses)
+function getActiveMechanics(boss) {
+  if (boss.phaseIndex === 0) {
+    return boss.bossData.mechanics;
+  }
+  return boss.bossData.phases[boss.phaseIndex - 1].mechanics;
+}
+
+// Fällt das Leben des Bosses unter die Grenze der nächsten Phase, beginnt sie jetzt
+function checkPhaseChange(battle, boss) {
+  const phases = boss.bossData.phases;
+  if (!phases || boss.phaseIndex >= phases.length) {
+    return;
+  }
+  const nextPhase = phases[boss.phaseIndex];
+  if (boss.getHpPercent() >= nextPhase.belowHpPercent) {
+    return;
+  }
+  boss.phaseIndex++;
+  boss.phaseStartRound = battle.round;
+  battle.addLog(boss.name + ': ' + nextPhase.name + '! ' + nextPhase.text, 'warning',
+    { labels: [{ targetId: boss.id, text: nextPhase.name }] });
+}
+
+// ---------- Raid: Tank-Stapel und Tankwechsel ----------
+
+// Der getroffene Held bekommt einen Stapel (er nimmt mehr Schaden), alle anderen verlieren einen.
+// Hat er zu viele Stapel, übernimmt automatisch ein anderer lebender Tank den Boss.
+function addTankStack(battle, boss, target) {
+  const rules = boss.bossData.tankStacks;
+  for (const hero of battle.getLivingHeroes()) {
+    if (hero === target) {
+      hero.tankStacks++;
+      hero.tankStackValue = rules.damageTakenPerStack;
+    } else if (hero.tankStacks > 0) {
+      hero.tankStacks--;
+    }
+  }
+  if (!target || !target.alive || target.tankStacks < rules.swapAt) {
+    return;
+  }
+  const otherTank = findSwapTank(battle, target);
+  if (!otherTank) {
+    if (!boss.warnedNoSwapTank) {
+      boss.warnedNoSwapTank = true;
+      battle.addLog('Kein zweiter Tank für den Tankwechsel! ' + target.name + ' muss weiter ' + rules.name + ' aushalten.', 'warning',
+        { labels: [{ targetId: target.id, text: rules.name + ' ×' + target.tankStacks }] });
+    }
+    return;
+  }
+  // Der andere Tank spottet: Er hat jetzt mehr Bedrohung als der bisherige Tank
+  otherTank.threat = target.threat * COMBAT_RULES.tauntThreatFactor + 10;
+  if (battle.forcedTarget && battle.forcedTarget.combatant === target) {
+    battle.forcedTarget = null;
+  }
+  battle.addLog('Tankwechsel: ' + otherTank.name + ' übernimmt ' + boss.name + ' von ' + target.name +
+    ' (' + rules.name + ' ×' + target.tankStacks + ').', 'info',
+    { labels: [{ targetId: otherTank.id, text: 'Tankwechsel!' }] });
+}
+
+// Ein anderer lebender Tank, am liebsten der mit den wenigsten Stapeln (null, wenn es keinen gibt)
+function findSwapTank(battle, currentTank) {
+  let best = null;
+  for (const hero of battle.getLivingHeroes()) {
+    if (hero === currentTank || getHeroClass(hero.classId).role !== 'tank') {
+      continue;
+    }
+    if (hero.tankStacks >= currentTank.tankStacks) {
+      continue;
+    }
+    if (best === null || hero.tankStacks < best.tankStacks) {
+      best = hero;
+    }
+  }
+  return best;
 }
 
 function isMechanicDue(mechanic, round) {
@@ -112,6 +205,21 @@ function resolveMechanic(battle, boss, mechanic) {
         enemyHits(battle, boss, hero, 'trifft', mechanic.power, mechanic.damageType || 'physical', source);
       }
       break;
+    case 'groupStrike': {
+      // Die Gruppe wurde beim Ankündigen gewählt; ist sie inzwischen gefallen, trifft es eine andere
+      const groupIndexes = battle.getLivingGroupIndexes();
+      if (!groupIndexes.includes(boss.strikeGroupIndex)) {
+        boss.strikeGroupIndex = battle.random.pick(groupIndexes);
+      }
+      const group = battle.getLivingHeroes().filter((hero) => hero.groupIndex === boss.strikeGroupIndex);
+      battle.logAction(boss, mechanic.name, mechanic.fx, group, true);
+      battle.addLog(boss.name + ': ' + mechanic.name + ' trifft Gruppe ' + (boss.strikeGroupIndex + 1) + '!', 'mechanic',
+        { cast: { state: 'end' }, labels: missedLabels });
+      for (const hero of group) {
+        enemyHits(battle, boss, hero, 'trifft', mechanic.power, mechanic.damageType || 'physical', source);
+      }
+      break;
+    }
     case 'frontWave': {
       const frontRow = battle.getLivingHeroes().filter((hero) => hero.row === 'front');
       battle.logAction(boss, mechanic.name, mechanic.fx, frontRow, true);

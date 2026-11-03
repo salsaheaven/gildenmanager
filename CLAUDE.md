@@ -57,15 +57,15 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                CraftingSystem (Zerlegen → Staub/Kristalle/Rohstoffe, Verbessern +1 bis +10 mit Fehlschlag ab +6),
                ForgeSystem (Schmieden: weißes Item nach Vorlage; Umschmieden: andere Rüstungsart), AlchemySystem (Brauen: Kräuter → Waren), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
-               simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug),
-               BattleTimeline (wann passiert was → Dauer eines Runs, mit Zeitraffer für Trash und ruhige Runden), Battle (Zustand + Zielwahl),
-               Combatant (ein Kämpfer), HeroAI (welcher Skill?), EnemyAI (Boss-Mechaniken),
+               simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug; simulateRaid = Raid-Bosskampf mit 4 Gruppen à 5),
+               BattleTimeline (wann passiert was → Dauer eines Runs, mit Zeitraffer für Trash und ruhige Runden), Battle (Zustand + Zielwahl; Verbündete = nur die eigene Gruppe, groupIndex),
+               Combatant (ein Kämpfer), HeroAI (welcher Skill?), EnemyAI (Boss-Mechaniken; Raid: Phasen, Tank-Stapel mit automatischem Tankwechsel, Gruppenschlag),
                AbilityEffects (was ein Skill bewirkt), OrderSettings (gewählte Anweisungen + Talente → ein Paket mit Wirkungen für den Kampf, Gruppen-Auren),
                CauseTracker (woher der Schaden an den Helden kommt), SupplyEffects (Wirkung der mitgenommenen Vorräte im Run), DefeatAnalysis („Woran es lag“: Top 3 Ursachen + Tipp), ChanceEstimator (200 Kämpfe → Siegchance; estimateRunChances = ganzer Dungeon),
-               TestGroup (Testgruppe fürs Labor, Klassen frei wählbar)
+               TestGroup (Testgruppe fürs Labor, Klassen frei wählbar; createTestRaid = 4 Gruppen)
 src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes, balancing, sprites (Pixel-Art als Text),
                heroClasses (15 Klassen inkl. Rüstungsart, nützliche Werte, Dauer-Fähigkeit `passive` und Begleiter `pet`), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
-               enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
+               enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), raidBosses (Raid-Bosse: Phasen, Tank-Stapel, Gruppenschlag), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
                dungeons (7 Level-Dungeons + 3 Set-Dungeons: Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),

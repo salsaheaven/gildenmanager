@@ -12,16 +12,34 @@ export const STANDARD_TEST_CLASSES = ['warrior', 'priest', 'runeweaver', 'mage',
 
 const TEST_LOOKS = { skin: '#f1c39b', hair: '#6b3f17' };
 
+// Der Standard-Raid: 4 Gruppen à 5, jede mit eigenem Heiler, dazu 2 Tanks (in Gruppe 1 und 2)
+export const STANDARD_TEST_RAID = [
+  ['warrior', 'priest', 'mage', 'rogue', 'hunter'],
+  ['paladin', 'druid', 'warlock', 'samurai', 'bard'],
+  ['barbarian', 'runeweaver', 'mage', 'hunter', 'shaman'],
+  ['rogue', 'priest', 'warlock', 'samurai', 'chronomancer'],
+];
+
 // classIds = welche Klassen mitkämpfen (Standard: die fünf Start-Klassen). Doppelte sind erlaubt.
-export function createTestGroup(level = 1, rarityId = 'uncommon', classIds = null) {
+// idOffset / nameSuffix = für Raids, damit Helden verschiedener Gruppen unterscheidbar sind
+export function createTestGroup(level = 1, rarityId = 'uncommon', classIds = null, idOffset = 0, nameSuffix = '') {
   const chosen = classIds || STANDARD_TEST_CLASSES;
   const group = [];
   for (let i = 0; i < chosen.length; i++) {
     const classId = chosen[i];
     // Negative ids, damit sie nie mit echten Helden verwechselt werden
-    const hero = new Hero(-(i + 1), 'Test-' + getHeroClass(classId).name, classId, rarityId, [], TEST_LOOKS);
+    const name = 'Test-' + getHeroClass(classId).name + nameSuffix;
+    const hero = new Hero(-(idOffset + i + 1), name, classId, rarityId, [], TEST_LOOKS);
     hero.level = level;
     group.push(hero);
   }
   return group;
+}
+
+// Ein Test-Raid: eine Liste von Gruppen (Standard: STANDARD_TEST_RAID).
+// Die Helden heißen z.B. "Test-Magier 3" (3 = Gruppe 3) und haben alle verschiedene ids.
+export function createTestRaid(level = 1, rarityId = 'uncommon', groupClassIds = null) {
+  const chosen = groupClassIds || STANDARD_TEST_RAID;
+  return chosen.map((classIds, groupIndex) =>
+    createTestGroup(level, rarityId, classIds, groupIndex * 10, ' ' + (groupIndex + 1)));
 }

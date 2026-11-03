@@ -155,11 +155,37 @@ export class Battle {
     return this.boss && this.boss.alive ? this.boss : null;
   }
 
-  // Der Held (oder Begleiter) mit dem prozentual wenigsten Leben.
+  // ---------- Verbündete (im Raid nur die eigene Gruppe) ----------
+
+  // Lebende Helden in der Gruppe dieses Helden. Ohne caster: alle lebenden Helden.
+  // Im Dungeon sind alle in Gruppe 0, im Raid wirken Heilung und Buffs nur in der eigenen Gruppe.
+  getAlliedHeroes(caster = null) {
+    const living = this.getLivingHeroes();
+    return caster ? living.filter((hero) => hero.groupIndex === caster.groupIndex) : living;
+  }
+
+  // Wie getAlliedHeroes, aber mit den Begleitern der Gruppe (Heiler kümmern sich auch um sie)
+  getAllies(caster = null) {
+    const pets = this.getLivingPets();
+    return this.getAlliedHeroes(caster).concat(caster ? pets.filter((pet) => pet.groupIndex === caster.groupIndex) : pets);
+  }
+
+  // Die Gruppennummern, in denen noch jemand lebt (im Dungeon nur [0])
+  getLivingGroupIndexes() {
+    const indexes = [];
+    for (const hero of this.getLivingHeroes()) {
+      if (!indexes.includes(hero.groupIndex)) {
+        indexes.push(hero.groupIndex);
+      }
+    }
+    return indexes;
+  }
+
+  // Der Held (oder Begleiter) mit dem prozentual wenigsten Leben, in der Gruppe von caster.
   // Begleiter zählen mit: Heiler kümmern sich auch um sie.
-  getLowestAlly() {
+  getLowestAlly(caster = null) {
     let lowest = null;
-    for (const hero of this.getLivingHeroes().concat(this.getLivingPets())) {
+    for (const hero of this.getAllies(caster)) {
       if (lowest === null || hero.getHpPercent() < lowest.getHpPercent()) {
         lowest = hero;
       }
@@ -198,21 +224,21 @@ export class Battle {
     return strongest;
   }
 
-  // Der erste gefallene Held (für Ruf der Wurzeln). Begleiter werden nicht wiederbelebt.
-  getFallenAlly() {
-    return this.heroes.find((hero) => !hero.alive) || null;
+  // Der erste gefallene Held der Gruppe (für Ruf der Wurzeln). Begleiter werden nicht wiederbelebt.
+  getFallenAlly(caster = null) {
+    return this.heroes.find((hero) => !hero.alive && (!caster || hero.groupIndex === caster.groupIndex)) || null;
   }
 
   // Der Held mit dem höchsten Angriff bzw. der höchsten Magie unter den Schadensmachern, außer mir selbst
   // Ein anderer lebender Held mit dieser Rolle ('healer' oder 'tank'), z.B. für "Beschleunigt Heiler"
   getAllyWithRole(caster, role) {
-    return this.getLivingHeroes().find((hero) => hero !== caster && getHeroClass(hero.classId).role === role) || null;
+    return this.getAlliedHeroes(caster).find((hero) => hero !== caster && getHeroClass(hero.classId).role === role) || null;
   }
 
   getBestDamageAlly(caster) {
     let best = null;
     let bestValue = 0;
-    for (const hero of this.getLivingHeroes()) {
+    for (const hero of this.getAlliedHeroes(caster)) {
       if (hero === caster || getHeroClass(hero.classId).role !== 'damage') {
         continue;
       }
@@ -228,7 +254,7 @@ export class Battle {
   // Der Held, dessen Skills insgesamt am längsten abklingen, außer mir selbst
   getAllyWithCooldowns(caster) {
     let best = null;
-    for (const hero of this.getLivingHeroes()) {
+    for (const hero of this.getAlliedHeroes(caster)) {
       if (hero === caster || hero.getTotalCooldown() === 0) {
         continue;
       }
@@ -239,8 +265,9 @@ export class Battle {
     return best;
   }
 
-  getAverageHeroHpPercent() {
-    const living = this.getLivingHeroes();
+  // Durchschnittliches Leben der Gruppe von caster (ohne caster: aller Helden)
+  getAverageHeroHpPercent(caster = null) {
+    const living = this.getAlliedHeroes(caster);
     if (living.length === 0) {
       return 0;
     }
@@ -271,6 +298,7 @@ export class Battle {
       isPet: true,
       ownerId: owner.id,
       petSprite: { sprite: petData.sprite, colors: petData.colors || {} },
+      groupIndex: owner.groupIndex, // der Begleiter gehört zur Gruppe seines Helden
     });
     pet.defenseConstant = owner.defenseConstant;
     this.pets.push(pet);

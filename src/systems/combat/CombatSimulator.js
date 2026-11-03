@@ -9,8 +9,9 @@
 // Ein Kampf endet, wenn die Gegner besiegt sind, alle Helden gefallen sind,
 // der Rückzug geschafft ist oder die maximale Rundenzahl erreicht ist.
 //
-// Drei Einstiege:
+// Einstiege:
 //   simulateBattle   = ein einzelner Bosskampf mit frischen Helden (Kampf-Labor)
+//   simulateRaid     = ein Raid-Bosskampf: 4 Gruppen à 5 Helden gegen einen Raid-Boss
 //   simulateRun      = ein ganzer Dungeon-Run: Begegnungen nacheinander, Leben und Mana gehen mit
 //   runEncounter     = eine Begegnung mit bereits vorhandenen Kämpfern (wird von beiden benutzt)
 //
@@ -36,7 +37,8 @@ import { combineSupplyEffects, applySupplyEffects, applyManaAtStart, applyRestHe
 
 // Macht aus einem Helden (entities/Hero.js) einen Kämpfer
 // Talente mit Werte-Bonus (z.B. +20 % Leben) wirken hier auf die Werte.
-export function createHeroCombatant(hero) {
+// groupIndex = Nummer der Raid-Gruppe (0 bis 3), im Dungeon immer 0
+export function createHeroCombatant(hero, groupIndex = 0) {
   const heroClass = hero.getClass();
   const settings = hero.getOrderSettings();
   const stats = { ...hero.getStats() };
@@ -56,6 +58,7 @@ export function createHeroCombatant(hero) {
     basicAttack: heroClass.basicAttack,
     orderSettings: settings,
     passive: heroClass.passive,
+    groupIndex: groupIndex,
   });
 }
 
@@ -76,6 +79,22 @@ export function createBossCombatant(bossData, level = 1) {
 export function simulateBattle(options) {
   const random = new Random(options.seed);
   const heroes = options.heroes.map((hero) => createHeroCombatant(hero));
+  applyGroupAuras(heroes);
+  return runEncounter(heroes, { type: 'boss', bossId: options.bossId }, random, options.recordLog, {},
+    options.enemyLevel || 1);
+}
+
+// Ein Raid-Bosskampf. options = { groups: [[Hero, …], …] (bis zu 4 Gruppen à 5), bossId, seed, recordLog,
+//                                  enemyLevel (Stufe des Bosses, Standard 1) }
+// Heilung, Buffs und Auren wirken nur in der eigenen Gruppe (siehe Battle.getAlliedHeroes).
+export function simulateRaid(options) {
+  const random = new Random(options.seed);
+  const heroes = [];
+  options.groups.forEach((group, groupIndex) => {
+    for (const hero of group) {
+      heroes.push(createHeroCombatant(hero, groupIndex));
+    }
+  });
   applyGroupAuras(heroes);
   return runEncounter(heroes, { type: 'boss', bossId: options.bossId }, random, options.recordLog, {},
     options.enemyLevel || 1);
