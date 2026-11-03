@@ -155,8 +155,9 @@ Plan vom 2026-11-01 (Entscheidungen in `KONZEPT.md` unter „Raids“, „Klasse
   - **4a** ✅ Kampf-Logik: Helden gehören zu einer von 4 Gruppen, Heilung und Buffs nur in der eigenen Gruppe; neue Raid-Mechaniken „trifft eine Gruppe“, Tankwechsel (Stapel-Debuff), Phasen (ab 50 % andere Mechaniken); ein Raid-Boss zum Testen; Tests
   - **4b** Kampfszene für 20 Helden (Boss oben, 4 Gruppenreihen klein, auch auf dem Handy)
   - **4c** Raid im Kampf-Labor testbar (Testraid aus 4 Gruppen)
-- **Schritt 5** Raid 1 (4 Bosse): Raid-Tage (Tag 6 und 7 jeder Woche), Wochen-Sperre, Raidgruppe aus 20 Helden (mind. 2 Tanks, 4 Heiler), legendäre Waffen und Ringe, Raid-Zutaten zum Umschmieden von Set-Teilen, Krit als Zusatzwert auf Items.
-- **Schritt 6** Raid 2 (5 Bosse, der letzte ist der Endboss), Endauswertung nach Spieltagen, Raid-Rennen der KI-Gilden im Ticker. Danach M4 pushen.
+- **Offen (Feature, entschieden 2026-11-03):** Die 3 Set-Dungeons bekommen mehrere Bosse und mehr Trash-Gruppen.
+- **Schritt 5** Raid 1 (4 Bosse, mit mehreren Trash-Gruppen zwischen den Bossen): Raid-Tage (Tag 6 und 7 jeder Woche), Wochen-Sperre, Raidgruppe aus 20 Helden (mind. 2 Tanks, 4 Heiler), legendäre Waffen und Ringe, Raid-Zutaten zum Umschmieden von Set-Teilen, Krit als Zusatzwert auf Items.
+- **Schritt 6** Raid 2 (5 Bosse mit Trash-Gruppen dazwischen, der letzte ist der Endboss), Endauswertung nach Spieltagen, Raid-Rennen der KI-Gilden im Ticker. Danach M4 pushen.
 
 **M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie.
 
