@@ -53,6 +53,7 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                Unlocks (schrittweises Freischalten = Tutorial: Bedingungen prüfen, Freigeschaltetes und gesehene Hinweise merken),
                StandingGroups (stehende Gruppen: Name, fehlende Mitglieder, Ersatz derselben Position, verfügbare Vorräte),
                DungeonKnowledge (Dungeonwissen: Erkunden deckt Boss für Boss auf; none/partial/full; bekannte Schadensarten, verdeckte Mechaniken),
+               AutoGroup („Auto-Gruppe“: füllt leere Plätze mit freien Helden, Tank/Heiler zuerst, dann Konter für bekannte Mechaniken),
                GroupCounter (Helden nach Position, wie viele vollständige Gruppen die freien Helden ergeben, was fehlt; checkGroup prüft eine Gruppe),
                CraftingSystem (Zerlegen → Staub/Kristalle/Rohstoffe, Verbessern +1 bis +10 mit Fehlschlag ab +6),
                ForgeSystem (Schmieden: weißes Item nach Vorlage; Umschmieden: andere Rüstungsart), AlchemySystem (Brauen: Kräuter → Waren), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
@@ -90,7 +91,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                HeroScreen (+ RoleOverview = Kacheln nach Position mit Gruppen-Zähler; HeroDetailPanel = Plätze direkt unter dem Porträt, Rest aufklappbar, Blättern ‹ ›; EquipPanel = Ausrüstungsliste für den angetippten Platz,
                auf dem Handy als Fenster von unten, nach Item-Level sortiert, Vergleich pro Wert; „Bestes anlegen“ am Helden), TavernScreen, CombatLabScreen,
                DungeonScreen (+ DungeonGuide = Dungeonführer: Niveau, Gegner und Bosse im Detail, Beute mit Sammelbuch-Sternen;
-               Gruppenwahl mit Kacheln nach Position und Statuszeile, „Gruppe ausrüsten“; + RunViewer = Bericht eines beendeten Runs zeigen),
+               Gruppenwahl mit Kacheln nach Position, Statuszeile, „Auto-Gruppe“ und „Gruppe ausrüsten“; + RunViewer = Bericht eines beendeten Runs zeigen),
                GuildHallScreen (Gildenhalle: Karte pro Gebäude, Bauen, Baustelle mit Balken).
                DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe als Szene, danach Zusammenfassung mit Beute.
                LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden, während des Tagesabschlusses zurückgehalten).

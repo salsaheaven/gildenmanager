@@ -142,7 +142,8 @@ In kleinen, jeweils online testbaren Schritten:
 - „Rückgängig“ in der Meldung nach „Bestes anlegen“ / „Gruppe ausrüsten“, Knopf sagt „(nach Werten)“, eigene Set-Teile bleiben dran
 - Fenster von unten: „✕ Schließen“, Zurück-Geste schließt es, Tippflächen mindestens 44 px
 - Markierung „neu“ in der Gruppenwahl gab es schon
-Offen aus dem Bericht (größere Umbauten): Auto-Gruppe pro Dungeon, Risiko live mit Konter-Symbolen, ein Dungeon = eine Karte, vorbelegte Vorräte, Ausrüstung vom Vorgänger übernehmen, Tagesabschluss mit Kernzahlen zuerst, Zerlegen im Beute-Ergebnis.
+- ✅ **Auto-Gruppe** (2026-11-03): Knopf „Auto-Gruppe · Einschätzung“ in der Gruppenwahl füllt leere Plätze (Tank/Heiler, dann Konter für bekannte Mechaniken, dann die Stärksten), nur ganz freie Helden (`systems/AutoGroup.js`, `getRiskSummary` in `RiskBadge.js`)
+Offen aus dem Bericht (größere Umbauten): Risiko live mit Konter-Symbolen, ein Dungeon = eine Karte, vorbelegte Vorräte, Ausrüstung vom Vorgänger übernehmen, Tagesabschluss mit Kernzahlen zuerst, Zerlegen im Beute-Ergebnis.
 
 **M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.
 Plan vom 2026-11-01 (Entscheidungen in `KONZEPT.md` unter „Raids“, „Klassen-Sets“, „Umfang“), jeder Schritt einzeln spielbar:

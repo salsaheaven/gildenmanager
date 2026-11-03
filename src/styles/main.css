@@ -3962,6 +3962,14 @@ body.locked-collection .collection-button {
   min-height: 44px;
 }
 
+/* Knopf "Auto-Gruppe · Machbar" in der Gruppenwahl */
+.auto-group-button {
+  width: 100%;
+  margin-bottom: 8px;
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
 /* Heldenübersicht nach Position (RoleOverview) */
 .group-counter {
   display: flex;

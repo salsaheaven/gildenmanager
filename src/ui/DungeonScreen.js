@@ -13,7 +13,7 @@ import { COMBAT_RULES } from '../data/combatRules.js';
 import { createHeroCanvas } from './PixelArt.js';
 import { renderOrders } from './OrdersPanel.js';
 import { RunViewer } from './RunViewer.js';
-import { createRiskBadge } from './RiskBadge.js';
+import { createRiskBadge, getRiskSummary } from './RiskBadge.js';
 import { renderDungeonGuide } from './DungeonGuide.js';
 import { getRunTitle, createRunControls } from './StandingGroupControls.js';
 import { renderRoleTiles, createGroupCounter } from './RoleOverview.js';
@@ -212,6 +212,7 @@ export class DungeonScreen {
       return;
     }
     container.appendChild(this.createGroupStatus());
+    container.appendChild(this.createAutoGroupButton());
 
     const chosen = document.createElement('div');
     chosen.className = 'group-chosen';
@@ -236,6 +237,33 @@ export class DungeonScreen {
       isDisabled: (hero) => this.game.guild.isHeroBusy(hero.id) || hero.isInjured(),
       onSelect: (heroId) => this.toggleHero(heroId),
     });
+  }
+
+  // Knopf "Auto-Gruppe · Machbar": füllt leere Plätze mit freien Helden (Tank/Heiler zuerst, dann Konter
+  // für bekannte Mechaniken, siehe systems/AutoGroup.js). Auf dem Knopf steht schon, wie riskant der Vorschlag wäre.
+  createAutoGroupButton() {
+    const button = document.createElement('button');
+    button.className = 'auto-group-button';
+    const selected = [...this.selectedHeroIds];
+    const proposal = this.game.suggestAutoGroup(this.dungeonId, selected);
+    if (proposal.length === selected.length) {
+      button.textContent = selected.length >= GROUP_RULES.size ? 'Auto-Gruppe: Gruppe ist voll' : 'Auto-Gruppe: niemand frei';
+      button.disabled = true;
+      return button;
+    }
+    const heroes = proposal.map((heroId) => this.game.guild.findHero(heroId));
+    const summary = getRiskSummary(this.game, heroes, this.dungeonId, this.retreatRuleId, this.chosenSupplies);
+    button.innerHTML = 'Auto-Gruppe <span class="auto-group-risk"></span>';
+    const risk = button.querySelector('.auto-group-risk');
+    risk.textContent = '· ' + summary.name;
+    risk.style.color = summary.color;
+    button.title = 'Füllt die leeren Plätze mit freien Helden: zuerst Tank und Heiler, dann wer bekannte Mechaniken kontert, dann die Stärksten. Gewählte Helden bleiben drin.';
+    button.addEventListener('click', () => {
+      Sound.click();
+      this.selectedHeroIds = new Set(proposal);
+      this.render();
+    });
+    return button;
   }
 
   // Held in die Gruppe nehmen oder wieder heraus (höchstens GROUP_RULES.size Helden)

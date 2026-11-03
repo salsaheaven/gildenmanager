@@ -22,6 +22,7 @@ import { getSlotsWithNewGear, markSlotSeen, markItemSeen } from '../systems/NewG
 import { countPossibleGroups, groupHeroesByPosition, checkGroup } from '../systems/GroupCounter.js';
 import { getPositionId } from '../data/groupRules.js';
 import { getDailyTodos, getEndDayWarnings } from '../systems/DailyTodo.js';
+import { suggestAutoGroup } from '../systems/AutoGroup.js';
 import { getFreeGroupName, getMissingMembers, findSubstitute, getAvailableSupplies } from '../systems/StandingGroups.js';
 import { StandingGroup } from '../entities/StandingGroup.js';
 import { updateUnlocks, getUnannouncedUnlocks } from '../systems/Unlocks.js';
@@ -628,6 +629,12 @@ export class Game {
   // Wie viele vollständige Gruppen gehen heute noch aus den freien Helden? (siehe systems/GroupCounter.js)
   countPossibleGroups() {
     return countPossibleGroups(this.guild);
+  }
+
+  // "Auto-Gruppe": füllt die leeren Plätze mit freien Helden (Tank/Heiler zuerst, dann Konter für bekannte Mechaniken).
+  // Gibt die ganze vorgeschlagene Gruppe als Liste von Helden-ids zurück (siehe systems/AutoGroup.js).
+  suggestAutoGroup(dungeonId, selectedHeroIds) {
+    return suggestAutoGroup(this.guild, dungeonId, selectedHeroIds);
   }
 
   // Prüft eine Gruppe (Liste von Helden-ids): Pflicht-Positionen besetzt, Gruppe voll? (siehe systems/GroupCounter.js)
