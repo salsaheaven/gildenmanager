@@ -23,7 +23,8 @@
 //   (abilityDuration darf auch negativ sein: Der Skill hält dann kürzer, mindestens 1 Runde.)
 // Konter-Talente (Unterbrechen, Fluch lösen, großen Schlag abfangen) machen eine zweite Klasse zum Ersatz
 // für den Spezialisten. Sie kosten etwas: Der Skill wird dafür umgebaut und fehlt für seinen alten Zweck
-// (siehe "Konter verteilen" in KONZEPT.md).
+// (siehe "Konter verteilen" in KONZEPT.md). Sie stehen in Reihe 1, damit es sie schon ab Level 5 gibt
+// (ab der Kapelle braucht man Unterbrechen).
 // Zahlen grob gesetzt, gebalanced wird am Ende.
 // ============================================================
 
@@ -64,12 +65,12 @@ export const TALENTS = {
     [
       { id: 'palLightStrike', name: 'Lichtschlag', description: 'Lichtbrecher +25 %',
         effects: { abilityPower: { lightbreaker: 0.25 } } },
-      { id: 'palRecovery', name: 'Genesung', description: 'Gelübde der Genesung heilt 30 % mehr',
-        effects: { abilityPower: { vowOfRecovery: 0.3 } } },
-    ],
-    [
       { id: 'palGuardianShield', name: 'Schutzherr', description: 'Konter: Gottesschild schützt den, den ein großer Schlag treffen soll (statt nur sich selbst)',
         effects: { abilityTarget: { divineShield: 'bossTarget' }, abilityWhen: { divineShield: 'busterIncoming' } } },
+    ],
+    [
+      { id: 'palRecovery', name: 'Genesung', description: 'Gelübde der Genesung heilt 30 % mehr',
+        effects: { abilityPower: { vowOfRecovery: 0.3 } } },
       { id: 'palHallowedShield', name: 'Geweihter Schild', description: '+15 % Rüstung',
         effects: { statBonus: { defense: 0.15 } } },
     ],
@@ -107,14 +108,14 @@ export const TALENTS = {
     [
       { id: 'priDevout', name: 'Andächtig', description: 'Stille Andacht gibt 50 % mehr Mana',
         effects: { abilityPower: { silentDevotion: 0.5 } } },
-      { id: 'priZealous', name: 'Eifrig', description: '+10 % Heilung',
-        effects: { healingDone: 0.1 } },
+      { id: 'priPurifyingSpark', name: 'Läuternder Funke', description: 'Konter: Funke der Gnade löst Flüche, wird dafür aber nur noch auf Verfluchte gezaubert',
+        effects: { abilityTarget: { sparkOfGrace: 'debuffedAlly' }, abilityWhen: { sparkOfGrace: 'allyDebuffed' }, abilityCleanses: { sparkOfGrace: true } } },
     ],
     [
       { id: 'priStreamOfGrace', name: 'Strom der Gnade', description: 'Strom des Lebens heilt 30 % mehr',
         effects: { abilityPower: { streamOfLife: 0.3 } } },
-      { id: 'priPurifyingSpark', name: 'Läuternder Funke', description: 'Konter: Funke der Gnade löst Flüche, wird dafür aber nur noch auf Verfluchte gezaubert',
-        effects: { abilityTarget: { sparkOfGrace: 'debuffedAlly' }, abilityWhen: { sparkOfGrace: 'allyDebuffed' }, abilityCleanses: { sparkOfGrace: true } } },
+      { id: 'priZealous', name: 'Eifrig', description: '+10 % Heilung',
+        effects: { healingDone: 0.1 } },
     ],
     [
       { id: 'priHolyGlow', name: 'Heiliger Schein', description: 'Die ganze Gruppe nimmt −5 % Schaden',
@@ -149,12 +150,12 @@ export const TALENTS = {
     [
       { id: 'druThickMoss', name: 'Dichtes Moos', description: 'Moosmantel heilt 25 % mehr',
         effects: { abilityPower: { mossMantle: 0.25 } } },
-      { id: 'druWideGrove', name: 'Weiter Hain', description: 'Hainsegen heilt 25 % mehr',
-        effects: { abilityPower: { groveBlessing: 0.25 } } },
-    ],
-    [
       { id: 'druBarkskin', name: 'Borkenhaut', description: 'Konter: Moosmantel fängt einen großen Schlag mit einem Schild ab, wird dafür nur noch davor gezaubert',
         effects: { abilityTarget: { mossMantle: 'bossTarget' }, abilityWhen: { mossMantle: 'busterIncoming' }, abilityShield: { mossMantle: 2.0 } } },
+    ],
+    [
+      { id: 'druWideGrove', name: 'Weiter Hain', description: 'Hainsegen heilt 25 % mehr',
+        effects: { abilityPower: { groveBlessing: 0.25 } } },
       { id: 'druFrugal', name: 'Genügsam', description: '−20 % Mana-Kosten',
         effects: { manaCost: -0.2 } },
     ],
@@ -171,12 +172,12 @@ export const TALENTS = {
     [
       { id: 'magEmber', name: 'Glut', description: 'Glutlanze +20 %',
         effects: { abilityPower: { emberLance: 0.2 } } },
-      { id: 'magAsh', name: 'Asche', description: 'Aschenregen +25 %',
-        effects: { abilityPower: { ashRain: 0.25 } } },
-    ],
-    [
       { id: 'magCounterIce', name: 'Bannendes Eis', description: 'Konter: Eiskranz unterbricht Zauber (lange Abklingzeit), wird dafür nur noch gegen unterbrechbare Zauber eingesetzt',
         effects: { abilityWhen: { iceWreath: 'bossCastingInterruptible' }, abilityInterrupts: { iceWreath: true } } },
+    ],
+    [
+      { id: 'magAsh', name: 'Asche', description: 'Aschenregen +25 %',
+        effects: { abilityPower: { ashRain: 0.25 } } },
       { id: 'magManaFlow', name: 'Manafluss', description: '+30 % Mana',
         effects: { statBonus: { mana: 0.3 } } },
     ],
@@ -255,12 +256,12 @@ export const TALENTS = {
     [
       { id: 'hunEagleEye', name: 'Adlerblick', description: 'Falkenauge +25 %',
         effects: { abilityPower: { hawkEye: 0.25 } } },
-      { id: 'hunArrowHail', name: 'Pfeilhagel', description: 'Pfeilfächer +30 %',
-        effects: { abilityPower: { arrowFan: 0.3 } } },
-    ],
-    [
       { id: 'hunInterruptNet', name: 'Netzwurf', description: 'Konter: Fangnetz trifft den Boss und unterbricht seinen Zauber, fängt dafür keine Diener mehr',
         effects: { abilityTarget: { snareNet: 'boss' }, abilityWhen: { snareNet: 'bossCastingInterruptible' }, abilityDuration: { snareNet: -2 }, abilityInterrupts: { snareNet: true } } },
+    ],
+    [
+      { id: 'hunArrowHail', name: 'Pfeilhagel', description: 'Pfeilfächer +30 %',
+        effects: { abilityPower: { arrowFan: 0.3 } } },
       { id: 'hunMarksman', name: 'Scharfschütze', description: '+10 % Angriff',
         effects: { statBonus: { attack: 0.1 } } },
     ],
@@ -319,14 +320,14 @@ export const TALENTS = {
     [
       { id: 'shaThunder', name: 'Gewitter', description: 'Kettenblitz +30 %',
         effects: { abilityPower: { chainLightning: 0.3 } } },
-      { id: 'shaRock', name: 'Fels', description: 'Felsenpfahl schützt 30 % stärker',
-        effects: { abilityPower: { stoneTotem: 0.3 } } },
+      { id: 'shaCleansingTotem', name: 'Reinigender Pfahl', description: 'Konter: Felsenpfahl löst Flüche der ganzen Gruppe, wird dafür bei Flüchen statt vor Gruppenschaden gesetzt',
+        effects: { abilityWhen: { stoneTotem: 'allyDebuffed' }, abilityCleanses: { stoneTotem: true } } },
     ],
     [
       { id: 'shaLongRage', name: 'Langer Rausch', description: 'Kampfrausch hält 1 Runde länger',
         effects: { abilityDuration: { bloodlust: 1 } } },
-      { id: 'shaCleansingTotem', name: 'Reinigender Pfahl', description: 'Konter: Felsenpfahl löst Flüche der ganzen Gruppe, wird dafür bei Flüchen statt vor Gruppenschaden gesetzt',
-        effects: { abilityWhen: { stoneTotem: 'allyDebuffed' }, abilityCleanses: { stoneTotem: true } } },
+      { id: 'shaRock', name: 'Fels', description: 'Felsenpfahl schützt 30 % stärker',
+        effects: { abilityPower: { stoneTotem: 0.3 } } },
     ],
     [
       { id: 'shaAncestor', name: 'Ahnengeist', description: 'Die ganze Gruppe macht +5 % Schaden',
