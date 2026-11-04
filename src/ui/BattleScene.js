@@ -6,6 +6,9 @@
 //   - Ticker mit den letzten Ereignissen
 //   - großer Skill-Name über dem, der handelt; Handelnder und Ziele leuchten kurz auf
 //   - Maus über einem Helden (Handy: antippen) zeigt seine Skills und Abklingzeiten (SkillTooltip)
+//   - Raid (result.isRaid): Boss und Diener oben, darunter 4 Reihen mit je einer Gruppe aus kleinen Helden.
+//     Ein angekündigter Gruppenschlag färbt die Reihe der getroffenen Gruppe rot.
+//     Skill-Namen erscheinen im Raid nur bei Gegnern, sonst wird es bei 20 Helden zu unruhig.
 //
 // Die Szene läuft nicht von selbst: Wer sie benutzt, ruft in jedem Bild update(sekunden) auf.
 // Mit den Knöpfen 1x / 2x / 4x läuft sie schneller. Die Wahl wird im Browser gemerkt.
@@ -23,6 +26,7 @@ import { SkillTooltip } from './SkillTooltip.js';
 import { getDamageType } from '../data/damageTypes.js';
 
 const TICKER_LINES = 6;       // so viele Zeilen zeigt der Ticker
+const RAID_GROUP_COUNT = 4;   // so viele Gruppenreihen zeigt die Raid-Szene
 
 // Springt die Zeit weiter als das (z.B. wenn der Browser-Tab im Hintergrund war), wird ohne Animationen nachgeholt
 const CATCH_UP_SECONDS = 1.5;
@@ -51,8 +55,13 @@ export class BattleScene {
     this.units = {}; // Kämpfer-id → Elemente der Figur
     this.round = 0;  // aktuelle Kampfrunde (für die Abklingzeiten im Skill-Fenster)
     this.timeLapse = 1; // Zeitraffer-Faktor der aktuellen Runde (1 = normal)
+    this.isRaid = Boolean(result.isRaid); // Raid-Aufstellung mit 4 Gruppenreihen?
 
-    this.buildLayout();
+    if (this.isRaid) {
+      this.buildRaidLayout();
+    } else {
+      this.buildLayout();
+    }
     this.renderSpeedButtons();
     this.tooltip = new SkillTooltip(this.container.querySelector('.scene-field'));
     this.container.querySelector('.scene-skip').hidden = !showSkip;
@@ -89,6 +98,40 @@ export class BattleScene {
     `;
 
     this.container.querySelector('.scene-skip').addEventListener('click', () => this.skip());
+  }
+
+  // Raid: oben Boss und Diener, darunter eine Reihe pro Gruppe ("G1" bis "G4")
+  buildRaidLayout() {
+    let groupRows = '';
+    for (let i = 0; i < RAID_GROUP_COUNT; i++) {
+      groupRows += '<div class="raid-group" data-group="' + i + '">' +
+        '<span class="raid-group-label">G' + (i + 1) + '</span><div class="raid-group-units"></div></div>';
+    }
+    this.container.innerHTML = `
+      <div class="battle-scene raid-scene">
+        <div class="scene-top">
+          <span class="scene-round">Bereit …</span>
+          <span class="scene-timelapse" hidden>Zeitraffer ⏩</span>
+          <span class="scene-speeds"></span>
+          <button class="scene-skip">Überspringen</button>
+        </div>
+        <div class="scene-field raid-field">
+          <div class="cast-bar" hidden><span class="cast-name"></span><div class="cast-fill"></div></div>
+          <div class="scene-enemies raid-enemies">
+            <div class="scene-boss"></div>
+            <div class="scene-minions"></div>
+          </div>
+          <div class="raid-groups">${groupRows}</div>
+        </div>
+        <div class="scene-ticker"></div>
+      </div>
+    `;
+    this.container.querySelector('.scene-skip').addEventListener('click', () => this.skip());
+  }
+
+  // Raid: die Reihe einer Gruppe (groupIndex 0 bis 3)
+  getRaidGroupRow(groupIndex) {
+    return this.container.querySelector('.raid-group[data-group="' + groupIndex + '"]');
   }
 
   // Knöpfe 1x / 2x / 4x
@@ -144,11 +187,16 @@ export class BattleScene {
     if (info.maxMana > 0) {
       unit.querySelector('.unit-bars').insertAdjacentHTML('beforeend', '<div class="unit-mana"><div></div></div>');
     }
-    unit.querySelector('.unit-name').textContent = info.name;
+    // Im Raid ist wenig Platz: nur der erste Teil des Namens
+    unit.querySelector('.unit-name').textContent = this.isRaid && info.side === 'hero' ? info.name.split(' ')[0] : info.name;
+    unit.title = info.name;
     unit.querySelector('.unit-sprite').appendChild(this.createUnitCanvas(info));
 
     let parent;
-    if (info.side === 'hero') {
+    if (this.isRaid && info.side === 'hero') {
+      parent = this.getRaidGroupRow(info.groupIndex || 0).querySelector('.raid-group-units');
+      unit.classList.add('raid-unit');
+    } else if (info.side === 'hero') {
       parent = this.container.querySelector('.scene-column.' + info.row);
     } else if (info.bossId) {
       parent = this.container.querySelector('.scene-boss');
@@ -207,12 +255,13 @@ export class BattleScene {
       round: this.round, usedRounds: unit.usedRounds, manaCostFactor: unit.manaCostFactor };
   }
 
+  // Bilder sind im Raid kleiner, damit 20 Helden Platz haben
   createUnitCanvas(info) {
     if (info.isPet) {
-      return createSpriteCanvas(info.petSprite.sprite, 3, info.petSprite.colors);
+      return createSpriteCanvas(info.petSprite.sprite, this.isRaid ? 2 : 3, info.petSprite.colors);
     }
     if (info.side === 'hero') {
-      return createHeroCanvas(this.heroesById[info.heroId], 4);
+      return createHeroCanvas(this.heroesById[info.heroId], this.isRaid ? 2 : 4);
     }
     if (info.bossId) {
       const boss = getBoss(info.bossId);
@@ -246,7 +295,7 @@ export class BattleScene {
 
   // Jedes Ereignis bekommt einen Zeitpunkt (dieselbe Rechnung wie für die Dauer eines Runs)
   scheduleEntries() {
-    const timeline = computeEncounterTimeline(this.result.log, this.result.encounterType);
+    const timeline = computeEncounterTimeline(this.result.log, this.result.encounterType, this.isRaid);
     this.entryTimes = timeline.times;
     this.entrySpeeds = timeline.speeds;
     this.endTime = timeline.duration;
@@ -304,6 +353,7 @@ export class BattleScene {
     this.container.querySelector('.scene-skip').disabled = true;
     this.container.querySelector('.cast-bar').hidden = true;
     this.container.querySelector('.scene-timelapse').hidden = true;
+    this.markTargetedGroup(null);
     this.onFinished(this.result);
   }
 
@@ -357,7 +407,8 @@ export class BattleScene {
       return;
     }
     this.lunge(action.sourceId);
-    if (action.showName && action.name) {
+    const isHero = source.element.classList.contains('hero-unit');
+    if (action.showName && action.name && !(this.isRaid && isHero)) {
       this.showSkillCallout(source, action.name);
     }
     this.highlightAction(action);
@@ -455,8 +506,20 @@ export class BattleScene {
       if (!quiet) {
         Sound.warning();
       }
+      this.markTargetedGroup(cast.groupIndex === undefined ? null : cast.groupIndex);
     } else {
       bar.hidden = true;
+      this.markTargetedGroup(null);
+    }
+  }
+
+  // Raid: Die Reihe der Gruppe, die der angekündigte Gruppenschlag treffen wird, leuchtet rot (null = keine)
+  markTargetedGroup(groupIndex) {
+    if (!this.isRaid) {
+      return;
+    }
+    for (const row of this.container.querySelectorAll('.raid-group')) {
+      row.classList.toggle('raid-group-targeted', groupIndex !== null && Number(row.dataset.group) === groupIndex);
     }
   }
 

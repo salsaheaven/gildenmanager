@@ -7,6 +7,8 @@
 //   - Trash: schnell (trashSpeed), außer in Runden, in denen ein Held fällt
 //   - Bosskampf: ruhige Runden schnell (quietRoundSpeed), wichtige Runden normal
 //     wichtig = Ankündigung, ausgelöste Mechanik, Raserei oder ein Held fällt
+// Raid: 20 Helden handeln pro Runde. Damit eine Runde nicht ewig dauert, laufen ihre Einzelschritte
+//   um raidSpeed schneller (die Pause zwischen den Runden bleibt gleich).
 // Die Zahlen stehen unter "pacing" in data/combatRules.js.
 // ============================================================
 
@@ -14,9 +16,11 @@ import { COMBAT_RULES } from '../../data/combatRules.js';
 
 // Zeitpunkte aller Einträge eines Kampfes.
 // encounterType = 'trash' oder 'boss' (aus dem Ergebnis der Begegnung). Ohne Angabe: kein Zeitraffer.
+// isRaid = true: Raid-Kampf mit 20 Helden (Einzelschritte schneller, siehe oben)
 // Gibt { times, speeds, duration } zurück. speeds[i] = Tempo-Faktor der Runde von Eintrag i (1 = normal).
-export function computeEncounterTimeline(log, encounterType = null) {
+export function computeEncounterTimeline(log, encounterType = null, isRaid = false) {
   const pacing = COMBAT_RULES.pacing;
+  const stepFactor = isRaid ? pacing.raidSpeed : 1;
   const roundSpeeds = getRoundSpeeds(log, encounterType);
   const times = [];
   const speeds = [];
@@ -32,11 +36,11 @@ export function computeEncounterTimeline(log, encounterType = null) {
     times.push(time);
     speeds.push(speed);
     if (entry.kind === 'action') {
-      time += pacing.actionLead / speed;
+      time += pacing.actionLead / speed / stepFactor;
     } else if (entry.hits || entry.labels || entry.spawn || entry.cast) {
-      time += pacing.effectTime / speed;
+      time += pacing.effectTime / speed / stepFactor;
     } else {
-      time += pacing.infoTime / speed;
+      time += pacing.infoTime / speed / stepFactor;
     }
   }
   return { times: times, speeds: speeds, duration: time + pacing.endDelay };

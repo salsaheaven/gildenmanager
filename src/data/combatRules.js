@@ -60,6 +60,7 @@ export const COMBAT_RULES = {
     // Zeitraffer: So viel schneller als das gewählte Tempo laufen ...
     trashSpeed: 4,      // ... Trash-Begegnungen (außer Runden, in denen ein Held fällt)
     quietRoundSpeed: 3, // ... ruhige Runden im Bosskampf (keine Ankündigung, keine Mechanik, niemand fällt)
+    raidSpeed: 5,       // Raid: Die Einzelschritte einer Runde laufen so viel schneller (20 Helden statt 5)
   },
 
   // Wählbare Geschwindigkeiten der Kampfszene (Knöpfe über der Szene)

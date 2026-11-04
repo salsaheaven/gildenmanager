@@ -1806,6 +1806,83 @@ h3 {
   width: 140px;
 }
 
+/* ---------- Raid-Szene: Boss oben, darunter 4 Gruppenreihen mit kleinen Helden ---------- */
+
+/* Kein Boden-Streifen: Die Gruppenreihen gehen über die ganze Höhe */
+.battle-scene.raid-scene {
+  background: linear-gradient(#1a1328 0%, #120d1c 100%);
+}
+
+.scene-field.raid-field {
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 10px;
+  padding: 40px 12px 12px;
+}
+
+.raid-enemies {
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.raid-groups {
+  display: grid;
+  gap: 6px;
+}
+
+.raid-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.04);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+/* Diese Gruppe trifft gleich der angekündigte Gruppenschlag */
+.raid-group.raid-group-targeted {
+  border-color: #d63c3c;
+  background: rgba(214, 60, 60, 0.2);
+}
+
+.raid-group-label {
+  width: 26px;
+  font-family: var(--font-title);
+  font-size: 10px;
+  color: var(--gold);
+}
+
+.raid-group-units {
+  flex: 1;
+  display: flex;
+  justify-content: space-around;
+  gap: 4px;
+}
+
+.scene-unit.raid-unit {
+  width: 64px;
+}
+
+.raid-unit .unit-name {
+  font-size: 12px;
+}
+
+.raid-unit .unit-hp {
+  height: 9px;
+}
+
+.raid-unit .unit-hp span {
+  font-size: 10px;
+  line-height: 8px;
+}
+
+.raid-unit .float-text {
+  font-size: 16px;
+}
+
 .unit-name {
   font-size: 15px;
   white-space: nowrap;

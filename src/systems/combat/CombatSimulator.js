@@ -96,8 +96,10 @@ export function simulateRaid(options) {
     }
   });
   applyGroupAuras(heroes);
-  return runEncounter(heroes, { type: 'boss', bossId: options.bossId }, random, options.recordLog, {},
+  const result = runEncounter(heroes, { type: 'boss', bossId: options.bossId }, random, options.recordLog, {},
     options.enemyLevel || 1);
+  result.isRaid = true; // für die Kampfszene: Raid-Aufstellung mit 4 Gruppenreihen
+  return result;
 }
 
 // Ein ganzer Dungeon-Run.

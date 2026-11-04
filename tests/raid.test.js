@@ -8,6 +8,7 @@ import { createTestRaid, createTestGroup } from '../src/systems/combat/TestGroup
 import { RAID_BOSSES } from '../src/data/raidBosses.js';
 import { BOSSES, MINIONS, MECHANIC_TYPE_TEXTS, getBoss } from '../src/data/enemies.js';
 import { SPRITES } from '../src/data/sprites.js';
+import { computeEncounterTimeline } from '../src/systems/combat/BattleTimeline.js';
 
 const BOSS_ID = 'raidTestColossus';
 
@@ -137,5 +138,20 @@ describe('Raid-Kampf', () => {
   it('normale Bosskämpfe bleiben gleich (alle in Gruppe 0)', () => {
     const result = simulateBattle({ heroes: createTestGroup(5), bossId: 'morva', seed: 11, recordLog: true });
     expect(result.startingCombatants.filter((c) => c.side === 'hero').every((c) => c.groupIndex === 0)).toBe(true);
+  });
+
+  it('die Ankündigung des Gruppenschlags nennt die Gruppe (für die Szene)', () => {
+    const result = raidResult(7);
+    expect(result.isRaid).toBe(true);
+    const start = result.log.find((entry) => entry.cast && entry.cast.state === 'start' && entry.cast.name.startsWith('Erdstoß'));
+    expect(start.cast.groupIndex).toBeGreaterThanOrEqual(0);
+    expect(start.cast.name).toBe('Erdstoß auf Gruppe ' + (start.cast.groupIndex + 1));
+  });
+
+  it('im Raid laufen die Einzelschritte schneller', () => {
+    const result = raidResult(7);
+    const normal = computeEncounterTimeline(result.log, 'boss', false).duration;
+    const raid = computeEncounterTimeline(result.log, 'boss', true).duration;
+    expect(raid).toBeLessThan(normal);
   });
 });

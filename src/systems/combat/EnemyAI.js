@@ -75,8 +75,11 @@ function takeBossTurn(battle, boss) {
       }
       if (mechanic.castTime > 0) {
         boss.casting = mechanic;
-        battle.addLog(boss.name + ' bereitet ' + mechanic.name + ' vor!', 'warning',
-          { cast: { state: 'start', name: mechanic.name } });
+        // Beim Gruppenschlag steht dabei, welche Gruppe es treffen wird (die Szene hebt die Reihe hervor)
+        const isStrike = mechanic.type === 'groupStrike';
+        const castName = isStrike ? mechanic.name + ' auf Gruppe ' + (boss.strikeGroupIndex + 1) : mechanic.name;
+        battle.addLog(boss.name + ' bereitet ' + castName + ' vor!', 'warning',
+          { cast: { state: 'start', name: castName, groupIndex: isStrike ? boss.strikeGroupIndex : null } });
       } else {
         resolveMechanic(battle, boss, mechanic);
       }
