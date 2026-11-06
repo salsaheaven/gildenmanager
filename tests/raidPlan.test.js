@@ -155,6 +155,8 @@ describe('Raid-Tag', () => {
     // Gold für jede gewonnene Begegnung
     const wins = finished.result.encounters.filter((encounter) => encounter.outcome === 'victory').length;
     expect(finished.gold > 0).toBe(wins > 0);
+    // Eine Raid-Kiste pro besiegtem Boss
+    expect(finished.chests.length).toBe(finished.defeatedBossIds.length);
     expect(game.getDefeatedRaidBossIds()).toEqual(finished.defeatedBossIds);
     expect(finished.heroResults.length).toBe(RAID_CLASSES.length);
   });

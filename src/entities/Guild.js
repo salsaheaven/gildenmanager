@@ -36,7 +36,7 @@ export class Guild {
     this.dungeonAttempts = {}; // Dungeon-id → wie oft versucht (egal wie es ausging)
     this.reports = [];         // Berichte über abgeschlossene Runs (neueste zuerst)
     this.collection = new CollectionBook(); // Sammelbuch: welche Boss-Items schon gefunden wurden
-    this.materials = { dust: 0, crystal: 0, raw: 0, herbs: 0 }; // Materiallager: Staub, Kristalle, Rohstoffe, Kräuter (siehe data/crafting.js)
+    this.materials = { dust: 0, crystal: 0, raw: 0, herbs: 0, ashEssence: 0 }; // Materiallager: Staub, Kristalle, Rohstoffe, Kräuter, Aschenessenz (siehe data/crafting.js)
     this.supplies = {};        // Vorratskammer: Verbrauchsgut-id → Anzahl (siehe data/consumables.js)
     this.dailyOffer = [];      // heutiges Tagesangebot des Händlers (Liste von Verbrauchsgut-ids)
     this.scoutedDungeons = {}; // vorbereitete Dungeons: Dungeon-id → wie viele Kampftage die Erkundung noch hält
@@ -60,6 +60,8 @@ export class Guild {
 
     // Pity-Zähler: Items seit dem letzten epischen oder legendären Item
     this.itemsSinceEpic = 0;
+    // Raid-Pity: Raid-Kisten seit dem letzten legendären Item (siehe BALANCING.raidLegendaryPityAfter)
+    this.raidChestsSinceLegendary = 0;
 
     // Statistiken für spätere Erfolge
     this.stats = {
@@ -304,6 +306,7 @@ export class Guild {
       inventory: this.inventory.map((item) => item.toSaveData()),
       nextItemId: this.nextItemId,
       itemsSinceEpic: this.itemsSinceEpic,
+      raidChestsSinceLegendary: this.raidChestsSinceLegendary,
       stats: this.stats,
       heroes: this.heroes.map((hero) => hero.toSaveData()),
       candidates: this.candidates.map((candidate) => candidate.toSaveData()),
@@ -343,6 +346,7 @@ export class Guild {
     guild.inventory = data.inventory.map((itemData) => Item.fromSaveData(itemData));
     guild.nextItemId = data.nextItemId;
     guild.itemsSinceEpic = data.itemsSinceEpic;
+    guild.raidChestsSinceLegendary = data.raidChestsSinceLegendary;
     guild.stats = data.stats;
     // "|| []" damit auch alte Spielstände ohne Helden geladen werden können
     guild.heroes = (data.heroes || []).map((heroData) => Hero.fromSaveData(heroData));

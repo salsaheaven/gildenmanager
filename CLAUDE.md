@@ -57,7 +57,7 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                RaidRules (Wochentag, Raid-Tage, Raid offen?, Aufstellung prüfen, wo es nach der Wochen-Sperre weitergeht), AutoRaid („Auto-Raid“: Helden auf 4 Gruppen verteilen),
                GroupCounter (Helden nach Position, wie viele vollständige Gruppen die freien Helden ergeben, was fehlt; checkGroup prüft eine Gruppe),
                CraftingSystem (Zerlegen → Staub/Kristalle/Rohstoffe, Verbessern +1 bis +10 mit Fehlschlag ab +6),
-               ForgeSystem (Schmieden: weißes Item nach Vorlage; Umschmieden: andere Rüstungsart), AlchemySystem (Brauen: Kräuter → Waren), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
+               ForgeSystem (Schmieden: weißes Item nach Vorlage; Umschmieden: andere Rüstungsart; Set-Teil in anderes Set mit Aschenessenz), AlchemySystem (Brauen: Kräuter → Waren), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
                simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug; simulateRaid = Raid-Bosskampf mit 4 Gruppen à 5; simulateRaidRun = Raid-Tag bis zum ersten Wipe),
                BattleTimeline (wann passiert was → Dauer eines Runs, mit Zeitraffer für Trash und ruhige Runden), Battle (Zustand + Zielwahl; Verbündete = nur die eigene Gruppe, groupIndex),
@@ -65,7 +65,7 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
                AbilityEffects (was ein Skill bewirkt), OrderSettings (gewählte Anweisungen + Talente → ein Paket mit Wirkungen für den Kampf, Gruppen-Auren),
                CauseTracker (woher der Schaden an den Helden kommt), SupplyEffects (Wirkung der mitgenommenen Vorräte im Run), DefeatAnalysis („Woran es lag“: Top 3 Ursachen + Tipp), ChanceEstimator (200 Kämpfe → Siegchance; estimateRunChances = ganzer Dungeon),
                TestGroup (Testgruppe fürs Labor, Klassen frei wählbar; createTestRaid = 4 Gruppen)
-src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes, balancing, sprites (Pixel-Art als Text),
+src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes (Legendär nur in Raid-Kisten: Waffen/Ringe, Raid-Pity, Aschenessenz), balancing, sprites (Pixel-Art als Text),
                heroClasses (15 Klassen inkl. Rüstungsart, nützliche Werte, Dauer-Fähigkeit `passive` und Begleiter `pet`), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
                enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), raidBosses (Raid-Bosse: Phasen, Tank-Stapel, Gruppenschlag), raids (Raid-Regeln: Raid-Tage, Mindestgröße; Raid 1 „Die Aschenhallen“), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
                dungeons (7 Level-Dungeons + 3 Set-Dungeons mit je 2 Bossen: Begegnungen, Stufe, Belohnung), retreatRules,
@@ -114,7 +114,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                StandingGroupControls = Anzeige und Knöpfe stehender Gruppen (Ersatz einsetzen, Bestes ausrüsten, Heute aussetzen, Wieder einplanen, Auflösen).
                LockButton = Knopf „Sperren“ an Items (Ausrüstungsliste, Inventar) und kleines 🔒; gesperrte Items tauscht „Bestes anlegen“ nicht aus, kein Verkaufen/Zerlegen.
                SetInfo = Set-Zeile an Items und Set-Kasten am Helden (getragene Teile, aktive Boni).
-               CraftingControls = Schmieden (Karte der Schmiede), Brauen (Karte des Alchemielabors), Umschmieden (Inventar).
+               CraftingControls = Schmieden (Karte der Schmiede), Brauen (Karte des Alchemielabors), Umschmieden und Set-Umschmieden (Inventar).
                UpgradeControls = Zerlegen und Verbessern in der Oberfläche (Verbessern-Knopf mit Kosten und Chance, Material-Text, Funken/Riss, Leuchten und „+3“ an verbesserten Items; Inventar + Ausrüstungsliste).
                TalentPanel = die 3 Talentreihen eines Helden zum Auswählen (Heldenbildschirm + Kampf-Labor).
                RiskBadge = Einschätzung eines Runs in Worten, je nach Dungeonwissen „Unbekannt“, „Eher leicht/schwer“ oder genau („Riskant · Gefallene: oft“).

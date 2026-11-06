@@ -281,6 +281,17 @@ button:disabled {
   color: var(--gold);
 }
 
+/* Zweite Zeile für das Raid-Pity (nur wenn der Raid offen ist) */
+.pity:has(.pity-raid) {
+  flex-wrap: wrap;
+}
+
+.pity-raid {
+  flex-basis: 100%;
+  font-size: 16px;
+  color: #ff8000;
+}
+
 .pity {
   display: flex;
   align-items: center;

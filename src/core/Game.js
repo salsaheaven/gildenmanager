@@ -18,7 +18,7 @@
 // ============================================================
 
 import { getSalvageYield, upgradeItem } from '../systems/CraftingSystem.js';
-import { forgeItem, reforgeItem } from '../systems/ForgeSystem.js';
+import { forgeItem, reforgeItem, reforgeSetItem } from '../systems/ForgeSystem.js';
 import { getSlotsWithNewGear, markSlotSeen, markItemSeen } from '../systems/NewGear.js';
 import { countPossibleGroups, groupHeroesByPosition, checkGroup } from '../systems/GroupCounter.js';
 import { getPositionId } from '../data/groupRules.js';
@@ -369,6 +369,20 @@ export class Game {
       return 'notFound';
     }
     const result = reforgeItem(this.guild, this.lootSystem, item, targetTemplateId);
+    if (result === 'ok') {
+      this.emit('changed');
+    }
+    return result;
+  }
+
+  // Schmiedet ein Set-Teil (im Inventar oder angelegt) in ein anderes Set um (kostet Raid-Zutaten).
+  // Gibt 'ok', 'notFound', 'notSetItem', 'wrongTarget' oder 'notEnough' zurück.
+  reforgeSetItem(itemId, targetSetId) {
+    const item = this.guild.findItemAnywhere(itemId);
+    if (!item) {
+      return 'notFound';
+    }
+    const result = reforgeSetItem(this.guild, this.lootSystem, item, targetSetId);
     if (result === 'ok') {
       this.emit('changed');
     }
@@ -1266,6 +1280,7 @@ export class Game {
       result: result,
       groups: groups.map((group) => group.map((hero) => hero.id)),
       defeatedBossIds: [],
+      chests: [],           // Raid-Kisten (eine pro besiegtem Boss)
       gold: 0,
       heroNames: result.heroes.map((hero) => hero.name),
       fallenNames: result.heroes.filter((hero) => !hero.alive).map((hero) => hero.name),
@@ -1280,10 +1295,16 @@ export class Game {
         plan.markBossDefeated(encounter.bossId, this.getWeek());
         report.defeatedBossIds.push(encounter.bossId);
         report.gold += raid.bossGold;
+        // Eine Raid-Kiste pro besiegtem Boss (Items in der Stufe des Raids)
+        this.guild.addBox(encounter.chest, raid.level);
+        report.chests.push(encounter.chest);
       } else {
         report.gold += raid.trashGold;
       }
     });
+    // Volle Sammelbuch-Seite des Raids: mehr Gold
+    report.collectionGold = Math.round(report.gold * this.guild.collection.getGoldBonus(raid.id));
+    report.gold += report.collectionGold;
     this.guild.addGold(report.gold);
     plan.lastFoughtDay = this.day;
 

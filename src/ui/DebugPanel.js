@@ -120,6 +120,14 @@ export class DebugPanel {
       }
       game.updateUnlocks();
     });
+    // Zum Ausprobieren der Raid-Beute: je eine Raid-Kiste pro Boss, eine Set-Kiste (Platte) und Aschenessenz
+    this.addButton('Raid-Beute-Test: Raid-Kisten + Set-Kiste', () => {
+      for (const chestId of ['raidChestColossus', 'raidChestMorgul', 'raidChestPyra', 'raidChestAshKing']) {
+        game.guild.addBox(chestId, SCALING.maxLevel);
+      }
+      game.guild.addBox('chestFerron', SCALING.maxLevel);
+      game.guild.addMaterials({ ashEssence: 10, dust: 100 });
+    });
     // Springt ohne Tagesende zum nächsten Raid-Tag (Helden heilen dabei nicht, Sold fällt keiner an)
     this.addButton('Zum nächsten Raid-Tag springen', () => {
       game.day++;

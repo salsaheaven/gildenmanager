@@ -3,6 +3,7 @@
 //   - createForgePanel: Vorlage wählen und "Schmieden" (auf der Karte der Schmiede in der Gildenhalle)
 //   - createBrewPanel: Rezeptliste mit "Brauen" (auf der Karte des Alchemielabors)
 //   - createReforgeControls: andere Rüstungsart wählen und "Umschmieden" (im Inventar)
+//   - createSetReforgeControls: Set-Teil in ein anderes Set umschmieden (mit Aschenessenz aus dem Raid, im Inventar)
 // Die Regeln stehen in systems/ForgeSystem.js und systems/AlchemySystem.js,
 // die Zahlen in data/crafting.js und data/alchemy.js.
 // ============================================================
@@ -10,7 +11,8 @@
 import { ITEM_TEMPLATES, SLOT_NAMES, ARMOR_TYPES } from '../data/items.js';
 import { getConsumable } from '../data/consumables.js';
 import { BREW_RECIPES } from '../data/alchemy.js';
-import { FORGE_RULES } from '../data/crafting.js';
+import { FORGE_RULES, SET_REFORGE_RULES } from '../data/crafting.js';
+import { getSetReforgeTargets, checkSetReforge } from '../systems/ForgeSystem.js';
 import { getRarity } from '../data/rarities.js';
 import { getForgeCost, getForgeItemLevel, getReforgeTargets, getReforgeCost, checkReforge } from '../systems/ForgeSystem.js';
 import { getBrewCost, checkBrew } from '../systems/AlchemySystem.js';
@@ -153,6 +155,42 @@ export function createReforgeControls(game, item) {
   button.addEventListener('click', () => {
     const oldName = item.getDisplayName();
     if (game.reforgeItem(item.id, select.value) === 'ok') {
+      Sound.upgradeSuccess(5);
+      showToast(oldName + ' umgeschmiedet: ' + item.getDisplayName(), item.getRarity().color);
+    }
+  });
+  return container;
+}
+
+// ---------- Set-Teile umschmieden (Raid-Zutaten) ----------
+
+// Auswahl des Ziel-Sets und Knopf "In Set umschmieden" (null, wenn das Item kein Set-Teil ist).
+// Jedes andere Set ist erlaubt, auch eine andere Rüstungsart (z.B. Krieger-Helm → Magier-Kapuze).
+export function createSetReforgeControls(game, item) {
+  const targets = getSetReforgeTargets(item);
+  if (targets.length === 0) {
+    return null;
+  }
+  const container = document.createElement('div');
+  container.className = 'reforge-controls set-reforge-controls';
+  container.innerHTML = '<div class="hint">Set-Teil umschmieden (Raid-Zutat Aschenessenz):</div>' +
+    '<select class="reforge-select"></select><button class="reforge-button"></button>';
+  const select = container.querySelector('.reforge-select');
+  for (const set of targets) {
+    const option = document.createElement('option');
+    option.value = set.id;
+    option.textContent = 'zu ' + set.name + ' (' + ARMOR_TYPES[set.armorType].name + ')';
+    select.appendChild(option);
+  }
+  const button = container.querySelector('.reforge-button');
+  button.textContent = 'In Set umschmieden (' + describeMaterials(SET_REFORGE_RULES.cost) + ')';
+  button.disabled = checkSetReforge(game.guild, item, targets[0].id) !== 'ok';
+  if (button.disabled) {
+    button.title = 'Zu wenig Material. Aschenessenz gibt es nur in Raid-Kisten.';
+  }
+  button.addEventListener('click', () => {
+    const oldName = item.getDisplayName();
+    if (game.reforgeSetItem(item.id, select.value) === 'ok') {
       Sound.upgradeSuccess(5);
       showToast(oldName + ' umgeschmiedet: ' + item.getDisplayName(), item.getRarity().color);
     }

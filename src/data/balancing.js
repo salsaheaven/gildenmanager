@@ -19,6 +19,9 @@ export const BALANCING = {
   // Was die Schatzkammer zum Pity-Stand anzeigt. Bewusst ungenau: keine Zahlen, nur eine Stimmung.
   // fromProgress = ab welchem Anteil des Weges (0 = gerade Glück gehabt, 1 = gleich garantiert)
   // level        = wie stark die Anzeige leuchtet (0 bis 3)
+  // Raid-Pity: Nach so vielen Raid-Kisten ohne Legendär ist die nächste garantiert legendär
+  raidLegendaryPityAfter: 6,
+
   pityHints: [
     { fromProgress: 0,   level: 0, text: 'Das Glück schlummert noch.' },
     { fromProgress: 0.4, level: 1, text: 'Ein leises Kribbeln liegt in der Luft …' },

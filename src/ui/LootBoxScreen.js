@@ -17,6 +17,7 @@ import { BALANCING } from '../data/balancing.js';
 import { createChestCanvas, createItemCanvas } from './PixelArt.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
+import { describeMaterials } from './UpgradeControls.js';
 
 // Zeiten der Animation in Millisekunden
 const FIRST_ITEM_DELAY = 450;
@@ -117,20 +118,21 @@ export class LootBoxScreen {
 
   // Deutet an, dass bald etwas Gutes kommt (Vorfreude!), aber bewusst ohne genaue Zahlen.
   // Die Texte stehen in data/balancing.js unter pityHints.
+  // Ist der Raid offen, gibt es eine zweite Zeile für Legendär aus Raid-Kisten (eigenes Pity).
   renderPity() {
     const pity = this.root.querySelector('.pity');
-    const progress = this.game.guild.itemsSinceEpic / BALANCING.pityEpicAfterItems;
-
-    let hint = BALANCING.pityHints[0];
-    for (const candidate of BALANCING.pityHints) {
-      if (progress >= candidate.fromProgress) {
-        hint = candidate;
-      }
-    }
-
+    const hint = getPityHint(this.game.guild.itemsSinceEpic / BALANCING.pityEpicAfterItems);
     pity.className = 'pity pity-level-' + hint.level;
     pity.innerHTML = '<span class="pity-rune">✦</span><span class="pity-text"></span>';
     pity.querySelector('.pity-text').textContent = hint.text;
+
+    if (this.game.isRaidUnlocked()) {
+      const raidHint = getPityHint(this.game.guild.raidChestsSinceLegendary / BALANCING.raidLegendaryPityAfter);
+      const line = document.createElement('div');
+      line.className = 'pity-raid pity-level-' + raidHint.level;
+      line.textContent = 'Raid-Kisten (Legendär): ' + raidHint.text;
+      pity.appendChild(line);
+    }
   }
 
   // ---------- Bühne in der Mitte ----------
@@ -270,6 +272,10 @@ export class LootBoxScreen {
   }
 
   finishOpening() {
+    // Raid-Kisten: die Raid-Zutaten dazu melden
+    if (this.currentItems && this.currentItems.ingredients) {
+      showToast('+' + describeMaterials(this.currentItems.ingredients) + ' Aschenessenz (zum Umschmieden von Set-Teilen)', '#ff8000');
+    }
     this.isOpening = false;
     this.timers = [];
     this.renderBoxList();
@@ -318,4 +324,15 @@ export class LootBoxScreen {
   later(milliseconds, callback) {
     this.timers.push(setTimeout(callback, milliseconds));
   }
+}
+
+// Stimmung zum Pity-Stand (progress = 0 bis 1): bewusst ungenau, Texte in data/balancing.js (pityHints)
+function getPityHint(progress) {
+  let hint = BALANCING.pityHints[0];
+  for (const candidate of BALANCING.pityHints) {
+    if (progress >= candidate.fromProgress) {
+      hint = candidate;
+    }
+  }
+  return hint;
 }

@@ -16,7 +16,7 @@ import { describeItemKind, describeSuitableClasses } from './format.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 import { describeMaterials, createUpgradeButton, applyUpgradeGlow } from './UpgradeControls.js';
-import { createReforgeControls } from './CraftingControls.js';
+import { createReforgeControls, createSetReforgeControls } from './CraftingControls.js';
 import { createSetLine } from './SetInfo.js';
 import { createLockButton, createLockBadge } from './LockButton.js';
 import { getSalvageYield } from '../systems/CraftingSystem.js';
@@ -282,6 +282,11 @@ export class InventoryOverlay {
     const reforgeControls = createReforgeControls(this.game, item);
     if (reforgeControls) {
       details.querySelector('.detail-upgrade-hint').after(reforgeControls);
+    }
+    // Set-Teile: in ein anderes Set umschmieden (Raid-Zutat)
+    const setReforgeControls = createSetReforgeControls(this.game, item);
+    if (setReforgeControls) {
+      details.querySelector('.detail-upgrade-hint').after(setReforgeControls);
     }
     details.querySelector('.detail-upgrade-hint').textContent = item.locked
       ? 'Gesperrt: Zum Verkaufen oder Zerlegen erst entsperren.'

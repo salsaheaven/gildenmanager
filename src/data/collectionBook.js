@@ -3,13 +3,14 @@
 // Welche Items auf eine Seite gehören, steht nicht hier, sondern in der Boss-Kiste des Dungeons
 // ("bossLoot" in lootBoxes.js). So muss ein neues Boss-Item nur an einer Stelle eingetragen werden.
 //
-// dungeonId = zu welchem Dungeon die Seite gehört
+// dungeonId = zu welchem Dungeon die Seite gehört (oder raidId = zu welchem Raid: Items aus allen Raid-Kisten seiner Bosse)
 // title     = Gildentitel, den man bekommt, wenn die Seite voll ist (alle Items mindestens einmal gefunden)
 // goldBonus = so viel mehr Gold gibt dieser Dungeon, sobald die Seite voll ist (0.1 = +10 %)
 // ============================================================
 
 import { getDungeon } from './dungeons.js';
 import { getLootBoxType } from './lootBoxes.js';
+import { getRaid } from './raids.js';
 
 export const COLLECTION_PAGES = [
   { dungeonId: 'bearCave', title: 'Bärenbezwinger', goldBonus: 0.1 },
@@ -23,17 +24,35 @@ export const COLLECTION_PAGES = [
   { dungeonId: 'ironCitadel', title: 'Eiserne Garde', goldBonus: 0.1 },
   { dungeonId: 'wildGrove', title: 'Herren der Wildnis', goldBonus: 0.1 },
   { dungeonId: 'arcaneArchive', title: 'Hüter des Archivs', goldBonus: 0.1 },
+  // Raid: Die Seite füllt sich mit den Boss-Items aller vier Raid-Kisten
+  { raidId: 'ashHalls', title: 'Bezwinger der Aschenhallen', goldBonus: 0.1 },
 ];
 
 // Ab dieser Seltenheit gilt ein Item als "glänzend". Sind alle Items einer Seite so selten, glänzt die Seite.
 export const SHINY_RARITY = 'epic';
 
+// Die Seite eines Dungeons oder Raids (id = Dungeon-id oder Raid-id), sonst null
 export function getCollectionPage(dungeonId) {
-  return COLLECTION_PAGES.find((page) => page.dungeonId === dungeonId) || null;
+  return COLLECTION_PAGES.find((page) => page.dungeonId === dungeonId || page.raidId === dungeonId) || null;
+}
+
+// Name der Seite: Name des Dungeons bzw. des Raids
+export function getPageName(page) {
+  return page.raidId ? getRaid(page.raidId).name : getDungeon(page.dungeonId).name;
 }
 
 // Die Boss-Items einer Seite (Einträge aus "bossLoot" der Boss-Kiste des Dungeons)
+// Raid-Seite: die Boss-Items aller Raid-Kisten der Raid-Bosse, in Reihenfolge der Bosse
 export function getPageItems(page) {
+  if (page.raidId) {
+    let items = [];
+    for (const encounter of getRaid(page.raidId).encounters) {
+      if (encounter.type === 'boss') {
+        items = items.concat(getLootBoxType(encounter.chest).bossLoot);
+      }
+    }
+    return items;
+  }
   const chest = getLootBoxType(getDungeon(page.dungeonId).rewards.chest);
   return chest.bossLoot || [];
 }

@@ -16,8 +16,9 @@
 //   level        = Stufe der Gegner
 //   unlockLevel  = der Raid öffnet, sobald ein Held dieses Level hat
 //   encounters   = Begegnungen in Reihenfolge, wie bei den Dungeons:
-//                  { type: 'trash', name, enemies: [Gegner-ids aus MINIONS] } oder { type: 'boss', bossId }
-//                  (Raid-Bosse stehen in raidBosses.js, 1–2 Trash-Gruppen vor jedem Boss)
+//                  { type: 'trash', name, enemies: [Gegner-ids aus MINIONS] } oder { type: 'boss', bossId, chest }
+//                  (Raid-Bosse stehen in raidBosses.js, 1–2 Trash-Gruppen vor jedem Boss;
+//                   chest = Raid-Kiste aus lootBoxes.js, die dieser Boss gibt)
 //   bossGold     = Gold für jeden besiegten Boss
 //   trashGold    = Gold für jede besiegte Trash-Gruppe
 //
@@ -47,14 +48,14 @@ export const RAIDS = [
     encounters: [
       { type: 'trash', name: 'Vorhof der Asche', enemies: ['templeConstruct', 'templeConstruct', 'templeConstruct', 'emberImp', 'emberImp', 'emberImp'] },
       { type: 'trash', name: 'Steinerne Wache', enemies: ['ironGuard', 'ironGuard', 'ironGuard', 'ironGuard', 'emberImp', 'emberImp'] },
-      { type: 'boss', bossId: 'stoneColossus' },
+      { type: 'boss', bossId: 'stoneColossus', chest: 'raidChestColossus' },
       { type: 'trash', name: 'Seuchengruben', enemies: ['ghoul', 'ghoul', 'ghoul', 'ghoul', 'bogCorpse', 'bogCorpse'] },
-      { type: 'boss', bossId: 'plagueMaw' },
+      { type: 'boss', bossId: 'plagueMaw', chest: 'raidChestMorgul' },
       { type: 'trash', name: 'Glutkammer', enemies: ['emberImp', 'emberImp', 'emberImp', 'emberImp', 'drakeling', 'drakeling'] },
       { type: 'trash', name: 'Feuerchor', enemies: ['sunAcolyte', 'sunAcolyte', 'sunAcolyte', 'sunAcolyte', 'drakeling', 'drakeling'] },
-      { type: 'boss', bossId: 'pyra' },
+      { type: 'boss', bossId: 'pyra', chest: 'raidChestPyra' },
       { type: 'trash', name: 'Thronwache', enemies: ['ironGuard', 'ironGuard', 'ironGuard', 'drakeling', 'drakeling', 'drakeling'] },
-      { type: 'boss', bossId: 'ashKing' },
+      { type: 'boss', bossId: 'ashKing', chest: 'raidChestAshKing' },
     ],
     bossGold: 300,
     trashGold: 40,

@@ -6,7 +6,8 @@
 // Die Zahlen stehen in data/crafting.js (FORGE_RULES, REFORGE_RULES).
 // ============================================================
 
-import { FORGE_RULES, REFORGE_RULES } from '../data/crafting.js';
+import { FORGE_RULES, REFORGE_RULES, SET_REFORGE_RULES } from '../data/crafting.js';
+import { SETS, getSet } from '../data/sets.js';
 import { ITEM_TEMPLATES, getItemTemplate } from '../data/items.js';
 import { getDungeon } from '../data/dungeons.js';
 
@@ -66,10 +67,11 @@ export function getReforgeCost(item) {
 }
 
 // In welche Vorlagen kann dieses Item umgeschmiedet werden? Gleicher Platz, andere Rüstungsart.
-// Gibt eine leere Liste zurück, wenn das Item keine Rüstung ist.
+// Gibt eine leere Liste zurück, wenn das Item keine Rüstung ist. Set-Teile haben ihr eigenes Umschmieden
+// (in ein anderes Set, siehe reforgeSetItem).
 export function getReforgeTargets(item) {
   const template = item.getTemplate();
-  if (!template.armorType) {
+  if (!template.armorType || item.setId) {
     return [];
   }
   return ITEM_TEMPLATES.filter((other) =>
@@ -108,5 +110,49 @@ export function reforgeItem(guild, lootSystem, item, targetTemplateId) {
   item.templateId = fresh.templateId;
   item.stats = fresh.stats;
   item.name = fresh.name;
+  return 'ok';
+}
+
+// ---------- Set-Teile umschmieden (mit Raid-Zutaten, siehe SET_REFORGE_RULES in data/crafting.js) ----------
+
+// In welche Sets kann dieses Set-Teil umgeschmiedet werden? Alle anderen Sets (auch andere Rüstungsarten).
+// Leere Liste, wenn das Item kein Set-Teil ist.
+export function getSetReforgeTargets(item) {
+  if (!item.setId) {
+    return [];
+  }
+  return SETS.filter((set) => set.id !== item.setId);
+}
+
+// Kann umgeschmiedet werden? 'ok' oder 'notSetItem', 'wrongTarget', 'notEnough'
+export function checkSetReforge(guild, item, targetSetId) {
+  if (!item.setId) {
+    return 'notSetItem';
+  }
+  if (!getSetReforgeTargets(item).some((set) => set.id === targetSetId)) {
+    return 'wrongTarget';
+  }
+  if (!guild.hasMaterials(SET_REFORGE_RULES.cost)) {
+    return 'notEnough';
+  }
+  return 'ok';
+}
+
+// Macht aus einem Set-Teil das Teil desselben Platzes aus einem anderen Set (Name, Vorlage, Werte, Set).
+// Seltenheit, Item-Level, Verbesserung, Resistenzen und Schloss bleiben. Gibt 'ok' oder den Grund zurück.
+export function reforgeSetItem(guild, lootSystem, item, targetSetId) {
+  const check = checkSetReforge(guild, item, targetSetId);
+  if (check !== 'ok') {
+    return check;
+  }
+  guild.spendMaterials(SET_REFORGE_RULES.cost);
+  const slot = item.getSlot();
+  const targetSet = getSet(targetSetId);
+  const fresh = lootSystem.createItem(item.rarityId, item.id, item.itemLevel, getItemTemplate(targetSet.templates[slot]));
+  item.templateId = fresh.templateId;
+  item.stats = fresh.stats;
+  item.name = targetSet.pieceNames[slot];
+  item.setId = targetSet.id;
+  item.bossItemId = targetSet.id + '_' + slot; // Kennung wie bei einem gefundenen Teil dieses Sets
   return 'ok';
 }

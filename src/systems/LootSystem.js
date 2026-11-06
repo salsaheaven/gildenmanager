@@ -5,6 +5,8 @@
 // - Item-Vorlage, Name und Werte (Werte wachsen mit dem Item-Level, siehe data/scaling.js)
 // - Boss-Kisten: ein garantiertes Boss-Item (fester Name, Mindest-Seltenheit, feste Resistenz des Bosses)
 // - Resistenzen: Zufalls-Items haben manchmal eine zufällige Resistenz (Chance und Höhe in rarities.js)
+// - Raid-Kisten: Legendär nur hier, immer als Waffe oder Ring; eigenes Pity (garantiert nach X Kisten ohne
+//   Legendär); dazu Raid-Zutaten (Aschenessenz)
 // ============================================================
 
 import { Item } from '../entities/Item.js';
@@ -35,11 +37,27 @@ export class LootSystem {
       normalCount--;
     }
 
+    // Raid-Pity: Ist die Pechsträhne lang genug, wird das erste Zufalls-Item legendär
+    const raidPity = boxType.isRaidChest && guild.raidChestsSinceLegendary >= BALANCING.raidLegendaryPityAfter - 1;
     for (let i = 0; i < normalCount; i++) {
-      const rarityId = this.rollRarity(boxType.chances, guild);
-      const item = this.createItem(rarityId, guild.createItemId(), itemLevel);
+      let rarityId = this.rollRarity(boxType.chances, guild);
+      if (raidPity && i === 0) {
+        rarityId = 'legendary';
+      }
+      // Legendär (nur aus Raid-Kisten) ist immer eine Waffe oder ein Ring
+      const template = rarityId === 'legendary' ? this.pickTemplate(boxType.legendarySlots || null) : null;
+      const item = this.createItem(rarityId, guild.createItemId(), itemLevel, template);
       items.push(item);
       guild.addItem(item);
+    }
+
+    if (boxType.isRaidChest) {
+      const gotLegendary = items.some((item) => item.rarityId === 'legendary');
+      guild.raidChestsSinceLegendary = gotLegendary ? 0 : guild.raidChestsSinceLegendary + 1;
+      // Raid-Zutaten zum Umschmieden von Set-Teilen
+      const ingredients = this.random.integer(boxType.raidIngredients.min, boxType.raidIngredients.max);
+      guild.addMaterials({ ashEssence: ingredients });
+      items.ingredients = { ashEssence: ingredients }; // für die Anzeige beim Öffnen
     }
 
     guild.stats.boxesOpened++;
@@ -81,7 +99,12 @@ export class LootSystem {
     if (getRarityRank(rarityId) < getRarityRank(entry.minRarity)) {
       rarityId = entry.minRarity;
     }
-    const item = this.createItem(rarityId, guild.createItemId(), itemLevel, getItemTemplate(entry.templateId), entry.name,
+    // Legendär gibt es nur für Waffen und Ringe (Raid-Kisten): ein Boss-Rüstungsteil bleibt dann episch
+    const template = getItemTemplate(entry.templateId);
+    if (rarityId === 'legendary' && boxType.legendarySlots && !boxType.legendarySlots.includes(template.slot)) {
+      rarityId = 'epic';
+    }
+    const item = this.createItem(rarityId, guild.createItemId(), itemLevel, template, entry.name,
       boxType.bossResistance || null);
     item.bossItemId = entry.id; // damit das Sammelbuch das Item erkennt
     item.setId = entry.setId || null; // Set-Teile der Set-Dungeons (siehe data/sets.js)
@@ -127,10 +150,14 @@ export class LootSystem {
     return {};
   }
 
-  // Eine zufällige Item-Vorlage, gewichtet mit dropWeight (siehe items.js, ohne Angabe 1)
-  pickTemplate() {
+  // Eine zufällige Item-Vorlage, gewichtet mit dropWeight (siehe items.js, ohne Angabe 1).
+  // slots = freiwillig: nur Vorlagen dieser Plätze (z.B. ['weapon', 'ring'] für legendäre Raid-Beute)
+  pickTemplate(slots = null) {
     const weights = {};
     for (const template of ITEM_TEMPLATES) {
+      if (slots && !slots.includes(template.slot)) {
+        continue;
+      }
       weights[template.id] = template.dropWeight || 1;
     }
     return getItemTemplate(this.random.pickWeighted(weights));

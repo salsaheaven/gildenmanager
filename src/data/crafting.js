@@ -15,6 +15,8 @@ export const MATERIALS = {
   crystal: { name: 'Kristall', icon: '◆', color: '#5aa9ff' },
   raw: { name: 'Rohstoffe', icon: '▲', color: '#c08a52' },
   herbs: { name: 'Kräuter', icon: '❀', color: '#9be15d' },
+  // Raid-Zutat: nur aus Raid-Kisten, zum Umschmieden von Set-Teilen (siehe SET_REFORGE_RULES)
+  ashEssence: { name: 'Aschenessenz', icon: '✦', color: '#ff8000' },
 };
 
 // So viel Material gibt ein zerlegtes Item, je nach Seltenheit
@@ -57,4 +59,11 @@ export const REFORGE_RULES = {
   baseCost: { raw: 20, dust: 10, crystal: 2 },
   // Faktor auf die Kosten je Seltenheit
   rarityFactor: { poor: 1, common: 1, uncommon: 1.5, rare: 2, epic: 3, legendary: 4 },
+};
+
+// Set-Teile umschmieden (mit Raid-Zutaten): Ein Set-Teil wird zum gleichen Platz eines anderen Sets,
+// auch einer anderen Rüstungsart (entschieden 2026-11-06). Seltenheit, Item-Level, Verbesserung und
+// Resistenzen bleiben, die Werte kommen von der neuen Vorlage. Ausgleich für Pech im Endgame.
+export const SET_REFORGE_RULES = {
+  cost: { ashEssence: 2, dust: 20 },
 };

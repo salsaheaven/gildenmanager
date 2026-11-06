@@ -8,8 +8,7 @@
 // Schließen mit dem X oder der Escape-Taste.
 // ============================================================
 
-import { COLLECTION_PAGES, getPageItems } from '../data/collectionBook.js';
-import { getDungeon } from '../data/dungeons.js';
+import { COLLECTION_PAGES, getPageItems, getPageName } from '../data/collectionBook.js';
 import { getRarity, getRarityRank } from '../data/rarities.js';
 import { Item } from '../entities/Item.js';
 import { createItemCanvas } from './PixelArt.js';
@@ -118,7 +117,7 @@ export class CollectionOverlay {
       <div class="collection-items"></div>
       <div class="collection-reward"></div>
     `;
-    element.querySelector('.collection-page-name').textContent = getDungeon(page.dungeonId).name;
+    element.querySelector('.collection-page-name').textContent = getPageName(page);
     element.querySelector('.collection-page-count').textContent = book.countFoundOnPage(page) + ' / ' + items.length;
 
     const list = element.querySelector('.collection-items');

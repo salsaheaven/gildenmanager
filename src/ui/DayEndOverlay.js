@@ -322,6 +322,10 @@ export class DayEndOverlay {
       goldLine.insertAdjacentHTML('beforeend', '<span>+' + report.gold + ' Gold</span>');
       card.querySelector('.day-run-rewards').appendChild(goldLine);
     }
+    // Eine Raid-Kiste pro besiegtem Boss, jede mit "Jetzt öffnen!"
+    for (const chestId of report.chests) {
+      card.querySelector('.day-run-rewards').appendChild(this.createChestLine(chestId));
+    }
     // Wo geht es weiter? (Wochen-Sperre)
     const nextIndex = this.game.getNextRaidEncounterIndex();
     const nextBoss = nextIndex === null ? null : raid.encounters.slice(nextIndex).find((encounter) => encounter.type === 'boss');
@@ -397,24 +401,29 @@ export class DayEndOverlay {
     }
 
     if (report.chest) {
-      const chest = getLootBoxType(report.chest);
-      const chestLine = document.createElement('div');
-      chestLine.className = 'day-reward day-chest';
-      chestLine.style.setProperty('--rarity', chest.mainColor);
-      chestLine.appendChild(createChestCanvas(chest, 3));
-      chestLine.insertAdjacentHTML('beforeend', '<span></span><button class="open-chest-button">Jetzt öffnen!</button>');
-      chestLine.querySelector('span').textContent = chest.name;
-      const button = chestLine.querySelector('.open-chest-button');
-      // Die Kiste könnte schon geöffnet sein (zweite Kiste derselben Art)
-      button.disabled = this.game.guild.countBoxes(report.chest) === 0;
-      button.addEventListener('click', () => {
-        this.close();
-        this.callbacks.onOpenChest(report.chest);
-      });
-      container.appendChild(chestLine);
+      container.appendChild(this.createChestLine(report.chest));
     } else if (gold === 0) {
       container.innerHTML = '<span class="hint">Keine Beute.</span>';
     }
+  }
+
+  // Zeile mit einer Kiste und "Jetzt öffnen!" (Boss-Kiste eines Runs oder Raid-Kiste)
+  createChestLine(chestId) {
+    const chest = getLootBoxType(chestId);
+    const chestLine = document.createElement('div');
+    chestLine.className = 'day-reward day-chest';
+    chestLine.style.setProperty('--rarity', chest.mainColor);
+    chestLine.appendChild(createChestCanvas(chest, 3));
+    chestLine.insertAdjacentHTML('beforeend', '<span></span><button class="open-chest-button">Jetzt öffnen!</button>');
+    chestLine.querySelector('span').textContent = chest.name;
+    const button = chestLine.querySelector('.open-chest-button');
+    // Die Kiste könnte schon geöffnet sein (zweite Kiste derselben Art)
+    button.disabled = this.game.guild.countBoxes(chestId) === 0;
+    button.addEventListener('click', () => {
+      this.close();
+      this.callbacks.onOpenChest(chestId);
+    });
+    return chestLine;
   }
 
   // Eine Zeile pro Held: Bild, Name, EP, Level-Up, Verletzung
