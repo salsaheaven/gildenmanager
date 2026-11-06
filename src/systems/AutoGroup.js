@@ -96,3 +96,22 @@ export function suggestAutoGroup(guild, dungeonId, selectedHeroIds) {
   }
   return group.map((hero) => hero.id);
 }
+
+// Konter-Stand einer Gruppe für die Anzeige "Konter ✓/✗" (Risiko live):
+// Welche Konter brauchen die bekannten Mechaniken, und kann sie jemand in der Gruppe?
+// Ergebnis: { counters: [{ id, name, covered }], unknownBosses } (unknownBosses = noch nicht erkundete Bosse)
+export function getCounterStatus(guild, dungeonId, heroes) {
+  const needed = getNeededCounterIds(guild, dungeonId);
+  const counters = COUNTERS.filter((counter) => needed.includes(counter.id)).map((counter) => ({
+    id: counter.id,
+    name: counter.name,
+    covered: heroes.some((hero) => heroProvidesCounter(hero, counter)),
+  }));
+  let unknownBosses = 0;
+  getDungeon(dungeonId).encounters.forEach((encounter, index) => {
+    if (encounter.type === 'boss' && !isEncounterKnown(guild, dungeonId, index)) {
+      unknownBosses++;
+    }
+  });
+  return { counters: counters, unknownBosses: unknownBosses };
+}

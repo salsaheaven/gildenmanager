@@ -24,7 +24,7 @@ import { getSlotsWithNewGear, markSlotSeen, markItemSeen } from '../systems/NewG
 import { countPossibleGroups, groupHeroesByPosition, checkGroup } from '../systems/GroupCounter.js';
 import { getPositionId } from '../data/groupRules.js';
 import { getDailyTodos, getEndDayWarnings } from '../systems/DailyTodo.js';
-import { suggestAutoGroup } from '../systems/AutoGroup.js';
+import { suggestAutoGroup, getCounterStatus } from '../systems/AutoGroup.js';
 import { getFreeGroupName, getMissingMembers, findSubstitute, getAvailableSupplies } from '../systems/StandingGroups.js';
 import { StandingGroup } from '../entities/StandingGroup.js';
 import { updateUnlocks, getUnannouncedUnlocks } from '../systems/Unlocks.js';
@@ -673,6 +673,12 @@ export class Game {
   }
 
   // Prüft eine Gruppe (Liste von Helden-ids): Pflicht-Positionen besetzt, Gruppe voll? (siehe systems/GroupCounter.js)
+  // Konter-Stand einer Gruppe für einen Dungeon: { counters: [{ id, name, covered }], unknownBosses }
+  getCounterStatus(dungeonId, heroIds) {
+    const heroes = heroIds.map((heroId) => this.guild.findHero(heroId)).filter((hero) => hero);
+    return getCounterStatus(this.guild, dungeonId, heroes);
+  }
+
   checkGroup(heroIds) {
     const heroes = heroIds.map((heroId) => this.guild.findHero(heroId)).filter((hero) => hero);
     return checkGroup(heroes);

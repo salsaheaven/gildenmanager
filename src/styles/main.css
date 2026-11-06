@@ -3238,16 +3238,108 @@ h3 {
 
 .dungeon-screen {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: minmax(0, 1fr) 380px;
   gap: 16px;
   align-items: start;
 }
 
 .run-panel {
-  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* "Ein Dungeon = eine Karte": die aufgeklappte Planung direkt unter dem gewählten Dungeon */
+.dungeon-plan-card {
+  border: 2px solid var(--gold);
+  border-top: none;
+  margin-top: -6px;
+  padding: 8px 10px 0;
+  background: var(--panel-light);
+}
+
+.plan-section {
+  border-top: 2px solid var(--border);
+  padding: 4px 0 8px;
+}
+
+.plan-section > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 10px;
+  color: var(--gold);
+}
+
+/* Feste Leiste unten in der Karte: bleibt beim Scrollen sichtbar */
+.plan-sticky-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px -10px 0;
+  padding: 8px 10px;
+  border-top: 2px solid var(--gold);
+  background: #1a1328;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.plan-live {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.plan-live-group {
+  font-size: 16px;
+  color: #ff6b6b;
+}
+
+.plan-live-group.complete {
+  color: #2ecc40;
+}
+
+.plan-live .risk-badge {
+  margin: 0;
+  padding: 2px 6px;
+  font-size: 16px;
+}
+
+/* In der Leiste reicht "Riskant · Gefallene: oft" ohne das Wort "Einschätzung:" */
+.plan-live .risk-label {
+  display: none;
+}
+
+.plan-live-counters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.counter-chip {
+  padding: 0 6px;
+  font-size: 15px;
+  border: 2px solid var(--border);
+}
+
+.counter-chip.ok {
+  border-color: #2ecc40;
+  color: #2ecc40;
+}
+
+.counter-chip.missing {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+.counter-chip.unknown {
+  color: var(--text-dim);
 }
 
 @media (max-width: 1000px) {
@@ -4430,6 +4522,11 @@ body.locked-collection .collection-button {
   /* Platz unten für die beiden festen Leisten */
   #screen {
     padding-bottom: 140px;
+  }
+
+  /* Feste Leiste der Dungeon-Karte über "Tag beenden" und den Abschnitten */
+  .plan-sticky-bar {
+    bottom: 128px;
   }
 
   #sub-nav {

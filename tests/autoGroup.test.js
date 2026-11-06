@@ -59,3 +59,26 @@ describe('Auto-Gruppe', () => {
     expect(withKnowledge).toContain('rogue');
   });
 });
+
+describe('Konter-Stand (Risiko live)', () => {
+  it('zeigt pro bekanntem Konter, ob jemand in der Gruppe ihn kann', async () => {
+    const { Game } = await import('../src/core/Game.js');
+    const { Hero } = await import('../src/entities/Hero.js');
+    const { getKnowledgeTotal } = await import('../src/systems/DungeonKnowledge.js');
+    const game = new Game(4);
+    const rogue = new Hero(1, 'Schurke', 'rogue', 'uncommon', [], { skin: '#fff', hair: '#000' });
+    const mage = new Hero(2, 'Magier', 'mage', 'uncommon', [], { skin: '#fff', hair: '#000' });
+    game.guild.heroes.push(rogue, mage);
+    // Unerkundet: keine Konter bekannt, aber verdeckte Bosse
+    let status = game.getCounterStatus('ruinedChapel', [mage.id]);
+    expect(status.counters).toEqual([]);
+    expect(status.unknownBosses).toBeGreaterThan(0);
+    // Erkundet: Morva braucht Unterbrechen (und Fluch lösen)
+    game.guild.dungeonKnowledge.ruinedChapel = getKnowledgeTotal('ruinedChapel');
+    status = game.getCounterStatus('ruinedChapel', [mage.id]);
+    expect(status.counters.find((counter) => counter.id === 'interrupt').covered).toBe(false);
+    status = game.getCounterStatus('ruinedChapel', [mage.id, rogue.id]);
+    expect(status.counters.find((counter) => counter.id === 'interrupt').covered).toBe(true);
+    expect(status.unknownBosses).toBe(0);
+  });
+});

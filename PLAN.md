@@ -146,6 +146,8 @@ In kleinen, jeweils online testbaren Schritten:
 - ✅ **Feste Starttruppe** (2026-11-03): Klassenwahl beim Gründen entfernt, alle starten mit Krieger, Priester, Runenwirker, Magier, Schurke (schafft die Bärenhöhle ohne Ausrüstung meist, ein Test prüft ≥ 80 %); `systems/StartTeam.js` entfernt
 Dazu (2026-11-06): „Bestes ausrüsten“ an jeder stehenden Gruppe, Schloss 🔒 am Item (`LockButton.js`, `Game.toggleItemLock`), Spielstand-Version 20.
 
+Umgesetzt (2026-11-06) aus dem Bericht: **Risiko live mit Konter-Symbolen** und **Ein Dungeon = eine Karte** (Planungs-Karte klappt unter dem Dungeon auf, Abschnitte Gruppe / Rückzug & Vorräte / Anweisungen / Dungeonführer, feste Leiste mit Gruppen-Stand, Einschätzung, Konter ✓/✗ und „Einplanen“).
+
 Offen aus dem Bericht (größere Umbauten): Risiko live mit Konter-Symbolen, ein Dungeon = eine Karte, vorbelegte Vorräte, Ausrüstung vom Vorgänger übernehmen, Tagesabschluss mit Kernzahlen zuerst, Zerlegen im Beute-Ergebnis.
 
 **M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.

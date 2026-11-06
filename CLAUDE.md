@@ -53,7 +53,7 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                Unlocks (schrittweises Freischalten = Tutorial: Bedingungen prüfen, Freigeschaltetes und gesehene Hinweise merken),
                StandingGroups (stehende Gruppen: Name, fehlende Mitglieder, Ersatz derselben Position, verfügbare Vorräte),
                DungeonKnowledge (Dungeonwissen: Erkunden deckt Boss für Boss auf; none/partial/full; bekannte Schadensarten, verdeckte Mechaniken),
-               AutoGroup („Auto-Gruppe“: füllt leere Plätze mit freien Helden, Tank/Heiler zuerst, dann Konter für bekannte Mechaniken),
+               AutoGroup („Auto-Gruppe“: füllt leere Plätze mit freien Helden, Tank/Heiler zuerst, dann Konter für bekannte Mechaniken; getCounterStatus = Konter ✓/✗ einer Gruppe),
                RaidRules (Wochentag, Raid-Tage, Raid offen?, Aufstellung prüfen, wo es nach der Wochen-Sperre weitergeht), AutoRaid („Auto-Raid“: Helden auf 4 Gruppen verteilen),
                GroupCounter (Helden nach Position, wie viele vollständige Gruppen die freien Helden ergeben, was fehlt; checkGroup prüft eine Gruppe),
                CraftingSystem (Zerlegen → Staub/Kristalle/Rohstoffe, Verbessern +1 bis +10 mit Fehlschlag ab +6),
@@ -92,7 +92,8 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                Bildschirme: DayPlanScreen (Tagesplan, Startseite, oben TodoBox = „Was gibt es heute zu tun?“), LootBoxScreen (Kisten öffnen), ShopScreen (Händler + Vorratskammer),
                HeroScreen (+ RoleOverview = Kacheln nach Position mit Gruppen-Zähler; HeroDetailPanel = Plätze direkt unter dem Porträt, Rest aufklappbar, Blättern ‹ ›; EquipPanel = Ausrüstungsliste für den angetippten Platz,
                auf dem Handy als Fenster von unten, nach Item-Level sortiert, Vergleich pro Wert; „Bestes anlegen“ am Helden), TavernScreen, CombatLabScreen (Kampf-Labor, auch „Test-Raid“ mit 4 Gruppen),
-               DungeonScreen (+ DungeonGuide = Dungeonführer: Niveau, Gegner und Bosse im Detail, Beute mit Sammelbuch-Sternen;
+               DungeonScreen („Ein Dungeon = eine Karte“: Planungs-Karte klappt unter dem Dungeon auf, feste Leiste mit Einschätzung live und Konter ✓/✗;
+               + DungeonGuide = Dungeonführer: Niveau, Gegner und Bosse im Detail, Beute mit Sammelbuch-Sternen;
                Gruppenwahl mit Kacheln nach Position, Statuszeile, „Auto-Gruppe“ und „Gruppe ausrüsten“; + RunViewer = Bericht eines beendeten Runs zeigen),
                GuildHallScreen (Gildenhalle: Karte pro Gebäude, Bauen, Baustelle mit Balken),
                RaidScreen (Raid: Raid-Tag, Bosse der Woche, Auto-Raid, 4 Gruppen tauschen, Bosse mit Phasen).
