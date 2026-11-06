@@ -32,7 +32,7 @@ import { getSet } from '../data/sets.js';
 import { getKnownCount, getKnowledgeTotal, getKnowledgeLevel, isEncounterKnown, getKnownDamageTypes, getHiddenMechanicNames } from '../systems/DungeonKnowledge.js';
 import { brew } from '../systems/AlchemySystem.js';
 import { START_TEAM_RULES, START_TEAM_CLASSES } from '../data/startTeam.js';
-import { advanceRivals, recordPlayerClear, getLeaderboard } from '../systems/RivalSystem.js';
+import { advanceRivals, recordPlayerClear, recordPlayerRaidKill, getLeaderboard } from '../systems/RivalSystem.js';
 import { getDayPlan } from '../systems/DayPlan.js';
 import { HERO_TASKS } from '../data/heroTasks.js';
 import { resolveHeroTasks, payWages, getDailyWages } from '../systems/HeroTaskSystem.js';
@@ -1298,6 +1298,7 @@ export class Game {
       groups: groups.map((group) => group.map((hero) => hero.id)),
       defeatedBossIds: [],
       chests: [],           // Raid-Kisten (eine pro besiegtem Boss)
+      serverFirstBossIds: [], // heute als erste Gilde des Servers besiegte Raid-Bosse
       raidCleared: false,   // alle Bosse des Raids heute geschafft?
       firstRaidClear: false, // zum ersten Mal ganz geschafft?
       unlockedRaidId: null, // dadurch neu geöffneter Raid
@@ -1314,6 +1315,13 @@ export class Game {
       }
       if (encounter.type === 'boss') {
         plan.markBossDefeated(raid.id, encounter.bossId, this.getWeek());
+        // Zum ersten Mal besiegt: in den Ticker, evtl. Server-First (Raid-Rennen)
+        if (plan.bossKillDays[encounter.bossId] === undefined) {
+          plan.bossKillDays[encounter.bossId] = this.day;
+          if (recordPlayerRaidKill(this.guild, encounter.bossId, this.day)) {
+            report.serverFirstBossIds.push(encounter.bossId);
+          }
+        }
         report.defeatedBossIds.push(encounter.bossId);
         report.gold += raid.bossGold;
         // Eine Raid-Kiste pro besiegtem Boss (Items in der Stufe des Raids)

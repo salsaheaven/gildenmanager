@@ -3,6 +3,9 @@
 // Jede KI-Gilde arbeitet sich der Reihe nach durch die Dungeons. Jeden Abend:
 //   1. Mit attemptChance versucht sie ihren nächsten Dungeon.
 //   2. Mit successChance schafft sie ihn (schwerere Dungeons sind schwerer, siehe RIVAL_RULES).
+// Raid-Rennen: Hat sie alle Dungeons geschafft, raidet sie an den Raid-Tagen (wie du) und versucht sich
+// Boss für Boss an den Raids (Raid 1, dann Raid 2). Der Ticker meldet Versuche und Siege,
+// der erste Sieg über einen Raid-Boss auf dem Server ist ein Server-First.
 // Wer langsamer ist als die Rivalen, verliert nichts. Wer zuerst ist, bekommt Ruhm (Server-First).
 // Die Logik steht in systems/RivalSystem.js. Zahlen grob gesetzt, gebalanced wird am Ende.
 //
@@ -44,6 +47,10 @@ export const RIVAL_RULES = {
   failNewsChance: 0.3,
   // So viele Meldungen merkt sich der Ticker
   keptNews: 30,
+  // Raid-Rennen: Erfolgschance an einem Raid-Boss = successChance der Gilde × raidSuccessFactor
+  raidSuccessFactor: 0.35,
+  // Jeder gescheiterte Versuch an einem Boss erhöht die Chance beim nächsten Mal (die Gilde lernt dazu)
+  raidLearningPerAttempt: 0.05,
 };
 
 export function getRivalGuild(rivalId) {

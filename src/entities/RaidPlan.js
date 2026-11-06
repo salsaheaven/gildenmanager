@@ -23,6 +23,7 @@ export class RaidPlan {
     this.lockouts = {};        // Raid-id → { week, defeatedBossIds } (Wochen-Sperre)
     this.clears = {};          // Raid-id → wie oft ganz geschafft
     this.firstClearDays = {};  // Raid-id → Tag des ersten vollständigen Siegs
+    this.bossKillDays = {};    // Raid-Boss-id → Tag des ersten Siegs (Rangliste, Raid-Rennen)
     this.skippedDay = 0;       // an diesem Tag setzt der Raid aus (0 = nie)
     this.lastFoughtDay = 0;    // an diesem Tag wurde zuletzt geraidet
     this.activeToday = false;  // zieht der Raid heute los? (siehe Game.refreshRaidToday)
@@ -84,6 +85,7 @@ export class RaidPlan {
       lockouts: this.lockouts,
       clears: this.clears,
       firstClearDays: this.firstClearDays,
+      bossKillDays: this.bossKillDays,
       skippedDay: this.skippedDay,
       lastFoughtDay: this.lastFoughtDay,
     };
@@ -95,6 +97,7 @@ export class RaidPlan {
     plan.lockouts = data.lockouts;
     plan.clears = data.clears;
     plan.firstClearDays = data.firstClearDays;
+    plan.bossKillDays = data.bossKillDays;
     plan.skippedDay = data.skippedDay;
     plan.lastFoughtDay = data.lastFoughtDay;
     return plan;

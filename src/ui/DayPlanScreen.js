@@ -122,9 +122,15 @@ export class DayPlanScreen {
       row.innerHTML = '<span class="leaderboard-rank"></span><span class="leaderboard-name"></span><span class="leaderboard-progress"></span>';
       row.querySelector('.leaderboard-rank').textContent = (index + 1) + '.';
       row.querySelector('.leaderboard-name').textContent = entry.name;
-      row.querySelector('.leaderboard-progress').textContent = entry.best === 0
-        ? 'noch kein Dungeon'
-        : entry.best + ' / ' + DUNGEONS.length + ' Dungeons · zuletzt Tag ' + entry.bestDay;
+      // Im Raid-Rennen zählt der Raid-Fortschritt, sonst die Dungeons
+      if (entry.raidBest > 0) {
+        row.querySelector('.leaderboard-progress').textContent = 'Raid: ' + entry.raidBest + ' / ' + entry.raidBossCount +
+          ' Bosse · zuletzt Tag ' + entry.raidBestDay;
+      } else {
+        row.querySelector('.leaderboard-progress').textContent = entry.best === 0
+          ? 'noch kein Dungeon'
+          : entry.best + ' / ' + DUNGEONS.length + ' Dungeons · zuletzt Tag ' + entry.bestDay;
+      }
       list.appendChild(row);
     });
   }

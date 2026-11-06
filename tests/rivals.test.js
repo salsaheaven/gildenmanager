@@ -142,3 +142,38 @@ describe('Rangliste', () => {
     }
   });
 });
+
+describe('Raid-Rennen der KI-Gilden', () => {
+  // Alle KI-Gilden haben schon alle Dungeons geschafft
+  function createRaceGame() {
+    const game = new Game(12);
+    for (const rival of game.guild.rivals) {
+      for (const dungeon of DUNGEONS) {
+        rival.clears[dungeon.id] = 1;
+      }
+    }
+    return game;
+  }
+
+  it('KI-Gilden raiden nur an Raid-Tagen, Versuche und Siege kommen in den Ticker', () => {
+    const game = createRaceGame();
+    // Tage 1 bis 5: keine Raid-Tage, also auch keine Raid-Meldungen
+    runDays(game, 5);
+    expect(game.guild.news.some((news) => news.text.includes('Raid:') || news.text.includes('Versuch'))).toBe(false);
+    // Einige Wochen: Es gibt Raid-Versuche und irgendwann Siege
+    runDays(game, 30);
+    expect(game.guild.news.some((news) => news.text.includes('Versuch') || news.text.includes('Raid:'))).toBe(true);
+    const anyKill = game.guild.rivals.some((rival) => Object.keys(rival.raidKills).length > 0);
+    expect(anyKill).toBe(true);
+  });
+
+  it('der erste Sieg über einen Raid-Boss ist ein Server-First, die Rangliste zählt den Raid zuerst', () => {
+    const game = createRaceGame();
+    const rival = game.guild.rivals[0];
+    rival.raidKills.stoneColossus = 6;
+    game.guild.serverFirsts['raid:stoneColossus'] = { name: rival.getData().name, day: 6, isPlayer: false };
+    const board = game.getLeaderboard();
+    expect(board[0].name).toBe(rival.getData().name);
+    expect(board[0].raidBest).toBe(1);
+  });
+});
