@@ -124,10 +124,13 @@ export function getSetReforgeTargets(item) {
   return SETS.filter((set) => set.id !== item.setId);
 }
 
-// Kann umgeschmiedet werden? 'ok' oder 'notSetItem', 'wrongTarget', 'notEnough'
+// Kann umgeschmiedet werden? 'ok' oder 'notSetItem', 'noSetReforge' (Schmiede unter Stufe 3), 'wrongTarget', 'notEnough'
 export function checkSetReforge(guild, item, targetSetId) {
   if (!item.setId) {
     return 'notSetItem';
+  }
+  if (!guild.hall.getEffect('setReforging', false)) {
+    return 'noSetReforge';
   }
   if (!getSetReforgeTargets(item).some((set) => set.id === targetSetId)) {
     return 'wrongTarget';

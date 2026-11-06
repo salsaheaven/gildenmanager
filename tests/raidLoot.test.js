@@ -77,8 +77,17 @@ describe('Set-Teile umschmieden', () => {
     item.setId = set.id;
     item.upgradeLevel = 3;
     game.guild.addItem(item);
+    game.guild.hall.levels.forge = 3; // Set-Umschmieden braucht Schmiede Stufe 3
     return item;
   }
+
+  it('geht erst mit Schmiede Stufe 3', () => {
+    const game = new Game(10);
+    const helm = createSetHelm(game);
+    game.guild.addMaterials(SET_REFORGE_RULES.cost);
+    game.guild.hall.levels.forge = 2;
+    expect(game.reforgeSetItem(helm.id, 'setMage')).toBe('noSetReforge');
+  });
 
   it('wird zum Teil eines anderen Sets (auch andere Rüstungsart), Verbesserung und Resistenz bleiben', () => {
     const game = new Game(8);

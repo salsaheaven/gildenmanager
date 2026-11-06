@@ -127,6 +127,7 @@ export class DebugPanel {
       }
       game.guild.addBox('chestFerron', SCALING.maxLevel);
       game.guild.addMaterials({ ashEssence: 10, dust: 100 });
+      game.guild.hall.levels.forge = 3; // Set-Umschmieden braucht Schmiede Stufe 3
     });
     // Springt ohne Tagesende zum nächsten Raid-Tag (Helden heilen dabei nicht, Sold fällt keiner an)
     this.addButton('Zum nächsten Raid-Tag springen', () => {

@@ -376,7 +376,7 @@ export class Game {
   }
 
   // Schmiedet ein Set-Teil (im Inventar oder angelegt) in ein anderes Set um (kostet Raid-Zutaten).
-  // Gibt 'ok', 'notFound', 'notSetItem', 'wrongTarget' oder 'notEnough' zurück.
+  // Braucht Schmiede Stufe 3. Gibt 'ok', 'notFound', 'notSetItem', 'noSetReforge', 'wrongTarget' oder 'notEnough' zurück.
   reforgeSetItem(itemId, targetSetId) {
     const item = this.guild.findItemAnywhere(itemId);
     if (!item) {

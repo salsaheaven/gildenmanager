@@ -173,6 +173,10 @@ export function createSetReforgeControls(game, item) {
   }
   const container = document.createElement('div');
   container.className = 'reforge-controls set-reforge-controls';
+  if (!game.guild.hall.getEffect('setReforging', false)) {
+    container.innerHTML = '<p class="hint">Set-Teil in ein anderes Set umschmieden: ab Schmiede Stufe 3 (Gildenhalle), kostet Aschenessenz aus dem Raid.</p>';
+    return container;
+  }
   container.innerHTML = '<div class="hint">Set-Teil umschmieden (Raid-Zutat Aschenessenz):</div>' +
     '<select class="reforge-select"></select><button class="reforge-button"></button>';
   const select = container.querySelector('.reforge-select');

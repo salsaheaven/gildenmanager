@@ -12,6 +12,7 @@
 //     injuryAvoidChance   = Chance, dass ein Gefallener gar nicht verletzt wird (Lazarett)
 //     upgradeChanceBonus  = mehr Erfolgschance beim Verbessern ab +6 (Schmiede, 0.05 = +5 Prozentpunkte)
 //     forging, reforging  = schaltet Schmieden / Umschmieden frei (Schmiede, siehe systems/ForgeSystem.js)
+//     setReforging        = schaltet das Umschmieden von Set-Teilen in ein anderes Set frei (Schmiede Stufe 3, mit Aschenessenz)
 //     forgeCostFactor     = Anteil der Schmiede-Kosten (0.75 = 25 % billiger)
 //     brewTier            = welche Rezepte das Labor brauen kann (Alchemielabor, siehe data/alchemy.js)
 //     brewCostFactor      = Anteil der Kräuter beim Brauen (0.85 = 15 % weniger, siehe data/alchemy.js)
@@ -51,7 +52,7 @@ export const BUILDINGS = {
     levels: [
       { cost: { gold: 250, dust: 20, crystal: 0 }, buildDays: 2, upkeep: 4, effects: { forging: true, upgradeChanceBonus: 0.05 }, text: 'Schmieden, +5 % Chance beim Verbessern' },
       { cost: { gold: 550, dust: 40, crystal: 5 }, buildDays: 3, upkeep: 8, effects: { forging: true, reforging: true, upgradeChanceBonus: 0.1 }, text: 'Umschmieden, +10 % Chance' },
-      { cost: { gold: 1000, dust: 80, crystal: 12 }, buildDays: 4, upkeep: 14, effects: { forging: true, reforging: true, forgeCostFactor: 0.75, upgradeChanceBonus: 0.15 }, text: 'Schmieden 25 % billiger, +15 % Chance' },
+      { cost: { gold: 1000, dust: 80, crystal: 12 }, buildDays: 4, upkeep: 14, effects: { forging: true, reforging: true, setReforging: true, forgeCostFactor: 0.75, upgradeChanceBonus: 0.15 }, text: 'Set-Teile umschmieden, Schmieden 25 % billiger, +15 % Chance' },
     ],
   },
   alchemyLab: {
