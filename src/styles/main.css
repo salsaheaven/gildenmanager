@@ -67,6 +67,8 @@ canvas.sprite {
 h2 {
   font-family: var(--font-title);
   font-size: 11px;
+  /* Genug Zeilenhöhe, damit zweizeilige Überschriften (z.B. "Waffe für …") nicht ineinanderlaufen */
+  line-height: 1.5;
   color: var(--gold);
   margin: 0 0 10px;
   text-transform: uppercase;
@@ -606,6 +608,11 @@ body.overlay-open {
   gap: 12px;
 }
 
+/* "Noch leer" geht über die ganze Breite statt in eine schmale Spalte */
+.inventory-grid .empty {
+  grid-column: 1 / -1;
+}
+
 .inventory-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
@@ -975,6 +982,14 @@ body.overlay-open {
   border: 2px solid #0c0914;
 }
 
+/* In den Unterreitern steht das Abzeichen neben dem Text statt darüber (sonst verdeckt es Buchstaben) */
+.sub-tab .nav-badge {
+  position: static;
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
 /* Leises Abzeichen: nur Info, keine Aufforderung */
 .nav-badge.quiet {
   background: #4a4060;
@@ -992,6 +1007,7 @@ body.overlay-open {
 h3 {
   font-family: var(--font-title);
   font-size: 9px;
+  line-height: 1.5;
   color: var(--text-dim);
   margin: 14px 0 8px;
   text-transform: uppercase;
@@ -1348,8 +1364,9 @@ h3 {
 
 .unequip-button {
   position: absolute;
-  top: -8px;
-  right: -8px;
+  /* innerhalb des Platzes, damit es nichts darüber (z.B. "Bestes anlegen") verdeckt */
+  top: 2px;
+  right: 2px;
   padding: 0 5px;
   font-size: 15px;
   line-height: 1.2;
@@ -3337,6 +3354,7 @@ h3 {
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 10px;
+  line-height: 1.5; /* zweizeilige Überschriften laufen sonst ineinander */
   color: var(--gold);
 }
 
@@ -4460,8 +4478,9 @@ body.locked-collection .collection-button {
 
 .hero-tile-marks {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  /* innerhalb der Kachel, damit die Zeichen nicht über die Nachbar-Kachel ragen */
+  top: 2px;
+  right: 2px;
   display: flex;
   gap: 2px;
 }
