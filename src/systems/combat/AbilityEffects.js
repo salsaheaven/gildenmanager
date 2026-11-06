@@ -4,6 +4,7 @@
 //         → Wirkung ausrechnen (Schaden, Heilung, Schild …) und in den Kampfbericht schreiben.
 // ============================================================
 
+import { getCounterPoints, findCounterEffect } from './CounterPoints.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
 
 // Stärke einer Aktion: Wert (Angriff oder Magie) × Faktor × Zufall, evtl. kritisch.
@@ -37,6 +38,7 @@ export function heroDealsDamage(battle, caster, target, actionName, scaling, pow
   if (!target.alive) {
     battle.addLog(target.name + ' ist besiegt!', 'death');
   }
+  breakShell(battle, caster, target);
 
   const lifesteal = caster.getLifesteal();
   if (lifesteal > 0 && result.damage > 0) {
@@ -46,6 +48,29 @@ export function heroDealsDamage(battle, caster, target, actionName, scaling, pow
     }
   }
   return result.damage;
+}
+
+// Panzer brechen (Mechanik 'shell'): Treffer von Samurai, Barbar, Mönch (oder mit Konter-Talent) ziehen Punkte ab.
+// Sind keine Punkte mehr übrig, ist der Panzer weg (siehe data/counters.js, COUNTER_POINTS).
+function breakShell(battle, caster, target) {
+  if (!target.alive) {
+    return;
+  }
+  const shell = findCounterEffect(target, 'shell');
+  const points = getCounterPoints(caster, 'breakShell');
+  if (!shell || points === 0) {
+    return;
+  }
+  shell.points -= points;
+  if (shell.points <= 0) {
+    target.effects = target.effects.filter((effect) => effect !== shell);
+    battle.causes.addCountered(shell.name);
+    battle.addLog(caster.name + ' bricht ' + shell.name + ' von ' + target.name + '!', 'mechanic',
+      { labels: [{ targetId: target.id, text: 'Panzer gebrochen!' }] });
+  } else {
+    battle.addLog(caster.name + ' schlägt Risse in ' + shell.name + '.', 'info',
+      { labels: [{ targetId: target.id, text: 'Risse!' }] });
+  }
 }
 
 // Normaler Angriff, wenn kein Skill passt

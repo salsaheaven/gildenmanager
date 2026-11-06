@@ -90,3 +90,28 @@ describe('Woran es lag', () => {
     expect(report.analysis.causes.length).toBeGreaterThan(0);
   });
 });
+
+describe('Klassen-Tipps ("Helfen würde")', () => {
+  it('nennt für Mechaniken mit Konter die Klassen aus der Konter-Tabelle', async () => {
+    const { getClassTip, getAreaDamageClassIds } = await import('../src/systems/ClassTips.js');
+    expect(getClassTip({ type: 'mechanic', mechanicType: 'groupCast', interruptible: true }))
+      .toBe('Unterbrechen: Schurke (per Talent auch Jäger, Magier)');
+    expect(getClassTip({ type: 'mechanic', mechanicType: 'shell' })).toContain('Panzer brechen: Samurai, Barbar, Mönch');
+    expect(getClassTip({ type: 'mechanic', mechanicType: 'frenzy' })).toContain('Wutanfall dämpfen');
+    expect(getAreaDamageClassIds()).toContain('mage');
+    expect(getClassTip({ type: 'minion' })).toContain('Magier');
+  });
+
+  it('ein nicht gebrochener Panzer steht als Hinweis mit den passenden Klassen da', async () => {
+    const { createTestGroup } = await import('../src/systems/combat/TestGroup.js');
+    const { simulateRun } = await import('../src/systems/combat/CombatSimulator.js');
+    const { analyzeRun } = await import('../src/systems/combat/DefeatAnalysis.js');
+    const heroes = createTestGroup(6, 'uncommon', ['warrior', 'priest', 'runeweaver', 'mage', 'rogue']);
+    const result = simulateRun({ heroes, dungeonId: 'broodNests', seed: 3, recordLog: false });
+    const analysis = analyzeRun(result, []);
+    if (result.encounters.length === 3) {
+      expect(analysis.notes.some((note) => note.includes('Chitinpanzer') && note.includes('Samurai'))).toBe(true);
+    }
+    expect(analysis.classTip).not.toBe(null);
+  });
+});

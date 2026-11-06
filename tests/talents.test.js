@@ -13,7 +13,7 @@ import { Combatant } from '../src/systems/combat/Combatant.js';
 
 const LOOKS = { skin: '#f1c39b', hair: '#6b3f17' };
 const KNOWN_EFFECTS = ['damageDone', 'damageTaken', 'healingDone', 'manaCost', 'threat', 'dodge', 'targetPriority',
-  'abilityPower', 'abilityWhen', 'abilityTarget', 'statBonus', 'abilityDuration', 'cheatDeath', 'groupAura', 'abilityInterrupts', 'abilityCleanses', 'abilityShield'];
+  'abilityPower', 'abilityWhen', 'abilityTarget', 'statBonus', 'abilityDuration', 'cheatDeath', 'groupAura', 'abilityInterrupts', 'abilityCleanses', 'abilityShield', 'counterPoints'];
 
 function heroOf(classId, level, rarityId = 'uncommon') {
   const hero = new Hero(1, 'T', classId, rarityId, [], LOOKS);
@@ -95,7 +95,7 @@ describe('Talente wählen', () => {
     expect(epic.chooseTalent('warShieldMaster')).toBe(true);
     expect(epic.chooseTalent('warBladeMaster')).toBe(true);
     expect(epic.chooseTalent('warUnbending')).toBe(true);
-    expect(epic.chooseTalent('warChallenger')).toBe(false);
+    expect(epic.chooseTalent('warShellBreaker')).toBe(false);
 
     const legendary = heroOf('warrior', 30, 'legendary');
     expect(legendary.getFreeTalentPicks()).toBe(5);

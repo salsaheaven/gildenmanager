@@ -69,3 +69,36 @@ describe('Konter-Daten', () => {
     }
   });
 });
+
+describe('Panzer brechen und Wutanfall dämpfen', () => {
+  it('Samurai, Barbar und Mönch brechen den Chitinpanzer von Skarrix', () => {
+    for (const classId of ['samurai', 'barbarian', 'monk']) {
+      const texts = fight(['warrior', 'priest', classId], null, null, 'skarrix');
+      expect(hasLine(texts, 'bricht Chitinpanzer'), classId).toBe(true);
+    }
+  });
+
+  it('ohne Konter bleibt der Panzer, mit Konter-Talent gibt es erst Risse', () => {
+    expect(hasLine(fight(['warrior', 'priest', 'mage'], null, null, 'skarrix'), 'bricht Chitinpanzer')).toBe(false);
+    const withTalent = fight(['warrior', 'priest', 'mage'], 'warrior', 'warShellBreaker', 'skarrix');
+    expect(hasLine(withTalent, 'schlägt Risse in Chitinpanzer')).toBe(true);
+  });
+
+  it('Barde, Chronomant und Hexenmeister dämpfen den Frostzorn von Hrimgar', () => {
+    for (const classId of ['bard', 'chronomancer', 'warlock']) {
+      const texts = fight(['warrior', 'priest', classId], null, null, 'hrimgar');
+      expect(hasLine(texts, 'dämpft Frostzorn'), classId).toBe(true);
+    }
+    const withTalent = fight(['warrior', 'priest', 'shaman'], 'shaman', 'shaCalmingTotem', 'hrimgar');
+    expect(hasLine(withTalent, 'redet beruhigend')).toBe(true);
+  });
+
+  it('jede Klasse hat jetzt einen Konter (fest oder per Talent)', async () => {
+    const { HERO_CLASSES } = await import('../src/data/heroClasses.js');
+    for (const heroClass of HERO_CLASSES) {
+      const has = COUNTERS.some((counter) => counter.classIds.includes(heroClass.id) ||
+        counter.talents.some((entry) => entry.classId === heroClass.id));
+      expect(has, heroClass.id).toBe(true);
+    }
+  });
+});

@@ -50,8 +50,8 @@ export const TALENTS = {
     [
       { id: 'warUnbending', name: 'Unbeugsam', description: '+20 % Leben',
         effects: { statBonus: { health: 0.2 } } },
-      { id: 'warChallenger', name: 'Herausforderer', description: 'Herausforderungsruf hält 1 Runde länger, Bollwerkstoß +30 % (mehr Aggro)',
-        effects: { abilityDuration: { challengingShout: 1 }, abilityPower: { bulwarkStrike: 0.3 } } },
+      { id: 'warShellBreaker', name: 'Schildbrecher', description: 'Konter: Seine Treffer brechen den Panzer eines Bosses (schwächer als Samurai, Barbar und Mönch)',
+        effects: { counterPoints: { breakShell: 1 } } },
     ],
     [
       { id: 'warLastStand', name: 'Letztes Gefecht', description: 'Einmal pro Kampf überlebt er einen tödlichen Treffer mit 1 Leben',
@@ -71,8 +71,8 @@ export const TALENTS = {
     [
       { id: 'palRecovery', name: 'Genesung', description: 'Gelübde der Genesung heilt 30 % mehr',
         effects: { abilityPower: { vowOfRecovery: 0.3 } } },
-      { id: 'palHallowedShield', name: 'Geweihter Schild', description: '+15 % Rüstung',
-        effects: { statBonus: { defense: 0.15 } } },
+      { id: 'palShellBreaker', name: 'Lichthammer', description: 'Konter: Seine Treffer brechen den Panzer eines Bosses (schwächer als Samurai, Barbar und Mönch)',
+        effects: { counterPoints: { breakShell: 1 } } },
     ],
     [
       { id: 'palDevotionAura', name: 'Aura der Hingabe', description: 'Die ganze Gruppe nimmt −5 % Schaden',
@@ -156,8 +156,8 @@ export const TALENTS = {
     [
       { id: 'druWideGrove', name: 'Weiter Hain', description: 'Hainsegen heilt 25 % mehr',
         effects: { abilityPower: { groveBlessing: 0.25 } } },
-      { id: 'druFrugal', name: 'Genügsam', description: '−20 % Mana-Kosten',
-        effects: { manaCost: -0.2 } },
+      { id: 'druSoothe', name: 'Besänftigen', description: 'Konter: Dämpft den Wutanfall eines Bosses (kostet seinen Zug, schwächer als Barde, Chronomant und Hexenmeister)',
+        effects: { counterPoints: { calm: 1 } } },
     ],
     [
       { id: 'druDeepRoots', name: 'Tiefe Wurzeln', description: 'Ruf der Wurzeln holt Gefallene mit doppelt so viel Leben zurück',
@@ -326,8 +326,8 @@ export const TALENTS = {
     [
       { id: 'shaLongRage', name: 'Langer Rausch', description: 'Kampfrausch hält 1 Runde länger',
         effects: { abilityDuration: { bloodlust: 1 } } },
-      { id: 'shaRock', name: 'Fels', description: 'Felsenpfahl schützt 30 % stärker',
-        effects: { abilityPower: { stoneTotem: 0.3 } } },
+      { id: 'shaCalmingTotem', name: 'Beruhigende Erde', description: 'Konter: Dämpft den Wutanfall eines Bosses (kostet seinen Zug, schwächer als Barde, Chronomant und Hexenmeister)',
+        effects: { counterPoints: { calm: 1 } } },
     ],
     [
       { id: 'shaAncestor', name: 'Ahnengeist', description: 'Die ganze Gruppe macht +5 % Schaden',

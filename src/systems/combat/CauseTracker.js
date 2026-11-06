@@ -1,6 +1,6 @@
 // ============================================================
 // CAUSETRACKER – merkt sich während eines Kampfes, WOHER der Schaden an den Helden kommt
-// und was schiefging (verpasste Unterbrechungen, Heiler ohne Mana).
+// und was schiefging (verpasste Unterbrechungen, nicht gekonterte Panzer/Wutanfälle, Heiler ohne Mana).
 // Daraus berechnet DefeatAnalysis.js nach dem Run die "Top 3 Ursachen".
 //
 // Eine Quelle (source) ist { key, name, type, hint }:
@@ -14,6 +14,23 @@ export class CauseTracker {
     this.damageBySource = {};   // key → { key, name, type, hint, damage }
     this.missedInterrupts = {}; // Mechanik-Name → wie oft sie nicht unterbrochen wurde
     this.outOfMana = [];        // Namen der Helden, denen das Mana ausging (jeder nur einmal)
+    // Panzer und Wutanfälle, die niemand beendet hat: Mechanik-Name → { count, mechanicType }
+    this.uncountered = {};
+  }
+
+  // Der Boss hat einen Panzer bzw. Wutanfall bekommen (zählt als "nicht gekontert", bis ihn jemand beendet)
+  addCounterMechanic(mechanicName, mechanicType) {
+    if (!this.uncountered[mechanicName]) {
+      this.uncountered[mechanicName] = { count: 0, mechanicType: mechanicType };
+    }
+    this.uncountered[mechanicName].count++;
+  }
+
+  // Ein Held hat den Panzer gebrochen bzw. den Wutanfall gedämpft
+  addCountered(mechanicName) {
+    if (this.uncountered[mechanicName]) {
+      this.uncountered[mechanicName].count--;
+    }
   }
 
   // Ein Held hat Schaden aus dieser Quelle genommen
@@ -23,7 +40,8 @@ export class CauseTracker {
     }
     if (!this.damageBySource[source.key]) {
       this.damageBySource[source.key] = { key: source.key, name: source.name, type: source.type,
-        hint: source.hint || null, damage: 0 };
+        hint: source.hint || null, mechanicType: source.mechanicType || null, interruptible: source.interruptible || false,
+        damage: 0 };
     }
     this.damageBySource[source.key].damage += amount;
   }
@@ -45,6 +63,8 @@ export class CauseTracker {
       damageBySource: Object.values(this.damageBySource),
       missedInterrupts: { ...this.missedInterrupts },
       outOfMana: this.outOfMana.slice(),
+      uncountered: Object.keys(this.uncountered).filter((name) => this.uncountered[name].count > 0)
+        .map((name) => ({ name: name, count: this.uncountered[name].count, mechanicType: this.uncountered[name].mechanicType })),
     };
   }
 }

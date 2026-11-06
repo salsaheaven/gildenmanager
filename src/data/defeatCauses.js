@@ -26,4 +26,19 @@ export const UNKNOWN_CAUSE = {
 export const CAUSE_NOTES = {
   missedInterrupt: '{name} wurde {count}× nicht unterbrochen.',
   outOfMana: '{name} ging das Mana aus.',
+  uncountered: '{name} wurde {count}× nicht gekontert ({counter}).',
+};
+
+// Konkrete Klassen-Tipps zur größten Ursache ("Helfen würde: …"), siehe systems/ClassTips.js.
+// Schlüssel: Art der Ursache (minion, enrage, attack) oder Art der Mechanik (frontWave, groupCast, groupStrike, summon).
+// Mechaniken mit Konter (Unterbrechen, Fluch lösen, Abfangen, Panzer brechen, Wutanfall dämpfen) nennen
+// automatisch die Klassen aus data/counters.js. classIds: 'aoe' = alle Klassen mit Flächenschaden (aus den Skills).
+export const CLASS_TIPS = {
+  minion: { text: 'Flächenschaden gegen die Diener', classIds: 'aoe' },
+  summon: { text: 'Flächenschaden gegen die Diener', classIds: 'aoe' },
+  enrage: { text: 'mehr Schaden', classIds: ['warlock', 'mage', 'rogue', 'barbarian'] },
+  attack: { text: 'mehr Heilung oder Schutz für den Tank', classIds: ['priest', 'druid', 'runeweaver', 'paladin'] },
+  frontWave: { text: 'Fernkämpfer statt Nahkämpfer', classIds: ['mage', 'hunter', 'warlock'] },
+  groupCast: { text: 'Gruppenheilung und Schutz', classIds: ['druid', 'shaman', 'runeweaver'] },
+  groupStrike: { text: 'Gruppenheilung und Schutz', classIds: ['druid', 'shaman', 'runeweaver'] },
 };

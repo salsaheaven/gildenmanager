@@ -3318,6 +3318,13 @@ h3 {
   color: var(--text-dim);
 }
 
+/* "Helfen würde: Panzer brechen: Samurai, Barbar, Mönch" */
+.defeat-class-tip {
+  margin-top: 4px;
+  font-size: 16px;
+  color: #7fd4ff;
+}
+
 /* ---------- Dungeons ---------- */
 
 .dungeon-screen {

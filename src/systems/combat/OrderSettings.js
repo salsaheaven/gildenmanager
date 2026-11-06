@@ -23,6 +23,7 @@ export function createEmptyOrderSettings() {
     abilityInterrupts: {}, // Skill-id → true: der Skill unterbricht zusätzlich einen unterbrechbaren Boss-Zauber
     abilityCleanses: {},   // Skill-id → true: der Skill löst zusätzlich Flüche von seinen Zielen
     abilityShield: {},     // Skill-id → Stärke: der Skill gibt seinen Zielen zusätzlich einen Schild (Magie × Stärke)
+    counterPoints: {},     // Konter-id → Punkte durch ein Konter-Talent (Panzer brechen, Wutanfall dämpfen; siehe data/counters.js)
     cheatDeath: false,   // einmal pro Kampf einen tödlichen Treffer überleben
     groupAuras: [],      // Auren für die ganze Gruppe: [{ id, damageDone, damageTaken }] (siehe applyGroupAuras)
   };
@@ -35,7 +36,7 @@ export function combineOrderEffects(effectsList) {
   for (const effects of effectsList) {
     for (const key in effects) {
       const value = effects[key];
-      if (key === 'abilityPower' || key === 'statBonus' || key === 'abilityDuration' || key === 'abilityShield') {
+      if (key === 'abilityPower' || key === 'statBonus' || key === 'abilityDuration' || key === 'abilityShield' || key === 'counterPoints') {
         // Zahlen pro Skill bzw. Wert zusammenzählen
         for (const name in value) {
           settings[key][name] = (settings[key][name] || 0) + value[name];

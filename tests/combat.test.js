@@ -11,7 +11,7 @@ import { SPRITES } from '../src/data/sprites.js';
 
 const SKILL_TYPES = ['damage', 'heal', 'shield', 'buff', 'taunt', 'mana', 'cleanse', 'stun', 'interrupt', 'dot',
   'hot', 'revive', 'resetCooldowns'];
-const MECHANIC_TYPES = ['tankBuster', 'groupCast', 'frontWave', 'summon', 'curse'];
+const MECHANIC_TYPES = ['tankBuster', 'groupCast', 'frontWave', 'summon', 'curse', 'shell', 'frenzy'];
 
 describe('Kampf-Daten', () => {
   for (const abilityId in ABILITIES) {

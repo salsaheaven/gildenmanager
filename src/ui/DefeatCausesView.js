@@ -52,5 +52,12 @@ export function createDefeatCausesView(analysis) {
     tip.textContent = 'Tipp: ' + analysis.tip;
     box.appendChild(tip);
   }
+  // Konkrete Klassen, die helfen würden (z.B. "Panzer brechen: Samurai, Barbar, Mönch")
+  if (analysis.classTip) {
+    const classTip = document.createElement('div');
+    classTip.className = 'defeat-class-tip';
+    classTip.textContent = 'Helfen würde: ' + analysis.classTip;
+    box.appendChild(classTip);
+  }
   return box;
 }

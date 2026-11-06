@@ -181,7 +181,8 @@ function isMechanicDue(mechanic, round) {
 
 // Quelle für "Woran es lag" (siehe CauseTracker.js)
 function getMechanicSource(mechanic) {
-  return { key: 'mechanic:' + mechanic.name, name: mechanic.name, type: 'mechanic', hint: mechanic.hint };
+  return { key: 'mechanic:' + mechanic.name, name: mechanic.name, type: 'mechanic', hint: mechanic.hint,
+    mechanicType: mechanic.type, interruptible: mechanic.interruptible === true };
 }
 
 function resolveMechanic(battle, boss, mechanic) {
@@ -221,6 +222,31 @@ function resolveMechanic(battle, boss, mechanic) {
       for (const hero of group) {
         enemyHits(battle, boss, hero, 'trifft', mechanic.power, mechanic.damageType || 'physical', source);
       }
+      break;
+    }
+    case 'shell': {
+      // Panzer: weniger erlittener Schaden, bis er gebrochen wird oder abläuft
+      boss.addEffect({
+        kind: 'damageTaken', value: -mechanic.damageReduction, remaining: mechanic.duration,
+        counterKind: 'shell', points: mechanic.breakPoints, name: mechanic.name, buffId: 'shell',
+      });
+      battle.causes.addCounterMechanic(mechanic.name, mechanic.type);
+      battle.logAction(boss, mechanic.name, mechanic.fx, [boss], true);
+      battle.addLog(boss.name + ' hüllt sich in ' + mechanic.name + '! Er nimmt kaum noch Schaden.', 'mechanic',
+        { labels: [{ targetId: boss.id, text: mechanic.name + '!' }] });
+      break;
+    }
+    case 'frenzy': {
+      // Wutanfall: mehr Schaden, bis er gedämpft wird oder abläuft
+      boss.addEffect({
+        kind: 'frenzy', value: mechanic.damageBonus, remaining: mechanic.duration,
+        counterKind: 'frenzy', points: mechanic.breakPoints, name: mechanic.name, buffId: 'frenzy',
+        cause: source, // Schaden im Wutanfall zählt für "Woran es lag" zu dieser Mechanik
+      });
+      battle.causes.addCounterMechanic(mechanic.name, mechanic.type);
+      battle.logAction(boss, mechanic.name, mechanic.fx, [boss], true);
+      battle.addLog(boss.name + ' gerät in ' + mechanic.name + '! Er schlägt viel härter zu.', 'mechanic',
+        { labels: [{ targetId: boss.id, text: mechanic.name + '!' }] });
       break;
     }
     case 'frontWave': {
@@ -279,13 +305,18 @@ function enemyHits(battle, enemy, target, verb, power, damageType, source, dodge
   }
   const variation = battle.random.between(1 - COMBAT_RULES.enemyVariation, 1 + COMBAT_RULES.enemyVariation);
   const enrageFactor = enemy.enraged ? 2 : 1;
+  // Wutanfall (Mechanik 'frenzy'): zusätzlicher Schaden
+  const frenzy = enemy.effects.find((effect) => effect.kind === 'frenzy') || null;
+  const frenzyFactor = frenzy ? 1 + frenzy.value : 1;
   const crit = battle.random.next() < COMBAT_RULES.enemyCritChance;
   const critFactor = crit ? COMBAT_RULES.critMultiplier : 1;
-  const result = target.takeDamage(enemy.attack * power * variation * enrageFactor * critFactor, false, damageType);
+  const result = target.takeDamage(enemy.attack * power * variation * enrageFactor * frenzyFactor * critFactor, false, damageType);
   enemy.damageDone += result.damage;
   // In Raserei zählt der Schaden zur Raserei: Der Kampf hat zu lange gedauert
   if (enemy.enraged) {
     battle.causes.addDamage({ key: 'enrage:' + enemy.name, name: 'Raserei von ' + enemy.name, type: 'enrage' }, result.damage);
+  } else if (frenzy) {
+    battle.causes.addDamage(frenzy.cause, result.damage);
   } else {
     battle.causes.addDamage(source, result.damage);
   }

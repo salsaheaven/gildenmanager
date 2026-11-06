@@ -26,6 +26,7 @@ import { Battle, scaleEnemyStats } from './Battle.js';
 import { chooseAbility } from './HeroAI.js';
 import { takeEnemyTurn, logSavedByTalent } from './EnemyAI.js';
 import { applyGroupAuras } from './OrderSettings.js';
+import { getCounterPoints, findCounterEffect } from './CounterPoints.js';
 import { useAbility, useBasicAttack, heroDealsDamage } from './AbilityEffects.js';
 import { ABILITIES } from '../../data/abilities.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
@@ -290,6 +291,11 @@ export function runEncounter(heroes, encounter, random, recordLog, retreatOption
 
 function takeHeroTurn(battle, hero) {
   warnIfOutOfMana(battle, hero);
+  // Wutanfall des Bosses (Mechanik 'frenzy'): Barde, Chronomant, Hexenmeister (oder mit Konter-Talent)
+  // nutzen ihren Zug, um ihn zu dämpfen
+  if (calmFrenzy(battle, hero)) {
+    return;
+  }
   const abilityId = chooseAbility(battle, hero);
   if (abilityId) {
     useAbility(battle, hero, abilityId, ABILITIES[abilityId]);
@@ -297,6 +303,31 @@ function takeHeroTurn(battle, hero) {
     // Beim Rückzug wird nicht angegriffen
     useBasicAttack(battle, hero);
   }
+}
+
+// Dämpft den Wutanfall des Bosses, wenn dieser Held es kann. Gibt true zurück, wenn der Zug dafür verbraucht wurde.
+function calmFrenzy(battle, hero) {
+  const boss = battle.boss;
+  if (!boss || !boss.alive || battle.retreating) {
+    return false;
+  }
+  const frenzy = findCounterEffect(boss, 'frenzy');
+  const points = getCounterPoints(hero, 'calm');
+  if (!frenzy || points === 0) {
+    return false;
+  }
+  frenzy.points -= points;
+  battle.logAction(hero, 'Beruhigen', 'aura', [boss], true);
+  if (frenzy.points <= 0) {
+    boss.effects = boss.effects.filter((effect) => effect !== frenzy);
+    battle.causes.addCountered(frenzy.name);
+    battle.addLog(hero.name + ' dämpft ' + frenzy.name + ' von ' + boss.name + '!', 'mechanic',
+      { labels: [{ targetId: boss.id, text: 'Beruhigt!' }] });
+  } else {
+    battle.addLog(hero.name + ' redet beruhigend auf ' + boss.name + ' ein.', 'info',
+      { labels: [{ targetId: boss.id, text: 'Ruhiger …' }] });
+  }
+  return true;
 }
 
 // Begleiter: stellt sich einem Diener entgegen (der dann nur noch ihn angreift) und beißt ihn.

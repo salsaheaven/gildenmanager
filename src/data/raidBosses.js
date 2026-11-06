@@ -216,6 +216,11 @@ export const RAID_BOSSES = [
         firstAt: 6, every: 9, minion: 'frostWolf', count: 3, castTime: 0, fx: 'summon',
         hint: 'Flächenschaden räumt die Wölfe weg.',
       },
+      {
+        type: 'shell', name: 'Eispanzer',
+        firstAt: 5, every: 8, duration: 4, damageReduction: 0.75, breakPoints: 2, castTime: 0, fx: 'aura',
+        hint: 'Samurai, Barbar oder Mönch brechen den Panzer.',
+      },
     ],
   },
   {
@@ -286,6 +291,11 @@ export const RAID_BOSSES = [
         firstAt: 6, every: 9, minion: 'ghoul', count: 3, castTime: 0, fx: 'summon',
         hint: 'Flächenschaden räumt die Ghule weg.',
       },
+      {
+        type: 'frenzy', name: 'Knochenwut',
+        firstAt: 3, every: 8, duration: 3, damageBonus: 0.8, breakPoints: 2, castTime: 0, fx: 'aura',
+        hint: 'Barde, Chronomant oder Hexenmeister dämpfen die Wut.',
+      },
     ],
   },
   {
@@ -309,8 +319,8 @@ export const RAID_BOSSES = [
       },
       {
         type: 'groupStrike', name: 'Schattenschlag', damageType: 'shadow',
-        firstAt: 4, every: 4, power: 1.9, castTime: 1, interruptible: true, fx: 'shadowWave',
-        hint: 'Trifft eine ganze Gruppe, lässt sich aber unterbrechen.',
+        firstAt: 4, every: 4, power: 1.9, castTime: 1, interruptible: false, fx: 'shadowWave',
+        hint: 'Trifft eine ganze Gruppe: Der Heiler der Gruppe muss bereit sein.',
       },
     ],
     phases: [

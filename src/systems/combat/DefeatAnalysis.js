@@ -6,6 +6,7 @@
 // ============================================================
 
 import { DEFEAT_ANALYSIS, CAUSE_TIPS, CAUSE_NOTES, UNKNOWN_CAUSE } from '../../data/defeatCauses.js';
+import { getClassTip } from '../ClassTips.js';
 
 // Lohnt sich die Auswertung? Bei einer Niederlage und bei einem Sieg mit Gefallenen.
 export function needsDefeatAnalysis(runResult) {
@@ -15,12 +16,14 @@ export function needsDefeatAnalysis(runResult) {
 // runResult = Ergebnis von simulateRun.
 // hiddenMechanicNames = Mechaniken noch nicht erkundeter Bosse (siehe systems/DungeonKnowledge.js):
 //   Sie erscheinen nur als "Etwas Unbekanntes" mit vagem Tipp (Texte in UNKNOWN_CAUSE).
-// Gibt zurück: { causes: [{ name, type, share }], tip, notes: [Text] }
+// Gibt zurück: { causes: [{ name, type, share }], tip, classTip, notes: [Text] }
+//   classTip = welche Klassen gegen die größte Ursache helfen würden (siehe systems/ClassTips.js), oder null
 //   share = Anteil am gesamten Schaden an den Helden (0 bis 1)
 export function analyzeRun(runResult, hiddenMechanicNames = []) {
   const bySource = {};
   const missedInterrupts = {};
   const outOfMana = [];
+  const uncountered = {}; // Name → { count, mechanicType }
   for (const encounter of runResult.encounters) {
     const causes = encounter.causes;
     if (!causes) {
@@ -45,6 +48,15 @@ export function analyzeRun(runResult, hiddenMechanicNames = []) {
         outOfMana.push(name);
       }
     }
+    for (const entry of causes.uncountered || []) {
+      if (hiddenMechanicNames.includes(entry.name)) {
+        continue;
+      }
+      if (!uncountered[entry.name]) {
+        uncountered[entry.name] = { count: 0, mechanicType: entry.mechanicType };
+      }
+      uncountered[entry.name].count += entry.count;
+    }
   }
 
   const sources = Object.values(bySource);
@@ -60,8 +72,11 @@ export function analyzeRun(runResult, hiddenMechanicNames = []) {
 
   // Tipp zur größten Ursache: der eigene Tipp der Mechanik, sonst der allgemeine für diese Art
   let tip = null;
+  let classTip = null;
   if (top.length > 0) {
     tip = top[0].hint || CAUSE_TIPS[top[0].type] || null;
+    // Unerkundete Mechaniken verraten nichts
+    classTip = top[0].key === 'unknown' ? null : getClassTip(top[0]);
   }
 
   const notes = [];
@@ -72,8 +87,13 @@ export function analyzeRun(runResult, hiddenMechanicNames = []) {
   for (const name of outOfMana) {
     notes.push(fillIn(CAUSE_NOTES.outOfMana, { name: name }));
   }
+  // Panzer bzw. Wutanfall, den niemand beendet hat, mit den Klassen, die es könnten
+  for (const name in uncountered) {
+    const counterText = getClassTip({ type: 'mechanic', mechanicType: uncountered[name].mechanicType, interruptible: false });
+    notes.push(fillIn(CAUSE_NOTES.uncountered, { name: name, count: uncountered[name].count, counter: counterText }));
+  }
 
-  return { causes: causes, tip: tip, notes: notes };
+  return { causes: causes, tip: tip, classTip: classTip, notes: notes };
 }
 
 // Ersetzt {name}, {count} … in einem Text

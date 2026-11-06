@@ -17,6 +17,11 @@
 //                   'summon'     (ruft Diener)
 //                   'curse'      (Fluch: Schaden über Zeit auf einen zufälligen Helden)
 //                   'groupStrike' (nur Raid: trifft eine ganze Raid-Gruppe, siehe raidBosses.js)
+//                   'shell'      (Panzer: der Boss nimmt duration Runden lang damageReduction weniger Schaden;
+//                                 Samurai, Barbar und Mönch brechen ihn, siehe data/counters.js)
+//                   'frenzy'     (Wutanfall: der Boss macht duration Runden lang damageBonus mehr Schaden;
+//                                 Barde, Chronomant und Hexenmeister dämpfen ihn)
+//   breakPoints   = Panzer/Wutanfall: so viele Konter-Punkte braucht es, um ihn zu beenden (siehe COUNTER_POINTS)
 //   name          = Anzeigename
 //   firstAt       = in welcher Runde zum ersten Mal
 //   every         = danach alle so viele Runden
@@ -104,6 +109,11 @@ export const BOSSES = [
         firstAt: 6, every: 7, power: 2.1, castTime: 1, interruptible: false, fx: 'acidWave',
         hint: 'Trifft nur die vordere Reihe: weniger Nahkämpfer mitnehmen.',
       },
+      {
+        type: 'shell', name: 'Chitinpanzer',
+        firstAt: 4, every: 8, duration: 4, damageReduction: 0.75, breakPoints: 2, castTime: 0, fx: 'aura',
+        hint: 'Samurai, Barbar oder Mönch brechen den Panzer mit ihren Treffern. Ohne sie dauert der Kampf viel länger (Raserei).',
+      },
     ],
   },
   {
@@ -125,6 +135,11 @@ export const BOSSES = [
         type: 'tankBuster', name: 'Vernichtungsschlag',
         firstAt: 8, every: 12, power: 9, castTime: 1, interruptible: false, fx: 'bigImpact',
         hint: 'Tödlich für jeden Tank. Nur der Gottesschild des Paladins fängt ihn sicher ab, knapp geht es mit Eiserner Wacht + Runenpanzer.',
+      },
+      {
+        type: 'frenzy', name: 'Frostzorn',
+        firstAt: 6, every: 8, duration: 3, damageBonus: 0.8, breakPoints: 2, castTime: 0, fx: 'aura',
+        hint: 'Barde, Chronomant oder Hexenmeister dämpfen den Zorn. Sonst schlägt Hrimgar drei Runden lang viel härter zu.',
       },
     ],
   },
@@ -187,9 +202,9 @@ export const BOSSES = [
     enrageRound: 18,
     mechanics: [
       {
-        type: 'groupCast', name: 'Sonnenfeuer', damageType: 'fire',
-        firstAt: 3, every: 5, power: 2.0, castTime: 1, interruptible: true, fx: 'fireRain',
-        hint: 'Ein Schurke kann das Sonnenfeuer unterbrechen, der Chronomant hält Azhur mit Zeitstillstand an.',
+        type: 'shell', name: 'Sonnenschild',
+        firstAt: 3, every: 6, duration: 4, damageReduction: 0.75, breakPoints: 2, castTime: 0, fx: 'aura',
+        hint: 'Samurai, Barbar oder Mönch brechen den Schild. Bei der frühen Raserei zählt jede Runde.',
       },
       {
         type: 'summon', name: 'Akolythen rufen',
@@ -349,9 +364,9 @@ export const BOSSES = [
     enrageRound: 24,
     mechanics: [
       {
-        type: 'groupCast', name: 'Urschrei',
-        firstAt: 4, every: 5, power: 1.9, castTime: 1, interruptible: true, fx: 'bigImpact',
-        hint: 'Ein Schurke kann den Urschrei unterbrechen.',
+        type: 'frenzy', name: 'Urzorn',
+        firstAt: 4, every: 7, duration: 3, damageBonus: 0.8, breakPoints: 2, castTime: 0, fx: 'aura',
+        hint: 'Barde, Chronomant oder Hexenmeister dämpfen den Urzorn.',
       },
       {
         type: 'summon', name: 'Rudel rufen',
@@ -536,6 +551,8 @@ export const MECHANIC_TYPE_TEXTS = {
   frontWave: 'Trifft die vordere Reihe',
   summon: 'Ruft Diener herbei',
   curse: 'Fluch: Schaden über Zeit auf einen Helden',
+  shell: 'Panzer: nimmt einige Runden kaum Schaden',
+  frenzy: 'Wutanfall: macht einige Runden viel mehr Schaden',
   groupStrike: 'Trifft eine ganze Raid-Gruppe',
 };
 

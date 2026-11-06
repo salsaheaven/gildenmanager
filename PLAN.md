@@ -148,6 +148,8 @@ Dazu (2026-11-06): „Bestes ausrüsten“ an jeder stehenden Gruppe, Schloss �
 
 Umgesetzt (2026-11-06) aus dem Bericht: **Risiko live mit Konter-Symbolen** und **Ein Dungeon = eine Karte** (Planungs-Karte klappt unter dem Dungeon auf, Abschnitte Gruppe / Rückzug & Vorräte / Anweisungen / Dungeonführer, feste Leiste mit Gruppen-Stand, Einschätzung, Konter ✓/✗ und „Einplanen“). **Zerlegen im Beute-Ergebnis**: nach dem Öffnen Items antippen (✓ zerlegen) oder „Schwache markieren“ (unter Episch, ohne Boss-Items und gesperrte), dann „N zerlegen (Material)“. **Tagesabschluss: erst Kernzahlen**: Bilanz oben (Gold ±, Kisten, besiegte Bosse, Level-Ups, Verletzte), Szenen-Wahl „Alle Kämpfe / Nur Bosse / Keine“ (im Browser gemerkt, wirkt sofort), „Bericht von gestern“ im Tagesplan (Zusammenfassung des letzten Abends ohne Szenen).
 
+**Konter für alle Klassen (2026-11-06):** neue Mechaniken Panzer (`shell`) und Wutanfall (`frenzy`) mit Konter-Punkten (`CounterPoints.js`, `COUNTER_POINTS` in `data/counters.js`), 4 umgebaute Talente (Schildbrecher, Lichthammer, Beruhigende Erde, Besänftigen), Azhur/Skaar/Umbral ohne Unterbrechen, Klassen-Tipps und Hinweis „nicht gekontert“ in „Woran es lag“ (`ClassTips.js`). Spielstand-Version 26.
+
 Offen aus dem Bericht (größere Umbauten): vorbelegte Vorräte, Ausrüstung vom Vorgänger übernehmen, kompakte Listenansicht für den Raid.
 
 **M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.
