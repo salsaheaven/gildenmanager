@@ -333,6 +333,9 @@ export class DayEndOverlay {
     let nextText = nextBoss
       ? 'Am nächsten Raid-Tag dieser Woche geht es bei ' + getBoss(nextBoss.bossId).name + ' weiter.'
       : 'Alle Bosse dieser Woche sind besiegt! Nächste Woche beginnt der Raid von vorn.';
+    if (report.endbossDefeated) {
+      nextText = 'Der Endboss ist besiegt! Gleich kommt die Endauswertung.';
+    }
     // Zum ersten Mal ganz geschafft: der nächste Raid ist offen
     if (report.unlockedRaidId) {
       nextText += ' Neu: ' + getRaid(report.unlockedRaidId).name + ' ist offen (Reiter „Raid“)!';

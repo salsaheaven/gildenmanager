@@ -164,7 +164,11 @@ Plan vom 2026-11-01 (Entscheidungen in `KONZEPT.md` unter „Raids“, „Klasse
   - **5c** ✅ Beute: Legendär (Orange) gibt es nur noch aus Raid-Kisten, dort immer als Waffe oder Ring. Eine Raid-Kiste pro besiegtem Boss (Boss-Items mind. Episch, eigene Sammelbuch-Seite „Die Aschenhallen“, 1–3 Aschenessenz). Raid-Pity: nach 6 Raid-Kisten ohne Legendär garantiert (Stimmung in der Schatzkammer, `raidLegendaryPityAfter`). Set-Teile mit Aschenessenz in jedes andere Set umschmieden (auch andere Rüstungsart, Inventar, erst ab Schmiede Stufe 3). Raid-Karte im Tagesabschluss mit „Jetzt öffnen!“ pro Kiste. Test-Menü: „Raid-Beute-Test“. Spielstand-Version 23
   - ~~**5d** Krit als Zusatzwert auf Items~~ gestrichen (2026-11-06): Die anderen Werte reichen. **Damit ist Schritt 5 (Raid 1) fertig.**
   Ursprünglicher Umfang: Raid-Tage (Tag 6 und 7 jeder Woche), Wochen-Sperre, Raidgruppe aus 20 Helden (mind. 2 Tanks, 4 Heiler), legendäre Waffen und Ringe, Raid-Zutaten zum Umschmieden von Set-Teilen, Krit als Zusatzwert auf Items.
-- **Schritt 6** Raid 2 (5 Bosse mit Trash-Gruppen dazwischen, der letzte ist der Endboss), Endauswertung nach Spieltagen, Raid-Rennen der KI-Gilden im Ticker. Danach M4 pushen.
+- **Schritt 6** ✅ (2026-11-06)
+  - **6a** Raid 2 **„Der Nachtthron“**: 5 Bosse (Hrimvald, Zyra die Sturmhexe, Morvath der Knochendrache, Fürst Umbral, Endboss **Vaelor der Weltenverschlinger** mit 4 Phasen) und 7 Trash-Gruppen, eigene Raid-Kisten und Sammelbuch-Seite „Retter der Welt“. Öffnet nach dem ersten vollständigen Sieg in den Aschenhallen. Raid wählen im Raid-Bildschirm, Wochen-Sperre pro Raid.
+  - **6b** Raid-Rennen: KI-Gilden, die alle Dungeons geschafft haben, raiden an Raid-Tagen Boss für Boss (lernen mit jedem Versuch dazu), der Ticker meldet Versuche und Siege, der erste Sieg über einen Raid-Boss ist ein Server-First (Titel „Erste: <Boss>“), die Rangliste zählt zuerst den Raid-Fortschritt.
+  - **6c** Endauswertung (`EndEvaluation.js`, `EndEvaluationOverlay.js`): nach dem ersten Sieg über Vaelor Rang S–D nach Spieltagen (`data/endEvaluation.js`), Statistik, Platz im Raid-Rennen, Bestenliste im Browser (`BestList.js`, bleibt nach „Neu“), danach „Weiterspielen“. Test-Menü: „Endauswertung testen“. Spielstand-Version 25.
+  **Damit ist M4 fertig.**
 
 **M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie.
 

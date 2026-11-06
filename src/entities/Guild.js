@@ -21,6 +21,7 @@ export class Guild {
   constructor() {
     this.name = 'Die Unbesiegbaren';
     this.founded = false; // false = Startbildschirm "Gründe deine Gilde" ist noch offen (siehe Game.foundGuild)
+    this.endEvaluation = null; // Endauswertung nach dem ersten Sieg über den Endboss (siehe systems/EndEvaluation.js), sonst null
     this.gold = BALANCING.startGold;
     this.boxes = [];     // ungeöffnete Kisten (LootBox-Objekte)
     this.inventory = []; // Items (Item-Objekte)
@@ -301,6 +302,7 @@ export class Guild {
     return {
       name: this.name,
       founded: this.founded,
+      endEvaluation: this.endEvaluation,
       gold: this.gold,
       boxes: this.boxes.map((box) => box.toSaveData()),
       inventory: this.inventory.map((item) => item.toSaveData()),
@@ -341,6 +343,7 @@ export class Guild {
     const guild = new Guild();
     guild.name = data.name;
     guild.founded = data.founded;
+    guild.endEvaluation = data.endEvaluation;
     guild.gold = data.gold;
     guild.boxes = data.boxes.map((boxData) => LootBox.fromSaveData(boxData));
     guild.inventory = data.inventory.map((itemData) => Item.fromSaveData(itemData));

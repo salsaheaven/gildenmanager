@@ -1973,6 +1973,66 @@ h3 {
   margin: 6px 0;
 }
 
+/* ---------- Endauswertung (EndEvaluationOverlay.js) ---------- */
+
+.end-evaluation {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow-y: auto;
+  padding: 16px;
+  background: rgba(10, 6, 18, 0.94);
+}
+
+.end-evaluation-box {
+  max-width: 560px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.end-evaluation h1 {
+  font-family: var(--font-title);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--gold);
+}
+
+.end-rank {
+  font-family: var(--font-title);
+  font-size: 96px;
+  line-height: 1.2;
+  text-shadow: 4px 4px 0 #0c0914;
+  animation: end-rank-pop 0.8s ease-out;
+}
+
+@keyframes end-rank-pop {
+  0% { transform: scale(0.2); opacity: 0; }
+  70% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.end-rank-name {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.end-stats,
+.end-best-list {
+  text-align: left;
+  font-size: 18px;
+  margin: 8px auto;
+  max-width: 420px;
+}
+
+.end-best-list li.current {
+  color: var(--gold);
+}
+
+.end-best-rank {
+  font-family: var(--font-title);
+  font-size: 12px;
+}
+
 /* ---------- Raid-Szene: Boss oben, darunter 4 Gruppenreihen mit kleinen Helden ---------- */
 
 /* Kein Boden-Streifen: Die Gruppenreihen gehen über die ganze Höhe */

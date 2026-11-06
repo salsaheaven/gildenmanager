@@ -25,6 +25,7 @@ import { CollectionOverlay } from './ui/CollectionOverlay.js';
 import { LevelUpBanner } from './ui/LevelUpBanner.js';
 import { FoundingScreen } from './ui/FoundingScreen.js';
 import { RaidScreen } from './ui/RaidScreen.js';
+import { EndEvaluationOverlay } from './ui/EndEvaluationOverlay.js';
 import { Sound } from './ui/Sound.js';
 import { showToast } from './ui/Toast.js';
 import { UNLOCKS, getUnlock } from './data/unlocks.js';
@@ -211,19 +212,44 @@ game.on('heroHealed', (hero) => {
 });
 
 // Tagesabschluss: Kämpfe als Szene, danach Zusammenfassung mit Beute
+// Endauswertung nach dem ersten Sieg über den Endboss: erst nach dem Tagesabschluss zeigen
+let pendingEndEvaluation = null;
+let dayIsEnding = false; // während des Tagesendes wartet die Endauswertung auf den Tagesabschluss
+function showPendingEndEvaluation() {
+  if (pendingEndEvaluation) {
+    new EndEvaluationOverlay(pendingEndEvaluation);
+    pendingEndEvaluation = null;
+  }
+}
+game.on('gameWon', (evaluation) => {
+  pendingEndEvaluation = evaluation;
+  // Ohne laufenden Tagesabschluss (z.B. über das Test-Menü) sofort
+  if (!dayEndOverlay.isOpen() && !dayIsEnding) {
+    showPendingEndEvaluation();
+  }
+});
+
 const dayEndOverlay = new DayEndOverlay(game, {
   // Erst in der Zusammenfassung kommen die Level-Up-Banner (sonst verraten sie das Ergebnis)
   onSummaryShown: () => levelUpBanner.release(),
   onOpenChest: (boxTypeId) => {
     showScreen('treasury');
     lootBoxScreen.startOpening(boxTypeId);
+    showPendingEndEvaluation();
   },
-  onClosed: () => levelUpBanner.release(),
+  onClosed: () => {
+    levelUpBanner.release();
+    showPendingEndEvaluation();
+  },
 });
 
-game.on('dayEnding', () => levelUpBanner.hold());
+game.on('dayEnding', () => {
+  levelUpBanner.hold();
+  dayIsEnding = true;
+});
 
 game.on('dayEnded', (data) => {
+  dayIsEnding = false;
   // Ohne Kämpfe und ohne Aufgaben (alle ruhen sich aus) reicht eine kurze Meldung
   const summary = data.summary;
   const somethingHappened = summary.tasks.some((task) => task.taskId !== 'rest') || summary.news.length > 0 ||

@@ -14,6 +14,7 @@ import { getKnowledgeTotal } from '../systems/DungeonKnowledge.js';
 import { Sound } from './Sound.js';
 import { advanceConstruction } from '../systems/BuildingSystem.js';
 import { isRaidDay } from '../systems/RaidRules.js';
+import { createEndEvaluation } from '../systems/EndEvaluation.js';
 import { ITEM_TEMPLATES } from '../data/items.js';
 import { getSuitableClasses } from '../data/heroClasses.js';
 
@@ -128,6 +129,10 @@ export class DebugPanel {
       game.guild.addBox('chestFerron', SCALING.maxLevel);
       game.guild.addMaterials({ ashEssence: 10, dust: 100 });
       game.guild.hall.levels.forge = 3; // Set-Umschmieden braucht Schmiede Stufe 3
+    });
+    // Zum Ausprobieren der Endauswertung (trägt den Lauf auch in die Bestenliste ein)
+    this.addButton('Endauswertung testen', () => {
+      game.emit('gameWon', createEndEvaluation(game.guild, game.day));
     });
     // Springt ohne Tagesende zum nächsten Raid-Tag (Helden heilen dabei nicht, Sold fällt keiner an)
     this.addButton('Zum nächsten Raid-Tag springen', () => {

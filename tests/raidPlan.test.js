@@ -214,3 +214,17 @@ describe('Raid 2', () => {
     expect(finalRaid.encounters.filter((entry) => entry.type === 'boss').length).toBe(5);
   });
 });
+
+describe('Endauswertung', () => {
+  it('Rang nach Tagen, Platz im Raid-Rennen, nur einmal beim ersten Sieg', async () => {
+    const { createEndEvaluation, getRank, getFinalBossId } = await import('../src/systems/EndEvaluation.js');
+    expect(getRank(60).rank).toBe('S');
+    expect(getRank(500).rank).toBe('D');
+    const game = createRaidGame();
+    game.guild.rivals[0].raidKills[getFinalBossId()] = 40;
+    const evaluation = createEndEvaluation(game.guild, 80);
+    expect(evaluation.rank).toBe('A');
+    expect(evaluation.place).toBe(2);
+    expect(evaluation.guildCount).toBe(game.guild.rivals.length + 1);
+  });
+});

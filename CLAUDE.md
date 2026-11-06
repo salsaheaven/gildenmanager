@@ -46,7 +46,7 @@ src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, CollectionBook (Sammelb
                RaidPlan (Raid-Aufstellung in 4 Gruppen, Wochen-Sperre, heute ausgesetzt?)
 src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem (EP, Aufhol-Erfahrung, Verletzungen nach einem Run),
                DayPlan (welcher Held hat heute welche Aufgabe), HeroTaskSystem (Training, Kräuter/Rohstoffe sammeln, Aufträge, Erkunden, Sold bei endDay Held für Held, unzufrieden ohne Sold),
-               RivalSystem (KI-Gilden kommen voran, Neuigkeiten-Ticker, Server-First, Rangliste),
+               RivalSystem (KI-Gilden kommen voran, Neuigkeiten-Ticker, Server-First, Rangliste; Raid-Rennen an Raid-Tagen),
                BuildingSystem (Bau starten, Bautag bei endDay, Unterhalt: alles oder nichts),
                NewGear (Markierung „neue Ausrüstung“: passende Items, die in der Liste des Platzes noch nicht gesehen wurden),
                DailyTodo („Was gibt es heute zu tun?“: Einträge mit Anzahl und Ziel-Bildschirm, neu Freigeschaltetes zuerst),
@@ -57,6 +57,7 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                RaidRules (Wochentag, Raid-Tage, Raid offen?, Aufstellung prüfen, wo es nach der Wochen-Sperre weitergeht), AutoRaid („Auto-Raid“: Helden auf 4 Gruppen verteilen),
                GroupCounter (Helden nach Position, wie viele vollständige Gruppen die freien Helden ergeben, was fehlt; checkGroup prüft eine Gruppe),
                CraftingSystem (Zerlegen → Staub/Kristalle/Rohstoffe, Verbessern +1 bis +10 mit Fehlschlag ab +6),
+               EndEvaluation (Endauswertung nach dem Endboss: Rang nach Tagen, Statistik, Platz im Raid-Rennen),
                ForgeSystem (Schmieden: weißes Item nach Vorlage; Umschmieden: andere Rüstungsart; Set-Teil in anderes Set mit Aschenessenz), AlchemySystem (Brauen: Kräuter → Waren), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
                simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug; simulateRaid = Raid-Bosskampf mit 4 Gruppen à 5; simulateRaidRun = Raid-Tag bis zum ersten Wipe),
@@ -67,7 +68,7 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
                TestGroup (Testgruppe fürs Labor, Klassen frei wählbar; createTestRaid = 4 Gruppen)
 src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes (Legendär nur in Raid-Kisten: Waffen/Ringe, Raid-Pity, Aschenessenz), balancing, sprites (Pixel-Art als Text),
                heroClasses (15 Klassen inkl. Rüstungsart, nützliche Werte, Dauer-Fähigkeit `passive` und Begleiter `pet`), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
-               enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), raidBosses (Raid-Bosse: Phasen, Tank-Stapel, Gruppenschlag), raids (Raid-Regeln: Raid-Tage, Mindestgröße; Raid 1 „Die Aschenhallen“), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
+               enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), raidBosses (Raid-Bosse: Phasen, Tank-Stapel, Gruppenschlag), raids (Raid-Regeln: Raid-Tage, Mindestgröße; Raid 1 „Die Aschenhallen“, Raid 2 „Der Nachtthron“ mit dem Endboss), endEvaluation (Ränge nach Spieltagen, Größe der Bestenliste), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
                dungeons (7 Level-Dungeons + 3 Set-Dungeons mit je 2 Bossen: Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),
@@ -108,6 +109,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                BattleEffects = Skill-Animationen (fx-Name aus den Daten → CSS-Klasse fx-… in main.css).
                SupplyPicker = Vorrats-Plätze einer Gruppe (Dungeon-Bildschirm + Tagesplan).
                NewsLine = eine Zeile aus dem Neuigkeiten-Ticker (Tagesplan + Tagesabschluss).
+               EndEvaluationOverlay = Endauswertung als Vollbild (Rang, Statistik, Bestenliste, Weiterspielen); BestList = Bestenliste im Browser (localStorage, bleibt nach „Neu“).
                FoundingScreen = Startbildschirm „Gründe deine Gilde“ (Gildenname, Vorschau der festen Starttruppe), nur bei neuem Spielstand.
                EndDayCheck = Nachfrage bei „Tag beenden“, wenn Helden ohne Aufgabe oder Gruppen unvollständig sind (blockiert nie).
                NextTodoBar = Leiste „Noch X offen · Weiter: …“ unter den Unterreitern (nicht auf dem Tagesplan).

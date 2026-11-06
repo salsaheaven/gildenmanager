@@ -15,6 +15,7 @@
 //   'heroLevelUp'          → ein Held ist aufgestiegen (Daten: { hero, newLevel })
 //   'heroHealed'           → ein verletzter Held ist wieder fit (Daten: der Held)
 //   'raidFinished'         → der Raid des Tages ist ausgekämpft (Daten: der Bericht, siehe finishRaid)
+//   'gameWon'              → der Endboss ist zum ersten Mal besiegt (Daten: die Endauswertung)
 // ============================================================
 
 import { getSalvageYield, upgradeItem } from '../systems/CraftingSystem.js';
@@ -50,6 +51,7 @@ import { applyRunResults } from '../systems/ExperienceSystem.js';
 import { getRaid, RAID_RULES, RAIDS } from '../data/raids.js';
 import { getWeekday, getWeek, isRaidDay, isRaidUnlocked, getFightingGroups, checkRaid, getNextEncounterIndex } from '../systems/RaidRules.js';
 import { suggestAutoRaid } from '../systems/AutoRaid.js';
+import { createEndEvaluation } from '../systems/EndEvaluation.js';
 import { simulateRaidRun } from '../systems/combat/CombatSimulator.js';
 import { getGroupGoldBonus, getGroupExtraChestItems } from '../systems/TraitEffects.js';
 
@@ -1343,6 +1345,11 @@ export class Game {
         report.unlockedRaidId = nextRaid ? nextRaid.id : null;
         report.endbossDefeated = Boolean(raid.isFinal);
       }
+    }
+    // Der Endboss ist zum ersten Mal gefallen: Endauswertung (danach darf man weiterspielen)
+    if (report.endbossDefeated && this.guild.endEvaluation === null) {
+      this.guild.endEvaluation = createEndEvaluation(this.guild, this.day);
+      this.emit('gameWon', this.guild.endEvaluation);
     }
 
     // Volle Sammelbuch-Seite des Raids: mehr Gold
