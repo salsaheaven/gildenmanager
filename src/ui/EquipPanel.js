@@ -15,6 +15,7 @@ import { compareByItemLevel } from './InventoryOverlay.js';
 import { Sound } from './Sound.js';
 import { createUpgradeButton, applyUpgradeGlow } from './UpgradeControls.js';
 import { createSetLine } from './SetInfo.js';
+import { createLockButton } from './LockButton.js';
 
 export class EquipPanel {
   // inventory = das InventoryOverlay (weiß, welche Items "neu" sind)
@@ -89,6 +90,8 @@ export class EquipPanel {
       describeItemKind(currentItem) + ' · Stufe ' + currentItem.itemLevel + ' · ' + formatItemValues(currentItem);
     // Funken oder Riss erscheinen über der ganzen rechten Seite (die bleibt beim Neuzeichnen erhalten)
     container.appendChild(createUpgradeButton(this.game, currentItem, this.root));
+    // Sperren: "Bestes anlegen" tauscht dieses Item dann nicht mehr aus
+    container.appendChild(createLockButton(this.game, currentItem));
   }
 
   // Alle Items für den gewählten Platz, die der Held tragen darf: höchstes Item-Level zuerst

@@ -20,6 +20,7 @@ import { showToast } from './Toast.js';
 import { renderOrders } from './OrdersPanel.js';
 import { applyUpgradeGlow } from './UpgradeControls.js';
 import { createHeroSetView } from './SetInfo.js';
+import { createLockBadge } from './LockButton.js';
 import { WAGE_RULES } from '../data/heroRarities.js';
 
 export class HeroDetailPanel {
@@ -253,6 +254,10 @@ export class HeroDetailPanel {
         slotElement.title = item.getDisplayName();
         slotElement.querySelector('.slot-icon').appendChild(createItemCanvas(item, 3));
         applyUpgradeGlow(slotElement, item);
+        const lockBadge = createLockBadge(item);
+        if (lockBadge) {
+          slotElement.appendChild(lockBadge);
+        }
 
         const removeButton = document.createElement('button');
         removeButton.className = 'unequip-button';

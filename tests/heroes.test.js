@@ -308,3 +308,43 @@ describe('Bestes anlegen: Rückgängig und eigenes Set', () => {
     expect(mage.equipment.ring.id).toBe(weakRing.id);
   });
 });
+
+describe('Gesperrte Items (Schloss)', () => {
+  it('„Bestes anlegen“ tauscht ein gesperrtes Item nicht aus, die anderen Plätze schon', () => {
+    const game = new Game(1);
+    const hero = makeHero('mage');
+    game.guild.heroes.push(hero);
+    const oldStaff = makeItem(80, 'staff', { magic: 3 });
+    hero.equip(oldStaff);
+    game.guild.addItem(makeItem(81, 'staff', { magic: 30 }));
+
+    expect(game.toggleItemLock(oldStaff.id)).toBe(true);
+    game.equipBestItems(hero.id);
+    expect(hero.equipment.weapon.id).toBe(oldStaff.id);
+
+    expect(game.toggleItemLock(oldStaff.id)).toBe(false);
+    game.equipBestItems(hero.id);
+    expect(hero.equipment.weapon.id).toBe(81);
+  });
+
+  it('gesperrte Items lassen sich nicht verkaufen oder zerlegen, auch nicht als Schrott', () => {
+    const game = new Game(1);
+    const item = new Item(90, 'sword', 'poor', 'Rostiges Schwert', { attack: 1 });
+    game.guild.addItem(item);
+    game.toggleItemLock(item.id);
+    expect(game.sellItem(item.id)).toBe(0);
+    expect(game.salvageItem(item.id)).toBe(null);
+    game.sellAllOfRarity('poor');
+    game.salvageAllOfRarity('poor');
+    expect(game.guild.findItem(item.id)).toBe(item);
+  });
+
+  it('das Schloss wird gespeichert', () => {
+    const game = new Game(1);
+    const item = makeItem(91, 'sword', { attack: 5 });
+    game.guild.addItem(item);
+    game.toggleItemLock(item.id);
+    const loaded = Game.fromSaveData(JSON.parse(JSON.stringify(game.toSaveData())));
+    expect(loaded.guild.findItem(91).locked).toBe(true);
+  });
+});

@@ -274,12 +274,13 @@ export class Game {
     return items;
   }
 
-  // Verkauft ein Item. Gibt das erhaltene Gold zurück (0, wenn es das Item nicht gibt).
+  // Verkauft ein Item. Gibt das erhaltene Gold zurück (0, wenn es das Item nicht gibt oder es gesperrt ist).
   sellItem(itemId) {
-    const item = this.guild.removeItem(itemId);
-    if (!item) {
+    const found = this.guild.findItem(itemId);
+    if (!found || found.locked) {
       return 0;
     }
+    const item = this.guild.removeItem(itemId);
     const gold = item.getSellValue();
     this.guild.addGold(gold);
     this.emit('changed');
@@ -288,22 +289,24 @@ export class Game {
 
   // ---------- Aktionen: Zerlegen & Verbessern (siehe data/crafting.js) ----------
 
-  // Zerlegt ein Item aus dem Inventar zu Material. Gibt das Material zurück ({ dust, crystal, raw }) oder null.
+  // Zerlegt ein Item aus dem Inventar zu Material. Gibt das Material zurück ({ dust, crystal, raw })
+  // oder null (Item nicht da oder gesperrt).
   salvageItem(itemId) {
-    const item = this.guild.removeItem(itemId);
-    if (!item) {
+    const found = this.guild.findItem(itemId);
+    if (!found || found.locked) {
       return null;
     }
+    const item = this.guild.removeItem(itemId);
     const materials = getSalvageYield(item);
     this.guild.addMaterials(materials);
     this.emit('changed');
     return materials;
   }
 
-  // Zerlegt alle Items einer Seltenheit (z.B. allen Schrott). Gibt das Material zusammen zurück.
+  // Zerlegt alle Items einer Seltenheit (z.B. allen Schrott), gesperrte nicht. Gibt das Material zusammen zurück.
   salvageAllOfRarity(rarityId) {
     const total = {};
-    for (const item of this.guild.inventory.filter((entry) => entry.rarityId === rarityId)) {
+    for (const item of this.guild.inventory.filter((entry) => entry.rarityId === rarityId && !entry.locked)) {
       this.guild.removeItem(item.id);
       const materials = getSalvageYield(item);
       for (const materialId in materials) {
@@ -363,9 +366,9 @@ export class Game {
     return result;
   }
 
-  // Verkauft alle Items einer Seltenheit (z.B. allen Schrott). Gibt das Gold zurück.
+  // Verkauft alle Items einer Seltenheit (z.B. allen Schrott), gesperrte nicht. Gibt das Gold zurück.
   sellAllOfRarity(rarityId) {
-    const toSell = this.guild.inventory.filter((item) => item.rarityId === rarityId);
+    const toSell = this.guild.inventory.filter((item) => item.rarityId === rarityId && !item.locked);
     let gold = 0;
     for (const item of toSell) {
       this.guild.removeItem(item.id);
@@ -655,7 +658,7 @@ export class Game {
 
   // Legt für jeden Platz das beste passende Item aus dem Inventar an ("Bestes anlegen").
   // "Bestes" = höchste Summe der Werte, die der Klasse nützen (Hero.getUpgradeValue); Resistenzen und Set-Boni
-  // zählen nicht. Getragene Teile des eigenen Klassen-Sets bleiben aber dran.
+  // zählen nicht. Getragene Teile des eigenen Klassen-Sets bleiben aber dran, gesperrte Items (Schloss) auch.
   // Gibt zurück, wie viele Items angelegt wurden.
   equipBestItems(heroId) {
     const hero = this.guild.findHero(heroId);
@@ -669,6 +672,10 @@ export class Game {
       // Teile des eigenen Klassen-Sets bleiben dran (sonst gingen Set-Boni verloren)
       const current = hero.equipment[slot];
       if (current && current.setId && getSet(current.setId).classId === hero.classId) {
+        continue;
+      }
+      // Gesperrte Items hat der Spieler bewusst festgelegt
+      if (current && current.locked) {
         continue;
       }
       for (const item of this.guild.inventory) {
@@ -727,6 +734,19 @@ export class Game {
       }
     }
     this.emit('changed');
+  }
+
+  // Sperrt ein Item oder öffnet das Schloss wieder (im Inventar oder angelegt).
+  // Gesperrte Items tauscht "Bestes anlegen" nicht aus, und man kann sie nicht verkaufen oder zerlegen.
+  // Gibt den neuen Zustand zurück (true = gesperrt) oder null, wenn es das Item nicht gibt.
+  toggleItemLock(itemId) {
+    const item = this.guild.findItemAnywhere(itemId);
+    if (!item) {
+      return null;
+    }
+    item.locked = !item.locked;
+    this.emit('changed');
+    return item.locked;
   }
 
   // Rüstet mehrere Helden nacheinander mit dem Besten aus dem Inventar aus (z.B. eine Dungeon-Gruppe).

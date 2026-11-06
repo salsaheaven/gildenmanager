@@ -108,7 +108,8 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                FoundingScreen = Startbildschirm „Gründe deine Gilde“ (Gildenname, Vorschau der festen Starttruppe), nur bei neuem Spielstand.
                EndDayCheck = Nachfrage bei „Tag beenden“, wenn Helden ohne Aufgabe oder Gruppen unvollständig sind (blockiert nie).
                NextTodoBar = Leiste „Noch X offen · Weiter: …“ unter den Unterreitern (nicht auf dem Tagesplan).
-               StandingGroupControls = Anzeige und Knöpfe stehender Gruppen (Ersatz einsetzen, Heute aussetzen, Wieder einplanen, Auflösen).
+               StandingGroupControls = Anzeige und Knöpfe stehender Gruppen (Ersatz einsetzen, Bestes ausrüsten, Heute aussetzen, Wieder einplanen, Auflösen).
+               LockButton = Knopf „Sperren“ an Items (Ausrüstungsliste, Inventar) und kleines 🔒; gesperrte Items tauscht „Bestes anlegen“ nicht aus, kein Verkaufen/Zerlegen.
                SetInfo = Set-Zeile an Items und Set-Kasten am Helden (getragene Teile, aktive Boni).
                CraftingControls = Schmieden (Karte der Schmiede), Brauen (Karte des Alchemielabors), Umschmieden (Inventar).
                UpgradeControls = Zerlegen und Verbessern in der Oberfläche (Verbessern-Knopf mit Kosten und Chance, Material-Text, Funken/Riss, Leuchten und „+3“ an verbesserten Items; Inventar + Ausrüstungsliste).

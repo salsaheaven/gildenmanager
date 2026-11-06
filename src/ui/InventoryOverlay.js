@@ -18,6 +18,7 @@ import { showToast } from './Toast.js';
 import { describeMaterials, createUpgradeButton, applyUpgradeGlow } from './UpgradeControls.js';
 import { createReforgeControls } from './CraftingControls.js';
 import { createSetLine } from './SetInfo.js';
+import { createLockButton, createLockBadge } from './LockButton.js';
 import { getSalvageYield } from '../systems/CraftingSystem.js';
 
 export class InventoryOverlay {
@@ -221,6 +222,10 @@ export class InventoryOverlay {
     applyUpgradeGlow(slot, item);
     // Kleine Zahl unten links: die Stufe (Item-Level)
     slot.insertAdjacentHTML('beforeend', '<span class="item-level">' + item.itemLevel + '</span>');
+    const lockBadge = createLockBadge(item);
+    if (lockBadge) {
+      slot.appendChild(lockBadge);
+    }
 
     if (this.newItemIds.has(item.id)) {
       const dot = document.createElement('span');
@@ -268,11 +273,19 @@ export class InventoryOverlay {
     }
     details.querySelector('.salvage-button').textContent = 'Zerlegen (' + describeMaterials(getSalvageYield(item)) + ')';
     details.querySelector('.detail-actions').appendChild(createUpgradeButton(this.game, item, details));
+    details.querySelector('.detail-actions').appendChild(createLockButton(this.game, item));
+    // Gesperrte Items kann man nicht verkaufen oder zerlegen
+    if (item.locked) {
+      details.querySelector('.sell-button').disabled = true;
+      details.querySelector('.salvage-button').disabled = true;
+    }
     const reforgeControls = createReforgeControls(this.game, item);
     if (reforgeControls) {
       details.querySelector('.detail-upgrade-hint').after(reforgeControls);
     }
-    details.querySelector('.detail-upgrade-hint').textContent = item.upgradeLevel > 0
+    details.querySelector('.detail-upgrade-hint').textContent = item.locked
+      ? 'Gesperrt: Zum Verkaufen oder Zerlegen erst entsperren.'
+      : item.upgradeLevel > 0
       ? 'Verkaufen und Zerlegen bringen nur den Grundwert, die Verbesserung geht verloren.'
       : 'Jede Stufe gibt +6 % auf alle Werte. Ab +6 kann es fehlschlagen.';
 
@@ -309,7 +322,7 @@ export class InventoryOverlay {
 
   // Allen grauen Schrott auf einmal verkaufen (Gold) oder zerlegen (Staub)
   renderJunkButtons(items) {
-    const junk = items.filter((item) => item.rarityId === 'poor');
+    const junk = items.filter((item) => item.rarityId === 'poor' && !item.locked);
     const sellButton = this.root.querySelector('.sell-junk-button');
     const goldValue = junk.length * getRarity('poor').sellValue;
     sellButton.textContent = 'Schrott verkaufen (' + junk.length + ' = ' + goldValue + ' Gold)';

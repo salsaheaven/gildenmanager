@@ -1280,6 +1280,22 @@ h3 {
   }
 }
 
+/* Gesperrtes Item (🔒): kleines Schloss oben links an Plätzen und Inventar-Kacheln */
+.lock-badge {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Knopf "Sperren" / "Gesperrt" */
+.lock-button.locked {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
 .equipment-slot {
   --rarity: var(--border);
   position: relative;

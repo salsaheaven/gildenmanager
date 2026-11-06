@@ -1,10 +1,11 @@
 // ============================================================
 // STANDINGGROUPCONTROLS – Anzeige und Knöpfe für stehende Gruppen (Tagesplan und Dungeon-Bildschirm)
 //   - getRunTitle: "Gruppe A · Die Bärenhöhle" (einmalige Runs nur mit dem Dungeon-Namen)
-//   - createRunControls: wer heute fehlt, "Ersatz einsetzen", "Heute aussetzen", "Auflösen"
+//   - createRunControls: wer heute fehlt, "Ersatz einsetzen", "Bestes ausrüsten", "Heute aussetzen", "Auflösen"
 //     (einmalige Runs nur "Absagen")
 //   - createPausedGroupRows: Gruppen, die heute nicht losziehen (ausgesetzt oder alle verletzt),
-//     mit "Wieder einplanen" und "Auflösen"
+//     mit "Wieder einplanen", "Bestes ausrüsten" und "Auflösen"
+//   "Bestes ausrüsten" legt allen Mitgliedern das Beste aus dem Inventar an (gesperrte Items bleiben dran)
 // Die Regeln stehen in systems/StandingGroups.js, die Aktionen in Game.
 // ============================================================
 
@@ -12,6 +13,7 @@ import { getDungeon } from '../data/dungeons.js';
 import { getPositionName } from '../data/groupRules.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
+import { announceEquipBest } from './HeroDetailPanel.js';
 
 // Überschrift eines geplanten Runs
 export function getRunTitle(game, expedition) {
@@ -50,6 +52,8 @@ export function createRunControls(game, expedition) {
       }));
     }
   }
+  // Wer heute mitgeht (mit Ersatz), wird ausgerüstet
+  container.appendChild(createEquipBestButton(game, group.name, expedition.getHeroIds()));
   container.appendChild(createButton('Heute aussetzen', () => game.skipStandingGroupToday(group.id)));
   container.appendChild(createDisbandButton(game, group));
   return container;
@@ -80,6 +84,7 @@ export function createPausedGroupRows(game) {
         game.emit('changed');
       }));
     }
+    controls.appendChild(createEquipBestButton(game, group.name, group.heroIds));
     controls.appendChild(createDisbandButton(game, group));
     rows.push(row);
   }
@@ -92,6 +97,22 @@ function createButton(label, onClick) {
   button.addEventListener('click', () => {
     Sound.click();
     onClick();
+  });
+  return button;
+}
+
+// "Bestes ausrüsten": Die Mitglieder bekommen nacheinander das Beste aus dem Inventar (wer zuerst steht, zuerst).
+// Die Rückmeldung hat "Rückgängig".
+function createEquipBestButton(game, groupName, heroIds) {
+  const button = document.createElement('button');
+  button.className = 'equip-group-button';
+  button.textContent = 'Bestes ausrüsten';
+  button.title = 'Legt allen Mitgliedern das Beste aus dem Inventar an. Gesperrte Items (🔒) und eigene Set-Teile bleiben dran.';
+  button.addEventListener('click', () => {
+    const snapshot = game.getEquipmentSnapshot(heroIds);
+    const count = game.equipBestForGroup(heroIds);
+    announceEquipBest(game, count, groupName, snapshot);
+    game.emit('changed');
   });
   return button;
 }
