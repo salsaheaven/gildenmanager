@@ -248,6 +248,74 @@ export const BOSSES = [
     ],
   },
   // ---------- Set-Dungeons (Stufe 30) ----------
+  // Erste Bosse der Set-Dungeons (davor und danach Trash, der zweite Boss ist der Endboss mit der Set-Kiste)
+  {
+    id: 'ironWarden',
+    name: 'Der Eiserne Wächter',
+    title: 'Hüter des Zitadellentors',
+    sprite: 'bossGolem',
+    colors: { s: '#9aa3b5', S: '#4a5268', r: '#ff6b3a' },
+    attackFx: 'bigImpact',
+    stats: { health: 1200, attack: 25, defense: 10 },
+    enrageRound: 26,
+    mechanics: [
+      {
+        type: 'groupCast', name: 'Funkenregen', damageType: 'fire',
+        firstAt: 4, every: 6, power: 1.7, castTime: 1, interruptible: false, fx: 'fireRain',
+        hint: 'Trifft die ganze Gruppe: Feuerresistenz und ein Heiler mit Gruppenheilung helfen.',
+      },
+      {
+        type: 'summon', name: 'Wachen rufen',
+        firstAt: 6, every: 10, minion: 'ironGuard', count: 1, castTime: 0, fx: 'summon',
+        hint: 'Die Eisenwache geht auf den Tank: Flächenschaden räumt sie weg.',
+      },
+    ],
+  },
+  {
+    id: 'gnarr',
+    name: 'Gnarr',
+    title: 'Der Borkenriese',
+    sprite: 'bossFrostGiant',
+    colors: { i: '#8fbf5a', I: '#4a3a22', w: '#c8e89a' },
+    attackFx: 'claw',
+    stats: { health: 1100, attack: 25, defense: 6 },
+    enrageRound: 26,
+    mechanics: [
+      {
+        type: 'frontWave', name: 'Wurzelpeitsche',
+        firstAt: 3, every: 5, power: 1.9, castTime: 1, interruptible: false, fx: 'bigImpact',
+        hint: 'Trifft nur die vordere Reihe: weniger Nahkämpfer mitnehmen.',
+      },
+      {
+        type: 'curse', name: 'Dornengift', damageType: 'acid',
+        firstAt: 5, every: 6, power: 0.5, duration: 5, castTime: 0, fx: 'curse',
+        hint: 'Der Runenwirker löst das Gift mit der Lösungsrune. Säureresistenz hilft.',
+      },
+    ],
+  },
+  {
+    id: 'selvra',
+    name: 'Selvra',
+    title: 'Die Tintenhexe',
+    sprite: 'bossWitch',
+    colors: { P: '#1e3a6a', V: '#3a5aa0', v: '#7ab8ff' },
+    attackFx: 'shadowBolt',
+    attackDamageType: 'shadow',
+    stats: { health: 1300, attack: 26, defense: 5 },
+    enrageRound: 26,
+    mechanics: [
+      {
+        type: 'summon', name: 'Seiten beleben',
+        firstAt: 3, every: 7, minion: 'livingTome', count: 2, castTime: 0, fx: 'summon',
+        hint: 'Flächenschaden (Aschenregen des Magiers) räumt die Bücher schnell weg.',
+      },
+      {
+        type: 'tankBuster', name: 'Tintenspeer', damageType: 'shadow',
+        firstAt: 5, every: 6, power: 2.8, castTime: 1, interruptible: false, fx: 'shadowWave',
+        hint: 'Schilde (Runenwirker) oder Eiserne Wacht (Krieger) fangen den Speer ab.',
+      },
+    ],
+  },
   {
     id: 'ferron',
     name: 'Kommandant Ferron',
