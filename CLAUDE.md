@@ -42,7 +42,8 @@ src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen, Tageszä
 src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, CollectionBook (Sammelbuch: beste gefundene Seltenheit je Boss-Item, Titel, Gold-Bonus),
                RivalGuild (eine KI-Gilde: welche Dungeons an welchem Tag),
                GuildHall (Gildenhalle: Stufe jedes Gebäudes, laufende Baustelle, Unterhalt bezahlt?; getEffect liefert die Wirkung), Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft),
-               StandingGroup (stehende Gruppe: Name, Dungeon, feste Mitglieder, Vorräte; wird jeden Morgen eingeplant)
+               StandingGroup (stehende Gruppe: Name, Dungeon, feste Mitglieder, Vorräte; wird jeden Morgen eingeplant),
+               RaidPlan (Raid-Aufstellung in 4 Gruppen, Wochen-Sperre, heute ausgesetzt?)
 src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem (EP, Aufhol-Erfahrung, Verletzungen nach einem Run),
                DayPlan (welcher Held hat heute welche Aufgabe), HeroTaskSystem (Training, Kräuter/Rohstoffe sammeln, Aufträge, Erkunden, Sold bei endDay Held für Held, unzufrieden ohne Sold),
                RivalSystem (KI-Gilden kommen voran, Neuigkeiten-Ticker, Server-First, Rangliste),
@@ -53,11 +54,12 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                StandingGroups (stehende Gruppen: Name, fehlende Mitglieder, Ersatz derselben Position, verfügbare Vorräte),
                DungeonKnowledge (Dungeonwissen: Erkunden deckt Boss für Boss auf; none/partial/full; bekannte Schadensarten, verdeckte Mechaniken),
                AutoGroup („Auto-Gruppe“: füllt leere Plätze mit freien Helden, Tank/Heiler zuerst, dann Konter für bekannte Mechaniken),
+               RaidRules (Wochentag, Raid-Tage, Raid offen?, Aufstellung prüfen, wo es nach der Wochen-Sperre weitergeht), AutoRaid („Auto-Raid“: Helden auf 4 Gruppen verteilen),
                GroupCounter (Helden nach Position, wie viele vollständige Gruppen die freien Helden ergeben, was fehlt; checkGroup prüft eine Gruppe),
                CraftingSystem (Zerlegen → Staub/Kristalle/Rohstoffe, Verbessern +1 bis +10 mit Fehlschlag ab +6),
                ForgeSystem (Schmieden: weißes Item nach Vorlage; Umschmieden: andere Rüstungsart), AlchemySystem (Brauen: Kräuter → Waren), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
-               simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug; simulateRaid = Raid-Bosskampf mit 4 Gruppen à 5),
+               simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug; simulateRaid = Raid-Bosskampf mit 4 Gruppen à 5; simulateRaidRun = Raid-Tag bis zum ersten Wipe),
                BattleTimeline (wann passiert was → Dauer eines Runs, mit Zeitraffer für Trash und ruhige Runden), Battle (Zustand + Zielwahl; Verbündete = nur die eigene Gruppe, groupIndex),
                Combatant (ein Kämpfer), HeroAI (welcher Skill?), EnemyAI (Boss-Mechaniken; Raid: Phasen, Tank-Stapel mit automatischem Tankwechsel, Gruppenschlag),
                AbilityEffects (was ein Skill bewirkt), OrderSettings (gewählte Anweisungen + Talente → ein Paket mit Wirkungen für den Kampf, Gruppen-Auren),
@@ -65,7 +67,7 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
                TestGroup (Testgruppe fürs Labor, Klassen frei wählbar; createTestRaid = 4 Gruppen)
 src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes, balancing, sprites (Pixel-Art als Text),
                heroClasses (15 Klassen inkl. Rüstungsart, nützliche Werte, Dauer-Fähigkeit `passive` und Begleiter `pet`), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
-               enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), raidBosses (Raid-Bosse: Phasen, Tank-Stapel, Gruppenschlag), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
+               enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), raidBosses (Raid-Bosse: Phasen, Tank-Stapel, Gruppenschlag), raids (Raid-Regeln: Raid-Tage, Mindestgröße; Raid 1 „Die Aschenhallen“), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
                dungeons (7 Level-Dungeons + 3 Set-Dungeons mit je 2 Bossen: Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),

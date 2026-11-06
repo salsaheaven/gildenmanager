@@ -10,7 +10,7 @@ import { BOSSES, MINIONS, MECHANIC_TYPE_TEXTS, getBoss } from '../src/data/enemi
 import { SPRITES } from '../src/data/sprites.js';
 import { computeEncounterTimeline } from '../src/systems/combat/BattleTimeline.js';
 
-const BOSS_ID = 'raidTestColossus';
+const BOSS_ID = 'stoneColossus';
 
 function raidResult(seed = 7, groups = null) {
   return simulateRaid({ groups: groups || createTestRaid(1), bossId: BOSS_ID, seed: seed, recordLog: true });

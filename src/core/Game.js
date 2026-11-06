@@ -14,6 +14,7 @@
 //   'dayEnded'             → ein Tag ist vorbei (Daten: { day, reports })
 //   'heroLevelUp'          → ein Held ist aufgestiegen (Daten: { hero, newLevel })
 //   'heroHealed'           → ein verletzter Held ist wieder fit (Daten: der Held)
+//   'raidFinished'         → der Raid des Tages ist ausgekämpft (Daten: der Bericht, siehe finishRaid)
 // ============================================================
 
 import { getSalvageYield, upgradeItem } from '../systems/CraftingSystem.js';
@@ -46,7 +47,14 @@ import { BALANCING } from '../data/balancing.js';
 import { getDungeon } from '../data/dungeons.js';
 import { Expedition } from '../entities/Expedition.js';
 import { applyRunResults } from '../systems/ExperienceSystem.js';
+import { getRaid, RAID_RULES } from '../data/raids.js';
+import { getWeekday, getWeek, isRaidDay, isRaidUnlocked, getFightingGroups, checkRaid, getNextEncounterIndex } from '../systems/RaidRules.js';
+import { suggestAutoRaid } from '../systems/AutoRaid.js';
+import { simulateRaidRun } from '../systems/combat/CombatSimulator.js';
 import { getGroupGoldBonus, getGroupExtraChestItems } from '../systems/TraitEffects.js';
+
+// Höchstens so viele Helden pro Raid-Gruppe
+const RAID_GROUP_SIZE = RAID_RULES.groupSize;
 
 export class Game {
   constructor(seed = Date.now()) {
@@ -59,6 +67,7 @@ export class Game {
 
     this.recruitmentSystem.refreshCandidates(this.guild);
     this.refreshDailyOffer();
+    this.lastRaidReport = null; // Bericht des letzten Raid-Tags (nur im Speicher, für den Tagesabschluss)
   }
 
   // ---------- Ereignisse ----------
@@ -71,6 +80,10 @@ export class Game {
   }
 
   emit(eventName, data) {
+    // Bei jeder Änderung neu ausrechnen, ob der Raid heute loszieht (Verletzte, neue Helden, Aufstellung …)
+    if (eventName === 'changed') {
+      this.refreshRaidToday();
+    }
     const callbacks = this.listeners[eventName] || [];
     for (const callback of callbacks) {
       callback(data);
@@ -89,7 +102,11 @@ export class Game {
 
     // 0. Wer macht heute was? (vor allem anderen, damit Verletzte von heute nicht noch trainieren)
     const plan = getDayPlan(this.guild);
-    const taskEntries = plan.entries.filter((entry) => entry.taskId !== 'dungeon' && entry.taskId !== 'injured');
+    const taskEntries = plan.entries.filter((entry) =>
+      entry.taskId !== 'dungeon' && entry.taskId !== 'raid' && entry.taskId !== 'injured');
+    // Zieht heute der Raid los? (Wer heute fällt, ist danach verletzt: deshalb vorher merken)
+    this.refreshRaidToday();
+    const raidToday = this.guild.raidPlan.activeToday;
 
     // 1. Wer schon verletzt war, heilt einen Tag lang.
     //    (Zuerst, damit Helden, die heute fallen, morgen noch verletzt sind.)
@@ -99,11 +116,12 @@ export class Game {
       }
     }
 
-    // 2. Alle Runs von heute auskämpfen
+    // 2. Alle Runs von heute auskämpfen, an Raid-Tagen den Raid
     const reports = [];
     for (const expedition of this.guild.expeditions.slice()) {
       reports.push(this.finishExpedition(expedition));
     }
+    this.lastRaidReport = raidToday ? this.finishRaid() : null;
     // Erkundungen der Dungeons, in denen heute gekämpft wurde: ein Kampftag ist verbraucht
     // (mit Kartenraum hält eine Erkundung mehrere Kampftage)
     const foughtDungeonIds = new Set(reports.map((report) => report.dungeonId));
@@ -147,7 +165,7 @@ export class Game {
     // Neue Teile des Spiels freischalten (Tutorial)
     this.updateUnlocks();
 
-    this.emit('dayEnded', { day: endedDay, reports: reports, summary: this.lastDaySummary });
+    this.emit('dayEnded', { day: endedDay, reports: reports, summary: this.lastDaySummary, raidReport: this.lastRaidReport });
     this.emit('changed');
     return reports;
   }
@@ -395,6 +413,10 @@ export class Game {
   startExpedition(dungeonId, heroIds, retreatRuleId, supplyIds = []) {
     if (!this.isDungeonUnlocked(dungeonId)) {
       return 'locked';
+    }
+    // An Raid-Tagen gibt es keine Dungeon-Runs (5 Dungeon-Tage, 2 Raid-Tage pro Woche), sobald der Raid offen ist
+    if (this.areDungeonsClosedToday()) {
+      return 'raidDay';
     }
     if (heroIds.length === 0) {
       return 'noHeroes';
@@ -963,11 +985,15 @@ export class Game {
 
   // Jeden Morgen: alle stehenden Gruppen einplanen. Entlassene Helden fallen vorher aus ihrer Gruppe,
   // leere Gruppen lösen sich auf.
+  // An Raid-Tagen (sobald der Raid offen ist) ziehen sie nicht los.
   planStandingGroups() {
     for (const group of this.guild.standingGroups) {
       group.heroIds = group.heroIds.filter((heroId) => this.guild.findHero(heroId));
     }
     this.guild.standingGroups = this.guild.standingGroups.filter((group) => group.heroIds.length > 0);
+    if (this.areDungeonsClosedToday()) {
+      return;
+    }
     for (const group of this.guild.standingGroups) {
       this.planStandingGroup(group.id);
     }
@@ -1072,6 +1098,193 @@ export class Game {
   }
 
   // ---------- Speichern ----------
+
+  // ---------- Raid (siehe data/raids.js, systems/RaidRules.js, entities/RaidPlan.js) ----------
+
+  getRaid() {
+    return getRaid(this.guild.raidPlan.raidId);
+  }
+
+  // Wochentag (1 bis 7) und Woche des heutigen Tages
+  getWeekday() {
+    return getWeekday(this.day);
+  }
+
+  getWeek() {
+    return getWeek(this.day);
+  }
+
+  isRaidDayToday() {
+    return isRaidDay(this.day);
+  }
+
+  isRaidUnlocked() {
+    return isRaidUnlocked(this.guild, this.getRaid());
+  }
+
+  // Heute keine Dungeons? Erst wenn der Raid offen ist, werden die Raid-Tage zu reinen Raid-Tagen.
+  // Vorher sind alle 7 Tage Dungeon-Tage.
+  areDungeonsClosedToday() {
+    return this.isRaidDayToday() && this.isRaidUnlocked();
+  }
+
+  // Reicht die Raid-Aufstellung? { ok, heroCount, tanks, healers, problems }
+  checkRaid() {
+    return checkRaid(this.guild, this.guild.raidPlan);
+  }
+
+  // Die in dieser Woche schon besiegten Bosse (Wochen-Sperre)
+  getDefeatedRaidBossIds() {
+    return this.guild.raidPlan.getDefeatedBossIds(this.getWeek());
+  }
+
+  // Ab welcher Begegnung geht es diese Woche weiter? (null = alle Bosse dieser Woche besiegt)
+  getNextRaidEncounterIndex() {
+    return getNextEncounterIndex(this.getRaid(), this.getDefeatedRaidBossIds());
+  }
+
+  // Zieht der Raid heute los? Raid-Tag, Raid offen, noch Bosse übrig, nicht ausgesetzt,
+  // heute noch nicht geraidet und die Aufstellung reicht. Das Ergebnis steht danach in raidPlan.activeToday.
+  refreshRaidToday() {
+    const plan = this.guild.raidPlan;
+    plan.removeMissingHeroes(this.guild);
+    plan.activeToday = this.isRaidDayToday() && this.isRaidUnlocked() && this.getNextRaidEncounterIndex() !== null &&
+      plan.skippedDay !== this.day && plan.lastFoughtDay !== this.day && this.checkRaid().ok;
+    return plan.activeToday;
+  }
+
+  // Stellt die Raid-Gruppen ein: groups = 4 Listen mit Helden-ids (je höchstens 5, jeder Held nur einmal).
+  // Gibt 'ok' oder 'invalid' zurück.
+  setRaidGroups(groups) {
+    const plan = this.guild.raidPlan;
+    const seen = [];
+    if (groups.length !== plan.groups.length) {
+      return 'invalid';
+    }
+    for (const group of groups) {
+      if (group.length > RAID_GROUP_SIZE) {
+        return 'invalid';
+      }
+      for (const heroId of group) {
+        if (!this.guild.findHero(heroId) || seen.includes(heroId)) {
+          return 'invalid';
+        }
+        seen.push(heroId);
+      }
+    }
+    plan.groups = groups.map((group) => group.slice());
+    this.emit('changed');
+    return 'ok';
+  }
+
+  // "Auto-Raid": stellt den Raid aus den einsatzbereiten Helden zusammen (siehe systems/AutoRaid.js)
+  applyAutoRaid() {
+    return this.setRaidGroups(suggestAutoRaid(this.guild));
+  }
+
+  // Setzt einen Helden in eine Raid-Gruppe (aus einer anderen Gruppe oder neu dazu).
+  // Ist die Gruppe voll, tauscht er mit target (Helden-id in der Zielgruppe) bzw. es geht nicht.
+  // Gibt 'ok', 'full' oder 'invalid' zurück.
+  moveRaidHero(heroId, groupIndex, swapWithHeroId = null) {
+    const plan = this.guild.raidPlan;
+    if (!this.guild.findHero(heroId) || groupIndex < 0 || groupIndex >= plan.groups.length) {
+      return 'invalid';
+    }
+    const groups = plan.groups.map((group) => group.slice());
+    const fromIndex = plan.getGroupIndexOf(heroId);
+    if (fromIndex === groupIndex) {
+      return 'ok';
+    }
+    const target = groups[groupIndex];
+    if (swapWithHeroId !== null && target.includes(swapWithHeroId)) {
+      // Tauschen: Der andere geht dorthin, wo dieser Held herkommt (oder aus dem Raid, wenn er neu dazukommt)
+      target.splice(target.indexOf(swapWithHeroId), 1);
+      if (fromIndex !== -1) {
+        groups[fromIndex].push(swapWithHeroId);
+      }
+    } else if (target.length >= RAID_GROUP_SIZE) {
+      return 'full';
+    }
+    if (fromIndex !== -1) {
+      groups[fromIndex].splice(groups[fromIndex].indexOf(heroId), 1);
+    }
+    target.push(heroId);
+    return this.setRaidGroups(groups);
+  }
+
+  // Nimmt einen Helden aus der Raid-Aufstellung
+  removeRaidHero(heroId) {
+    const groups = this.guild.raidPlan.groups.map((group) => group.filter((id) => id !== heroId));
+    return this.setRaidGroups(groups);
+  }
+
+  // Heute nicht raiden bzw. doch wieder raiden
+  skipRaidToday() {
+    this.guild.raidPlan.skippedDay = this.day;
+    this.emit('changed');
+  }
+
+  planRaidToday() {
+    if (this.guild.raidPlan.skippedDay === this.day) {
+      this.guild.raidPlan.skippedDay = 0;
+    }
+    this.emit('changed');
+  }
+
+  // Kämpft den Raid des Tages aus: ab dem nächsten Boss der Woche bis zum ersten Wipe.
+  // Besiegte Bosse sind bis Wochenende gesperrt. Gold für Bosse und Trash, EP und Verletzungen wie im Dungeon.
+  // Gibt den Bericht zurück: { raidId, day, outcome, startIndex, result (zum Abspielen), defeatedBossIds,
+  //                            gold, heroResults, heroNames, fallenNames }
+  finishRaid() {
+    const raid = this.getRaid();
+    const plan = this.guild.raidPlan;
+    const startIndex = this.getNextRaidEncounterIndex();
+    const groups = getFightingGroups(this.guild, plan);
+    const seed = Math.floor(this.random.next() * 2147483647);
+    const result = simulateRaidRun({ groups: groups, raidId: raid.id, startIndex: startIndex, seed: seed, recordLog: true });
+
+    const report = {
+      raidId: raid.id,
+      day: this.day,
+      outcome: result.outcome,
+      startIndex: startIndex,
+      result: result,
+      groups: groups.map((group) => group.map((hero) => hero.id)),
+      defeatedBossIds: [],
+      gold: 0,
+      heroNames: result.heroes.map((hero) => hero.name),
+      fallenNames: result.heroes.filter((hero) => !hero.alive).map((hero) => hero.name),
+      heroResults: [],
+    };
+    result.encounters.forEach((encounterResult, offset) => {
+      const encounter = raid.encounters[startIndex + offset];
+      if (encounterResult.outcome !== 'victory') {
+        return;
+      }
+      if (encounter.type === 'boss') {
+        plan.markBossDefeated(encounter.bossId, this.getWeek());
+        report.defeatedBossIds.push(encounter.bossId);
+        report.gold += raid.bossGold;
+      } else {
+        report.gold += raid.trashGold;
+      }
+    });
+    this.guild.addGold(report.gold);
+    plan.lastFoughtDay = this.day;
+
+    // EP für gewonnene Begegnungen, Verletzungen für Gefallene (wie im Dungeon, ab der heutigen ersten Begegnung)
+    const foughtPart = { level: raid.level, encounters: raid.encounters.slice(startIndex) };
+    report.heroResults = applyRunResults(this.guild, result, foughtPart, this.random);
+
+    this.emit('raidFinished', report);
+    for (const heroResult of report.heroResults) {
+      if (heroResult.levelsGained > 0) {
+        this.emit('heroLevelUp', { hero: this.guild.findHero(heroResult.heroId), newLevel: heroResult.newLevel });
+      }
+    }
+    this.emit('changed');
+    return report;
+  }
 
   toSaveData() {
     return {

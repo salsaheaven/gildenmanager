@@ -12,6 +12,8 @@ import { LootBox } from './LootBox.js';
 import { Hero } from './Hero.js';
 import { Expedition } from './Expedition.js';
 import { StandingGroup } from './StandingGroup.js';
+import { RaidPlan } from './RaidPlan.js';
+import { RAIDS } from '../data/raids.js';
 import { GuildHall } from './GuildHall.js';
 import { BALANCING } from '../data/balancing.js';
 
@@ -40,6 +42,7 @@ export class Guild {
     this.scoutedDungeons = {}; // vorbereitete Dungeons: Dungeon-id → wie viele Kampftage die Erkundung noch hält
     this.dungeonKnowledge = {}; // Dungeonwissen: Dungeon-id → wie viele Bosse aufgedeckt sind (siehe systems/DungeonKnowledge.js)
     this.standingGroups = [];  // stehende Gruppen, ziehen jeden Tag los (StandingGroup-Objekte)
+    this.raidPlan = new RaidPlan(RAIDS[0].id); // Raid-Aufstellung und Wochen-Sperre (siehe RaidPlan.js)
     this.unlockedFeatures = [];   // freigeschaltete Teile des Spiels (ids aus data/unlocks.js)
     this.acknowledgedUnlocks = []; // Freischaltungen, deren Hinweis der Spieler schon angeschaut hat
     this.nextStandingGroupId = 1;
@@ -201,8 +204,12 @@ export class Guild {
     return null;
   }
 
-  // Ist der Held heute schon für einen Dungeon eingeplant? (ein Held = eine Aufgabe pro Tag)
+  // Ist der Held heute schon beschäftigt? (ein Held = eine Aufgabe pro Tag)
+  // Beschäftigt = heute in einem Dungeon-Run eingeplant oder heute im Raid
   isHeroBusy(heroId) {
+    if (this.raidPlan.activeToday && this.raidPlan.isMember(heroId)) {
+      return true;
+    }
     return this.expeditions.some((expedition) => expedition.getHeroIds().includes(heroId));
   }
 
@@ -313,6 +320,7 @@ export class Guild {
       scoutedDungeons: this.scoutedDungeons,
       dungeonKnowledge: this.dungeonKnowledge,
       standingGroups: this.standingGroups.map((group) => group.toSaveData()),
+      raidPlan: this.raidPlan.toSaveData(),
       nextStandingGroupId: this.nextStandingGroupId,
       unlockedFeatures: this.unlockedFeatures,
       acknowledgedUnlocks: this.acknowledgedUnlocks,
@@ -352,6 +360,7 @@ export class Guild {
     guild.scoutedDungeons = data.scoutedDungeons;
     guild.dungeonKnowledge = data.dungeonKnowledge;
     guild.standingGroups = data.standingGroups.map((groupData) => StandingGroup.fromSaveData(groupData));
+    guild.raidPlan = RaidPlan.fromSaveData(data.raidPlan);
     guild.nextStandingGroupId = data.nextStandingGroupId;
     guild.unlockedFeatures = data.unlockedFeatures;
     guild.acknowledgedUnlocks = data.acknowledgedUnlocks;

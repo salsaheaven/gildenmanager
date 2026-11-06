@@ -3,6 +3,7 @@
 //
 // Jeder Held hat genau eine Aufgabe pro Tag (siehe data/heroTasks.js):
 //   'dungeon' = er ist für einen Dungeon-Run eingeplant
+//   'raid'    = heute ist Raid-Tag, der Raid zieht los, und er steht in der Raid-Aufstellung
 //   'injured' = er ist verletzt und kuriert sich aus
 //   sonst seine gewählte Aufgabe (hero.task): z.B. 'rest', 'training', 'herbs', 'gatherRaw', 'jobs' oder 'scouting'
 // Diese Datei rechnet nur nach, sie ändert nichts am Spielstand.
@@ -16,6 +17,9 @@ export function getHeroTask(guild, hero) {
   }
   if (hero.isInjured()) {
     return { taskId: 'injured', expedition: null };
+  }
+  if (guild.raidPlan.activeToday && guild.raidPlan.isMember(hero.id)) {
+    return { taskId: 'raid', expedition: null };
   }
   return { taskId: hero.task.taskId, expedition: null };
 }

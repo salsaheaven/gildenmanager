@@ -12,6 +12,7 @@
 // Einstiege:
 //   simulateBattle   = ein einzelner Bosskampf mit frischen Helden (Kampf-Labor)
 //   simulateRaid     = ein Raid-Bosskampf: 4 Gruppen à 5 Helden gegen einen Raid-Boss
+//   simulateRaidRun  = ein Raid-Tag: ab einer Begegnung Trash und Bosse nacheinander, bis zum ersten Wipe
 //   simulateRun      = ein ganzer Dungeon-Run: Begegnungen nacheinander, Leben und Mana gehen mit
 //   runEncounter     = eine Begegnung mit bereits vorhandenen Kämpfern (wird von beiden benutzt)
 //
@@ -31,6 +32,7 @@ import { COMBAT_RULES } from '../../data/combatRules.js';
 import { getBoss, MINIONS } from '../../data/enemies.js';
 import { getHeroClass } from '../../data/heroClasses.js';
 import { getDungeon } from '../../data/dungeons.js';
+import { getRaid } from '../../data/raids.js';
 import { getRetreatRule } from '../../data/retreatRules.js';
 import { TASK_RULES } from '../../data/heroTasks.js';
 import { combineSupplyEffects, applySupplyEffects, applyManaAtStart, applyRestHealth } from './SupplyEffects.js';
@@ -100,6 +102,46 @@ export function simulateRaid(options) {
     options.enemyLevel || 1);
   result.isRaid = true; // für die Kampfszene: Raid-Aufstellung mit 4 Gruppenreihen
   return result;
+}
+
+// Ein Raid-Tag: Der Raid kämpft sich ab startIndex Begegnung für Begegnung vor, bis zum ersten Wipe
+// (Leben und Mana gehen mit, zwischen den Begegnungen kurze Erholung wie im Dungeon).
+// options = { groups: [[Hero, …], …], raidId, startIndex (erste Begegnung, wegen der Wochen-Sperre), seed, recordLog }
+// Gibt { raidId, startIndex, outcome, encounters, heroes } zurück. outcome = 'success' (alles geschafft) oder
+// das Ergebnis der verlorenen Begegnung ('defeat' / 'timeout').
+export function simulateRaidRun(options) {
+  const raid = getRaid(options.raidId);
+  const random = new Random(options.seed);
+  const startIndex = options.startIndex || 0;
+  const heroes = [];
+  options.groups.forEach((group, groupIndex) => {
+    for (const hero of group) {
+      heroes.push(createHeroCombatant(hero, groupIndex));
+    }
+  });
+  applyGroupAuras(heroes);
+
+  const encounters = [];
+  let outcome = 'success';
+  for (let i = startIndex; i < raid.encounters.length; i++) {
+    if (i > startIndex) {
+      restBetweenEncounters(heroes);
+    }
+    const result = runEncounter(heroes, raid.encounters[i], random, options.recordLog, {}, raid.level);
+    result.isRaid = true; // für die Kampfszene: Raid-Aufstellung
+    encounters.push(result);
+    if (result.outcome !== 'victory') {
+      outcome = result.outcome;
+      break;
+    }
+  }
+  return {
+    raidId: raid.id,
+    startIndex: startIndex,
+    outcome: outcome,
+    encounters: encounters,
+    heroes: heroes.map((hero) => ({ heroId: hero.heroId, name: hero.name, alive: hero.alive, hp: hero.hp, maxHp: hero.maxHp })),
+  };
 }
 
 // Ein ganzer Dungeon-Run.

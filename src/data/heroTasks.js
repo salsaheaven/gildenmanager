@@ -6,7 +6,7 @@
 // color       = Farbe des Aufgaben-Schilds
 // choosable   = true: Der Spieler kann sie einem freien Helden geben (im Tagesplan).
 // unlock      = freiwillig: erst wählbar, wenn dieser Teil des Spiels freigeschaltet ist (siehe data/unlocks.js)
-//               'dungeon' und 'injured' ergeben sich von selbst (eingeplant bzw. verletzt).
+//               'dungeon', 'raid' und 'injured' ergeben sich von selbst (eingeplant, im Raid bzw. verletzt).
 //
 // Gewählte Aufgaben bleiben stehen, bis man sie ändert (wer heute trainiert, trainiert morgen weiter).
 // Erledigt werden sie bei "Tag beenden" (systems/HeroTaskSystem.js).
@@ -17,6 +17,12 @@ export const HERO_TASKS = {
     name: 'Dungeon',
     description: 'Kämpft heute mit seiner Gruppe im Dungeon',
     color: '#ffd23f',
+    choosable: false,
+  },
+  raid: {
+    name: 'Raid',
+    description: 'Kämpft heute im Raid',
+    color: '#ff8000',
     choosable: false,
   },
   injured: {
