@@ -6,32 +6,36 @@
 // estimateRunChances = ein ganzer Dungeon (Risiko-Einschätzung vor dem Run)
 // ============================================================
 
-import { simulateBattle, simulateRun } from './CombatSimulator.js';
+import { simulateBattle, simulateRun, simulateRaid } from './CombatSimulator.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
 import { needsDefeatAnalysis, analyzeRun } from './DefeatAnalysis.js';
 
 // options = { heroes, bossId, enemyLevel (optional, Stufe des Bosses), count (optional), seed (optional) }
+//   Raid: statt heroes groups = [[Hero, …], …] (4 Gruppen à 5), dann wird simulateRaid benutzt
 export function estimateChances(options) {
   const count = options.count || COMBAT_RULES.simulationCount;
   const baseSeed = options.seed || 1;
+  const heroes = options.groups ? options.groups.flat() : options.heroes;
 
   let wins = 0;
   let totalRounds = 0;
   let fightsWithFallen = 0;
   let totalDamage = 0;
   const fallsByHero = {};
-  for (const hero of options.heroes) {
+  for (const hero of heroes) {
     fallsByHero[hero.id] = 0;
   }
 
   for (let i = 0; i < count; i++) {
-    const result = simulateBattle({
+    const fightOptions = {
       heroes: options.heroes,
+      groups: options.groups,
       bossId: options.bossId,
       enemyLevel: options.enemyLevel,
       seed: baseSeed + i * 7919, // weit auseinanderliegende Seeds = unterschiedliche Kämpfe
       recordLog: false,
-    });
+    };
+    const result = options.groups ? simulateRaid(fightOptions) : simulateBattle(fightOptions);
 
     if (result.victory) {
       wins++;

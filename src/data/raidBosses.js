@@ -2,6 +2,7 @@
 // RAID-BOSSE – Gegner für den Raid (20 Helden in 4 Gruppen à 5)
 // Ein Raid-Boss hat alles, was ein normaler Boss hat (siehe enemies.js), und zusätzlich:
 //   isRaidBoss  = true (taucht nicht in den normalen Boss-Listen auf)
+//   level       = Stufe, auf der der Boss kämpft (Raids sind Endgame: Stufe 30)
 //   tankStacks  = Tank-Stapel: Jeder normale Angriff gibt dem Getroffenen einen Stapel.
 //                 name                = Anzeigename der Stapel (z.B. "Zermalmt")
 //                 damageTakenPerStack = so viel mehr Schaden nimmt der Held pro Stapel (0.1 = +10 %)
@@ -26,6 +27,7 @@ export const RAID_BOSSES = [
     sprite: 'bossGolem',
     attackFx: 'bigImpact',
     isRaidBoss: true,
+    level: 30,
     stats: { health: 9000, attack: 34, defense: 10 },
     enrageRound: 40,
     tankStacks: { name: 'Zermalmt', damageTakenPerStack: 0.12, swapAt: 4 },

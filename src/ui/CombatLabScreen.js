@@ -1,18 +1,21 @@
 // ============================================================
 // COMBATLABSCREEN – das Kampf-Labor (Testbildschirm)
-// Gruppe wählen (Testgruppe oder eigene Helden), Boss wählen, dann:
+// Gruppe wählen (Testgruppe, eigene Helden oder Test-Raid), Boss wählen, dann:
 //   - "Kampf ansehen": ein einzelner Kampf als Szene, danach der vollständige Bericht
 //   - "Siegchance berechnen": viele Kämpfe, daraus Siegchance und Risiko
+// Test-Raid: 4 Gruppen à 5 Testhelden gegen einen Raid-Boss (data/raidBosses.js).
+//   Anweisungen und Talente gelten pro Klasse, wie bei der Testgruppe eingestellt.
 // Nichts davon verändert den Spielstand.
 // ============================================================
 
 import { renderTalents } from './TalentPanel.js';
 import { BOSSES, getBoss } from '../data/enemies.js';
+import { RAID_BOSSES } from '../data/raidBosses.js';
 import { getBossLevel } from '../data/dungeons.js';
 import { scaleEnemyStats } from '../systems/combat/Battle.js';
-import { simulateBattle } from '../systems/combat/CombatSimulator.js';
+import { simulateBattle, simulateRaid } from '../systems/combat/CombatSimulator.js';
 import { estimateChances } from '../systems/combat/ChanceEstimator.js';
-import { createTestGroup, STANDARD_TEST_CLASSES } from '../systems/combat/TestGroup.js';
+import { createTestGroup, createTestRaid, STANDARD_TEST_CLASSES, STANDARD_TEST_RAID } from '../systems/combat/TestGroup.js';
 import { HERO_CLASSES, ROLE_NAMES } from '../data/heroClasses.js';
 import { createHeroCanvas } from './PixelArt.js';
 import { renderCombatReport } from './CombatReport.js';
@@ -28,11 +31,13 @@ export class CombatLabScreen {
     this.root = rootElement;
     this.game = game;
 
-    this.mode = 'test';                // 'test' = Testgruppe, 'guild' = eigene Helden
+    this.mode = 'test';                // 'test' = Testgruppe, 'guild' = eigene Helden, 'raid' = Test-Raid
     this.testLevel = 1;
     this.testClassIds = STANDARD_TEST_CLASSES.slice(); // Klassen der Testgruppe (5 Plätze)
     this.selectedHeroIds = new Set();  // gewählte eigene Helden
+    this.raidClassIds = STANDARD_TEST_RAID.map((group) => group.slice()); // Klassen des Test-Raids (4 × 5)
     this.bossId = 'grimfang';
+    this.raidBossId = RAID_BOSSES[0].id; // gewählter Raid-Boss (eigene Wahl, damit der Dungeon-Boss erhalten bleibt)
     this.fightCounter = 0;             // sorgt dafür, dass jeder Kampf anders verläuft
     this.activeScene = null;           // die gerade laufende Kampfszene
     this.testOrders = {};              // Anweisungen der Testgruppe: Klasse → { Anweisung → Option }
@@ -53,11 +58,15 @@ export class CombatLabScreen {
           <div class="boss-list"></div>
           <div class="boss-info"></div>
 
-          <h3>Anweisungen</h3>
-          <div class="orders-list"></div>
+          <p class="hint raid-settings-hint" hidden>Im Test-Raid gelten die Anweisungen und Talente,
+            die du bei der Testgruppe für eine Klasse gewählt hast.</p>
+          <div class="lab-group-settings">
+            <h3>Anweisungen</h3>
+            <div class="orders-list"></div>
 
-          <h3>Talente</h3>
-          <div class="lab-talents"></div>
+            <h3>Talente</h3>
+            <div class="lab-talents"></div>
+          </div>
 
           <div class="lab-actions">
             <button class="big-button fight-button">Kampf ansehen</button>
@@ -90,8 +99,14 @@ export class CombatLabScreen {
     this.renderGroupOptions();
     this.renderGroupPreview();
     this.renderBossList();
-    this.renderOrderList();
-    this.renderTalentList();
+    // Im Test-Raid wären es 20 Helden: Anweisungen und Talente kommen dann von der Testgruppe
+    const isRaid = this.mode === 'raid';
+    this.root.querySelector('.lab-group-settings').hidden = isRaid;
+    this.root.querySelector('.raid-settings-hint').hidden = !isRaid;
+    if (!isRaid) {
+      this.renderOrderList();
+      this.renderTalentList();
+    }
     const hasGroup = this.getGroup().length > 0;
     this.root.querySelector('.fight-button').disabled = !hasGroup;
     this.root.querySelector('.estimate-button').disabled = !hasGroup;
@@ -117,7 +132,7 @@ export class CombatLabScreen {
   renderModeButtons() {
     this.fillButtonRow(
       this.root.querySelector('.mode-buttons'),
-      [{ label: 'Testgruppe', value: 'test' }, { label: 'Eigene Helden', value: 'guild' }],
+      [{ label: 'Testgruppe', value: 'test' }, { label: 'Eigene Helden', value: 'guild' }, { label: 'Test-Raid', value: 'raid' }],
       (value) => value === this.mode,
       (value) => { this.mode = value; },
     );
@@ -127,7 +142,7 @@ export class CombatLabScreen {
     const container = this.root.querySelector('.group-options');
     container.innerHTML = '';
 
-    if (this.mode === 'test') {
+    if (this.mode === 'test' || this.mode === 'raid') {
       const row = document.createElement('div');
       row.className = 'button-row';
       container.appendChild(row);
@@ -137,7 +152,18 @@ export class CombatLabScreen {
         (value) => value === this.testLevel,
         (value) => { this.testLevel = value; },
       );
-      this.renderClassPickers(container);
+      if (this.mode === 'test') {
+        this.renderClassPickers(container, this.testClassIds);
+      } else {
+        // Test-Raid: eine Zeile Auswahllisten pro Gruppe
+        this.raidClassIds.forEach((classIds, groupIndex) => {
+          const label = document.createElement('div');
+          label.className = 'lab-raid-group-label';
+          label.textContent = 'Gruppe ' + (groupIndex + 1);
+          container.appendChild(label);
+          this.renderClassPickers(container, classIds);
+        });
+      }
       return;
     }
 
@@ -168,12 +194,13 @@ export class CombatLabScreen {
     }
   }
 
-  // Testgruppe: pro Platz eine Auswahlliste mit allen Klassen (nach Rolle sortiert)
-  renderClassPickers(container) {
+  // Pro Platz eine Auswahlliste mit allen Klassen (nach Rolle sortiert).
+  // classIds = die Liste, die geändert wird (Testgruppe oder eine Gruppe des Test-Raids)
+  renderClassPickers(container, classIds) {
     const row = document.createElement('div');
     row.className = 'lab-class-pickers';
     container.appendChild(row);
-    for (let slot = 0; slot < this.testClassIds.length; slot++) {
+    for (let slot = 0; slot < classIds.length; slot++) {
       const select = document.createElement('select');
       for (const role of Object.keys(ROLE_NAMES)) {
         const group = document.createElement('optgroup');
@@ -182,62 +209,109 @@ export class CombatLabScreen {
           const option = document.createElement('option');
           option.value = heroClass.id;
           option.textContent = heroClass.name;
-          option.selected = heroClass.id === this.testClassIds[slot];
+          option.selected = heroClass.id === classIds[slot];
           group.appendChild(option);
         }
         select.appendChild(group);
       }
       select.addEventListener('change', () => {
         Sound.click();
-        this.testClassIds[slot] = select.value;
+        classIds[slot] = select.value;
         this.renderSetup();
       });
       row.appendChild(select);
     }
   }
 
-  // Die Helden, die gerade kämpfen würden
+  // Die Helden, die gerade kämpfen würden (im Test-Raid alle 20 in einer Liste)
   getGroup() {
     if (this.mode === 'test') {
       const group = createTestGroup(this.testLevel, 'uncommon', this.testClassIds);
-      // Die Testgruppe wird jedes Mal neu erstellt, ihre Anweisungen merkt sich das Labor
-      for (const hero of group) {
-        hero.orders = { ...(this.testOrders[hero.classId] || {}) };
-        // Nur Talente behalten, die auf dem Test-Level erlaubt sind
-        for (const talentId of this.testTalents[hero.classId] || []) {
-          hero.chooseTalent(talentId);
-        }
-      }
+      this.applyTestSettings(group);
       return group;
     }
+    if (this.mode === 'raid') {
+      return this.getRaidGroups().flat();
+    }
     return this.game.guild.heroes.filter((hero) => this.selectedHeroIds.has(hero.id));
+  }
+
+  // Test-Raid: 4 Gruppen à 5 Testhelden
+  getRaidGroups() {
+    const groups = createTestRaid(this.testLevel, 'uncommon', this.raidClassIds);
+    for (const group of groups) {
+      this.applyTestSettings(group);
+    }
+    return groups;
+  }
+
+  // Testhelden werden jedes Mal neu erstellt: Anweisungen und Talente pro Klasse merkt sich das Labor
+  applyTestSettings(heroes) {
+    for (const hero of heroes) {
+      hero.orders = { ...(this.testOrders[hero.classId] || {}) };
+      // Nur Talente behalten, die auf dem Test-Level erlaubt sind
+      for (const talentId of this.testTalents[hero.classId] || []) {
+        hero.chooseTalent(talentId);
+      }
+    }
+  }
+
+  // Der gewählte Gegner (im Test-Raid ein Raid-Boss)
+  getBossId() {
+    return this.mode === 'raid' ? this.raidBossId : this.bossId;
+  }
+
+  // Stufe des Gegners: Dungeon-Bosse kämpfen auf der Stufe ihres Dungeons, Raid-Bosse auf ihrer eigenen
+  getEnemyLevel() {
+    const boss = getBoss(this.getBossId());
+    return boss.isRaidBoss ? boss.level : getBossLevel(boss.id);
   }
 
   renderGroupPreview() {
     const preview = this.root.querySelector('.group-preview');
     preview.innerHTML = '';
+    if (this.mode === 'raid') {
+      // Eine Zeile pro Gruppe, kleinere Bilder
+      for (const group of this.getRaidGroups()) {
+        const row = document.createElement('div');
+        row.className = 'lab-raid-preview-row';
+        for (const hero of group) {
+          row.appendChild(createHeroCanvas(hero, 2));
+        }
+        preview.appendChild(row);
+      }
+      return;
+    }
     for (const hero of this.getGroup()) {
       preview.appendChild(createHeroCanvas(hero, 4));
     }
   }
 
   renderBossList() {
+    const isRaid = this.mode === 'raid';
     this.fillButtonRow(
       this.root.querySelector('.boss-list'),
-      BOSSES.map((boss) => ({ label: boss.name, value: boss.id })),
-      (value) => value === this.bossId,
-      (value) => { this.bossId = value; },
+      (isRaid ? RAID_BOSSES : BOSSES).map((boss) => ({ label: boss.name, value: boss.id })),
+      (value) => value === this.getBossId(),
+      (value) => {
+        if (isRaid) {
+          this.raidBossId = value;
+        } else {
+          this.bossId = value;
+        }
+      },
     );
 
-    const boss = getBoss(this.bossId);
+    const boss = getBoss(this.getBossId());
     const info = this.root.querySelector('.boss-info');
     info.innerHTML = '<div class="boss-title"></div><ul class="mechanic-list"></ul>';
-    // Der Boss kämpft auf der Stufe seines Dungeons
-    const level = getBossLevel(boss.id);
+    const level = this.getEnemyLevel();
     const health = scaleEnemyStats(boss.stats, level).health;
     info.querySelector('.boss-title').textContent = boss.name + ' – ' + boss.title +
       ' (Stufe ' + level + ', ' + health + ' Leben' + (boss.enrageRound ? ', Raserei ab Runde ' + boss.enrageRound : '') + ')';
-    for (const mechanic of boss.mechanics) {
+    // Raid-Bosse: Mechaniken aller Phasen
+    const mechanics = boss.mechanics.concat(...(boss.phases || []).map((phase) => phase.mechanics));
+    for (const mechanic of mechanics) {
       const line = document.createElement('li');
       line.innerHTML = '<b></b><span></span>';
       line.querySelector('b').textContent = mechanic.name;
@@ -296,14 +370,23 @@ export class CombatLabScreen {
   // Kampf berechnen und als Szene abspielen. Am Ende erscheint der Bericht darunter.
   runFight() {
     this.fightCounter++;
-    const group = this.getGroup();
-    const result = simulateBattle({
-      heroes: group,
-      bossId: this.bossId,
-      enemyLevel: getBossLevel(this.bossId),
+    const options = {
+      bossId: this.getBossId(),
+      enemyLevel: this.getEnemyLevel(),
       seed: Date.now() + this.fightCounter,
       recordLog: true,
-    });
+    };
+    let group;
+    let result;
+    if (this.mode === 'raid') {
+      options.groups = this.getRaidGroups();
+      group = options.groups.flat();
+      result = simulateRaid(options);
+    } else {
+      group = this.getGroup();
+      options.heroes = group;
+      result = simulateBattle(options);
+    }
 
     const box = this.root.querySelector('.report-box');
     box.innerHTML = '<div class="scene-box"></div><div class="final-report"></div>';
@@ -326,20 +409,23 @@ export class CombatLabScreen {
   }
 
   runEstimate() {
-    const group = this.getGroup();
-    const estimate = estimateChances({
-      heroes: group,
-      bossId: this.bossId,
-      enemyLevel: getBossLevel(this.bossId),
-      seed: Date.now(),
-    });
+    const options = { bossId: this.getBossId(), enemyLevel: this.getEnemyLevel(), seed: Date.now() };
+    let group;
+    if (this.mode === 'raid') {
+      options.groups = this.getRaidGroups();
+      group = options.groups.flat();
+    } else {
+      group = this.getGroup();
+      options.heroes = group;
+    }
+    const estimate = estimateChances(options);
     Sound.click();
     this.renderEstimate(estimate, group);
   }
 
   renderEstimate(estimate, group) {
     const box = this.root.querySelector('.estimate-box');
-    const boss = getBoss(this.bossId);
+    const boss = getBoss(this.getBossId());
     if (boss.isDummy) {
       box.innerHTML = `<div class="estimate-main">Ø ${Math.round(estimate.averageGroupDamagePerRound)} Schaden pro Runde (ganze Gruppe)</div>`;
       return;
