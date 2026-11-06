@@ -42,7 +42,7 @@ export class Guild {
     this.scoutedDungeons = {}; // vorbereitete Dungeons: Dungeon-id → wie viele Kampftage die Erkundung noch hält
     this.dungeonKnowledge = {}; // Dungeonwissen: Dungeon-id → wie viele Bosse aufgedeckt sind (siehe systems/DungeonKnowledge.js)
     this.standingGroups = [];  // stehende Gruppen, ziehen jeden Tag los (StandingGroup-Objekte)
-    this.raidPlan = new RaidPlan(RAIDS[0].id); // Raid-Aufstellung und Wochen-Sperre (siehe RaidPlan.js)
+    this.raidPlan = new RaidPlan(RAIDS[0].id); // Raid-Aufstellung, gewählter Raid, Wochen-Sperre pro Raid (siehe RaidPlan.js)
     this.unlockedFeatures = [];   // freigeschaltete Teile des Spiels (ids aus data/unlocks.js)
     this.acknowledgedUnlocks = []; // Freischaltungen, deren Hinweis der Spieler schon angeschaut hat
     this.nextStandingGroupId = 1;

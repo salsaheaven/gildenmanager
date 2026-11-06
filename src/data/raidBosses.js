@@ -191,4 +191,221 @@ export const RAID_BOSSES = [
       },
     ],
   },
+  // ---------- Raid 2: Der Nachtthron (der letzte Boss ist der Endboss des Spiels) ----------
+  {
+    id: 'hrimvald',
+    name: 'Hrimvald',
+    title: 'Wächter des Eistors',
+    sprite: 'bossFrostGiant',
+    colors: { i: '#dff4ff', I: '#2a5a9a' },
+    attackFx: 'bigImpact',
+    attackDamageType: 'ice',
+    isRaidBoss: true,
+    level: 30,
+    stats: { health: 5500, attack: 28, defense: 14 },
+    enrageRound: 40,
+    tankStacks: { name: 'Erfroren', damageTakenPerStack: 0.12, swapAt: 4 },
+    mechanics: [
+      {
+        type: 'groupStrike', name: 'Eislawine', damageType: 'ice',
+        firstAt: 3, every: 4, power: 1.9, castTime: 1, interruptible: false, fx: 'frost',
+        hint: 'Trifft eine ganze Gruppe. Eisresistenz hilft.',
+      },
+      {
+        type: 'summon', name: 'Frostwölfe',
+        firstAt: 6, every: 9, minion: 'frostWolf', count: 3, castTime: 0, fx: 'summon',
+        hint: 'Flächenschaden räumt die Wölfe weg.',
+      },
+    ],
+  },
+  {
+    id: 'zyra',
+    name: 'Zyra',
+    title: 'Die Sturmhexe',
+    sprite: 'bossWitch',
+    colors: { P: '#1a3a6a', V: '#4a8cff', v: '#bfe8ff' },
+    attackFx: 'spark',
+    attackDamageType: 'water',
+    isRaidBoss: true,
+    level: 30,
+    stats: { health: 5800, attack: 28, defense: 6 },
+    enrageRound: 40,
+    mechanics: [
+      {
+        type: 'groupCast', name: 'Sturmflut', damageType: 'water',
+        firstAt: 3, every: 4, power: 1.6, castTime: 1, interruptible: true, fx: 'acidWave',
+        hint: 'Trifft den ganzen Raid: unterbrechen (Schurke, Jäger/Magier mit Konter-Talent). Wasserresistenz hilft.',
+      },
+      {
+        type: 'curse', name: 'Blitzmal', damageType: 'water',
+        firstAt: 2, every: 3, power: 0.6, duration: 5, castTime: 0, fx: 'curse',
+        hint: 'Viele Flüche: Helden, die Flüche lösen, auf die Gruppen verteilen.',
+      },
+    ],
+    phases: [
+      {
+        belowHpPercent: 0.5,
+        name: 'Phase 2',
+        text: 'Zyra entfesselt den Sturm! Irrlichter tanzen durch die Halle.',
+        mechanics: [
+          {
+            type: 'summon', name: 'Irrlichter',
+            firstAt: 0, every: 6, minion: 'wisp', count: 4, castTime: 0, fx: 'summon',
+            hint: 'Die Irrlichter greifen zufällig an: Flächenschaden räumt sie weg.',
+          },
+          {
+            type: 'groupStrike', name: 'Kettenblitz', damageType: 'water',
+            firstAt: 2, every: 4, power: 2.0, castTime: 1, interruptible: false, fx: 'acidWave',
+            hint: 'Trifft eine ganze Gruppe: Der Heiler der Gruppe muss bereit sein.',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'morvath',
+    name: 'Morvath',
+    title: 'Der Knochendrache',
+    sprite: 'bossDragon',
+    colors: { o: '#d8dee9', O: '#4a4a52' },
+    attackFx: 'claw',
+    attackDamageType: 'shadow',
+    isRaidBoss: true,
+    level: 30,
+    stats: { health: 6200, attack: 29, defense: 10 },
+    enrageRound: 40,
+    tankStacks: { name: 'Verwest', damageTakenPerStack: 0.1, swapAt: 5 },
+    mechanics: [
+      {
+        type: 'groupCast', name: 'Todesatem', damageType: 'shadow',
+        firstAt: 4, every: 5, power: 1.5, castTime: 1, interruptible: false, fx: 'shadowWave',
+        hint: 'Trifft den ganzen Raid: Schattenresistenz und starke Heiler helfen.',
+      },
+      {
+        type: 'summon', name: 'Ghule erheben sich',
+        firstAt: 6, every: 9, minion: 'ghoul', count: 3, castTime: 0, fx: 'summon',
+        hint: 'Flächenschaden räumt die Ghule weg.',
+      },
+    ],
+  },
+  {
+    id: 'umbral',
+    name: 'Fürst Umbral',
+    title: 'Herr der Schatten',
+    sprite: 'bossCultist',
+    colors: { P: '#1a0a2a', p: '#7a3ac8' },
+    attackFx: 'shadowBolt',
+    attackDamageType: 'shadow',
+    isRaidBoss: true,
+    level: 30,
+    stats: { health: 6500, attack: 29, defense: 8 },
+    enrageRound: 40,
+    tankStacks: { name: 'Umschattet', damageTakenPerStack: 0.12, swapAt: 4 },
+    mechanics: [
+      {
+        type: 'curse', name: 'Schattenfessel', damageType: 'shadow',
+        firstAt: 2, every: 3, power: 0.6, duration: 6, castTime: 0, fx: 'curse',
+        hint: 'Viele Flüche: Helden, die Flüche lösen, auf die Gruppen verteilen.',
+      },
+      {
+        type: 'groupStrike', name: 'Schattenschlag', damageType: 'shadow',
+        firstAt: 4, every: 4, power: 1.9, castTime: 1, interruptible: true, fx: 'shadowWave',
+        hint: 'Trifft eine ganze Gruppe, lässt sich aber unterbrechen.',
+      },
+    ],
+    phases: [
+      {
+        belowHpPercent: 0.4,
+        name: 'Phase 2',
+        text: 'Fürst Umbral ruft seine Kultisten aus der Finsternis!',
+        mechanics: [
+          {
+            type: 'summon', name: 'Kultisten',
+            firstAt: 0, every: 7, minion: 'cultist', count: 4, castTime: 0, fx: 'summon',
+            hint: 'Die Kultisten greifen zufällig an: Flächenschaden räumt sie weg.',
+          },
+          {
+            type: 'curse', name: 'Schattenfessel', damageType: 'shadow',
+            firstAt: 1, every: 2, power: 0.6, duration: 6, castTime: 0, fx: 'curse',
+            hint: 'Jetzt jede zweite Runde ein Fluch.',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'vaelor',
+    name: 'Vaelor',
+    title: 'Der Weltenverschlinger',
+    isFinalBoss: true,
+    sprite: 'bossDragon',
+    colors: { o: '#c07cff', O: '#2a0a4a', w: '#ffd23f' },
+    attackFx: 'claw',
+    attackDamageType: 'shadow',
+    isRaidBoss: true,
+    level: 30,
+    stats: { health: 8000, attack: 30, defense: 14 },
+    enrageRound: 50,
+    tankStacks: { name: 'Verschlungen', damageTakenPerStack: 0.12, swapAt: 4 },
+    mechanics: [
+      {
+        type: 'tankBuster', name: 'Weltenbiss', damageType: 'shadow',
+        firstAt: 3, every: 5, power: 3.0, castTime: 1, interruptible: false, fx: 'bigImpact',
+        hint: 'Schilde (Runenwirker) oder Eiserne Wacht (Krieger) fangen den Biss ab.',
+      },
+      {
+        type: 'groupStrike', name: 'Leerenwelle', damageType: 'shadow',
+        firstAt: 5, every: 5, power: 1.8, castTime: 1, interruptible: false, fx: 'shadowWave',
+        hint: 'Trifft eine ganze Gruppe: Der Heiler der Gruppe muss bereit sein.',
+      },
+    ],
+    phases: [
+      {
+        belowHpPercent: 0.7,
+        name: 'Phase 2',
+        text: 'Vaelor reißt die Welt auf! Aus den Rissen kriechen Jungdrachen.',
+        mechanics: [
+          {
+            type: 'summon', name: 'Brut der Leere',
+            firstAt: 0, every: 8, minion: 'drakeling', count: 4, castTime: 0, fx: 'summon',
+            hint: 'Die Jungdrachen greifen zufällig an: Flächenschaden räumt sie weg.',
+          },
+          {
+            type: 'groupCast', name: 'Sternenfall', damageType: 'fire',
+            firstAt: 3, every: 5, power: 1.6, castTime: 1, interruptible: true, fx: 'fireRain',
+            hint: 'Trifft den ganzen Raid: unbedingt unterbrechen.',
+          },
+        ],
+      },
+      {
+        belowHpPercent: 0.4,
+        name: 'Phase 3',
+        text: 'Vaelor verschlingt das Licht! Flüche legen sich auf den Raid.',
+        mechanics: [
+          {
+            type: 'curse', name: 'Verschlingende Leere', damageType: 'shadow',
+            firstAt: 1, every: 2, power: 0.6, duration: 5, castTime: 0, fx: 'curse',
+            hint: 'Jede zweite Runde ein Fluch: alle Flüche-Löser werden gebraucht.',
+          },
+          {
+            type: 'groupStrike', name: 'Leerenwelle', damageType: 'shadow',
+            firstAt: 2, every: 4, power: 2.0, castTime: 1, interruptible: false, fx: 'shadowWave',
+            hint: 'Trifft eine ganze Gruppe.',
+          },
+        ],
+      },
+      {
+        belowHpPercent: 0.15,
+        name: 'Letzte Phase',
+        text: 'Das Ende aller Dinge! Vaelor zerreißt den Himmel!',
+        mechanics: [
+          {
+            type: 'groupCast', name: 'Weltenende', damageType: 'shadow',
+            firstAt: 1, every: 3, power: 1.4, castTime: 1, interruptible: false, fx: 'shadowWave',
+            hint: 'Trifft den ganzen Raid immer wieder: jetzt zählt nur noch Schaden und Heilung.',
+          },
+        ],
+      },
+    ],
+  },
 ];

@@ -1,5 +1,6 @@
 // ============================================================
 // RAIDSCREEN – der Raid (Reiter "Raid" im Abschnitt Dungeons)
+//   - ganz oben: Raid wählen (Raid 2 öffnet nach dem ersten vollständigen Sieg in Raid 1)
 //   - oben: Raid-Name, ob heute Raid-Tag ist bzw. wann der nächste kommt, Fortschritt der Woche
 //     (✓ besiegt, ➜ als Nächstes), ob die Aufstellung reicht, Knöpfe "Auto-Raid" und "Heute aussetzen"
 //   - Aufstellung: 4 Gruppen mit je bis zu 5 Helden, darunter "Nicht im Raid".
@@ -9,7 +10,7 @@
 // Die Regeln stehen in systems/RaidRules.js, die Aktionen in Game (Raid-Abschnitt).
 // ============================================================
 
-import { RAID_RULES } from '../data/raids.js';
+import { RAID_RULES, RAIDS } from '../data/raids.js';
 import { getBoss, MECHANIC_TYPE_TEXTS } from '../data/enemies.js';
 import { ROLE_NAMES } from '../data/heroClasses.js';
 import { isRaidDay, getRaidBossIds } from '../systems/RaidRules.js';
@@ -26,6 +27,7 @@ export class RaidScreen {
     this.root.innerHTML = `
       <div class="raid-screen">
         <section class="panel raid-head">
+          <div class="button-row raid-select"></div>
           <h2 class="raid-name"></h2>
           <p class="hint raid-description"></p>
           <div class="raid-day-line"></div>
@@ -78,6 +80,7 @@ export class RaidScreen {
 
   render() {
     const raid = this.game.getRaid();
+    this.renderRaidSelect();
     this.root.querySelector('.raid-name').textContent = raid.name;
     this.root.querySelector('.raid-description').textContent = raid.description;
     this.renderDayLine();
@@ -93,6 +96,29 @@ export class RaidScreen {
     this.root.querySelector('.raid-select-hint').textContent = this.selectedHeroId === null
       ? 'Tippe einen Helden an, dann einen anderen Helden (tauschen) oder einen freien Platz „+“ (verschieben).'
       : this.game.guild.findHero(this.selectedHeroId).name + ' ist ausgewählt. Wohin soll er?';
+  }
+
+  // Knöpfe zum Wählen des Raids (gesperrte Raids ausgegraut, mit Grund)
+  renderRaidSelect() {
+    const container = this.root.querySelector('.raid-select');
+    container.innerHTML = '';
+    const unlocked = this.game.getUnlockedRaids().map((raid) => raid.id);
+    for (const raid of RAIDS) {
+      const button = document.createElement('button');
+      button.className = 'filter-button';
+      button.classList.toggle('active', raid.id === this.game.guild.raidPlan.selectedRaidId);
+      button.textContent = raid.name + (raid.isFinal ? ' (Endboss)' : '');
+      button.disabled = !unlocked.includes(raid.id);
+      if (button.disabled && raid.unlockAfterRaid) {
+        button.title = 'Öffnet, wenn du ' + RAIDS.find((entry) => entry.id === raid.unlockAfterRaid).name + ' einmal ganz geschafft hast.';
+        button.textContent += ' 🔒';
+      }
+      button.addEventListener('click', () => {
+        Sound.click();
+        this.game.selectRaid(raid.id);
+      });
+      container.appendChild(button);
+    }
   }
 
   // "Heute ist Raid-Tag" oder "Nächster Raid-Tag: Tag 13 (in 3 Tagen)"

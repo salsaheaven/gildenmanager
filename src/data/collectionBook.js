@@ -26,6 +26,7 @@ export const COLLECTION_PAGES = [
   { dungeonId: 'arcaneArchive', title: 'Hüter des Archivs', goldBonus: 0.1 },
   // Raid: Die Seite füllt sich mit den Boss-Items aller vier Raid-Kisten
   { raidId: 'ashHalls', title: 'Bezwinger der Aschenhallen', goldBonus: 0.1 },
+  { raidId: 'nightThrone', title: 'Retter der Welt', goldBonus: 0.1 },
 ];
 
 // Ab dieser Seltenheit gilt ein Item als "glänzend". Sind alle Items einer Seite so selten, glänzt die Seite.

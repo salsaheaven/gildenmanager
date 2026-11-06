@@ -15,6 +15,8 @@
 //   id, name, description = Anzeige
 //   level        = Stufe der Gegner
 //   unlockLevel  = der Raid öffnet, sobald ein Held dieses Level hat
+//   unlockAfterRaid = freiwillig: der Raid öffnet erst, wenn dieser Raid einmal ganz geschafft ist
+//   isFinal      = der letzte Raid: Sein letzter Boss ist der Endboss des Spiels (danach die Endauswertung)
 //   encounters   = Begegnungen in Reihenfolge, wie bei den Dungeons:
 //                  { type: 'trash', name, enemies: [Gegner-ids aus MINIONS] } oder { type: 'boss', bossId, chest }
 //                  (Raid-Bosse stehen in raidBosses.js, 1–2 Trash-Gruppen vor jedem Boss;
@@ -59,6 +61,31 @@ export const RAIDS = [
     ],
     bossGold: 300,
     trashGold: 40,
+  },
+  {
+    id: 'nightThrone',
+    name: 'Der Nachtthron',
+    description: 'Hinter dem Eistor wartet Vaelor, der Weltenverschlinger. Wer ihn besiegt, rettet die Welt – und gewinnt das Spiel.',
+    level: 30,
+    unlockLevel: 30,
+    unlockAfterRaid: 'ashHalls',
+    isFinal: true,
+    encounters: [
+      { type: 'trash', name: 'Eistor', enemies: ['frostWolf', 'frostWolf', 'frostWolf', 'iceKobold', 'iceKobold', 'iceKobold'] },
+      { type: 'boss', bossId: 'hrimvald', chest: 'raidChestHrimvald' },
+      { type: 'trash', name: 'Sturmgalerie', enemies: ['wisp', 'wisp', 'wisp', 'wisp', 'livingTome', 'livingTome'] },
+      { type: 'trash', name: 'Gewitterbrücke', enemies: ['wisp', 'wisp', 'iceKobold', 'iceKobold', 'frostWolf', 'frostWolf'] },
+      { type: 'boss', bossId: 'zyra', chest: 'raidChestZyra' },
+      { type: 'trash', name: 'Knochengrube', enemies: ['ghoul', 'ghoul', 'ghoul', 'ghoul', 'bogCorpse', 'bogCorpse'] },
+      { type: 'boss', bossId: 'morvath', chest: 'raidChestMorvath' },
+      { type: 'trash', name: 'Schattenkapelle', enemies: ['cultist', 'cultist', 'cultist', 'cultist', 'ghoul', 'ghoul'] },
+      { type: 'trash', name: 'Pfad der Finsternis', enemies: ['cultist', 'cultist', 'ghoul', 'ghoul', 'drakeling', 'drakeling'] },
+      { type: 'boss', bossId: 'umbral', chest: 'raidChestUmbral' },
+      { type: 'trash', name: 'Vorhof des Throns', enemies: ['drakeling', 'drakeling', 'drakeling', 'drakeling', 'ironGuard', 'ironGuard'] },
+      { type: 'boss', bossId: 'vaelor', chest: 'raidChestVaelor' },
+    ],
+    bossGold: 400,
+    trashGold: 50,
   },
 ];
 

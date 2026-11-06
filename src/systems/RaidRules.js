@@ -23,9 +23,12 @@ export function isRaidDay(day) {
   return RAID_RULES.raidDays.includes(getWeekday(day));
 }
 
-// Der Raid öffnet, sobald ein Held das nötige Level hat
+// Ist ein Raid offen? Ein Held hat das nötige Level, und (falls angegeben) der vorige Raid wurde einmal ganz geschafft
 export function isRaidUnlocked(guild, raid) {
-  return guild.heroes.some((hero) => hero.level >= raid.unlockLevel);
+  if (!guild.heroes.some((hero) => hero.level >= raid.unlockLevel)) {
+    return false;
+  }
+  return !raid.unlockAfterRaid || guild.raidPlan.getClears(raid.unlockAfterRaid) > 0;
 }
 
 // Die Gruppen mit den Helden, die heute kämpfen können (entlassene und verletzte fehlen)

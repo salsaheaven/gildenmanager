@@ -163,7 +163,7 @@ describe('Raid-Tag', () => {
 
   it('die Wochen-Sperre endet mit der neuen Woche', () => {
     const game = createRaidGame();
-    game.guild.raidPlan.markBossDefeated(RAIDS[0].encounters[2].bossId, game.getWeek());
+    game.guild.raidPlan.markBossDefeated('ashHalls', RAIDS[0].encounters[2].bossId, game.getWeek());
     expect(game.getDefeatedRaidBossIds().length).toBe(1);
     game.day += RAID_RULES.daysPerWeek;
     expect(game.getDefeatedRaidBossIds().length).toBe(0);
@@ -182,9 +182,35 @@ describe('Raid-Tag', () => {
   it('Aufstellung und Sperre werden gespeichert', () => {
     const game = createRaidGame();
     game.applyAutoRaid();
-    game.guild.raidPlan.markBossDefeated('stoneColossus', game.getWeek());
+    game.guild.raidPlan.markBossDefeated('ashHalls', 'stoneColossus', game.getWeek());
     const loaded = Game.fromSaveData(JSON.parse(JSON.stringify(game.toSaveData())));
     expect(loaded.guild.raidPlan.groups).toEqual(game.guild.raidPlan.groups);
     expect(loaded.getDefeatedRaidBossIds()).toEqual(['stoneColossus']);
+  });
+});
+
+describe('Raid 2', () => {
+  it('öffnet erst nach dem ersten vollständigen Sieg in Raid 1, dann frei wählbar', () => {
+    const game = createRaidGame();
+    expect(game.getUnlockedRaids().map((raid) => raid.id)).toEqual(['ashHalls']);
+    expect(game.selectRaid('nightThrone')).toBe('locked');
+    game.guild.raidPlan.recordClear('ashHalls', game.day);
+    expect(game.getUnlockedRaids().map((raid) => raid.id)).toEqual(['ashHalls', 'nightThrone']);
+    expect(game.selectRaid('nightThrone')).toBe('ok');
+    expect(game.getRaid().id).toBe('nightThrone');
+  });
+
+  it('jeder Raid hat seine eigene Wochen-Sperre', () => {
+    const game = createRaidGame();
+    game.guild.raidPlan.markBossDefeated('ashHalls', 'stoneColossus', game.getWeek());
+    expect(game.getDefeatedRaidBossIds('ashHalls')).toEqual(['stoneColossus']);
+    expect(game.getDefeatedRaidBossIds('nightThrone')).toEqual([]);
+  });
+
+  it('der letzte Raid hat den Endboss', () => {
+    const finalRaid = RAIDS.find((raid) => raid.isFinal);
+    const lastBoss = finalRaid.encounters[finalRaid.encounters.length - 1];
+    expect(getBoss(lastBoss.bossId).isFinalBoss).toBe(true);
+    expect(finalRaid.encounters.filter((entry) => entry.type === 'boss').length).toBe(5);
   });
 });

@@ -22,6 +22,7 @@ import { Hero } from '../entities/Hero.js';
 import { Expedition } from '../entities/Expedition.js';
 import { getDungeon } from '../data/dungeons.js';
 import { getRaid } from '../data/raids.js';
+import { getNextEncounterIndex } from '../systems/RaidRules.js';
 import { getBoss } from '../data/enemies.js';
 import { getBuilding } from '../data/buildings.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
@@ -327,11 +328,16 @@ export class DayEndOverlay {
       card.querySelector('.day-run-rewards').appendChild(this.createChestLine(chestId));
     }
     // Wo geht es weiter? (Wochen-Sperre)
-    const nextIndex = this.game.getNextRaidEncounterIndex();
+    const nextIndex = getNextEncounterIndex(raid, this.game.getDefeatedRaidBossIds(raid.id));
     const nextBoss = nextIndex === null ? null : raid.encounters.slice(nextIndex).find((encounter) => encounter.type === 'boss');
-    card.querySelector('.day-raid-next').textContent = nextBoss
+    let nextText = nextBoss
       ? 'Am nächsten Raid-Tag dieser Woche geht es bei ' + getBoss(nextBoss.bossId).name + ' weiter.'
       : 'Alle Bosse dieser Woche sind besiegt! Nächste Woche beginnt der Raid von vorn.';
+    // Zum ersten Mal ganz geschafft: der nächste Raid ist offen
+    if (report.unlockedRaidId) {
+      nextText += ' Neu: ' + getRaid(report.unlockedRaidId).name + ' ist offen (Reiter „Raid“)!';
+    }
+    card.querySelector('.day-raid-next').textContent = nextText;
 
     const heroResults = report.heroResults || [];
     card.querySelector('.day-raid-heroes summary').textContent = heroResults.length + ' Helden · ' +

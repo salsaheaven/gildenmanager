@@ -47,7 +47,7 @@ import { BALANCING } from '../data/balancing.js';
 import { getDungeon } from '../data/dungeons.js';
 import { Expedition } from '../entities/Expedition.js';
 import { applyRunResults } from '../systems/ExperienceSystem.js';
-import { getRaid, RAID_RULES } from '../data/raids.js';
+import { getRaid, RAID_RULES, RAIDS } from '../data/raids.js';
 import { getWeekday, getWeek, isRaidDay, isRaidUnlocked, getFightingGroups, checkRaid, getNextEncounterIndex } from '../systems/RaidRules.js';
 import { suggestAutoRaid } from '../systems/AutoRaid.js';
 import { simulateRaidRun } from '../systems/combat/CombatSimulator.js';
@@ -1126,8 +1126,24 @@ export class Game {
 
   // ---------- Raid (siehe data/raids.js, systems/RaidRules.js, entities/RaidPlan.js) ----------
 
+  // Der gewählte Raid (in den es an Raid-Tagen geht)
   getRaid() {
-    return getRaid(this.guild.raidPlan.raidId);
+    return getRaid(this.guild.raidPlan.selectedRaidId);
+  }
+
+  // Alle offenen Raids (Raid 2 öffnet nach dem ersten vollständigen Sieg in Raid 1)
+  getUnlockedRaids() {
+    return RAIDS.filter((raid) => isRaidUnlocked(this.guild, raid));
+  }
+
+  // Wählt, in welchen Raid es an Raid-Tagen geht. Gibt 'ok' oder 'locked' zurück.
+  selectRaid(raidId) {
+    if (!isRaidUnlocked(this.guild, getRaid(raidId))) {
+      return 'locked';
+    }
+    this.guild.raidPlan.selectedRaidId = raidId;
+    this.emit('changed');
+    return 'ok';
   }
 
   // Wochentag (1 bis 7) und Woche des heutigen Tages
@@ -1143,14 +1159,15 @@ export class Game {
     return isRaidDay(this.day);
   }
 
+  // Ist der gewählte Raid offen?
   isRaidUnlocked() {
     return isRaidUnlocked(this.guild, this.getRaid());
   }
 
-  // Heute keine Dungeons? Erst wenn der Raid offen ist, werden die Raid-Tage zu reinen Raid-Tagen.
+  // Heute keine Dungeons? Erst wenn der erste Raid offen ist, werden die Raid-Tage zu reinen Raid-Tagen.
   // Vorher sind alle 7 Tage Dungeon-Tage.
   areDungeonsClosedToday() {
-    return this.isRaidDayToday() && this.isRaidUnlocked();
+    return this.isRaidDayToday() && isRaidUnlocked(this.guild, RAIDS[0]);
   }
 
   // Reicht die Raid-Aufstellung? { ok, heroCount, tanks, healers, problems }
@@ -1158,9 +1175,9 @@ export class Game {
     return checkRaid(this.guild, this.guild.raidPlan);
   }
 
-  // Die in dieser Woche schon besiegten Bosse (Wochen-Sperre)
-  getDefeatedRaidBossIds() {
-    return this.guild.raidPlan.getDefeatedBossIds(this.getWeek());
+  // Die in dieser Woche schon besiegten Bosse eines Raids (Wochen-Sperre; ohne Angabe: der gewählte Raid)
+  getDefeatedRaidBossIds(raidId = this.guild.raidPlan.selectedRaidId) {
+    return this.guild.raidPlan.getDefeatedBossIds(raidId, this.getWeek());
   }
 
   // Ab welcher Begegnung geht es diese Woche weiter? (null = alle Bosse dieser Woche besiegt)
@@ -1173,7 +1190,7 @@ export class Game {
   refreshRaidToday() {
     const plan = this.guild.raidPlan;
     plan.removeMissingHeroes(this.guild);
-    const wouldRaid = this.areDungeonsClosedToday() && this.getNextRaidEncounterIndex() !== null &&
+    const wouldRaid = this.areDungeonsClosedToday() && this.isRaidUnlocked() && this.getNextRaidEncounterIndex() !== null &&
       plan.skippedDay !== this.day && plan.lastFoughtDay !== this.day;
     const ready = this.checkRaid().ok;
     plan.activeToday = wouldRaid && ready;
@@ -1281,6 +1298,10 @@ export class Game {
       groups: groups.map((group) => group.map((hero) => hero.id)),
       defeatedBossIds: [],
       chests: [],           // Raid-Kisten (eine pro besiegtem Boss)
+      raidCleared: false,   // alle Bosse des Raids heute geschafft?
+      firstRaidClear: false, // zum ersten Mal ganz geschafft?
+      unlockedRaidId: null, // dadurch neu geöffneter Raid
+      endbossDefeated: false, // der Endboss des Spiels ist zum ersten Mal besiegt
       gold: 0,
       heroNames: result.heroes.map((hero) => hero.name),
       fallenNames: result.heroes.filter((hero) => !hero.alive).map((hero) => hero.name),
@@ -1292,7 +1313,7 @@ export class Game {
         return;
       }
       if (encounter.type === 'boss') {
-        plan.markBossDefeated(encounter.bossId, this.getWeek());
+        plan.markBossDefeated(raid.id, encounter.bossId, this.getWeek());
         report.defeatedBossIds.push(encounter.bossId);
         report.gold += raid.bossGold;
         // Eine Raid-Kiste pro besiegtem Boss (Items in der Stufe des Raids)
@@ -1302,6 +1323,20 @@ export class Game {
         report.gold += raid.trashGold;
       }
     });
+    // Ganz geschafft (letzter Boss besiegt)? Beim ersten Mal öffnet sich evtl. der nächste Raid,
+    // und beim letzten Raid ist der Endboss besiegt (Endauswertung, siehe EndEvaluation.js)
+    if (result.outcome === 'success') {
+      const firstClear = plan.getClears(raid.id) === 0;
+      plan.recordClear(raid.id, this.day);
+      report.raidCleared = true;
+      report.firstRaidClear = firstClear;
+      if (firstClear) {
+        const nextRaid = RAIDS.find((entry) => entry.unlockAfterRaid === raid.id);
+        report.unlockedRaidId = nextRaid ? nextRaid.id : null;
+        report.endbossDefeated = Boolean(raid.isFinal);
+      }
+    }
+
     // Volle Sammelbuch-Seite des Raids: mehr Gold
     report.collectionGold = Math.round(report.gold * this.guild.collection.getGoldBonus(raid.id));
     report.gold += report.collectionGold;
