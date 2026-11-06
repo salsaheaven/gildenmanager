@@ -465,6 +465,7 @@ button:disabled {
 
 .item-card {
   --rarity: #ffffff;
+  position: relative;
   width: 150px;
   padding: 12px 8px;
   background: #120d1c;
@@ -1971,6 +1972,40 @@ h3 {
   flex-wrap: wrap;
   gap: 6px;
   margin: 6px 0;
+}
+
+/* ---------- Zerlegen im Beute-Ergebnis (LootBoxScreen) ---------- */
+
+.item-card.salvage-selectable {
+  cursor: pointer;
+}
+
+/* Zum Zerlegen markiert: Häkchen-Schild oben und etwas blasser */
+.item-card.salvage-marked {
+  outline: 3px dashed #c9b8ff;
+  opacity: 0.75;
+}
+
+.item-card.salvage-marked::after {
+  content: '✓ zerlegen';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 0 4px;
+  font-size: 14px;
+  color: #14101f;
+  background: #c9b8ff;
+}
+
+/* Zerlegt: Karte verschwindet fast */
+.item-card.salvaged {
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.salvage-result-row {
+  flex-basis: 100%;
+  justify-content: center;
 }
 
 /* ---------- Endauswertung (EndEvaluationOverlay.js) ---------- */

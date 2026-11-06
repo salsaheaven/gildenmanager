@@ -9,6 +9,8 @@
 //   4. Bei Legendär: Bildschirm wackelt und blitzt
 //   5. Boss-Items: Schild "Neu im Sammelbuch!" bzw. "Sammelbuch verbessert!", bei voller Seite ein Banner
 // Ein Klick auf die Bühne überspringt die Animation.
+//   6. Danach: Zerlegen direkt im Ergebnis. Items antippen (markiert ✓), dann "Markierte zerlegen".
+//      "Schwache markieren" markiert alles unter Episch (ohne Boss-Items und gesperrte Items).
 // ============================================================
 
 import { LOOT_BOXES, getLootBoxType } from '../data/lootBoxes.js';
@@ -18,6 +20,8 @@ import { createChestCanvas, createItemCanvas } from './PixelArt.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 import { describeMaterials } from './UpgradeControls.js';
+import { getSalvageYield } from '../systems/CraftingSystem.js';
+import { getRarityRank } from '../data/rarities.js';
 
 // Zeiten der Animation in Millisekunden
 const FIRST_ITEM_DELAY = 450;
@@ -233,6 +237,7 @@ export class LootBoxScreen {
     const rarity = item.getRarity();
     const card = document.createElement('div');
     card.className = 'item-card rarity-' + item.rarityId;
+    card.dataset.itemId = item.id;
     card.style.setProperty('--rarity', rarity.color);
     card.appendChild(createItemCanvas(item, 5));
 
@@ -271,6 +276,107 @@ export class LootBoxScreen {
     showToast('Sammelbuch: Titel „' + page.title + '“ freigeschaltet!', '#ffd23f');
   }
 
+  // ---------- Zerlegen im Ergebnis ----------
+
+  // Nach dem Öffnen: Karten lassen sich zum Zerlegen markieren (nicht bei gesperrten Items)
+  enableSalvageSelection() {
+    this.salvageIds = new Set();
+    for (const card of this.itemsElement.querySelectorAll('.item-card')) {
+      const item = this.game.guild.findItem(Number(card.dataset.itemId));
+      if (!item || item.locked) {
+        continue;
+      }
+      card.classList.add('salvage-selectable');
+      card.addEventListener('click', () => {
+        Sound.click();
+        if (this.salvageIds.has(item.id)) {
+          this.salvageIds.delete(item.id);
+        } else {
+          this.salvageIds.add(item.id);
+        }
+        this.updateSalvageMarks();
+      });
+    }
+  }
+
+  // Häkchen an den markierten Karten und der Text auf dem Knopf (mit dem Material, das es gibt)
+  updateSalvageMarks() {
+    for (const card of this.itemsElement.querySelectorAll('.item-card')) {
+      card.classList.toggle('salvage-marked', this.salvageIds.has(Number(card.dataset.itemId)));
+    }
+    const button = this.actionsElement.querySelector('.salvage-result-button');
+    if (!button) {
+      return;
+    }
+    const total = {};
+    for (const itemId of this.salvageIds) {
+      const item = this.game.guild.findItem(itemId);
+      if (!item) {
+        continue;
+      }
+      const materials = getSalvageYield(item);
+      for (const materialId in materials) {
+        total[materialId] = (total[materialId] || 0) + materials[materialId];
+      }
+    }
+    button.disabled = this.salvageIds.size === 0;
+    button.textContent = this.salvageIds.size === 0
+      ? 'Antippen zum Markieren, dann zerlegen'
+      : this.salvageIds.size + ' zerlegen (' + describeMaterials(total) + ')';
+  }
+
+  // Knöpfe zum Zerlegen unter dem Ergebnis
+  renderSalvageActions() {
+    const row = document.createElement('div');
+    row.className = 'button-row salvage-result-row';
+    const markButton = document.createElement('button');
+    markButton.className = 'salvage-mark-weak-button';
+    markButton.textContent = 'Schwache markieren';
+    markButton.title = 'Markiert alle Items unter Episch, außer Boss-Items und gesperrten Items';
+    markButton.addEventListener('click', () => {
+      Sound.click();
+      for (const item of this.currentItems) {
+        const stillThere = this.game.guild.findItem(item.id);
+        if (stillThere && !item.locked && !item.bossItemId && getRarityRank(item.rarityId) < getRarityRank('epic')) {
+          this.salvageIds.add(item.id);
+        }
+      }
+      this.updateSalvageMarks();
+    });
+    const salvageButton = document.createElement('button');
+    salvageButton.className = 'salvage-result-button';
+    salvageButton.addEventListener('click', () => this.salvageMarked());
+    row.append(markButton, salvageButton);
+    this.actionsElement.prepend(row);
+    this.updateSalvageMarks();
+  }
+
+  // Zerlegt alle markierten Items und blendet ihre Karten aus
+  salvageMarked() {
+    const total = {};
+    let count = 0;
+    for (const itemId of this.salvageIds) {
+      const materials = this.game.salvageItem(itemId);
+      if (!materials) {
+        continue;
+      }
+      count++;
+      for (const materialId in materials) {
+        total[materialId] = (total[materialId] || 0) + materials[materialId];
+      }
+      const card = this.itemsElement.querySelector('.item-card[data-item-id="' + itemId + '"]');
+      if (card) {
+        card.classList.add('salvaged');
+      }
+    }
+    this.salvageIds.clear();
+    if (count > 0) {
+      Sound.salvage();
+      showToast(count + (count === 1 ? ' Item' : ' Items') + ' zerlegt: +' + describeMaterials(total), '#c9b8ff');
+    }
+    this.updateSalvageMarks();
+  }
+
   finishOpening() {
     // Raid-Kisten: die Raid-Zutaten dazu melden
     if (this.currentItems && this.currentItems.ingredients) {
@@ -280,6 +386,11 @@ export class LootBoxScreen {
     this.timers = [];
     this.renderBoxList();
     this.renderActions();
+    // Zerlegen im Ergebnis (erst, wenn Zerlegen freigeschaltet ist)
+    if (this.game.isFeatureUnlocked('crafting')) {
+      this.enableSalvageSelection();
+      this.renderSalvageActions();
+    }
   }
 
   // Knöpfe "Noch eine öffnen" (direkt weitermachen) und "Ins Inventar"

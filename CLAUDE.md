@@ -89,7 +89,7 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                sets (15 Klassen-Sets à 3 Teile, Boni bei 2 und 3 Teilen, Set-Teile als Boss-Beute der 3 Set-Dungeons),
                collectionBook (Sammelbuch-Seiten pro Dungeon mit Titel und Gold-Bonus; die Items kommen aus `bossLoot` in lootBoxes)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute · Helden · Dungeons · Beute · Gilde mit Unterreitern (Liste SECTIONS in main.js).
-               Bildschirme: DayPlanScreen (Tagesplan, Startseite, oben TodoBox = „Was gibt es heute zu tun?“), LootBoxScreen (Kisten öffnen), ShopScreen (Händler + Vorratskammer),
+               Bildschirme: DayPlanScreen (Tagesplan, Startseite, oben TodoBox = „Was gibt es heute zu tun?“), LootBoxScreen (Kisten öffnen, danach Zerlegen direkt im Ergebnis), ShopScreen (Händler + Vorratskammer),
                HeroScreen (+ RoleOverview = Kacheln nach Position mit Gruppen-Zähler; HeroDetailPanel = Plätze direkt unter dem Porträt, Rest aufklappbar, Blättern ‹ ›; EquipPanel = Ausrüstungsliste für den angetippten Platz,
                auf dem Handy als Fenster von unten, nach Item-Level sortiert, Vergleich pro Wert; „Bestes anlegen“ am Helden), TavernScreen, CombatLabScreen (Kampf-Labor, auch „Test-Raid“ mit 4 Gruppen),
                DungeonScreen („Ein Dungeon = eine Karte“: Planungs-Karte klappt unter dem Dungeon auf, feste Leiste mit Einschätzung live und Konter ✓/✗;
