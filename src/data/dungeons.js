@@ -142,10 +142,10 @@ export const DUNGEONS = [
     level: 30,
     unlockAfter: 'emberKeep',
     encounters: [
-      { type: 'trash', name: 'Wildwolf-Rudel', enemies: ['wildWolf', 'wildWolf', 'wildWolf', 'wildWolf'] },
-      { type: 'trash', name: 'Dornendickicht', enemies: ['wildWolf', 'wildWolf', 'bogCorpse'] },
+      { type: 'trash', name: 'Wildwolf-Rudel', enemies: ['wildWolf', 'wildWolf', 'wildWolf'] },
+      { type: 'trash', name: 'Dornendickicht', enemies: ['wildWolf', 'bogCorpse'] },
       { type: 'boss', bossId: 'gnarr' },
-      { type: 'trash', name: 'Moorpfad', enemies: ['bogCorpse', 'bogCorpse', 'wildWolf'] },
+      { type: 'trash', name: 'Moorpfad', enemies: ['bogCorpse', 'wildWolf'] },
       { type: 'boss', bossId: 'skaar' },
     ],
     rewards: { gold: 450, chest: 'chestSkaar', trashGold: 38 },

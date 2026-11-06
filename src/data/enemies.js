@@ -345,7 +345,7 @@ export const BOSSES = [
     sprite: 'bossBear',
     colors: { b: '#6f8a4a', B: '#3a4a22' },
     attackFx: 'claw',
-    stats: { health: 1300, attack: 26, defense: 8 },
+    stats: { health: 1100, attack: 24, defense: 8 },
     enrageRound: 24,
     mechanics: [
       {
