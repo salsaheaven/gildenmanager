@@ -648,6 +648,33 @@ body.overlay-open {
   outline-offset: 1px;
 }
 
+/* Mehrfachauswahl: markierte Items mit Häkchen, gesperrte blass */
+.inventory-slot.mass-selected {
+  outline: 3px dashed #c9b8ff;
+  outline-offset: 1px;
+}
+
+.inventory-slot.mass-selected::after {
+  content: '✓';
+  position: absolute;
+  top: 1px;
+  right: 3px;
+  font-size: 16px;
+  color: #c9b8ff;
+}
+
+.inventory-slot.mass-locked {
+  opacity: 0.4;
+}
+
+.inventory-select-row {
+  margin: 6px 0;
+}
+
+.auto-junk {
+  margin-top: 8px;
+}
+
 .new-dot {
   position: absolute;
   top: -4px;
@@ -1989,6 +2016,19 @@ h3 {
   flex-wrap: wrap;
   gap: 6px;
   margin: 6px 0;
+}
+
+/* Automatisch verwerteter Schrott in der Kiste: blass mit Stempel */
+.item-card.auto-junked {
+  opacity: 0.5;
+}
+
+.auto-junk-stamp {
+  margin-top: 4px;
+  padding: 0 6px;
+  font-size: 15px;
+  color: #14101f;
+  background: #9d9d9d;
 }
 
 /* ---------- Tagesabschluss: Szenen-Wahl und Bilanz ---------- */
@@ -4295,6 +4335,7 @@ h3 {
 body.locked-crafting .upgrade-button,
 body.locked-crafting .salvage-button,
 body.locked-crafting .salvage-junk-button,
+body.locked-crafting .auto-junk-salvage,
 body.locked-rivals .day-plan-server,
 body.locked-rivals .day-news-card,
 body.locked-talents .detail-section[data-section="talents"],

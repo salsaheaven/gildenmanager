@@ -61,6 +61,8 @@ export class Guild {
 
     // Pity-Zähler: Items seit dem letzten epischen oder legendären Item
     this.itemsSinceEpic = 0;
+    // Automatische Verwertung von Schrott (Weiß und Grau) aus neuen Kisten: 'off', 'sell' oder 'salvage'
+    this.autoJunk = 'off';
     // Raid-Pity: Raid-Kisten seit dem letzten legendären Item (siehe BALANCING.raidLegendaryPityAfter)
     this.raidChestsSinceLegendary = 0;
 
@@ -309,6 +311,7 @@ export class Guild {
       nextItemId: this.nextItemId,
       itemsSinceEpic: this.itemsSinceEpic,
       raidChestsSinceLegendary: this.raidChestsSinceLegendary,
+      autoJunk: this.autoJunk,
       stats: this.stats,
       heroes: this.heroes.map((hero) => hero.toSaveData()),
       candidates: this.candidates.map((candidate) => candidate.toSaveData()),
@@ -350,6 +353,7 @@ export class Guild {
     guild.nextItemId = data.nextItemId;
     guild.itemsSinceEpic = data.itemsSinceEpic;
     guild.raidChestsSinceLegendary = data.raidChestsSinceLegendary;
+    guild.autoJunk = data.autoJunk;
     guild.stats = data.stats;
     // "|| []" damit auch alte Spielstände ohne Helden geladen werden können
     guild.heroes = (data.heroes || []).map((heroData) => Hero.fromSaveData(heroData));

@@ -212,7 +212,10 @@ export class LootBoxScreen {
     this.revealedCount++;
 
     this.itemsElement.appendChild(this.createItemCard(item));
-    this.inventory.revealItem(item);
+    // Automatisch verkaufte/zerlegte Items liegen nicht mehr im Inventar
+    if (!item.autoJunked) {
+      this.inventory.revealItem(item);
+    }
     Sound.itemReveal(item.getRarityRank());
     if (item.collectionStatus) {
       Sound.collectionEntry(item.collectionStatus === 'improved');
@@ -255,6 +258,15 @@ export class LootBoxScreen {
     stats.className = 'card-stats';
     stats.textContent = formatItemValues(item);
     card.appendChild(stats);
+
+    // Schrott, der automatisch verwertet wurde (Einstellung im Inventar)
+    if (item.autoJunked) {
+      card.classList.add('auto-junked');
+      const stamp = document.createElement('div');
+      stamp.className = 'auto-junk-stamp';
+      stamp.textContent = item.autoJunked === 'sell' ? 'verkauft' : 'zerlegt';
+      card.appendChild(stamp);
+    }
 
     // Boss-Item: Was hat es im Sammelbuch bewirkt?
     if (item.collectionStatus) {
@@ -378,6 +390,12 @@ export class LootBoxScreen {
   }
 
   finishOpening() {
+    // Automatische Verwertung melden
+    if (this.currentItems && this.currentItems.autoJunk && this.currentItems.autoJunk.count > 0) {
+      const auto = this.currentItems.autoJunk;
+      showToast('Schrott automatisch ' + (auto.mode === 'sell' ? 'verkauft: +' + auto.gold + ' Gold' :
+        'zerlegt: +' + describeMaterials(auto.materials)) + ' (' + auto.count + ' Items)', '#9d9d9d');
+    }
     // Raid-Kisten: die Raid-Zutaten dazu melden
     if (this.currentItems && this.currentItems.ingredients) {
       showToast('+' + describeMaterials(this.currentItems.ingredients) + ' Aschenessenz (zum Umschmieden von Set-Teilen)', '#ff8000');

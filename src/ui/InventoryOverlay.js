@@ -3,11 +3,13 @@
 // Wird über den Knopf "Inventar" in der Reiterleiste geöffnet, von jedem Bildschirm aus.
 // Oben: Kategorien (Alle, Waffe, Nebenhand, Kopf …). Darunter alle Items als Raster.
 // Klick auf ein Item zeigt Details mit Verkaufen, Zerlegen und Verbessern.
-// Oben steht der Materialbestand (Arkanstaub, Kristalle), unten "Schrott verkaufen" und "Schrott zerlegen".
+// Oben steht der Materialbestand (Arkanstaub, Kristalle), unten "Schrott verkaufen" und "Schrott zerlegen"
+// (Schrott = Weiß und Grau, ohne Boss-Items und gesperrte Items).
+// "Mehrere auswählen": Items antippen (✓), dann alle markierten verkaufen oder zerlegen (Massen-Verkauf).
+// "Automatisch": Schrott aus neuen Kisten gleich verkaufen oder zerlegen (Einstellung wird gespeichert).
 // Schließen mit dem X oder der Escape-Taste.
 // ============================================================
 
-import { getRarity } from '../data/rarities.js';
 import { STAT_NAMES, SLOT_NAMES } from '../data/items.js';
 import { DAMAGE_TYPES } from '../data/damageTypes.js';
 import { EQUIPMENT_SLOTS } from '../entities/Hero.js';
@@ -32,6 +34,8 @@ export class InventoryOverlay {
     this.selectedItemId = null;
     this.hiddenItemIds = new Set(); // Items, die gerade noch in der Kiste "stecken"
     this.newItemIds = new Set();    // frisch gefundene Items bekommen einen Punkt
+    this.selectMode = false;        // Mehrfachauswahl an? (Massen-Verkauf und -Zerlegen)
+    this.selectedIds = new Set();   // in der Mehrfachauswahl markierte Items
 
     this.root = document.createElement('div');
     this.root.className = 'inventory-overlay';
@@ -43,6 +47,9 @@ export class InventoryOverlay {
         <button class="close-button" title="Schließen (Esc)">✕</button>
       </div>
       <div class="inventory-categories"></div>
+      <div class="button-row inventory-select-row">
+        <button class="select-mode-button">Mehrere auswählen</button>
+      </div>
       <div class="inventory-body">
         <div class="inventory-grid"></div>
         <div class="inventory-side">
@@ -50,6 +57,10 @@ export class InventoryOverlay {
           <div class="junk-buttons">
             <button class="sell-junk-button"></button>
             <button class="salvage-junk-button"></button>
+          </div>
+          <div class="auto-junk">
+            <div class="hint">Schrott (Weiß und Grau) aus neuen Kisten automatisch:</div>
+            <div class="button-row auto-junk-buttons"></div>
           </div>
         </div>
       </div>
@@ -59,19 +70,26 @@ export class InventoryOverlay {
     this.root.querySelector('.close-button').addEventListener('click', () => this.close());
 
     this.root.querySelector('.sell-junk-button').addEventListener('click', () => {
-      const gold = this.game.sellAllOfRarity('poor');
-      if (gold > 0) {
+      const result = this.game.sellItems(this.game.getJunkItems().map((item) => item.id));
+      if (result.count > 0) {
         Sound.coin();
-        showToast('Schrott verkauft: +' + gold + ' Gold');
+        showToast('Schrott verkauft: ' + result.count + ' Items, +' + result.gold + ' Gold');
       }
     });
 
     this.root.querySelector('.salvage-junk-button').addEventListener('click', () => {
-      const materials = this.game.salvageAllOfRarity('poor');
-      if (materials.dust > 0 || materials.crystal > 0) {
+      const result = this.game.salvageItems(this.game.getJunkItems().map((item) => item.id));
+      if (result.count > 0) {
         Sound.salvage();
-        showToast('Schrott zerlegt: +' + describeMaterials(materials));
+        showToast('Schrott zerlegt: ' + result.count + ' Items, +' + describeMaterials(result.materials));
       }
+    });
+
+    this.root.querySelector('.select-mode-button').addEventListener('click', () => {
+      Sound.click();
+      this.selectMode = !this.selectMode;
+      this.selectedIds.clear();
+      this.render();
     });
 
     document.addEventListener('keydown', (event) => {
@@ -183,8 +201,101 @@ export class InventoryOverlay {
       grid.innerHTML = '<p class="empty">In dieser Kategorie liegt nichts.</p>';
     }
 
-    this.renderDetails();
+    this.root.querySelector('.select-mode-button').textContent = this.selectMode ? 'Fertig' : 'Mehrere auswählen';
+    this.root.querySelector('.select-mode-button').classList.toggle('active', this.selectMode);
+    if (this.selectMode) {
+      this.renderSelection(shownItems);
+    } else {
+      this.renderDetails();
+    }
     this.renderJunkButtons(items);
+    this.renderAutoJunk();
+  }
+
+  // ---------- Mehrfachauswahl (Massen-Verkauf und -Zerlegen) ----------
+
+  // Statt der Details: Anzahl, Knöpfe zum Markieren, Verkaufen und Zerlegen
+  renderSelection(shownItems) {
+    // Nicht mehr vorhandene Items fallen aus der Auswahl
+    for (const itemId of this.selectedIds) {
+      if (!this.game.guild.findItem(itemId)) {
+        this.selectedIds.delete(itemId);
+      }
+    }
+    const selected = [...this.selectedIds].map((itemId) => this.game.guild.findItem(itemId));
+    let gold = 0;
+    const materials = {};
+    for (const item of selected) {
+      gold += item.getSellValue();
+      const yieldOfItem = getSalvageYield(item);
+      for (const materialId in yieldOfItem) {
+        materials[materialId] = (materials[materialId] || 0) + yieldOfItem[materialId];
+      }
+    }
+    const details = this.root.querySelector('.item-details');
+    details.innerHTML = `
+      <div class="detail-name">${selected.length} ausgewählt</div>
+      <p class="hint">Tippe Items an, um sie zu markieren. Gesperrte Items (🔒) lassen sich nicht auswählen.</p>
+      <div class="button-row">
+        <button class="select-all-button">Alle hier markieren</button>
+        <button class="select-weak-button">Bis Grün markieren</button>
+        <button class="select-none-button">Auswahl aufheben</button>
+      </div>
+      <div class="detail-actions">
+        <button class="mass-sell-button">Verkaufen (${gold} Gold)</button>
+        <button class="mass-salvage-button salvage-button"></button>
+      </div>
+    `;
+    details.querySelector('.mass-salvage-button').textContent = 'Zerlegen (' + (describeMaterials(materials) || '✧ 0') + ')';
+    details.querySelector('.mass-sell-button').disabled = selected.length === 0;
+    details.querySelector('.mass-salvage-button').disabled = selected.length === 0;
+    const selectable = (item) => !item.locked;
+    details.querySelector('.select-all-button').addEventListener('click', () => {
+      Sound.click();
+      shownItems.filter(selectable).forEach((item) => this.selectedIds.add(item.id));
+      this.render();
+    });
+    details.querySelector('.select-weak-button').addEventListener('click', () => {
+      Sound.click();
+      // "Bis Grün" = Grau, Weiß und Grün, ohne Boss-Items
+      shownItems.filter((item) => selectable(item) && !item.bossItemId && item.getRarityRank() <= 2)
+        .forEach((item) => this.selectedIds.add(item.id));
+      this.render();
+    });
+    details.querySelector('.select-none-button').addEventListener('click', () => {
+      Sound.click();
+      this.selectedIds.clear();
+      this.render();
+    });
+    details.querySelector('.mass-sell-button').addEventListener('click', () => {
+      const result = this.game.sellItems([...this.selectedIds]);
+      this.selectedIds.clear();
+      Sound.coin();
+      showToast(result.count + ' Items verkauft: +' + result.gold + ' Gold', '#ffd23f');
+    });
+    details.querySelector('.mass-salvage-button').addEventListener('click', () => {
+      const result = this.game.salvageItems([...this.selectedIds]);
+      this.selectedIds.clear();
+      Sound.salvage();
+      showToast(result.count + ' Items zerlegt: +' + describeMaterials(result.materials), '#c9b8ff');
+    });
+  }
+
+  // Einstellung "automatisch verkaufen/zerlegen" für Schrott aus neuen Kisten
+  renderAutoJunk() {
+    const container = this.root.querySelector('.auto-junk-buttons');
+    container.innerHTML = '';
+    for (const option of [{ id: 'off', label: 'Aus' }, { id: 'sell', label: 'Verkaufen' }, { id: 'salvage', label: 'Zerlegen' }]) {
+      const button = document.createElement('button');
+      button.className = 'filter-button' + (option.id === 'salvage' ? ' auto-junk-salvage' : '');
+      button.textContent = option.label;
+      button.classList.toggle('active', this.game.guild.autoJunk === option.id);
+      button.addEventListener('click', () => {
+        Sound.click();
+        this.game.setAutoJunk(option.id);
+      });
+      container.appendChild(button);
+    }
   }
 
   // Knöpfe für die Kategorien, jeweils mit Anzahl und Punkt für neue Items
@@ -232,14 +343,30 @@ export class InventoryOverlay {
       dot.className = 'new-dot';
       slot.appendChild(dot);
     }
-    if (item.id === this.selectedItemId) {
+    if (this.selectMode) {
+      slot.classList.toggle('mass-selected', this.selectedIds.has(item.id));
+      slot.classList.toggle('mass-locked', item.locked);
+    } else if (item.id === this.selectedItemId) {
       slot.classList.add('selected');
     }
 
     slot.addEventListener('click', () => {
       Sound.click();
-      this.selectedItemId = item.id;
       this.newItemIds.delete(item.id);
+      // Mehrfachauswahl: markieren bzw. wieder abwählen (gesperrte nicht)
+      if (this.selectMode) {
+        if (item.locked) {
+          return;
+        }
+        if (this.selectedIds.has(item.id)) {
+          this.selectedIds.delete(item.id);
+        } else {
+          this.selectedIds.add(item.id);
+        }
+        this.render();
+        return;
+      }
+      this.selectedItemId = item.id;
       this.render();
     });
     return slot;
@@ -327,9 +454,9 @@ export class InventoryOverlay {
 
   // Allen grauen Schrott auf einmal verkaufen (Gold) oder zerlegen (Staub)
   renderJunkButtons(items) {
-    const junk = items.filter((item) => item.rarityId === 'poor' && !item.locked);
+    const junk = items.filter((item) => this.game.isJunk(item));
     const sellButton = this.root.querySelector('.sell-junk-button');
-    const goldValue = junk.length * getRarity('poor').sellValue;
+    const goldValue = junk.reduce((sum, item) => sum + item.getSellValue(), 0);
     sellButton.textContent = 'Schrott verkaufen (' + junk.length + ' = ' + goldValue + ' Gold)';
     sellButton.disabled = junk.length === 0;
 

@@ -136,3 +136,43 @@ describe('Verbessern', () => {
     expect(game.upgradeItem(9999)).toBe('notFound');
   });
 });
+
+describe('Schrott und Massen-Verkauf', () => {
+  it('verkauft und zerlegt mehrere Items auf einmal, gesperrte bleiben', async () => {
+    const { Game } = await import('../src/core/Game.js');
+    const { Item } = await import('../src/entities/Item.js');
+    const game = new Game(2);
+    const a = new Item(1, 'sword', 'common', 'A', { attack: 2 });
+    const b = new Item(2, 'sword', 'rare', 'B', { attack: 5 });
+    const c = new Item(3, 'sword', 'poor', 'C', { attack: 1 });
+    c.locked = true;
+    [a, b, c].forEach((item) => game.guild.addItem(item));
+    const gold = game.guild.gold;
+    const sold = game.sellItems([1, 3]);
+    expect(sold.count).toBe(1);
+    expect(game.guild.gold).toBe(gold + a.getSellValue());
+    const salvaged = game.salvageItems([2]);
+    expect(salvaged.count).toBe(1);
+    expect(game.guild.materials.dust).toBeGreaterThan(0);
+    expect(game.guild.findItem(3)).toBe(c);
+  });
+
+  it('automatische Verwertung: Weiß und Grau aus Kisten werden gleich zerlegt', async () => {
+    const { Game } = await import('../src/core/Game.js');
+    const game = new Game(4);
+    game.setAutoJunk('salvage');
+    let junk = 0;
+    for (let i = 0; i < 10; i++) {
+      game.guild.addBox('wood');
+      const items = game.openBox('wood');
+      for (const item of items) {
+        const isJunk = item.getRarityRank() <= 1;
+        expect(Boolean(item.autoJunked), item.rarityId).toBe(isJunk);
+        expect(game.guild.findItem(item.id) === null).toBe(isJunk);
+        junk += isJunk ? 1 : 0;
+      }
+    }
+    expect(junk).toBeGreaterThan(0);
+    expect(game.guild.inventory.every((item) => item.getRarityRank() > 1)).toBe(true);
+  });
+});

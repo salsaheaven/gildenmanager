@@ -100,7 +100,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                RaidScreen (Raid: Raid-Tag, Bosse der Woche, Auto-Raid, 4 Gruppen tauschen, Bosse mit Phasen).
                DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe (auch der Raid) als Szene (Wahl: Alle / Nur Bosse / Keine), danach Zusammenfassung mit Bilanz oben und Beute; „Bericht von gestern“ zeigt sie noch einmal.
                LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden, während des Tagesabschlusses zurückgehalten).
-               InventoryOverlay = Inventar als Vollbild-Fenster mit Kategorien (Knopf „Inventar“ in der Reiterleiste).
+               InventoryOverlay = Inventar als Vollbild-Fenster mit Kategorien (Knopf „Inventar“ in der Reiterleiste), Mehrfachauswahl für Massen-Verkauf/-Zerlegen, Einstellung „Schrott automatisch verkaufen/zerlegen“.
                CollectionOverlay = Sammelbuch als Vollbild-Fenster (Knopf in der Schatzkammer): Seiten pro Dungeon, Sterne, „???“, Titel-Auswahl.
                CombatReport = Ergebnis, Schadensmesser und Kampfbericht (wiederverwendbar).
                DefeatCausesView = Kasten „Woran es lag“ (Ursachen mit Balken, Hinweise, Tipp) im Tagesabschluss und im Bericht.

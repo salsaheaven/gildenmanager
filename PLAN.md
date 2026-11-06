@@ -150,6 +150,8 @@ Umgesetzt (2026-11-06) aus dem Bericht: **Risiko live mit Konter-Symbolen** und 
 
 **Konter für alle Klassen (2026-11-06):** neue Mechaniken Panzer (`shell`) und Wutanfall (`frenzy`) mit Konter-Punkten (`CounterPoints.js`, `COUNTER_POINTS` in `data/counters.js`), 4 umgebaute Talente (Schildbrecher, Lichthammer, Beruhigende Erde, Besänftigen), Azhur/Skaar/Umbral ohne Unterbrechen, Klassen-Tipps und Hinweis „nicht gekontert“ in „Woran es lag“ (`ClassTips.js`). Spielstand-Version 26.
 
+**Inventar (2026-11-06):** automatische Schrott-Verwertung für neue Kisten-Items (Weiß und Grau, `junkMaxRarity`, Einstellung `guild.autoJunk`), Massen-Verkauf/-Zerlegen mit Mehrfachauswahl (`Game.sellItems`, `Game.salvageItems`), „Schrott verkaufen/zerlegen“ gilt jetzt für Weiß und Grau. Spielstand-Version 27.
+
 Offen aus dem Bericht (größere Umbauten): vorbelegte Vorräte, Ausrüstung vom Vorgänger übernehmen, kompakte Listenansicht für den Raid.
 
 **M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.

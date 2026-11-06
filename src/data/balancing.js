@@ -16,6 +16,10 @@ export const BALANCING = {
   // ist das nächste Item garantiert mindestens episch.
   pityEpicAfterItems: 25,
 
+  // Schrott-Verwertung: Items bis zu dieser Seltenheit gelten als "Schrott" (Weiß und Grau).
+  // Knöpfe "Schrott verkaufen/zerlegen" und die automatische Verwertung neuer Kisten-Items nutzen diese Grenze.
+  junkMaxRarity: 'common',
+
   // Was die Schatzkammer zum Pity-Stand anzeigt. Bewusst ungenau: keine Zahlen, nur eine Stimmung.
   // fromProgress = ab welchem Anteil des Weges (0 = gerade Glück gehabt, 1 = gleich garantiert)
   // level        = wie stark die Anzeige leuchtet (0 bis 3)

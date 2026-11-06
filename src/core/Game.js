@@ -45,6 +45,7 @@ import { Guild } from '../entities/Guild.js';
 import { LootSystem } from '../systems/LootSystem.js';
 import { RecruitmentSystem } from '../systems/RecruitmentSystem.js';
 import { BALANCING } from '../data/balancing.js';
+import { getRarityRank } from '../data/rarities.js';
 import { getDungeon } from '../data/dungeons.js';
 import { Expedition } from '../entities/Expedition.js';
 import { applyRunResults } from '../systems/ExperienceSystem.js';
@@ -290,6 +291,18 @@ export class Game {
       item.collectionStatus = entry.status;
       item.completedPage = entry.completedPage;
     }
+    // Automatische Verwertung: Schrott (Weiß und Grau) gleich verkaufen bzw. zerlegen (siehe setAutoJunk).
+    // Das Item bleibt in der Liste (für die Anzeige beim Öffnen), item.autoJunked sagt, was damit passiert ist.
+    if (this.guild.autoJunk !== 'off') {
+      const junkIds = items.filter((item) => this.isJunk(item)).map((item) => item.id);
+      const result = this.guild.autoJunk === 'sell' ? this.sellItems(junkIds, false) : this.salvageItems(junkIds, false);
+      for (const item of items) {
+        if (junkIds.includes(item.id)) {
+          item.autoJunked = this.guild.autoJunk;
+        }
+      }
+      items.autoJunk = { mode: this.guild.autoJunk, count: result.count, gold: result.gold || 0, materials: result.materials || {} };
+    }
     // Das erste Boss-Item schaltet das Sammelbuch frei
     this.updateUnlocks();
     this.emit('changed');
@@ -400,6 +413,71 @@ export class Game {
       this.emit('changed');
     }
     return result;
+  }
+
+  // ---------- Schrott und Massen-Verkauf ----------
+
+  // Ist das Item Schrott? Seltenheit höchstens BALANCING.junkMaxRarity, kein Boss-Item, nicht gesperrt
+  isJunk(item) {
+    return item.getRarityRank() <= getRarityRank(BALANCING.junkMaxRarity) && !item.bossItemId && !item.locked;
+  }
+
+  // Alle Schrott-Items im Inventar
+  getJunkItems() {
+    return this.guild.inventory.filter((item) => this.isJunk(item));
+  }
+
+  // Automatische Verwertung neuer Kisten-Items: 'off', 'sell' oder 'salvage'
+  setAutoJunk(mode) {
+    if (!['off', 'sell', 'salvage'].includes(mode)) {
+      return;
+    }
+    this.guild.autoJunk = mode;
+    this.emit('changed');
+  }
+
+  // Verkauft mehrere Items auf einmal (gesperrte bleiben). Gibt { count, gold } zurück.
+  // emitChange = false: kein 'changed' (wenn der Aufrufer selbst Bescheid gibt)
+  sellItems(itemIds, emitChange = true) {
+    let count = 0;
+    let gold = 0;
+    for (const itemId of itemIds) {
+      const item = this.guild.findItem(itemId);
+      if (!item || item.locked) {
+        continue;
+      }
+      this.guild.removeItem(itemId);
+      gold += item.getSellValue();
+      count++;
+    }
+    this.guild.addGold(gold);
+    if (emitChange) {
+      this.emit('changed');
+    }
+    return { count: count, gold: gold };
+  }
+
+  // Zerlegt mehrere Items auf einmal (gesperrte bleiben). Gibt { count, materials } zurück.
+  salvageItems(itemIds, emitChange = true) {
+    let count = 0;
+    const materials = {};
+    for (const itemId of itemIds) {
+      const item = this.guild.findItem(itemId);
+      if (!item || item.locked) {
+        continue;
+      }
+      this.guild.removeItem(itemId);
+      const yieldOfItem = getSalvageYield(item);
+      for (const materialId in yieldOfItem) {
+        materials[materialId] = (materials[materialId] || 0) + yieldOfItem[materialId];
+      }
+      count++;
+    }
+    this.guild.addMaterials(materials);
+    if (emitChange) {
+      this.emit('changed');
+    }
+    return { count: count, materials: materials };
   }
 
   // Verkauft alle Items einer Seltenheit (z.B. allen Schrott), gesperrte nicht. Gibt das Gold zurück.
