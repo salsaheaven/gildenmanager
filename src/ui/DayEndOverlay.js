@@ -6,7 +6,9 @@
 //      Begegnung für Begegnung. Jede Szene lässt sich überspringen, oder gleich alles.
 //      Das Ergebnis steht schon fest (es wurde beim Tagesende berechnet), die Szene zeigt es nur.
 //      An Raid-Tagen läuft danach der Raid (Raid-Szene mit 4 Gruppenreihen), bis zum ersten Wipe.
-//   2. Zusammenfassung: pro Run Ergebnis, Gold, Boss-Kiste ("Jetzt öffnen"), EP und Level-Ups; beim Raid
+//      Oben wählt man "Alle Kämpfe / Nur Bosse / Keine" (wird im Browser gemerkt).
+//   2. Zusammenfassung: ganz oben die Bilanz des Tages (Gold ±, Kisten, besiegte Bosse, Level-Ups, Verletzte),
+//      darunter pro Run Ergebnis, Gold, Boss-Kiste ("Jetzt öffnen"), EP und Level-Ups; beim Raid
 //      die besiegten Bosse, das Gold und wo es am nächsten Raid-Tag weitergeht.
 //      Erst jetzt erscheinen die Level-Up-Banner, damit sie das Ergebnis nicht vorher verraten.
 // ============================================================
@@ -30,6 +32,14 @@ import { BattleScene } from './BattleScene.js';
 import { createHeroCanvas, createSpriteCanvas, createChestCanvas } from './PixelArt.js';
 import { outcomeText } from './DungeonScreen.js';
 import { Sound } from './Sound.js';
+
+// Welche Kämpfe als Szene laufen (die Wahl merkt sich der Browser, siehe loadSceneMode)
+const SCENE_MODES = [
+  { id: 'all', label: 'Alle Kämpfe' },
+  { id: 'bosses', label: 'Nur Bosse' },
+  { id: 'none', label: 'Keine' },
+];
+const SCENE_MODE_KEY = 'gildenmanager-dayend-scenes';
 
 // Pause zwischen zwei Begegnungen ("Die Gruppe zieht weiter …"), in Sekunden
 const TRAVEL_SECONDS = 1.2;
@@ -55,6 +65,7 @@ export class DayEndOverlay {
         <h2 class="day-end-title"></h2>
         <button class="skip-all-button">Alles überspringen</button>
       </div>
+      <div class="button-row day-end-modes"></div>
       <div class="day-end-sub"></div>
       <div class="day-end-body"></div>
     `;
@@ -64,6 +75,77 @@ export class DayEndOverlay {
       Sound.click();
       this.showSummary();
     });
+    this.sceneMode = loadSceneMode();
+    this.lastStart = null; // der letzte Tagesabschluss (für "Bericht von gestern")
+  }
+
+  // Knöpfe "Alle Kämpfe / Nur Bosse / Keine"
+  renderModeButtons() {
+    const container = this.root.querySelector('.day-end-modes');
+    container.innerHTML = '';
+    for (const mode of SCENE_MODES) {
+      const button = document.createElement('button');
+      button.className = 'filter-button';
+      button.textContent = mode.label;
+      button.classList.toggle('active', mode.id === this.sceneMode);
+      button.addEventListener('click', () => {
+        Sound.click();
+        this.changeSceneMode(mode.id);
+      });
+      container.appendChild(button);
+    }
+  }
+
+  // Neue Szenen-Wahl: gilt sofort für die restlichen Kämpfe des Abends
+  changeSceneMode(modeId) {
+    this.sceneMode = modeId;
+    saveSceneMode(modeId);
+    this.renderModeButtons();
+    if (this.phase !== 'scene' && this.phase !== 'waiting') {
+      return;
+    }
+    const remaining = this.steps.slice(this.stepIndex + 1).filter((step) => this.isStepShown(step));
+    this.steps = this.steps.slice(0, this.stepIndex + 1).concat(remaining);
+    if (modeId === 'none' || (this.phase === 'scene' && !this.isStepShown(this.steps[this.stepIndex]))) {
+      // Die laufende Szene passt nicht mehr: gleich zum nächsten passenden Kampf (oder zur Zusammenfassung)
+      this.stepIndex++;
+      if (modeId === 'none') {
+        this.showSummary();
+      } else {
+        this.playStep();
+      }
+    }
+  }
+
+  // Läuft dieser Kampf als Szene? (je nach Wahl: alle, nur Bosse oder keine)
+  isStepShown(step) {
+    if (this.sceneMode === 'none') {
+      return false;
+    }
+    if (this.sceneMode === 'bosses') {
+      return step.run.result.encounters[step.encounterIndex].encounterType === 'boss';
+    }
+    return true;
+  }
+
+  // "Bericht von gestern": die Zusammenfassung des letzten Abends noch einmal (ohne Szenen)
+  hasLastReport() {
+    return this.lastStart !== null;
+  }
+
+  showLastReport() {
+    if (!this.lastStart || this.isOpen()) {
+      return;
+    }
+    const last = this.lastStart;
+    this.prepare(last.day, last.reports, last.daySummary, last.raidReport);
+    this.root.hidden = false;
+    document.body.classList.add('overlay-open');
+    this.root.querySelector('.day-end-title').textContent = 'Bericht von Tag ' + last.day;
+    this.root.querySelector('.day-end-modes').innerHTML = '';
+    this.phase = 'closed';
+    this.isReplay = true;
+    this.showSummary();
   }
 
   isOpen() {
@@ -74,6 +156,23 @@ export class DayEndOverlay {
   // daySummary = Ergebnisse der Aufgaben und der Sold (siehe Game.lastDaySummary),
   // raidReport = Bericht des Raids (an Raid-Tagen, siehe Game.finishRaid), sonst null
   start(day, reports, daySummary, raidReport = null) {
+    this.lastStart = { day, reports, daySummary, raidReport };
+    this.isReplay = false;
+    this.prepare(day, reports, daySummary, raidReport);
+    // Nur die gewählten Kämpfe als Szene
+    this.steps = this.steps.filter((step) => this.isStepShown(step));
+
+    this.root.hidden = false;
+    document.body.classList.add('overlay-open');
+    this.root.querySelector('.day-end-title').textContent = 'Tag ' + day + ' – Abend';
+    this.root.querySelector('.skip-all-button').hidden = false;
+    this.renderModeButtons();
+    this.stepIndex = 0;
+    this.playStep();
+  }
+
+  // Runs und Schritte für einen Abend vorbereiten (für den Tagesabschluss und "Bericht von gestern")
+  prepare(day, reports, daySummary, raidReport) {
     this.day = day;
     this.daySummary = daySummary;
     this.raidReport = raidReport;
@@ -95,13 +194,6 @@ export class DayEndOverlay {
         this.steps.push({ run: run, encounterIndex: i });
       }
     }
-
-    this.root.hidden = false;
-    document.body.classList.add('overlay-open');
-    this.root.querySelector('.day-end-title').textContent = 'Tag ' + day + ' – Abend';
-    this.root.querySelector('.skip-all-button').hidden = false;
-    this.stepIndex = 0;
-    this.playStep();
   }
 
   // Wird in jedem Bild aufgerufen (seconds = vergangene echte Zeit)
@@ -154,7 +246,9 @@ export class DayEndOverlay {
   // Eine Begegnung ist fertig: kurz warten, beim letzten Kampf eines Runs das Ergebnis einblenden
   onSceneFinished(step) {
     const run = step.run;
-    const isLastOfRun = step.encounterIndex === run.result.encounters.length - 1;
+    // Letzter gezeigter Kampf dieses Runs? (bei "Nur Bosse" fehlen die Trash-Kämpfe)
+    const nextStep = this.steps[this.stepIndex + 1];
+    const isLastOfRun = !nextStep || nextStep.run !== run;
     const body = this.root.querySelector('.day-end-body');
 
     if (isLastOfRun) {
@@ -187,11 +281,14 @@ export class DayEndOverlay {
     this.phase = 'summary';
     this.scene = null;
     this.root.querySelector('.skip-all-button').hidden = true;
-    this.root.querySelector('.day-end-sub').textContent = 'Das hat deine Gilde heute erreicht:';
+    this.root.querySelector('.day-end-sub').textContent = this.isReplay ? 'Das hat deine Gilde an diesem Tag erreicht:' : 'Das hat deine Gilde heute erreicht:';
+    this.root.querySelector('.day-end-modes').innerHTML = '';
 
     const body = this.root.querySelector('.day-end-body');
     body.innerHTML = '<div class="day-summary"></div><div class="lab-actions"><button class="big-button next-day-button"></button></div>';
     const summary = body.querySelector('.day-summary');
+    // Ganz oben: die Kernzahlen des Tages
+    summary.appendChild(this.createBalanceBar());
     for (const run of this.runs) {
       summary.appendChild(run.isRaid ? this.createRaidCard(run.report) : this.createRunCard(run.report));
     }
@@ -204,7 +301,7 @@ export class DayEndOverlay {
     }
 
     const nextButton = body.querySelector('.next-day-button');
-    nextButton.textContent = 'Weiter zu Tag ' + (this.day + 1);
+    nextButton.textContent = this.isReplay ? 'Schließen' : 'Weiter zu Tag ' + (this.day + 1);
     nextButton.addEventListener('click', () => {
       Sound.click();
       this.close();
@@ -214,13 +311,60 @@ export class DayEndOverlay {
     const serverFirst = this.runs.find((run) => run.report.serverFirst);
     const best = this.runs.find((run) => run.report.firstClear) || this.runs.find((run) => run.report.outcome === 'success') ||
       this.runs.find((run) => run.isRaid && run.report.defeatedBossIds.length > 0);
-    if (serverFirst) {
+    if (this.isReplay) {
+      // "Bericht von gestern": keine Fanfare und keine Meldungen noch einmal
+    } else if (serverFirst) {
       Sound.collectionPage();
       showToast('Server-First! Neuer Titel: „' + getServerFirstTitle(serverFirst.report.dungeonId) + '“', '#ffd23f');
     } else if (best) {
       Sound.itemReveal(best.report.firstClear ? 4 : 3);
     }
     this.callbacks.onSummaryShown();
+  }
+
+  // Bilanz des Tages: Gold ±, Kisten, besiegte Bosse, Level-Ups, Verletzte (nur was nicht 0 ist, Gold immer)
+  createBalanceBar() {
+    let chests = 0;
+    let bosses = 0;
+    let levelUps = 0;
+    let injured = 0;
+    for (const run of this.runs) {
+      const report = run.report;
+      if (run.isRaid) {
+        chests += report.chests.length;
+        bosses += report.defeatedBossIds.length;
+      } else {
+        chests += report.chest ? 1 : 0;
+        bosses += run.result.encounters.filter((encounter) => encounter.encounterType === 'boss' && encounter.outcome === 'victory').length;
+      }
+      for (const heroResult of report.heroResults || []) {
+        levelUps += heroResult.levelsGained > 0 ? 1 : 0;
+        injured += heroResult.injured ? 1 : 0;
+      }
+    }
+    for (const task of this.daySummary.tasks) {
+      levelUps += task.levelsGained > 0 ? 1 : 0;
+    }
+    const bar = document.createElement('div');
+    bar.className = 'day-balance';
+    const gold = this.daySummary.goldChange || 0;
+    const parts = [
+      { text: (gold >= 0 ? '+' : '−') + Math.abs(gold) + ' Gold', className: gold >= 0 ? 'good' : 'bad' },
+      { text: chests + (chests === 1 ? ' Kiste' : ' Kisten'), className: chests > 0 ? 'good' : '', show: chests > 0 },
+      { text: bosses + (bosses === 1 ? ' Boss besiegt' : ' Bosse besiegt'), className: 'good', show: bosses > 0 },
+      { text: levelUps + '× Level-Up', className: 'good', show: levelUps > 0 },
+      { text: injured + ' verletzt', className: 'bad', show: injured > 0 },
+    ];
+    for (const part of parts) {
+      if (part.show === false) {
+        continue;
+      }
+      const chip = document.createElement('span');
+      chip.className = 'day-balance-part ' + part.className;
+      chip.textContent = part.text;
+      bar.appendChild(chip);
+    }
+    return bar;
   }
 
   // Karte "Neues vom Server": alle Meldungen dieses Abends (deine und die der KI-Gilden),
@@ -506,4 +650,27 @@ function raidOutcomeText(report) {
     return 'Wipe! Kein Boss besiegt';
   }
   return 'Wipe nach ' + bosses + (bosses === 1 ? ' Boss' : ' Bossen');
+}
+
+// ---------- Gemerkte Szenen-Wahl ----------
+// Liegt nur im Browser (kein Teil des Spielstands). Kann blockiert sein, daher try/catch.
+
+function loadSceneMode() {
+  try {
+    const saved = localStorage.getItem(SCENE_MODE_KEY);
+    if (SCENE_MODES.some((mode) => mode.id === saved)) {
+      return saved;
+    }
+  } catch (error) {
+    // nichts gemerkt
+  }
+  return 'all';
+}
+
+function saveSceneMode(modeId) {
+  try {
+    localStorage.setItem(SCENE_MODE_KEY, modeId);
+  } catch (error) {
+    // nicht schlimm
+  }
 }

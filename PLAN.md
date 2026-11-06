@@ -146,9 +146,9 @@ In kleinen, jeweils online testbaren Schritten:
 - ✅ **Feste Starttruppe** (2026-11-03): Klassenwahl beim Gründen entfernt, alle starten mit Krieger, Priester, Runenwirker, Magier, Schurke (schafft die Bärenhöhle ohne Ausrüstung meist, ein Test prüft ≥ 80 %); `systems/StartTeam.js` entfernt
 Dazu (2026-11-06): „Bestes ausrüsten“ an jeder stehenden Gruppe, Schloss 🔒 am Item (`LockButton.js`, `Game.toggleItemLock`), Spielstand-Version 20.
 
-Umgesetzt (2026-11-06) aus dem Bericht: **Risiko live mit Konter-Symbolen** und **Ein Dungeon = eine Karte** (Planungs-Karte klappt unter dem Dungeon auf, Abschnitte Gruppe / Rückzug & Vorräte / Anweisungen / Dungeonführer, feste Leiste mit Gruppen-Stand, Einschätzung, Konter ✓/✗ und „Einplanen“). **Zerlegen im Beute-Ergebnis**: nach dem Öffnen Items antippen (✓ zerlegen) oder „Schwache markieren“ (unter Episch, ohne Boss-Items und gesperrte), dann „N zerlegen (Material)“.
+Umgesetzt (2026-11-06) aus dem Bericht: **Risiko live mit Konter-Symbolen** und **Ein Dungeon = eine Karte** (Planungs-Karte klappt unter dem Dungeon auf, Abschnitte Gruppe / Rückzug & Vorräte / Anweisungen / Dungeonführer, feste Leiste mit Gruppen-Stand, Einschätzung, Konter ✓/✗ und „Einplanen“). **Zerlegen im Beute-Ergebnis**: nach dem Öffnen Items antippen (✓ zerlegen) oder „Schwache markieren“ (unter Episch, ohne Boss-Items und gesperrte), dann „N zerlegen (Material)“. **Tagesabschluss: erst Kernzahlen**: Bilanz oben (Gold ±, Kisten, besiegte Bosse, Level-Ups, Verletzte), Szenen-Wahl „Alle Kämpfe / Nur Bosse / Keine“ (im Browser gemerkt, wirkt sofort), „Bericht von gestern“ im Tagesplan (Zusammenfassung des letzten Abends ohne Szenen).
 
-Offen aus dem Bericht (größere Umbauten): Risiko live mit Konter-Symbolen, ein Dungeon = eine Karte, vorbelegte Vorräte, Ausrüstung vom Vorgänger übernehmen, Tagesabschluss mit Kernzahlen zuerst, Zerlegen im Beute-Ergebnis.
+Offen aus dem Bericht (größere Umbauten): vorbelegte Vorräte, Ausrüstung vom Vorgänger übernehmen, kompakte Listenansicht für den Raid.
 
 **M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.
 Plan vom 2026-11-01 (Entscheidungen in `KONZEPT.md` unter „Raids“, „Klassen-Sets“, „Umfang“), jeder Schritt einzeln spielbar:

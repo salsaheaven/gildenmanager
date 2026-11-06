@@ -97,7 +97,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                Gruppenwahl mit Kacheln nach Position, Statuszeile, „Auto-Gruppe“ und „Gruppe ausrüsten“; + RunViewer = Bericht eines beendeten Runs zeigen),
                GuildHallScreen (Gildenhalle: Karte pro Gebäude, Bauen, Baustelle mit Balken),
                RaidScreen (Raid: Raid-Tag, Bosse der Woche, Auto-Raid, 4 Gruppen tauschen, Bosse mit Phasen).
-               DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe (auch der Raid) als Szene, danach Zusammenfassung mit Beute.
+               DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe (auch der Raid) als Szene (Wahl: Alle / Nur Bosse / Keine), danach Zusammenfassung mit Bilanz oben und Beute; „Bericht von gestern“ zeigt sie noch einmal.
                LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden, während des Tagesabschlusses zurückgehalten).
                InventoryOverlay = Inventar als Vollbild-Fenster mit Kategorien (Knopf „Inventar“ in der Reiterleiste).
                CollectionOverlay = Sammelbuch als Vollbild-Fenster (Knopf in der Schatzkammer): Seiten pro Dungeon, Sterne, „???“, Titel-Auswahl.

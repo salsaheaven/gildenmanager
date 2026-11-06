@@ -106,10 +106,16 @@ new DungeonScreen(screenElements.dungeons, game);
 new RaidScreen(screenElements.raid, game);
 new GuildHallScreen(screenElements.hall, game);
 new ShopScreen(screenElements.shop, game);
+// "Bericht von gestern" im Tagesplan: fragt den Tagesabschluss (der erst weiter unten entsteht)
+const lastReport = {
+  has: () => dayEndOverlay !== null && dayEndOverlay.hasLastReport(),
+  show: () => dayEndOverlay.showLastReport(),
+};
+let dayEndOverlay = null;
 new DayPlanScreen(screenElements.plan, game, showScreen, (heroId) => {
   showScreen('heroes');
   heroScreen.selectHero(heroId);
-});
+}, lastReport);
 // Das Kampf-Labor ist ein Entwickler-Werkzeug: Es öffnet sich über das Test-Menü (F2)
 new DebugPanel(game, () => showScreen('lab'));
 
@@ -229,7 +235,7 @@ game.on('gameWon', (evaluation) => {
   }
 });
 
-const dayEndOverlay = new DayEndOverlay(game, {
+dayEndOverlay = new DayEndOverlay(game, {
   // Erst in der Zusammenfassung kommen die Level-Up-Banner (sonst verraten sie das Ergebnis)
   onSummaryShown: () => levelUpBanner.release(),
   onOpenChest: (boxTypeId) => {

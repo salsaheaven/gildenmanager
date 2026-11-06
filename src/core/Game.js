@@ -100,6 +100,7 @@ export class Game {
   // Was die Aufgaben und der Sold ergeben haben, steht danach in this.lastDaySummary.
   endDay() {
     const endedDay = this.day;
+    const goldBefore = this.guild.gold; // für die Bilanz im Tagesabschluss
     this.emit('dayEnding');
 
     // 0. Wer macht heute was? (vor allem anderen, damit Verletzte von heute nicht noch trainieren)
@@ -156,6 +157,7 @@ export class Game {
     this.lastDaySummary = {
       day: endedDay, tasks: taskResults, wages: wages, upkeep: upkeep, finishedBuilding: finishedBuilding,
       news: news, rivalNews: rivalNews,
+      goldChange: this.guild.gold - goldBefore, // Gold-Bilanz des Tages (Beute minus Sold und Unterhalt)
     };
 
     // 5. Der nächste Tag beginnt: neue Bewerber in der Taverne, neues Tagesangebot beim Händler, stehende Gruppen einplanen

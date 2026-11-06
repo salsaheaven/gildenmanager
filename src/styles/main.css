@@ -1974,6 +1974,38 @@ h3 {
   margin: 6px 0;
 }
 
+/* ---------- Tagesabschluss: Szenen-Wahl und Bilanz ---------- */
+
+.day-end-modes {
+  margin: 4px 0;
+}
+
+/* Bilanz des Tages ganz oben in der Zusammenfassung */
+.day-balance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  border: 3px solid var(--gold);
+  background: #120d1c;
+}
+
+.day-balance-part {
+  padding: 2px 8px;
+  font-size: 20px;
+  border: 2px solid var(--border);
+}
+
+.day-balance-part.good {
+  color: #2ecc40;
+  border-color: #2ecc40;
+}
+
+.day-balance-part.bad {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+}
+
 /* ---------- Zerlegen im Beute-Ergebnis (LootBoxScreen) ---------- */
 
 .item-card.salvage-selectable {

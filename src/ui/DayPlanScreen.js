@@ -34,11 +34,13 @@ import { getBoss } from '../data/enemies.js';
 export class DayPlanScreen {
   // onGoTo(screenId) = zu einem anderen Reiter wechseln (z.B. 'dungeons' oder 'tavern')
   // onShowHero(heroId) = einen Helden im Heldenbildschirm zeigen (z.B. wegen neuer Ausrüstung)
-  constructor(rootElement, game, onGoTo, onShowHero) {
+  // lastReport = { has(), show() }: "Bericht von gestern" (die Zusammenfassung des letzten Abends)
+  constructor(rootElement, game, onGoTo, onShowHero, lastReport) {
     this.root = rootElement;
     this.game = game;
     this.onGoTo = onGoTo;
     this.onShowHero = onShowHero;
+    this.lastReport = lastReport;
     this.openOrders = new Set(); // ids der Gruppen, deren Anweisungen gerade aufgeklappt sind
 
     this.root.innerHTML = `
@@ -51,6 +53,7 @@ export class DayPlanScreen {
           <div class="day-plan-wages hint"></div>
           <div class="day-plan-actions">
             <button class="go-dungeons-button">Gruppe einplanen</button>
+            <button class="yesterday-button" hidden>Bericht von gestern</button>
             <button class="big-button plan-end-day-button">Tag beenden ▶</button>
           </div>
         </section>
@@ -78,6 +81,10 @@ export class DayPlanScreen {
       // Ohne Helden geht es zur Taverne, sonst zu den Dungeons (siehe renderHeader)
       this.onGoTo(this.root.querySelector('.go-dungeons-button').dataset.target);
     });
+    this.root.querySelector('.yesterday-button').addEventListener('click', () => {
+      Sound.click();
+      this.lastReport.show();
+    });
     this.root.querySelector('.plan-end-day-button').addEventListener('click', () => {
       Sound.click();
       requestEndDay(this.game, this.onGoTo);
@@ -94,6 +101,7 @@ export class DayPlanScreen {
     todoSlot.innerHTML = '';
     todoSlot.appendChild(createTodoBox(this.game, this.onGoTo));
     this.renderHeader(plan);
+    this.root.querySelector('.yesterday-button').hidden = !this.lastReport.has();
     this.renderRuns();
     this.renderOthers(plan);
     this.renderServer();
