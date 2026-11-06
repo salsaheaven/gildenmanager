@@ -1841,6 +1841,127 @@ h3 {
   width: 140px;
 }
 
+/* ---------- Raid-Bildschirm (RaidScreen.js), Raid im Tagesplan und Tagesabschluss ---------- */
+
+.raid-day-line {
+  margin: 8px 0;
+  font-size: 18px;
+}
+
+.raid-day-line.raid-today {
+  color: #ff8000;
+}
+
+.raid-day-line.raid-warning,
+.raid-check.bad,
+.raid-not-ready .run-status {
+  color: #ff6b6b;
+}
+
+.raid-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.raid-boss-chip {
+  padding: 2px 8px;
+  border: 2px solid var(--border);
+  font-size: 16px;
+  color: var(--text-dim);
+}
+
+.raid-boss-chip.defeated {
+  border-color: #2ecc40;
+  color: #2ecc40;
+}
+
+.raid-boss-chip.next {
+  border-color: #ff8000;
+  color: #ff8000;
+}
+
+.raid-check {
+  margin: 6px 0;
+  font-size: 17px;
+}
+
+.raid-check.ok {
+  color: #2ecc40;
+}
+
+.raid-edit-groups {
+  display: grid;
+  gap: 8px;
+}
+
+.raid-edit-group {
+  border: 2px solid var(--border);
+  background: var(--panel-light);
+  padding: 4px;
+}
+
+.raid-edit-group-head {
+  display: block;
+  width: 100%;
+  min-height: 36px;
+  text-align: left;
+  color: var(--gold);
+  background: transparent;
+  border: none;
+}
+
+.raid-edit-group-head.no-healer {
+  color: #ff6b6b;
+}
+
+.raid-edit-tiles,
+.raid-bench {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.raid-empty-slot {
+  flex: 0 0 66px;
+  min-height: 70px;
+  font-size: 24px;
+  color: var(--text-dim);
+  border: 2px dashed var(--border);
+  background: transparent;
+}
+
+.raid-boss-card {
+  margin-bottom: 6px;
+}
+
+.raid-boss-card summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.raid-day-notice {
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  border: 2px solid #ff8000;
+  color: #ff8000;
+}
+
+.day-plan-raid {
+  border-color: #ff8000;
+}
+
+.day-raid-bosses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0;
+}
+
 /* ---------- Raid-Szene: Boss oben, darunter 4 Gruppenreihen mit kleinen Helden ---------- */
 
 /* Kein Boden-Streifen: Die Gruppenreihen gehen über die ganze Höhe */

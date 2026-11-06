@@ -5,7 +5,9 @@
 //   1. Kämpfe ansehen: Alle Runs von heute laufen nacheinander als Kampfszene ab,
 //      Begegnung für Begegnung. Jede Szene lässt sich überspringen, oder gleich alles.
 //      Das Ergebnis steht schon fest (es wurde beim Tagesende berechnet), die Szene zeigt es nur.
-//   2. Zusammenfassung: pro Run Ergebnis, Gold, Boss-Kiste ("Jetzt öffnen"), EP und Level-Ups.
+//      An Raid-Tagen läuft danach der Raid (Raid-Szene mit 4 Gruppenreihen), bis zum ersten Wipe.
+//   2. Zusammenfassung: pro Run Ergebnis, Gold, Boss-Kiste ("Jetzt öffnen"), EP und Level-Ups; beim Raid
+//      die besiegten Bosse, das Gold und wo es am nächsten Raid-Tag weitergeht.
 //      Erst jetzt erscheinen die Level-Up-Banner, damit sie das Ergebnis nicht vorher verraten.
 // ============================================================
 
@@ -19,6 +21,7 @@ import { createDefeatCausesView } from './DefeatCausesView.js';
 import { Hero } from '../entities/Hero.js';
 import { Expedition } from '../entities/Expedition.js';
 import { getDungeon } from '../data/dungeons.js';
+import { getRaid } from '../data/raids.js';
 import { getBoss } from '../data/enemies.js';
 import { getBuilding } from '../data/buildings.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
@@ -67,10 +70,12 @@ export class DayEndOverlay {
   }
 
   // Startet den Tagesabschluss. day = der Tag, der gerade zu Ende ging, reports = Berichte der Runs,
-  // daySummary = Ergebnisse der Aufgaben und der Sold (siehe Game.lastDaySummary)
-  start(day, reports, daySummary) {
+  // daySummary = Ergebnisse der Aufgaben und der Sold (siehe Game.lastDaySummary),
+  // raidReport = Bericht des Raids (an Raid-Tagen, siehe Game.finishRaid), sonst null
+  start(day, reports, daySummary, raidReport = null) {
     this.day = day;
     this.daySummary = daySummary;
+    this.raidReport = raidReport;
     this.runs = reports.map((report) => {
       const expedition = Expedition.fromSaveData(report.expedition);
       return {
@@ -79,6 +84,10 @@ export class DayEndOverlay {
         heroes: expedition.heroSnapshots.map((snapshot) => Hero.fromSaveData(snapshot)),
       };
     });
+    // Der Raid läuft wie ein weiterer Run (mit den Helden der Gilde für die Bilder)
+    if (raidReport) {
+      this.runs.push({ isRaid: true, report: raidReport, result: raidReport.result, heroes: this.game.guild.heroes });
+    }
     this.steps = [];
     for (const run of this.runs) {
       for (let i = 0; i < run.result.encounters.length; i++) {
@@ -116,14 +125,21 @@ export class DayEndOverlay {
       return;
     }
     const run = step.run;
-    const dungeon = getDungeon(run.report.dungeonId);
     const encounterResult = run.result.encounters[step.encounterIndex];
-    const runNumber = this.runs.indexOf(run) + 1;
-
-    let subText = dungeon.name + ' · Begegnung ' + (step.encounterIndex + 1) + '/' + dungeon.encounters.length +
-      ': ' + encounterResult.encounterName;
-    if (this.runs.length > 1) {
-      subText = 'Gruppe ' + runNumber + ' von ' + this.runs.length + ' · ' + subText;
+    const dungeonRuns = this.runs.filter((entry) => !entry.isRaid);
+    let subText;
+    if (run.isRaid) {
+      // Raid: Begegnungen zählen ab dem Anfang des Raids (heute ging es evtl. erst beim 2. Boss los)
+      const raid = getRaid(run.report.raidId);
+      subText = 'Raid · ' + raid.name + ' · Begegnung ' + (run.report.startIndex + step.encounterIndex + 1) + '/' +
+        raid.encounters.length + ': ' + encounterResult.encounterName;
+    } else {
+      const dungeon = getDungeon(run.report.dungeonId);
+      subText = dungeon.name + ' · Begegnung ' + (step.encounterIndex + 1) + '/' + dungeon.encounters.length +
+        ': ' + encounterResult.encounterName;
+      if (dungeonRuns.length > 1) {
+        subText = 'Gruppe ' + (dungeonRuns.indexOf(run) + 1) + ' von ' + dungeonRuns.length + ' · ' + subText;
+      }
     }
     this.root.querySelector('.day-end-sub').textContent = subText;
 
@@ -143,7 +159,7 @@ export class DayEndOverlay {
     if (isLastOfRun) {
       const flash = document.createElement('div');
       flash.className = 'run-result-flash outcome-' + run.report.outcome;
-      flash.textContent = outcomeText(run.report.outcome);
+      flash.textContent = run.isRaid ? raidOutcomeText(run.report) : outcomeText(run.report.outcome);
       body.appendChild(flash);
       if (run.report.outcome === 'success') {
         Sound.itemReveal(3);
@@ -154,7 +170,7 @@ export class DayEndOverlay {
     } else {
       const note = document.createElement('div');
       note.className = 'day-end-travel';
-      note.textContent = 'Die Gruppe zieht weiter …';
+      note.textContent = run.isRaid ? 'Der Raid zieht weiter …' : 'Die Gruppe zieht weiter …';
       body.appendChild(note);
       this.waitSeconds = TRAVEL_SECONDS;
     }
@@ -176,7 +192,7 @@ export class DayEndOverlay {
     body.innerHTML = '<div class="day-summary"></div><div class="lab-actions"><button class="big-button next-day-button"></button></div>';
     const summary = body.querySelector('.day-summary');
     for (const run of this.runs) {
-      summary.appendChild(this.createRunCard(run.report));
+      summary.appendChild(run.isRaid ? this.createRaidCard(run.report) : this.createRunCard(run.report));
     }
     if (this.daySummary.finishedBuilding) {
       summary.appendChild(this.createBuildingCard(this.daySummary.finishedBuilding));
@@ -195,7 +211,8 @@ export class DayEndOverlay {
 
     // Fanfare für den besten Erfolg des Tages (Server-First am größten)
     const serverFirst = this.runs.find((run) => run.report.serverFirst);
-    const best = this.runs.find((run) => run.report.firstClear) || this.runs.find((run) => run.report.outcome === 'success');
+    const best = this.runs.find((run) => run.report.firstClear) || this.runs.find((run) => run.report.outcome === 'success') ||
+      this.runs.find((run) => run.isRaid && run.report.defeatedBossIds.length > 0);
     if (serverFirst) {
       Sound.collectionPage();
       showToast('Server-First! Neuer Titel: „' + getServerFirstTitle(serverFirst.report.dungeonId) + '“', '#ffd23f');
@@ -266,6 +283,58 @@ export class DayEndOverlay {
         ? 'Unterhalt nicht bezahlt (' + upkeep.total + ' Gold): Morgen wirkt kein Gebäude!'
         : 'Unterhalt der Gebäude: −' + upkeep.total + ' Gold';
       lines.appendChild(upkeepLine);
+    }
+    return card;
+  }
+
+  // Karte für den Raid: besiegte Bosse, Gold, wo es weitergeht, Helden mit EP und Verletzungen
+  createRaidCard(report) {
+    const raid = getRaid(report.raidId);
+    const card = document.createElement('div');
+    card.className = 'day-run-card day-raid-card outcome-' + (report.defeatedBossIds.length > 0 ? 'success' : 'defeat');
+    card.innerHTML = `
+      <div class="day-run-head">
+        <b class="day-run-name"></b>
+        <span class="day-run-outcome"></span>
+      </div>
+      <div class="day-raid-bosses"></div>
+      <div class="day-run-rewards"></div>
+      <div class="day-raid-next hint"></div>
+      <details class="day-raid-heroes"><summary></summary><div class="day-run-heroes"></div></details>
+    `;
+    card.querySelector('.day-run-name').textContent = 'Raid: ' + raid.name;
+    card.querySelector('.day-run-outcome').textContent = raidOutcomeText(report);
+
+    const bossLine = card.querySelector('.day-raid-bosses');
+    for (const bossId of report.defeatedBossIds) {
+      const chip = document.createElement('span');
+      chip.className = 'raid-boss-chip defeated';
+      chip.textContent = '✓ ' + getBoss(bossId).name;
+      bossLine.appendChild(chip);
+    }
+    if (report.defeatedBossIds.length === 0) {
+      bossLine.textContent = 'Heute fiel kein Boss.';
+    }
+    if (report.gold > 0) {
+      const goldLine = document.createElement('div');
+      goldLine.className = 'day-reward';
+      goldLine.appendChild(createSpriteCanvas('coin', 2));
+      goldLine.insertAdjacentHTML('beforeend', '<span>+' + report.gold + ' Gold</span>');
+      card.querySelector('.day-run-rewards').appendChild(goldLine);
+    }
+    // Wo geht es weiter? (Wochen-Sperre)
+    const nextIndex = this.game.getNextRaidEncounterIndex();
+    const nextBoss = nextIndex === null ? null : raid.encounters.slice(nextIndex).find((encounter) => encounter.type === 'boss');
+    card.querySelector('.day-raid-next').textContent = nextBoss
+      ? 'Am nächsten Raid-Tag dieser Woche geht es bei ' + getBoss(nextBoss.bossId).name + ' weiter.'
+      : 'Alle Bosse dieser Woche sind besiegt! Nächste Woche beginnt der Raid von vorn.';
+
+    const heroResults = report.heroResults || [];
+    card.querySelector('.day-raid-heroes summary').textContent = heroResults.length + ' Helden · ' +
+      (report.fallenNames.length > 0 ? report.fallenNames.length + ' gefallen' : 'niemand gefallen');
+    const heroList = card.querySelector('.day-run-heroes');
+    for (const heroResult of heroResults) {
+      heroList.appendChild(this.createHeroRow(heroResult));
     }
     return card;
   }
@@ -407,4 +476,16 @@ function createTraitBonusLine(text) {
   line.className = 'day-trait-bonus';
   line.textContent = text;
   return line;
+}
+
+// Ergebnis des Raids in Worten: "Raid geschafft!" oder "Wipe nach 2 Bossen"
+function raidOutcomeText(report) {
+  const bosses = report.defeatedBossIds.length;
+  if (report.outcome === 'success') {
+    return 'Raid geschafft!';
+  }
+  if (bosses === 0) {
+    return 'Wipe! Kein Boss besiegt';
+  }
+  return 'Wipe nach ' + bosses + (bosses === 1 ? ' Boss' : ' Bossen');
 }

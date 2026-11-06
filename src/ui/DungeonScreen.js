@@ -74,6 +74,13 @@ export class DungeonScreen {
   renderDungeonCards() {
     const container = this.root.querySelector('.dungeon-cards');
     container.innerHTML = '';
+    // An Raid-Tagen (sobald der Raid offen ist) gibt es keine Dungeons
+    if (this.game.areDungeonsClosedToday()) {
+      const notice = document.createElement('div');
+      notice.className = 'raid-day-notice';
+      notice.textContent = 'Heute ist Raid-Tag: Die Dungeons sind geschlossen. Neue Gruppen ziehen ab dem nächsten Dungeon-Tag los.';
+      container.appendChild(notice);
+    }
     // Oben einmal: Wie viele vollständige Gruppen sind heute noch frei, was fehlt? (wie in der Heldenübersicht)
     if (this.game.guild.heroes.length > 0) {
       container.appendChild(createGroupCounter(this.game));
@@ -358,7 +365,9 @@ export class DungeonScreen {
     }
     Sound.boxArrived();
     const group = this.game.guild.standingGroups[this.game.guild.standingGroups.length - 1];
-    showToast(group.name + ' zieht ab heute jeden Tag in ' + getDungeon(this.dungeonId).name + '.', '#ffd23f');
+    // An Raid-Tagen gibt es keine Dungeons: Die Gruppe zieht erst ab dem nächsten Dungeon-Tag los
+    const when = this.game.getTodaysExpedition(group.id) ? 'ab heute' : 'ab dem nächsten Dungeon-Tag';
+    showToast(group.name + ' zieht ' + when + ' jeden Tag in ' + getDungeon(this.dungeonId).name + '.', '#ffd23f');
     this.selectedHeroIds.clear();
     this.chosenSupplies = [];
     this.render();

@@ -1,6 +1,7 @@
 // ============================================================
 // DAYPLANSCREEN – der Tagesplan: Wer macht heute was?
 //   - oben: Tag, Überblick (wie viele im Dungeon, verletzt, frei) und "Tag beenden"
+//   - an Raid-Tagen (sobald der Raid offen ist) oben die Raid-Zeile: zieht los / reicht nicht / setzt aus
 //   - Gruppen, die heute in einen Dungeon ziehen (mit Risiko-Einschätzung, aufklappbaren Anweisungen
 //     und "Absagen"). Ändert man eine Anweisung, rechnet die Einschätzung sofort neu.
 //   - Vorräte jeder Gruppe lassen sich hier noch tauschen
@@ -28,6 +29,7 @@ import { Sound } from './Sound.js';
 import { createTodoBox } from './TodoBox.js';
 import { requestEndDay } from './EndDayCheck.js';
 import { getRunTitle, createRunControls, createPausedGroupRows } from './StandingGroupControls.js';
+import { getBoss } from '../data/enemies.js';
 
 export class DayPlanScreen {
   // onGoTo(screenId) = zu einem anderen Reiter wechseln (z.B. 'dungeons' oder 'tavern')
@@ -130,7 +132,8 @@ export class DayPlanScreen {
   // ---------- Überblick ----------
 
   renderHeader(plan) {
-    this.root.querySelector('.day-plan-title').textContent = 'Tagesplan – Tag ' + this.game.day;
+    this.root.querySelector('.day-plan-title').textContent = 'Tagesplan – Tag ' + this.game.day +
+      (this.game.areDungeonsClosedToday() ? ' · Raid-Tag' : '');
 
     const counts = this.root.querySelector('.day-plan-counts');
     counts.innerHTML = '';
@@ -168,12 +171,58 @@ export class DayPlanScreen {
 
   // ---------- Gruppen im Dungeon ----------
 
+  // Raid-Zeile (nur an Raid-Tagen, sobald der Raid offen ist; sonst null)
+  createRaidRow() {
+    const game = this.game;
+    if (!game.areDungeonsClosedToday()) {
+      return null;
+    }
+    const plan = game.guild.raidPlan;
+    const raid = game.getRaid();
+    const row = document.createElement('div');
+    row.className = 'run-row day-plan-raid';
+    row.innerHTML = '<div class="run-head"><b class="run-name"></b><span class="run-status"></span></div><div class="run-controls"></div>';
+    row.querySelector('.run-name').textContent = 'Raid · ' + raid.name;
+    const status = row.querySelector('.run-status');
+    const nextIndex = game.getNextRaidEncounterIndex();
+    if (nextIndex === null) {
+      status.textContent = 'Alle Bosse dieser Woche sind besiegt';
+    } else if (plan.lastFoughtDay === game.day) {
+      status.textContent = 'heute schon geraidet';
+    } else if (plan.skippedDay === game.day) {
+      status.textContent = 'setzt heute aus';
+    } else if (plan.activeToday) {
+      const nextBoss = raid.encounters.slice(nextIndex).find((encounter) => encounter.type === 'boss');
+      status.textContent = game.checkRaid().heroCount + ' Helden ziehen los · nächster Boss: ' + getBoss(nextBoss.bossId).name;
+    } else {
+      status.textContent = 'Aufstellung reicht nicht: ' + game.checkRaid().problems.join(', ');
+      row.classList.add('raid-not-ready');
+    }
+    const controls = row.querySelector('.run-controls');
+    const goButton = document.createElement('button');
+    goButton.textContent = 'Aufstellung';
+    goButton.addEventListener('click', () => {
+      Sound.click();
+      this.onGoTo('raid');
+    });
+    controls.appendChild(goButton);
+    return row;
+  }
+
   renderRuns() {
     const list = this.root.querySelector('.day-plan-runs');
     list.innerHTML = '';
+    // An Raid-Tagen zuerst der Raid
+    const raidRow = this.createRaidRow();
+    if (raidRow) {
+      list.appendChild(raidRow);
+    }
     // Gruppen, die heute nicht losziehen (ausgesetzt oder alle verletzt), stehen oben
     for (const row of createPausedGroupRows(this.game)) {
       list.appendChild(row);
+    }
+    if (raidRow && this.game.guild.expeditions.length === 0) {
+      return;
     }
     if (this.game.guild.expeditions.length === 0 && this.game.guild.standingGroups.length === 0) {
       list.innerHTML = '<p class="empty">Heute zieht keine Gruppe los. Bilde eine Gruppe im Abschnitt Dungeons, sie zieht dann jeden Tag los.</p>';

@@ -93,8 +93,9 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                auf dem Handy als Fenster von unten, nach Item-Level sortiert, Vergleich pro Wert; „Bestes anlegen“ am Helden), TavernScreen, CombatLabScreen (Kampf-Labor, auch „Test-Raid“ mit 4 Gruppen),
                DungeonScreen (+ DungeonGuide = Dungeonführer: Niveau, Gegner und Bosse im Detail, Beute mit Sammelbuch-Sternen;
                Gruppenwahl mit Kacheln nach Position, Statuszeile, „Auto-Gruppe“ und „Gruppe ausrüsten“; + RunViewer = Bericht eines beendeten Runs zeigen),
-               GuildHallScreen (Gildenhalle: Karte pro Gebäude, Bauen, Baustelle mit Balken).
-               DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe als Szene, danach Zusammenfassung mit Beute.
+               GuildHallScreen (Gildenhalle: Karte pro Gebäude, Bauen, Baustelle mit Balken),
+               RaidScreen (Raid: Raid-Tag, Bosse der Woche, Auto-Raid, 4 Gruppen tauschen, Bosse mit Phasen).
+               DayEndOverlay = Tagesabschluss nach „Tag beenden“: Kämpfe (auch der Raid) als Szene, danach Zusammenfassung mit Beute.
                LevelUpBanner = großes „Level Up!“ mit Fanfare (nacheinander bei mehreren Helden, während des Tagesabschlusses zurückgehalten).
                InventoryOverlay = Inventar als Vollbild-Fenster mit Kategorien (Knopf „Inventar“ in der Reiterleiste).
                CollectionOverlay = Sammelbuch als Vollbild-Fenster (Knopf in der Schatzkammer): Seiten pro Dungeon, Sterne, „???“, Titel-Auswahl.

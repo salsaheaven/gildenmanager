@@ -10,6 +10,7 @@ import { Sound } from './Sound.js';
 const WARNING_TEXTS = {
   idleHeroes: (count) => count === 1 ? '1 Held hat keine Aufgabe' : count + ' Helden haben keine Aufgabe',
   groupMissing: (count) => count === 1 ? 'Einer Gruppe fehlt jemand' : count + ' Gruppen fehlt jemand',
+  raidNotReady: () => 'Raid-Tag, aber die Raid-Aufstellung reicht nicht: Der Raid fällt heute aus',
 };
 
 // onGoTo(screenId) = zu einem Bildschirm springen

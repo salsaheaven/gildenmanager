@@ -41,6 +41,8 @@ export function getDailyTodos(guild, lastDaySummary) {
   const unlocked = (unlockId) => guild.unlockedFeatures.includes(unlockId);
 
   add('groupMissing', countGroupsWithMissingMembers(guild), 'plan');
+  // Heute ist Raid-Tag, aber die Raid-Aufstellung reicht nicht (zu wenige Helden, Tanks oder Heiler)
+  add('raidNotReady', guild.raidPlan.notReadyToday ? 1 : 0, 'raid');
   add('boxes', guild.boxes.length, 'treasury');
   add('newGear', guild.heroes.filter((hero) => getSlotsWithNewGear(guild, hero).length > 0).length, 'heroes');
   if (unlocked('talents')) {
@@ -51,7 +53,10 @@ export function getDailyTodos(guild, lastDaySummary) {
     add('upkeep', guild.hall.upkeepPaid ? 0 : 1, 'hall');
   }
   add('unhappy', guild.heroes.filter((hero) => hero.isUnhappy()).length, 'heroes');
-  add('groups', countPossibleGroups(guild).groups, 'dungeons');
+  // An Raid-Tagen gibt es keine Dungeons: dann auch keinen Hinweis auf mögliche Gruppen
+  if (!guild.raidPlan.dungeonsClosedToday) {
+    add('groups', countPossibleGroups(guild).groups, 'dungeons');
+  }
   if (unlocked('tavern')) {
     add('candidate', guild.candidates.filter((candidate) => candidate.getRarityRank() >= NOTABLE_CANDIDATE_RANK).length, 'tavern');
   }
@@ -90,6 +95,9 @@ export function getEndDayWarnings(guild) {
   const missing = countGroupsWithMissingMembers(guild);
   if (missing > 0) {
     warnings.push({ id: 'groupMissing', count: missing, screenId: 'plan' });
+  }
+  if (guild.raidPlan.notReadyToday) {
+    warnings.push({ id: 'raidNotReady', count: 1, screenId: 'raid' });
   }
   return warnings;
 }

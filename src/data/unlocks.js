@@ -42,6 +42,10 @@ export const UNLOCKS = [
     text: 'Ab Level 5 wählen Helden Talente. Jede Reihe bietet zwei Wege.',
   },
   {
+    id: 'raid', name: 'Raid', screenId: 'raid', condition: { heroLevel: 30 },
+    text: 'Die Aschenhallen sind offen! An Tag 6 und 7 jeder Woche zieht dein Raid (10 bis 20 Helden) los, an diesen Tagen gibt es keine Dungeons. Stell die Aufstellung im Reiter „Raid“ zusammen.',
+  },
+  {
     id: 'guildHall', name: 'Gildenhalle', screenId: 'hall', condition: { clears: 3, day: 8 },
     text: 'Baue die Gildenhalle aus: Kaserne, Lazarett, Schmiede und mehr. Neue Aufgaben: Kräuter und Rohstoffe sammeln.',
   },

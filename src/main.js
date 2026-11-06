@@ -24,6 +24,7 @@ import { InventoryOverlay } from './ui/InventoryOverlay.js';
 import { CollectionOverlay } from './ui/CollectionOverlay.js';
 import { LevelUpBanner } from './ui/LevelUpBanner.js';
 import { FoundingScreen } from './ui/FoundingScreen.js';
+import { RaidScreen } from './ui/RaidScreen.js';
 import { Sound } from './ui/Sound.js';
 import { showToast } from './ui/Toast.js';
 import { UNLOCKS, getUnlock } from './data/unlocks.js';
@@ -36,7 +37,7 @@ const AUTOSAVE_SECONDS = 5;
 const SECTIONS = [
   { id: 'today', name: 'Heute', screens: [{ id: 'plan', name: 'Tagesplan' }] },
   { id: 'heroesSection', name: 'Helden', screens: [{ id: 'heroes', name: 'Übersicht' }, { id: 'tavern', name: 'Taverne' }] },
-  { id: 'dungeonsSection', name: 'Dungeons', screens: [{ id: 'dungeons', name: 'Dungeons' }] },
+  { id: 'dungeonsSection', name: 'Dungeons', screens: [{ id: 'dungeons', name: 'Dungeons' }, { id: 'raid', name: 'Raid' }] },
   { id: 'loot', name: 'Beute', screens: [{ id: 'treasury', name: 'Kisten' }] },
   { id: 'guildSection', name: 'Gilde', screens: [{ id: 'hall', name: 'Gildenhalle' }, { id: 'shop', name: 'Händler' }] },
 ];
@@ -101,6 +102,7 @@ const heroScreen = new HeroScreen(screenElements.heroes, game, () => showScreen(
 new TavernScreen(screenElements.tavern, game);
 const combatLabScreen = new CombatLabScreen(screenElements.lab, game);
 new DungeonScreen(screenElements.dungeons, game);
+new RaidScreen(screenElements.raid, game);
 new GuildHallScreen(screenElements.hall, game);
 new ShopScreen(screenElements.shop, game);
 new DayPlanScreen(screenElements.plan, game, showScreen, (heroId) => {
@@ -149,6 +151,9 @@ function updateBadges() {
   const hall = guild.hall;
   // Fehlender Unterhalt braucht eine Entscheidung (rot), eine laufende Baustelle ist nur Info (leise)
   navBar.setBadge('hall', !hall.upkeepPaid ? '!' : (hall.construction !== null ? '⚒' : ''), hall.upkeepPaid);
+  // Raid: "!" wenn heute Raid wäre, die Aufstellung aber nicht reicht; leise "⚔", wenn der Raid heute loszieht
+  const raidPlan = guild.raidPlan;
+  navBar.setBadge('raid', raidPlan.notReadyToday ? '!' : (raidPlan.activeToday ? '⚔' : ''), !raidPlan.notReadyToday);
 }
 
 game.on('changed', updateBadges);
@@ -156,7 +161,7 @@ game.on('changed', updateBadges);
 // ---------- Schrittweises Freischalten (Tutorial, siehe data/unlocks.js) ----------
 
 // Welcher Bildschirm bzw. Knopf gehört zu welcher Freischaltung?
-const SCREENS_BY_UNLOCK = { tavern: 'tavern', shop: 'shop', guildHall: 'hall', collection: 'collection' };
+const SCREENS_BY_UNLOCK = { tavern: 'tavern', shop: 'shop', guildHall: 'hall', collection: 'collection', raid: 'raid' };
 
 // Blendet aus, was noch gesperrt ist: Reiter über die NavBar, alles andere über CSS-Klassen am <body>
 // (z.B. "locked-crafting" versteckt Zerlegen und Verbessern, siehe main.css)
@@ -223,12 +228,12 @@ game.on('dayEnded', (data) => {
   const summary = data.summary;
   const somethingHappened = summary.tasks.some((task) => task.taskId !== 'rest') || summary.news.length > 0 ||
     summary.finishedBuilding !== null || summary.wages.paid < summary.wages.total || summary.upkeep.paid < summary.upkeep.total;
-  if (data.reports.length === 0 && !somethingHappened) {
+  if (data.reports.length === 0 && !data.raidReport && !somethingHappened) {
     Sound.click();
     showToast('Ein ruhiger Tag. Sold: −' + data.summary.wages.paid + ' Gold. Tag ' + game.day + ' beginnt.', '#ffd23f');
     levelUpBanner.release();
   } else {
-    dayEndOverlay.start(data.day, data.reports, data.summary);
+    dayEndOverlay.start(data.day, data.reports, data.summary, data.raidReport);
   }
   saveManager.save(game);
 });

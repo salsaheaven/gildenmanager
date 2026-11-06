@@ -3,8 +3,8 @@
 //   - groups: 4 Raid-Gruppen mit je bis zu 5 Helden-ids (bleibt von Woche zu Woche gespeichert)
 //   - Wochen-Sperre: welche Bosse in dieser Woche schon besiegt sind (lockoutWeek + defeatedBossIds)
 //   - skippedDay: an diesem Tag setzt der Raid aus (Knopf "Heute aussetzen")
-//   - activeToday: zieht der Raid heute los? Wird von Game.refreshRaidToday ausgerechnet
-//     (nicht gespeichert), damit der Tagesplan und "beschäftigt" es ohne Tageszähler wissen.
+//   - activeToday, notReadyToday, dungeonsClosedToday: von Game.refreshRaidToday ausgerechnet
+//     (nicht gespeichert), damit Tagesplan, "beschäftigt" und Hinweise es ohne Tageszähler wissen.
 // Die Regeln (Raid-Tage, Mindestgröße …) stehen in data/raids.js und systems/RaidRules.js.
 // ============================================================
 
@@ -22,6 +22,8 @@ export class RaidPlan {
     this.skippedDay = 0;       // an diesem Tag setzt der Raid aus (0 = nie)
     this.lastFoughtDay = 0;    // an diesem Tag wurde zuletzt geraidet
     this.activeToday = false;  // zieht der Raid heute los? (siehe Game.refreshRaidToday)
+    this.notReadyToday = false;        // heute wäre Raid, aber die Aufstellung reicht nicht (Hinweis im Tagesplan)
+    this.dungeonsClosedToday = false;  // heute ist Raid-Tag und der Raid ist offen: keine Dungeons
   }
 
   // Alle Helden-ids der Aufstellung (Gruppe für Gruppe)

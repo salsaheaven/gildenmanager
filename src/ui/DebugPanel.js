@@ -13,6 +13,13 @@ import { DUNGEONS } from '../data/dungeons.js';
 import { getKnowledgeTotal } from '../systems/DungeonKnowledge.js';
 import { Sound } from './Sound.js';
 import { advanceConstruction } from '../systems/BuildingSystem.js';
+import { isRaidDay } from '../systems/RaidRules.js';
+import { ITEM_TEMPLATES } from '../data/items.js';
+import { getSuitableClasses } from '../data/heroClasses.js';
+
+// Klassen für "Raid-Test": genug Tanks und Heiler, damit Auto-Raid eine gültige Aufstellung findet
+const RAID_TEST_CLASSES = ['paladin', 'druid', 'priest', 'monk', 'mage', 'hunter', 'warlock', 'samurai', 'barbarian', 'bard',
+  'shaman', 'chronomancer', 'rogue', 'runeweaver', 'warrior'];
 
 export class DebugPanel {
   // onOpenLab = öffnet das Kampf-Labor (ein Entwickler-Werkzeug, das nur über dieses Menü erreichbar ist)
@@ -90,6 +97,36 @@ export class DebugPanel {
       for (const hero of game.guild.heroes) {
         hero.level = Math.min(SCALING.maxLevel, hero.level + 1);
       }
+    });
+    // Zum Ausprobieren des Raids: die Gilde auf 20 Helden auffüllen (gemischte Klassen), alle auf Level 30,
+    // leere Plätze bekommen ein grünes Item der Stufe 30
+    this.addButton('Raid-Test: 20 Helden auf Level 30', () => {
+      let index = 0;
+      while (game.guild.heroes.length < 20) {
+        const hero = game.recruitmentSystem.createCandidate(game.guild.createHeroId(), 'uncommon');
+        hero.classId = RAID_TEST_CLASSES[index % RAID_TEST_CLASSES.length];
+        game.guild.heroes.push(hero);
+        index++;
+      }
+      for (const hero of game.guild.heroes) {
+        hero.level = SCALING.maxLevel;
+        for (const template of ITEM_TEMPLATES) {
+          const suitable = getSuitableClasses(template).some((heroClass) => heroClass.id === hero.classId);
+          const slot = template.slot;
+          if (suitable && !hero.equipment[slot]) {
+            hero.equip(game.lootSystem.createItem('uncommon', game.guild.createItemId(), SCALING.maxLevel, template));
+          }
+        }
+      }
+      game.updateUnlocks();
+    });
+    // Springt ohne Tagesende zum nächsten Raid-Tag (Helden heilen dabei nicht, Sold fällt keiner an)
+    this.addButton('Zum nächsten Raid-Tag springen', () => {
+      game.day++;
+      while (!isRaidDay(game.day)) {
+        game.day++;
+      }
+      game.planStandingGroups();
     });
 
     document.addEventListener('keydown', (event) => {

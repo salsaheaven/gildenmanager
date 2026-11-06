@@ -102,11 +102,17 @@ export class TopBar {
     const runs = guild.expeditions.length;
     const freeHeroes = getDayPlan(guild).counts.rest; // nur wer sich ausruht, gilt als "frei"
     let planText = runs === 0 ? 'Keine Gruppe eingeplant' : (runs === 1 ? '1 Gruppe zieht los' : runs + ' Gruppen ziehen los');
+    // An Raid-Tagen: der Raid statt der Gruppen
+    if (guild.raidPlan.activeToday) {
+      planText = 'Der Raid zieht los';
+    } else if (guild.raidPlan.notReadyToday) {
+      planText = 'Raid-Tag: Aufstellung reicht nicht';
+    }
     if (freeHeroes > 0) {
       planText += ' · ' + freeHeroes + ' frei';
     }
     this.root.querySelector('.end-day-plan').textContent = planText;
-    this.root.querySelector('.end-day-button').classList.toggle('has-runs', runs > 0);
+    this.root.querySelector('.end-day-button').classList.toggle('has-runs', runs > 0 || guild.raidPlan.activeToday);
 
     this.root.querySelector('.mute-button').textContent = Sound.isMuted() ? 'Ton: aus' : 'Ton: an';
   }

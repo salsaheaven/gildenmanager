@@ -933,10 +933,19 @@ export class Game {
 
   // Bildet eine stehende Gruppe und plant sie gleich für heute ein. Ab morgen zieht sie jeden Tag von selbst los.
   // Gibt 'ok' oder einen Grund aus startExpedition zurück. Die Helden verlassen dabei ihre bisherige stehende Gruppe.
+  // An Raid-Tagen wird die Gruppe nur angelegt und zieht ab dem nächsten Dungeon-Tag los.
   createStandingGroup(dungeonId, heroIds, retreatRuleId, supplyIds = []) {
-    const result = this.startExpedition(dungeonId, heroIds, retreatRuleId, supplyIds);
-    if (result !== 'ok') {
-      return result;
+    const closedToday = this.areDungeonsClosedToday();
+    if (closedToday) {
+      const allThere = heroIds.length > 0 && heroIds.length <= 5 && heroIds.every((heroId) => this.guild.findHero(heroId));
+      if (!this.isDungeonUnlocked(dungeonId) || !allThere) {
+        return 'invalid';
+      }
+    } else {
+      const result = this.startExpedition(dungeonId, heroIds, retreatRuleId, supplyIds);
+      if (result !== 'ok') {
+        return result;
+      }
     }
     for (const other of this.guild.standingGroups) {
       other.heroIds = other.heroIds.filter((heroId) => !heroIds.includes(heroId));
@@ -946,8 +955,10 @@ export class Game {
       heroIds.slice(), retreatRuleId, supplyIds.slice());
     this.guild.nextStandingGroupId++;
     this.guild.standingGroups.push(group);
-    const expedition = this.guild.expeditions[this.guild.expeditions.length - 1];
-    expedition.standingGroupId = group.id;
+    if (!closedToday) {
+      const expedition = this.guild.expeditions[this.guild.expeditions.length - 1];
+      expedition.standingGroupId = group.id;
+    }
     this.emit('changed');
     return 'ok';
   }
@@ -1148,8 +1159,12 @@ export class Game {
   refreshRaidToday() {
     const plan = this.guild.raidPlan;
     plan.removeMissingHeroes(this.guild);
-    plan.activeToday = this.isRaidDayToday() && this.isRaidUnlocked() && this.getNextRaidEncounterIndex() !== null &&
-      plan.skippedDay !== this.day && plan.lastFoughtDay !== this.day && this.checkRaid().ok;
+    const wouldRaid = this.areDungeonsClosedToday() && this.getNextRaidEncounterIndex() !== null &&
+      plan.skippedDay !== this.day && plan.lastFoughtDay !== this.day;
+    const ready = this.checkRaid().ok;
+    plan.activeToday = wouldRaid && ready;
+    plan.notReadyToday = wouldRaid && !ready;
+    plan.dungeonsClosedToday = this.areDungeonsClosedToday();
     return plan.activeToday;
   }
 
