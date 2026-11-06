@@ -16,7 +16,7 @@
 // Neue Mechanik-Art nur für Raids:
 //   'groupStrike' = trifft alle Helden einer zufälligen Raid-Gruppe (wird beim Ankündigen ausgewählt)
 //
-// Die Zahlen sind grob gesetzt (Testballon, kein Balancing).
+// Die Zahlen sind grob gesetzt (Testballon, kein Balancing). Für Spieltests abgeschwächt (Leben halbiert, Angriff −20 %).
 // ============================================================
 
 export const RAID_BOSSES = [
@@ -29,7 +29,7 @@ export const RAID_BOSSES = [
     attackFx: 'bigImpact',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 9000, attack: 34, defense: 10 },
+    stats: { health: 4500, attack: 27, defense: 10 },
     enrageRound: 40,
     tankStacks: { name: 'Zermalmt', damageTakenPerStack: 0.12, swapAt: 4 },
     mechanics: [
@@ -69,7 +69,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'acid',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 9500, attack: 32, defense: 8 },
+    stats: { health: 4750, attack: 26, defense: 8 },
     enrageRound: 40,
     tankStacks: { name: 'Zersetzt', damageTakenPerStack: 0.1, swapAt: 5 },
     mechanics: [
@@ -100,7 +100,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'fire',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 10000, attack: 33, defense: 6 },
+    stats: { health: 5000, attack: 26, defense: 6 },
     enrageRound: 40,
     mechanics: [
       {
@@ -144,7 +144,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'fire',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 12000, attack: 35, defense: 14 },
+    stats: { health: 6000, attack: 28, defense: 14 },
     enrageRound: 45,
     tankStacks: { name: 'Ascheglut', damageTakenPerStack: 0.12, swapAt: 4 },
     mechanics: [
