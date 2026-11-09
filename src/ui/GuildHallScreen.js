@@ -8,6 +8,7 @@
 // Die Zahlen stehen in data/buildings.js, die Regeln in systems/BuildingSystem.js.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { BUILDING_ORDER, getBuilding } from '../data/buildings.js';
 import { getNextLevel, canAffordCost } from '../systems/BuildingSystem.js';
 import { describeMaterials } from './UpgradeControls.js';
@@ -25,10 +26,10 @@ export class GuildHallScreen {
     this.root.innerHTML = `
       <div class="hall-screen">
         <section class="panel hall-header">
-          <h2>Gildenhalle</h2>
+          <h2>${t('hall.title')}</h2>
           <div class="hall-info"></div>
           <div class="hall-dust-hint" hidden></div>
-          <div class="hall-warning" hidden>Der Unterhalt wurde gestern nicht bezahlt. Heute wirkt kein Gebäude.</div>
+          <div class="hall-warning" hidden>${t('hall.upkeepWarning')}</div>
           <div class="hall-construction"></div>
         </section>
         <section class="hall-list"></section>
@@ -45,8 +46,7 @@ export class GuildHallScreen {
 
     // Kopf: Unterhalt und Material
     const upkeep = this.game.getDailyUpkeep();
-    this.root.querySelector('.hall-info').textContent = 'Unterhalt: ' + upkeep + ' Gold pro Tag · Material: ' +
-      describeMaterials(guild.materials, true);
+    this.root.querySelector('.hall-info').textContent = t('hall.header', { upkeep, materials: describeMaterials(guild.materials, true) });
     this.root.querySelector('.hall-warning').hidden = hall.upkeepPaid;
     this.renderDustHint();
     this.renderConstruction();
@@ -72,10 +72,11 @@ export class GuildHallScreen {
     if (!dustMissing) {
       return;
     }
-    hint.innerHTML = '<span>✧ Staub bekommst du beim Zerlegen von Items.</span>';
+    hint.innerHTML = '<span></span>';
+    hint.querySelector('span').textContent = t('hall.dustHint');
     const junk = this.game.getJunkItems();
     if (junk.length === 0) {
-      hint.querySelector('span').textContent += ' Zerlege überzählige Items im Inventar.';
+      hint.querySelector('span').textContent += t('hall.dustHintNoJunk');
       return;
     }
     const total = {};
@@ -87,11 +88,11 @@ export class GuildHallScreen {
     }
     const button = document.createElement('button');
     button.className = 'hall-salvage-button';
-    button.textContent = 'Schrott zerlegen (' + junk.length + ' = ' + describeMaterials(total) + ')';
+    button.textContent = t('loot.salvageJunk', { count: junk.length, materials: describeMaterials(total) });
     button.addEventListener('click', () => {
       const result = this.game.salvageItems(junk.map((item) => item.id));
       Sound.click();
-      showToast('Schrott zerlegt: ' + result.count + ' Items, +' + describeMaterials(result.materials), '#c084fc');
+      showToast(t('loot.junkSalvaged', { count: result.count, materials: describeMaterials(result.materials) }), '#c084fc');
     });
     hint.appendChild(button);
   }
@@ -102,7 +103,7 @@ export class GuildHallScreen {
     container.innerHTML = '';
     const construction = this.game.guild.hall.construction;
     if (construction === null) {
-      container.innerHTML = '<p class="hint">Keine Baustelle. Es kann immer nur ein Gebäude gleichzeitig gebaut werden.</p>';
+      container.innerHTML = '<p class="hint">' + t('hall.noConstruction') + '</p>';
       return;
     }
     const building = getBuilding(construction.buildingId);
@@ -141,14 +142,14 @@ export class GuildHallScreen {
     }
 
     card.querySelector('.hall-card-now').textContent = level > 0
-      ? 'Jetzt (Stufe ' + level + '): ' + building.levels[level - 1].text
-      : 'Noch nicht gebaut';
+      ? t('hall.now', { level, text: building.levels[level - 1].text })
+      : t('hall.notBuilt');
 
     if (nextLevel === null) {
-      card.querySelector('.hall-card-next').textContent = 'Höchste Stufe erreicht';
+      card.querySelector('.hall-card-next').textContent = t('hall.maxed');
       return card;
     }
-    card.querySelector('.hall-card-next').textContent = 'Stufe ' + (level + 1) + ': ' + nextLevel.text;
+    card.querySelector('.hall-card-next').textContent = t('hall.nextLevel', { level: level + 1, text: nextLevel.text });
 
     const action = card.querySelector('.hall-card-action');
     if (isBuildingThis) {
@@ -160,20 +161,19 @@ export class GuildHallScreen {
     const costLine = document.createElement('div');
     costLine.className = 'hall-cost';
     const materialText = describeMaterials(nextLevel.cost);
-    costLine.textContent = nextLevel.cost.gold + ' Gold' + (materialText ? ' · ' + materialText : '') +
-      ' · ' + formatDays(nextLevel.buildDays) + ' Bauzeit · Unterhalt ' + nextLevel.upkeep + '/Tag';
+    costLine.textContent = t('hall.cost', { gold: nextLevel.cost.gold, materials: materialText, days: formatDays(nextLevel.buildDays), upkeep: nextLevel.upkeep });
     action.appendChild(costLine);
 
     const button = document.createElement('button');
     button.className = 'hall-build-button';
-    button.textContent = level === 0 ? 'Bauen' : 'Ausbauen auf Stufe ' + (level + 1);
+    button.textContent = level === 0 ? t('hall.build') : t('hall.upgrade', { level: level + 1 });
     const affordable = canAffordCost(this.game.guild, nextLevel.cost);
     if (construction !== null) {
       button.disabled = true;
-      button.title = 'Es wird schon gebaut. Nur eine Baustelle gleichzeitig.';
+      button.title = t('hall.busy');
     } else if (!affordable) {
       button.disabled = true;
-      button.title = 'Zu wenig Gold oder Material. Material bekommst du durchs Zerlegen.';
+      button.title = t('hall.missing');
     }
     button.addEventListener('click', () => this.build(buildingId));
     action.appendChild(button);
@@ -200,8 +200,7 @@ export class GuildHallScreen {
     if (result === 'ok') {
       Sound.buildStart();
       const construction = this.game.guild.hall.construction;
-      showToast('Baustelle eröffnet: ' + getBuilding(buildingId).name + ' Stufe ' + construction.targetLevel +
-        ' (' + formatDays(construction.daysLeft) + ')', '#ffd23f');
+      showToast(t('hall.started', { name: getBuilding(buildingId).name, level: construction.targetLevel, days: formatDays(construction.daysLeft) }), '#ffd23f');
     }
   }
 }
@@ -213,8 +212,8 @@ export function createConstructionLine(building, construction) {
   const line = document.createElement('div');
   line.className = 'hall-construction-line';
   line.innerHTML = '<span class="hall-construction-text"></span><div class="bar"><div class="bar-fill"></div></div>';
-  line.querySelector('.hall-construction-text').textContent = 'Baustelle: ' + building.name + ' Stufe ' +
-    construction.targetLevel + ' · noch ' + formatDays(construction.daysLeft);
+  line.querySelector('.hall-construction-text').textContent = t('hall.construction',
+    { name: building.name, level: construction.targetLevel, days: formatDays(construction.daysLeft) });
   // Mindestens ein kleiner Anfang, damit man den Balken sieht
   line.querySelector('.bar-fill').style.width = Math.max(5, Math.round(doneDays / totalDays * 100)) + '%';
   return line;
@@ -222,5 +221,5 @@ export function createConstructionLine(building, construction) {
 
 // "1 Tag" / "3 Tage"
 function formatDays(days) {
-  return days === 1 ? '1 Tag' : days + ' Tage';
+  return t('hall.days', { days });
 }

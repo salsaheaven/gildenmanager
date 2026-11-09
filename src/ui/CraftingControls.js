@@ -8,6 +8,7 @@
 // die Zahlen in data/crafting.js und data/alchemy.js.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { ITEM_TEMPLATES, SLOT_NAMES, ARMOR_TYPES } from '../data/items.js';
 import { getConsumable } from '../data/consumables.js';
 import { BREW_RECIPES } from '../data/alchemy.js';
@@ -34,15 +35,14 @@ export function createForgePanel(game, selectedTemplateId, onSelect) {
   const panel = document.createElement('div');
   panel.className = 'workshop-panel';
   panel.innerHTML = `
-    <div class="workshop-title">Schmieden</div>
+    <div class="workshop-title">${t('hall.forge')}</div>
     <p class="hint workshop-hint"></p>
     <div class="workshop-row">
       <select class="forge-select"></select>
       <button class="forge-button"></button>
     </div>
   `;
-  panel.querySelector('.workshop-hint').textContent = 'Stellt ein weißes Item her (Stufe ' + getForgeItemLevel(guild) +
-    '). Gut gegen fehlende Plätze oder Rüstungsarten, aber schwächer als Beute.';
+  panel.querySelector('.workshop-hint').textContent = t('hall.forgeHint', { level: getForgeItemLevel(guild) });
 
   // Auswahl nach Platz gruppiert (Waffe, Kopf, Brust …)
   const select = panel.querySelector('.forge-select');
@@ -62,16 +62,16 @@ export function createForgePanel(game, selectedTemplateId, onSelect) {
 
   const cost = getForgeCost(guild);
   const button = panel.querySelector('.forge-button');
-  button.textContent = 'Schmieden (' + describeMaterials(cost) + ')';
+  button.textContent = t('hall.forgeButton', { materials: describeMaterials(cost) });
   button.disabled = !guild.hasMaterials(cost);
   if (button.disabled) {
-    button.title = 'Zu wenig Material. Rohstoffe bringt die Aufgabe „Rohstoffe sammeln“ und das Zerlegen.';
+    button.title = t('hall.forgeMissing');
   }
   button.addEventListener('click', () => {
     const outcome = game.forgeItem(select.value);
     if (outcome.result === 'ok') {
       Sound.upgradeSuccess(3);
-      showToast('Geschmiedet: ' + outcome.item.getDisplayName() + ' (im Inventar)', getRarity(FORGE_RULES.rarityId).color);
+      showToast(t('hall.forged', { name: outcome.item.getDisplayName() }), getRarity(FORGE_RULES.rarityId).color);
     }
   });
   return panel;
@@ -84,7 +84,8 @@ export function createBrewPanel(game) {
   const guild = game.guild;
   const panel = document.createElement('div');
   panel.className = 'workshop-panel';
-  panel.innerHTML = '<div class="workshop-title">Brauen</div><div class="brew-list"></div>';
+  panel.innerHTML = '<div class="workshop-title"></div><div class="brew-list"></div>';
+  panel.querySelector('.workshop-title').textContent = t('hall.brew');
   const list = panel.querySelector('.brew-list');
 
   for (const recipe of BREW_RECIPES) {
@@ -94,25 +95,25 @@ export function createBrewPanel(game) {
     row.className = 'brew-row' + (check === 'noLab' ? ' locked' : '');
     row.innerHTML = '<span class="brew-name"></span><button class="brew-button"></button>';
     row.querySelector('.brew-name').textContent = consumable.icon + ' ' + consumable.name +
-      ' (vorrätig: ' + guild.countSupply(consumable.id) + ')';
+      t('hall.inStock', { count: guild.countSupply(consumable.id) });
     row.querySelector('.brew-name').style.color = consumable.color;
     row.querySelector('.brew-name').title = consumable.description;
 
     const button = row.querySelector('.brew-button');
     if (check === 'noLab') {
-      button.textContent = 'Labor Stufe ' + recipe.tier;
+      button.textContent = t('hall.labLevel', { level: recipe.tier });
       button.disabled = true;
     } else {
-      button.textContent = 'Brauen (' + describeMaterials(getBrewCost(guild, recipe.id)) + ')';
+      button.textContent = t('hall.brewButton', { materials: describeMaterials(getBrewCost(guild, recipe.id)) });
       button.disabled = check !== 'ok';
       if (button.disabled) {
-        button.title = 'Zu wenig Kräuter oder Material. Kräuter bringt die Aufgabe „Kräuter sammeln“.';
+        button.title = t('hall.brewMissing');
       }
     }
     button.addEventListener('click', () => {
       if (game.brewRecipe(recipe.id) === 'ok') {
         Sound.brew();
-        showToast('Gebraut: ' + consumable.name + ' (in der Vorratskammer)', consumable.color);
+        showToast(t('hall.brewed', { name: consumable.name }), consumable.color);
       }
     });
     list.appendChild(row);
@@ -132,7 +133,7 @@ export function createReforgeControls(game, item) {
   const container = document.createElement('div');
   container.className = 'reforge-controls';
   if (!game.guild.hall.getEffect('reforging', false)) {
-    container.innerHTML = '<p class="hint">Umschmieden in eine andere Rüstungsart: ab Schmiede Stufe 2 (Gildenhalle).</p>';
+    container.innerHTML = '<p class="hint">' + t('hall.reforgeLocked') + '</p>';
     return container;
   }
 
@@ -147,16 +148,16 @@ export function createReforgeControls(game, item) {
 
   const cost = getReforgeCost(item);
   const button = container.querySelector('.reforge-button');
-  button.textContent = 'Umschmieden (' + describeMaterials(cost) + ')';
+  button.textContent = t('hall.reforgeButton', { materials: describeMaterials(cost) });
   button.disabled = checkReforge(game.guild, item, targets[0].id) !== 'ok';
   if (button.disabled) {
-    button.title = 'Zu wenig Material. Umschmieden ist teuer – oft lohnt es sich mehr, das Teil im Dungeon zu suchen.';
+    button.title = t('hall.reforgeMissing');
   }
   button.addEventListener('click', () => {
     const oldName = item.getDisplayName();
     if (game.reforgeItem(item.id, select.value) === 'ok') {
       Sound.upgradeSuccess(5);
-      showToast(oldName + ' umgeschmiedet: ' + item.getDisplayName(), item.getRarity().color);
+      showToast(t('hall.reforged', { oldName, name: item.getDisplayName() }), item.getRarity().color);
     }
   });
   return container;
@@ -174,29 +175,29 @@ export function createSetReforgeControls(game, item) {
   const container = document.createElement('div');
   container.className = 'reforge-controls set-reforge-controls';
   if (!game.guild.hall.getEffect('setReforging', false)) {
-    container.innerHTML = '<p class="hint">Set-Teil in ein anderes Set umschmieden: ab Schmiede Stufe 3 (Gildenhalle), kostet Aschenessenz aus dem Raid.</p>';
+    container.innerHTML = '<p class="hint">' + t('hall.setReforgeLocked') + '</p>';
     return container;
   }
-  container.innerHTML = '<div class="hint">Set-Teil umschmieden (Raid-Zutat Aschenessenz):</div>' +
+  container.innerHTML = '<div class="hint">' + t('hall.setReforgeLabel') + '</div>' +
     '<select class="reforge-select"></select><button class="reforge-button"></button>';
   const select = container.querySelector('.reforge-select');
   for (const set of targets) {
     const option = document.createElement('option');
     option.value = set.id;
-    option.textContent = 'zu ' + set.name + ' (' + ARMOR_TYPES[set.armorType].name + ')';
+    option.textContent = t('hall.toSet', { set: set.name, armor: ARMOR_TYPES[set.armorType].name });
     select.appendChild(option);
   }
   const button = container.querySelector('.reforge-button');
-  button.textContent = 'In Set umschmieden (' + describeMaterials(SET_REFORGE_RULES.cost) + ')';
+  button.textContent = t('hall.setReforgeButton', { materials: describeMaterials(SET_REFORGE_RULES.cost) });
   button.disabled = checkSetReforge(game.guild, item, targets[0].id) !== 'ok';
   if (button.disabled) {
-    button.title = 'Zu wenig Material. Aschenessenz gibt es nur in Raid-Kisten.';
+    button.title = t('hall.setReforgeMissing');
   }
   button.addEventListener('click', () => {
     const oldName = item.getDisplayName();
     if (game.reforgeSetItem(item.id, select.value) === 'ok') {
       Sound.upgradeSuccess(5);
-      showToast(oldName + ' umgeschmiedet: ' + item.getDisplayName(), item.getRarity().color);
+      showToast(t('hall.reforged', { oldName, name: item.getDisplayName() }), item.getRarity().color);
     }
   });
   return container;
