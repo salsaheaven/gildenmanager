@@ -5,6 +5,7 @@
 // Rechnet nur, ändert nichts.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { CLASS_TIPS } from '../data/defeatCauses.js';
 import { COUNTERS, getCounterIds } from '../data/counters.js';
 import { HERO_CLASSES, getHeroClass } from '../data/heroClasses.js';
@@ -32,7 +33,7 @@ export function getClassTip(cause) {
       return counterIds.map((counterId) => {
         const counter = COUNTERS.find((entry) => entry.id === counterId);
         const talentText = counter.talents.length > 0
-          ? ' (per Talent auch ' + classNames(counter.talents.map((entry) => entry.classId)) + ')'
+          ? t('logic.alsoByTalent', { names: classNames(counter.talents.map((entry) => entry.classId)) })
           : '';
         return counter.name + ': ' + classNames(counter.classIds) + talentText;
       }).join(' · ');

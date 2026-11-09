@@ -35,10 +35,11 @@ import { outcomeText } from './DungeonScreen.js';
 import { Sound } from './Sound.js';
 
 // Welche Kämpfe als Szene laufen (die Wahl merkt sich der Browser, siehe loadSceneMode)
+// (Die Beschriftung kommt erst beim Anzeigen aus t(), dann ist die Sprache schon gesetzt)
 const SCENE_MODES = [
-  { id: 'all', label: t('dayEnd.modeAll') },
-  { id: 'bosses', label: t('dayEnd.modeBosses') },
-  { id: 'none', label: t('dayEnd.modeNone') },
+  { id: 'all', labelKey: 'dayEnd.modeAll' },
+  { id: 'bosses', labelKey: 'dayEnd.modeBosses' },
+  { id: 'none', labelKey: 'dayEnd.modeNone' },
 ];
 const SCENE_MODE_KEY = 'gildenmanager-dayend-scenes';
 
@@ -87,7 +88,7 @@ export class DayEndOverlay {
     for (const mode of SCENE_MODES) {
       const button = document.createElement('button');
       button.className = 'filter-button';
-      button.textContent = mode.label;
+      button.textContent = t(mode.labelKey);
       button.classList.toggle('active', mode.id === this.sceneMode);
       button.addEventListener('click', () => {
         Sound.click();

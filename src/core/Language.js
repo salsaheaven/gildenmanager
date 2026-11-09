@@ -20,6 +20,9 @@ export const LANGUAGES = { de: 'DE', en: 'EN' };
 const TEXTS = { de: TEXTS_DE, en: TEXTS_EN };
 
 let currentLanguage = 'de';
+// Schon nachgeschlagene Texte (Schlüssel → Text oder Funktion), damit oft gebrauchte Texte
+// (z.B. im Kampfprotokoll bei 200 Probekämpfen) nicht jedes Mal neu gesucht werden
+let cache = new Map();
 
 // Aktuelle Sprache: 'de' oder 'en'
 export function getLanguage() {
@@ -30,6 +33,7 @@ export function getLanguage() {
 export function setLanguage(language) {
   if (TEXTS[language]) {
     currentLanguage = language;
+    cache = new Map();
   }
 }
 
@@ -40,7 +44,11 @@ export function getLanguageForBrowser(browserLanguage) {
 
 // Einen Text nachschlagen. key = "bildschirm.name", params = Werte für Texte, die Funktionen sind
 export function t(key, params = {}) {
-  const text = findText(TEXTS[currentLanguage], key) ?? findText(TEXTS.de, key);
+  let text = cache.get(key);
+  if (text === undefined) {
+    text = findText(TEXTS[currentLanguage], key) ?? findText(TEXTS.de, key);
+    cache.set(key, text);
+  }
   if (text === undefined) {
     return key; // fehlt ganz: den Schlüssel zeigen, damit man es beim Testen sieht
   }

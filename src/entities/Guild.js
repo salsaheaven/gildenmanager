@@ -159,6 +159,19 @@ export class Guild {
     return null;
   }
 
+  // Alle Items der Gilde: im Inventar und am Körper der Helden
+  getAllItems() {
+    const items = this.inventory.slice();
+    for (const hero of this.heroes) {
+      for (const slot in hero.equipment) {
+        if (hero.equipment[slot]) {
+          items.push(hero.equipment[slot]);
+        }
+      }
+    }
+    return items;
+  }
+
   // ---------- Helden ----------
 
   createHeroId() {

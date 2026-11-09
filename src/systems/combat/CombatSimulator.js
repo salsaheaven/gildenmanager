@@ -19,6 +19,7 @@
 // Gleicher Seed = gleicher Kampf. So lassen sich Kämpfe wiederholen und testen.
 // ============================================================
 
+import { t } from '../../core/Language.js';
 import { getDefenseConstant } from '../../data/scaling.js';
 import { Random } from '../../core/Random.js';
 import { Combatant } from './Combatant.js';
@@ -238,7 +239,7 @@ export function runEncounter(heroes, encounter, random, recordLog, retreatOption
   const maxRounds = bossData && bossData.isDummy ? bossData.dummyRounds : COMBAT_RULES.maxRounds;
   // Wer zu Beginn dabei ist (für die Kampfszene), mit dem aktuellen Leben aus vorigen Begegnungen
   const startingCombatants = heroes.concat(battle.pets, battle.enemies).map((combatant) => combatant.describe());
-  battle.addLog('Der Kampf gegen ' + encounterName + ' beginnt!', 'info');
+  battle.addLog(t('combat.fightBegins', { name: encounterName }), 'info');
   battle.takeSnapshot();
 
   while (!battle.isOver() && battle.round < maxRounds) {
@@ -321,11 +322,11 @@ function calmFrenzy(battle, hero) {
   if (frenzy.points <= 0) {
     boss.effects = boss.effects.filter((effect) => effect !== frenzy);
     battle.causes.addCountered(frenzy.name);
-    battle.addLog(hero.name + ' dämpft ' + frenzy.name + ' von ' + boss.name + '!', 'mechanic',
-      { labels: [{ targetId: boss.id, text: 'Beruhigt!' }] });
+    battle.addLog(t('combat.calms', { hero: hero.name, frenzy: frenzy.name, boss: boss.name }), 'mechanic',
+      { labels: [{ targetId: boss.id, text: t('combat.calmedLabel') }] });
   } else {
-    battle.addLog(hero.name + ' redet beruhigend auf ' + boss.name + ' ein.', 'info',
-      { labels: [{ targetId: boss.id, text: 'Ruhiger …' }] });
+    battle.addLog(t('combat.soothes', { hero: hero.name, boss: boss.name }), 'info',
+      { labels: [{ targetId: boss.id, text: t('combat.calmerLabel') }] });
   }
   return true;
 }
@@ -342,8 +343,8 @@ function takePetTurn(battle, pet) {
     if (chosen) {
       pet.boundEnemy = chosen;
       chosen.boundTo = pet;
-      battle.addLog(pet.name + ' stellt sich ' + chosen.name + ' entgegen.', 'info',
-        { labels: [{ targetId: chosen.id, text: 'Gebunden' }] });
+      battle.addLog(t('combat.petFaces', { pet: pet.name, target: chosen.name }), 'info',
+        { labels: [{ targetId: chosen.id, text: t('combat.boundLabel') }] });
     }
   }
   const target = pet.boundEnemy || battle.getFocusTarget(pet);
@@ -364,7 +365,7 @@ function warnIfOutOfMana(battle, hero) {
   if (manaPercent < COMBAT_RULES.lowManaWarning && !hero.warnedLowMana) {
     hero.warnedLowMana = true;
     battle.causes.addOutOfMana(hero.name);
-    battle.addLog(hero.name + ' hat kaum noch Mana!', 'warning', { labels: [{ targetId: hero.id, text: 'Kein Mana!' }] });
+    battle.addLog(t('combat.lowMana', { name: hero.name }), 'warning', { labels: [{ targetId: hero.id, text: t('combat.noManaLabel') }] });
   } else if (manaPercent > 0.5) {
     hero.warnedLowMana = false;
   }
@@ -391,8 +392,8 @@ function checkRetreat(battle, retreatOptions) {
   }
   battle.retreating = true;
   battle.retreatRoundsLeft = COMBAT_RULES.retreatRounds;
-  const labels = battle.getLivingHeroes().map((hero) => ({ targetId: hero.id, text: 'Rückzug!' }));
-  battle.addLog('RÜCKZUG! Die Gruppe kämpft sich zum Ausgang durch.', 'warning', { labels: labels });
+  const labels = battle.getLivingHeroes().map((hero) => ({ targetId: hero.id, text: t('combat.retreatLabel') }));
+  battle.addLog(t('combat.retreat'), 'warning', { labels: labels });
 }
 
 // Am Rundenende: Rückzug eine Runde weiter, evtl. geschafft
@@ -470,11 +471,11 @@ function tickDamageOverTime(battle, target, effect, everyone) {
   if (target.side === 'hero' && effect.cause) {
     battle.causes.addDamage(effect.cause, result.damage);
   }
-  battle.addLog(effect.name + ' verletzt ' + target.name + ' um ' + result.damage + '.', 'damage',
+  battle.addLog(t('combat.dotHurts', { effect: effect.name, target: target.name, amount: result.damage }), 'damage',
     { hits: [target.describeHit(result.damage, 'damage', false, 0, effect.damageType || 'physical')] });
   logSavedByTalent(battle, target, result);
   if (!target.alive) {
-    battle.addLog(target.name + (target.side === 'hero' ? ' fällt!' : ' ist besiegt!'), 'death',
+    battle.addLog(t(target.side === 'hero' ? 'combat.falls' : 'combat.defeated', { name: target.name }), 'death',
       { heroFallen: target.side === 'hero' });
   }
 }
@@ -487,7 +488,7 @@ function tickHealOverTime(battle, target, effect, everyone) {
     source.healingDone += healed;
   }
   if (healed > 0) {
-    battle.addLog(effect.name + ' heilt ' + target.name + ' um ' + healed + '.', 'heal',
+    battle.addLog(t('combat.hotHeals', { effect: effect.name, target: target.name, amount: healed }), 'heal',
       { hits: [target.describeHit(healed, 'heal')] });
   }
 }
@@ -521,15 +522,15 @@ function createResult(battle, encounter, encounterName, bossData, maxRounds) {
   }
 
   if (bossData && bossData.isDummy) {
-    battle.addLog('Die Zeit ist um. Gemessen wurde der Schaden über ' + maxRounds + ' Runden.', 'info');
+    battle.addLog(t('combat.timeUp', { rounds: maxRounds }), 'info');
   } else if (outcome === 'victory') {
-    battle.addLog(encounterName + (bossData ? ' ist besiegt! Sieg!' : ': alle Gegner besiegt!'), 'death');
+    battle.addLog(t(bossData ? 'combat.bossDefeated' : 'combat.allEnemiesDefeated', { name: encounterName }), 'death');
   } else if (outcome === 'retreat') {
-    battle.addLog('Die Gruppe hat sich in Sicherheit gebracht.', 'warning');
+    battle.addLog(t('combat.safe'), 'warning');
   } else if (outcome === 'timeout') {
-    battle.addLog('Die Gruppe ist erschöpft und muss sich zurückziehen. Niederlage.', 'warning');
+    battle.addLog(t('combat.exhausted'), 'warning');
   } else {
-    battle.addLog('Die ganze Gruppe ist gefallen. Niederlage.', 'warning');
+    battle.addLog(t('combat.wiped'), 'warning');
   }
 
   return {

@@ -7,13 +7,14 @@
 // Das Einplanen selbst macht Game (planStandingGroups, jeden Morgen).
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { GROUP_NAMES, getPositionId } from '../data/groupRules.js';
 
 // Erster freier Gruppenname
 export function getFreeGroupName(guild) {
   const used = guild.standingGroups.map((group) => group.name);
   const free = GROUP_NAMES.find((name) => !used.includes(name));
-  return free || 'Gruppe ' + (guild.standingGroups.length + 1);
+  return free || t('logic.groupNumber', { number: guild.standingGroups.length + 1 });
 }
 
 // Mitglieder, die heute ausfallen, weil sie verletzt sind: [{ hero, positionId }]

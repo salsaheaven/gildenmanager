@@ -39,7 +39,8 @@ Eine Option, die immer die beste ist, ist keine Wahl. Geprüft wird das per Simu
 ## Aufbau
 ```
 src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen, Tageszähler, endDay), Random, SaveManager,
-               Language (Sprache Deutsch/Englisch, t('bereich.name') schlägt Texte nach, Rückfall auf Deutsch)
+               Language (Sprache Deutsch/Englisch, t('bereich.name') schlägt Texte nach, Rückfall auf Deutsch; auch die Logik nutzt t() für Ticker und Kampfprotokoll),
+               DataLanguage (schreibt beim Start die englischen Namen/Texte aus src/data/en/ in die Daten, nur bei Englisch)
 src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, CollectionBook (Sammelbuch: beste gefundene Seltenheit je Boss-Item, Titel, Gold-Bonus),
                RivalGuild (eine KI-Gilde: welche Dungeons an welchem Tag),
                GuildHall (Gildenhalle: Stufe jedes Gebäudes, laufende Baustelle, Unterhalt bezahlt?; getEffect liefert die Wirkung), Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft),
@@ -57,6 +58,7 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                AutoGroup („Auto-Gruppe“: füllt leere Plätze mit freien Helden, Tank/Heiler zuerst, dann Konter für bekannte Mechaniken; getCounterStatus = Konter ✓/✗ einer Gruppe),
                RaidRules (Wochentag, Raid-Tage, Raid offen?, Aufstellung prüfen, wo es nach der Wochen-Sperre weitergeht), AutoRaid („Auto-Raid“: Helden auf 4 Gruppen verteilen),
                GroupCounter (Helden nach Position, wie viele vollständige Gruppen die freien Helden ergeben, was fehlt; checkGroup prüft eine Gruppe),
+               ItemNames (Item-Name aus Vorlage, Seltenheit, Namenszusatz-Nummer oder Boss-Item; beim Laden neu gebaut, damit ein Sprachwechsel greift),
                CraftingSystem (Zerlegen → Staub/Kristalle/Rohstoffe, Verbessern +1 bis +10 mit Fehlschlag ab +6),
                ClassTips („Helfen würde: …“: welche Klassen gegen die größte Ursache einer Niederlage helfen),
                EndEvaluation (Endauswertung nach dem Endboss: Rang nach Tagen, Statistik, Platz im Raid-Rennen),
@@ -68,7 +70,8 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
                AbilityEffects (was ein Skill bewirkt), OrderSettings (gewählte Anweisungen + Talente → ein Paket mit Wirkungen für den Kampf, Gruppen-Auren),
                CauseTracker (woher der Schaden an den Helden kommt, nicht gekonterte Panzer/Wutanfälle), CounterPoints (wie viel ein Held gegen Panzer und Wutanfall ausrichtet), SupplyEffects (Wirkung der mitgenommenen Vorräte im Run), DefeatAnalysis („Woran es lag“: Top 3 Ursachen + Tipp), ChanceEstimator (200 Kämpfe → Siegchance; estimateRunChances = ganzer Dungeon),
                TestGroup (Testgruppe fürs Labor, Klassen frei wählbar; createTestRaid = 4 Gruppen)
-src/data/      Reine Inhalte: texts/de.js + texts/en.js (alle Texte der Oberfläche nach Bildschirm, gleiche Namen in beiden Sprachen), rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes (Legendär nur in Raid-Kisten: Waffen/Ringe, Raid-Pity, Aschenessenz), balancing, sprites (Pixel-Art als Text),
+src/data/      Reine Inhalte: texts/de.js + texts/en.js (alle Texte der Oberfläche und der Logik nach Bereich, gleiche Namen in beiden Sprachen),
+               en/ (englische Namen und Texte der Inhalte nach id, Liste in en/index.js; die deutschen stehen direkt in den Datendateien), rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes (Legendär nur in Raid-Kisten: Waffen/Ringe, Raid-Pity, Aschenessenz), balancing, sprites (Pixel-Art als Text),
                heroClasses (15 Klassen inkl. Rüstungsart, nützliche Werte, Dauer-Fähigkeit `passive` und Begleiter `pet`), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
                enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), raidBosses (Raid-Bosse: Phasen, Tank-Stapel, Gruppenschlag), raids (Raid-Regeln: Raid-Tage, Mindestgröße; Raid 1 „Die Aschenhallen“, Raid 2 „Der Nachtthron“ mit dem Endboss), endEvaluation (Ränge nach Spieltagen, Größe der Bestenliste), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
                dungeons (7 Level-Dungeons + 3 Set-Dungeons mit je 2 Bossen: Begegnungen, Stufe, Belohnung), retreatRules,
@@ -138,7 +141,8 @@ tools/         Mess-Werkzeuge für Balancing (Node-Skripte mit der echten Spiell
 - Zufall läuft immer über `Random`, nie direkt über `Math.random()`. So bleibt er testbar und wird mitgespeichert.
 - Balancing (erst ganz am Ende, wenn Roster, Dungeons und Raids stehen): Kampf-Labor und Mess-Werkzeuge in `tools/`. Die Zielwerte stehen unter „Schwierigkeit“ in KONZEPT.md.
 - Die Oberfläche muss auch auf dem Handy funktionieren (Breite ~390 px). Handy-Regeln stehen am Ende von `main.css` (`@media (max-width: 700px)`).
-- **Zwei Sprachen:** Neue Texte der Oberfläche nie fest in den Code schreiben, sondern in `src/data/texts/de.js` und `en.js` eintragen und mit `t('bereich.name')` holen (ein Test prüft, dass beide Sprachen dieselben Namen haben).
+- **Zwei Sprachen:** Neue Texte der Oberfläche (und Meldungen der Logik) nie fest in den Code schreiben, sondern in `src/data/texts/de.js` und `en.js` eintragen und mit `t('bereich.name')` holen (ein Test prüft, dass beide Sprachen dieselben Namen haben). `t()` nie auf oberster Ebene einer Datei aufrufen (dort ist die Sprache noch nicht gesetzt), sondern erst beim Anzeigen.
+  Neue Inhalte in `src/data/` (Namen, Beschreibungen, Tipps) bekommen ihre englische Fassung in `src/data/en/` (ein Test prüft, dass jede Übersetzung zu einem deutschen Eintrag passt).
 - Pixel-Art steht als Text-Raster in `src/data/sprites.js`. Ein Zeichen ist ein Pixel, die Farben stehen in `PALETTE`.
 
 ## Befehle

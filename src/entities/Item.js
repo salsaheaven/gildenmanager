@@ -25,6 +25,7 @@ export class Item {
     this.upgradeLevel = 0;  // Verbesserungsstufe 0 bis +10 (siehe data/crafting.js), erhöht alle Werte
     this.bossItemId = null; // Boss-Items: feste Kennung aus lootBoxes.js (für das Sammelbuch), sonst null
     this.setId = null;      // Set-Teile: zu welchem Klassen-Set es gehört (data/sets.js), sonst null
+    this.suffixIndex = null; // Namenszusatz ("des Bären") als Nummer in ITEM_SUFFIXES, sonst null (siehe systems/ItemNames.js)
     this.locked = false;    // gesperrt (Schloss): wird von "Bestes anlegen" nicht ausgetauscht, nicht verkauft, nicht zerlegt
     // Nur direkt nach dem Öffnen einer Kiste, wird nicht gespeichert (siehe Game.openBox):
     this.collectionStatus = null; // 'new' / 'improved' / null: was das Item im Sammelbuch bewirkt hat
@@ -102,6 +103,7 @@ export class Item {
       upgradeLevel: this.upgradeLevel,
       bossItemId: this.bossItemId,
       setId: this.setId,
+      suffixIndex: this.suffixIndex,
       locked: this.locked,
     };
   }
@@ -110,6 +112,7 @@ export class Item {
     const item = new Item(data.id, data.templateId, data.rarityId, data.name, data.stats, data.itemLevel, data.resistances);
     item.bossItemId = data.bossItemId;
     item.setId = data.setId;
+    item.suffixIndex = data.suffixIndex;
     item.upgradeLevel = data.upgradeLevel;
     item.locked = data.locked;
     return item;

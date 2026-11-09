@@ -7,6 +7,7 @@
 // Die Zahlen stehen in data/raids.js.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { RAID_RULES } from '../data/raids.js';
 
 // Wochentag: 1 bis 7 (Tag 1 ist der erste Tag der ersten Woche)
@@ -47,13 +48,13 @@ export function checkRaid(guild, plan) {
   const healers = heroes.filter((hero) => hero.getClass().role === 'healer').length;
   const problems = [];
   if (heroes.length < RAID_RULES.minHeroes) {
-    problems.push('Mindestens ' + RAID_RULES.minHeroes + ' Helden (bereit: ' + heroes.length + ')');
+    problems.push(t('logic.raidMinHeroes', { need: RAID_RULES.minHeroes, ready: heroes.length }));
   }
   if (tanks < RAID_RULES.minTanks) {
-    problems.push('Mindestens ' + RAID_RULES.minTanks + ' Tanks (bereit: ' + tanks + ')');
+    problems.push(t('logic.raidMinTanks', { need: RAID_RULES.minTanks, ready: tanks }));
   }
   if (healers < RAID_RULES.minHealers) {
-    problems.push('Mindestens ' + RAID_RULES.minHealers + ' Heiler (bereit: ' + healers + ')');
+    problems.push(t('logic.raidMinHealers', { need: RAID_RULES.minHealers, ready: healers }));
   }
   return { ok: problems.length === 0, heroCount: heroes.length, tanks: tanks, healers: healers, problems: problems };
 }

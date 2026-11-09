@@ -4,6 +4,7 @@
 //         → Wirkung ausrechnen (Schaden, Heilung, Schild …) und in den Kampfbericht schreiben.
 // ============================================================
 
+import { t } from '../../core/Language.js';
 import { getCounterPoints, findCounterEffect } from './CounterPoints.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
 
@@ -31,12 +32,12 @@ export function heroDealsDamage(battle, caster, target, actionName, scaling, pow
   caster.damageDone += result.damage;
   caster.threat += result.damage * (options.threat || 1) * caster.getThreatFactor();
 
-  const critText = output.crit ? ' kritisch' : '';
-  battle.addLog(caster.name + ': ' + actionName + ' trifft ' + target.name + critText + ' für ' + result.damage + '.',
+  const critText = output.crit ? t('combat.crit') : '';
+  battle.addLog(t('combat.hits', { caster: caster.name, action: actionName, target: target.name, crit: critText, amount: result.damage }),
     output.crit ? 'crit' : 'damage',
     { hits: [target.describeHit(result.damage, 'damage', output.crit, result.absorbed, damageType)] });
   if (!target.alive) {
-    battle.addLog(target.name + ' ist besiegt!', 'death');
+    battle.addLog(t('combat.defeated', { name: target.name }), 'death');
   }
   breakShell(battle, caster, target);
 
@@ -44,7 +45,7 @@ export function heroDealsDamage(battle, caster, target, actionName, scaling, pow
   if (lifesteal > 0 && result.damage > 0) {
     const healed = caster.heal(result.damage * lifesteal);
     if (healed > 0) {
-      battle.addLog(caster.name + ' saugt ' + healed + ' Leben.', 'heal', { hits: [caster.describeHit(healed, 'heal')] });
+      battle.addLog(t('combat.lifesteal', { name: caster.name, amount: healed }), 'heal', { hits: [caster.describeHit(healed, 'heal')] });
     }
   }
   return result.damage;
@@ -65,11 +66,11 @@ function breakShell(battle, caster, target) {
   if (shell.points <= 0) {
     target.effects = target.effects.filter((effect) => effect !== shell);
     battle.causes.addCountered(shell.name);
-    battle.addLog(caster.name + ' bricht ' + shell.name + ' von ' + target.name + '!', 'mechanic',
-      { labels: [{ targetId: target.id, text: 'Panzer gebrochen!' }] });
+    battle.addLog(t('combat.shellBroken', { caster: caster.name, shell: shell.name, target: target.name }), 'mechanic',
+      { labels: [{ targetId: target.id, text: t('combat.shellBrokenLabel') }] });
   } else {
-    battle.addLog(caster.name + ' schlägt Risse in ' + shell.name + '.', 'info',
-      { labels: [{ targetId: target.id, text: 'Risse!' }] });
+    battle.addLog(t('combat.shellCracks', { caster: caster.name, shell: shell.name }), 'info',
+      { labels: [{ targetId: target.id, text: t('combat.cracksLabel') }] });
   }
 }
 
@@ -187,8 +188,8 @@ export function useAbility(battle, caster, abilityId, baseAbility) {
       break;
     case 'resetCooldowns':
       targets[0].cooldowns = {};
-      battle.addLog(caster.name + ': ' + ability.name + '! Die Skills von ' + targets[0].name + ' sind sofort wieder bereit.', 'shield',
-        { labels: [{ targetId: targets[0].id, text: 'Bereit!' }] });
+      battle.addLog(t('combat.resetCooldowns', { caster: caster.name, ability: ability.name, target: targets[0].name }), 'shield',
+        { labels: [{ targetId: targets[0].id, text: t('combat.readyLabel') }] });
       break;
     case 'shield':
       applyShield(battle, caster, ability, power, targets);
@@ -201,13 +202,13 @@ export function useAbility(battle, caster, abilityId, baseAbility) {
       break;
     case 'mana':
       caster.mana = Math.min(caster.maxMana, caster.mana + caster.maxMana * ability.value * powerFactor);
-      battle.addLog(caster.name + ' sammelt sich: ' + ability.name + '.', 'info',
+      battle.addLog(t('combat.gathers', { caster: caster.name, ability: ability.name }), 'info',
         { labels: [{ targetId: caster.id, text: '+Mana' }], manaUpdate: { targetId: caster.id, mana: Math.round(caster.mana) } });
       break;
     case 'cleanse':
       targets[0].effects = targets[0].effects.filter((effect) => !effect.isDebuff);
-      battle.addLog(caster.name + ': ' + ability.name + ' befreit ' + targets[0].name + ' vom Fluch.', 'shield',
-        { labels: [{ targetId: targets[0].id, text: 'Fluch gelöst' }] });
+      battle.addLog(t('combat.cleansed', { caster: caster.name, ability: ability.name, target: targets[0].name }), 'shield',
+        { labels: [{ targetId: targets[0].id, text: t('combat.cleansedLabel') }] });
       break;
     case 'stun':
       applyStun(battle, caster, ability, targets);
@@ -234,8 +235,8 @@ function applyTalentExtras(battle, caster, abilityId, ability, targets) {
     for (const target of targets) {
       if (target.hasDebuff && target.hasDebuff()) {
         target.effects = target.effects.filter((effect) => !effect.isDebuff);
-        battle.addLog(caster.name + ': ' + ability.name + ' befreit ' + target.name + ' vom Fluch.', 'shield',
-          { labels: [{ targetId: target.id, text: 'Fluch gelöst' }] });
+        battle.addLog(t('combat.cleansed', { caster: caster.name, ability: ability.name, target: target.name }), 'shield',
+          { labels: [{ targetId: target.id, text: t('combat.cleansedLabel') }] });
       }
     }
   }
@@ -249,8 +250,8 @@ function applyTalentExtras(battle, caster, abilityId, ability, targets) {
 function interruptCasting(battle, caster, actionName) {
   const casting = battle.getCasting();
   if (casting && casting.interruptible) {
-    battle.addLog(caster.name + ': ' + actionName + ' unterbricht ' + casting.name + '!', 'mechanic',
-      { labels: [{ targetId: battle.boss.id, text: 'UNTERBROCHEN!' }], cast: { state: 'end' } });
+    battle.addLog(t('combat.interrupts', { caster: caster.name, action: actionName, spell: casting.name }), 'mechanic',
+      { labels: [{ targetId: battle.boss.id, text: t('combat.interruptedLabel') }], cast: { state: 'end' } });
     battle.boss.casting = null;
   }
 }
@@ -271,8 +272,8 @@ function applyPoison(battle, caster, abilityId, ability, power, target) {
     remaining: ability.duration,
     isDebuff: true,
   });
-  const word = ability.growth ? 'Fluch' : 'Gift';
-  battle.addLog(caster.name + ' belegt ' + target.name + ' mit ' + ability.name + '.', 'damage',
+  const word = ability.growth ? t('combat.curseLabel') : t('combat.poisonLabel');
+  battle.addLog(t('combat.afflicts', { caster: caster.name, target: target.name, ability: ability.name }), 'damage',
     { labels: [{ targetId: target.id, text: word }] });
 }
 
@@ -289,8 +290,8 @@ function applyHealOverTime(battle, caster, abilityId, ability, power, targets) {
       remaining: ability.duration,
     });
   }
-  const who = targets.length === 1 ? targets[0].name : 'die Gruppe';
-  battle.addLog(caster.name + ': ' + ability.name + ' umhüllt ' + who + '.', 'heal',
+  const who = targets.length === 1 ? targets[0].name : t('combat.theGroup');
+  battle.addLog(t('combat.envelops', { caster: caster.name, ability: ability.name, who }), 'heal',
     { labels: targets.map((target) => ({ targetId: target.id, text: ability.name })) });
 }
 
@@ -298,8 +299,8 @@ function applyHealOverTime(battle, caster, abilityId, ability, power, targets) {
 function applyRevive(battle, caster, ability, hpShare, target) {
   target.revive(Math.min(1, hpShare));
   caster.healingDone += target.hp;
-  battle.addLog(caster.name + ': ' + ability.name + '! ' + target.name + ' steht wieder auf.', 'heal',
-    { hits: [target.describeHit(target.hp, 'heal')], labels: [{ targetId: target.id, text: 'Wiederbelebt!' }] });
+  battle.addLog(t('combat.revives', { caster: caster.name, ability: ability.name, target: target.name }), 'heal',
+    { hits: [target.describeHit(target.hp, 'heal')], labels: [{ targetId: target.id, text: t('combat.revivedLabel') }] });
 }
 
 // Buff: Verstärkung für sich selbst, einen Helden oder die ganze Gruppe (siehe "effect" in abilities.js).
@@ -310,8 +311,8 @@ function applyBuff(battle, caster, abilityId, ability, value, targets) {
   for (const target of targets) {
     target.addEffect({ kind: kind, buffId: abilityId, value: value, remaining: ability.duration });
   }
-  const who = targets.length === 1 && targets[0] === caster ? '' : ' auf ' + (targets.length === 1 ? targets[0].name : 'die Gruppe');
-  battle.addLog(caster.name + ' wirkt ' + ability.name + who + '.', 'shield',
+  const who = targets.length === 1 && targets[0] === caster ? '' : t('combat.castsOn', { who: targets.length === 1 ? targets[0].name : t('combat.theGroup') });
+  battle.addLog(t('combat.casts', { caster: caster.name, ability: ability.name, on: who }), 'shield',
     { labels: targets.map((target) => ({ targetId: target.id, text: ability.name })) });
 }
 
@@ -320,8 +321,8 @@ function applyHeal(battle, caster, ability, power, target) {
   const healed = target.heal(output.amount * caster.getHealingFactor());
   caster.healingDone += healed;
   caster.threat += healed * COMBAT_RULES.healThreat * caster.getThreatFactor();
-  const critText = output.crit ? ' kritisch' : '';
-  battle.addLog(caster.name + ': ' + ability.name + ' heilt ' + target.name + critText + ' um ' + healed + '.', 'heal',
+  const critText = output.crit ? t('combat.crit') : '';
+  battle.addLog(t('combat.heals', { caster: caster.name, ability: ability.name, target: target.name, crit: critText, amount: healed }), 'heal',
     { hits: [target.describeHit(healed, 'heal', output.crit)] });
 }
 
@@ -338,8 +339,8 @@ function applyShield(battle, caster, ability, power, targets) {
   // Schilde zählen in der Auswertung als "Heilung" (Schutz)
   caster.healingDone += total;
   caster.threat += total * COMBAT_RULES.shieldThreat * caster.getThreatFactor();
-  const who = targets.length === 1 ? targets[0].name : 'die Gruppe';
-  battle.addLog(caster.name + ': ' + ability.name + ' schützt ' + who + ' (' + total + ').', 'shield', { hits: hits });
+  const who = targets.length === 1 ? targets[0].name : t('combat.theGroup');
+  battle.addLog(t('combat.protects', { caster: caster.name, ability: ability.name, who, amount: total }), 'shield', { hits: hits });
 }
 
 function applyTaunt(battle, caster, ability) {
@@ -349,19 +350,19 @@ function applyTaunt(battle, caster, ability) {
   }
   caster.threat = highest * COMBAT_RULES.tauntThreatFactor + 10;
   battle.forcedTarget = { combatant: caster, rounds: ability.duration };
-  battle.addLog(caster.name + ': ' + ability.name + '! Der Gegner wendet sich ihm zu.', 'info');
+  battle.addLog(t('combat.taunts', { caster: caster.name, ability: ability.name }), 'info');
 }
 
 // Betäubung: Gegner verlieren ihren nächsten Zug. Ein Boss-Zauber wird dadurch nur verzögert.
 function applyStun(battle, caster, ability, targets) {
   const labels = [];
-  const word = ability.label || 'Eingefroren';
+  const word = ability.label || t('combat.frozenLabel');
   for (const enemy of targets) {
     enemy.addEffect({ kind: 'stun', remaining: ability.duration });
     labels.push({ targetId: enemy.id, text: word });
   }
-  const who = targets.length === 1 ? targets[0].name : 'alle Gegner';
-  battle.addLog(caster.name + ': ' + ability.name + ' trifft ' + who + ' (' + word + ')!', 'mechanic', { labels: labels });
+  const who = targets.length === 1 ? targets[0].name : t('combat.allEnemies');
+  battle.addLog(t('combat.stuns', { caster: caster.name, ability: ability.name, who, word }), 'mechanic', { labels: labels });
 }
 
 // Unterbrechen: bricht einen unterbrechbaren Boss-Zauber ab

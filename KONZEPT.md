@@ -198,4 +198,6 @@ Alle Formeln und Zahlen dafür stehen in `src/data/` (`scaling.js`, `experience.
 
 ## Sprachen (entschieden 2026-11-09)
 - Deutsch und Englisch. Beim ersten Start gilt die Browser-Sprache (Deutsch bei „de…“, sonst Englisch), umschaltbar mit DE/EN oben in der Leiste und auf dem Gründungs-Bildschirm.
-- Übersetzt werden Oberfläche, Erklärtexte und Eigennamen von Bossen, Dungeons und Items; Heldennamen bleiben, wie sie sind.
+- Übersetzt werden Oberfläche, Erklärtexte, Kampfprotokoll, Ticker und Eigennamen von Bossen, Dungeons und Items; Heldennamen bleiben, wie sie sind.
+- Beim Sprachwechsel werden Item- und Gruppennamen neu gebaut. Schon geschriebene Ticker-Meldungen und Berichte bleiben in der alten Sprache; den Gildennamen wählt der Spieler selbst.
+- Test-Menü und Kampf-Labor (Entwickler-Werkzeuge) bleiben deutsch.

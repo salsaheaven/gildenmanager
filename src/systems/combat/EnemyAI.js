@@ -10,6 +10,7 @@
 //   - Gruppenschlag ('groupStrike'): trifft alle Helden einer einzigen Raid-Gruppe
 // ============================================================
 
+import { t } from '../../core/Language.js';
 import { COMBAT_RULES } from '../../data/combatRules.js';
 import { getHeroClass } from '../../data/heroClasses.js';
 import { MINIONS } from '../../data/enemies.js';
@@ -17,8 +18,8 @@ import { getDamageType } from '../../data/damageTypes.js';
 
 export function takeEnemyTurn(battle, enemy) {
   if (enemy.isStunned()) {
-    battle.addLog(enemy.name + ' ist eingefroren und kann nicht handeln.', 'info',
-      { labels: [{ targetId: enemy.id, text: 'Eingefroren' }] });
+    battle.addLog(t('combat.frozen', { name: enemy.name }), 'info',
+      { labels: [{ targetId: enemy.id, text: t('combat.frozenLabel') }] });
     return;
   }
   if (enemy.isMinion) {
@@ -40,7 +41,7 @@ function minionAttack(battle, minion) {
   }
   battle.logAction(minion, null, minionData.attackFx, [target], false);
   const source = { key: 'minion:' + minion.minionId, name: minionData.name, type: 'minion' };
-  enemyHits(battle, minion, target, 'greift an', 1.0, minionData.attackDamageType || 'physical', source, true);
+  enemyHits(battle, minion, target, t('combat.verbAttacks'), 1.0, minionData.attackDamageType || 'physical', source, true);
 }
 
 function takeBossTurn(battle, boss) {
@@ -60,8 +61,8 @@ function takeBossTurn(battle, boss) {
   // Raserei
   if (bossData.enrageRound !== null && battle.round >= bossData.enrageRound && !boss.enraged) {
     boss.enraged = true;
-    battle.addLog(boss.name + ' gerät in Raserei! Der Schaden verdoppelt sich.', 'warning',
-      { labels: [{ targetId: boss.id, text: 'RASEREI!' }] });
+    battle.addLog(t('combat.enrage', { name: boss.name }), 'warning',
+      { labels: [{ targetId: boss.id, text: t('combat.enrageLabel') }] });
   }
 
   // Raid-Boss: Phasenwechsel?
@@ -77,8 +78,8 @@ function takeBossTurn(battle, boss) {
         boss.casting = mechanic;
         // Beim Gruppenschlag steht dabei, welche Gruppe es treffen wird (die Szene hebt die Reihe hervor)
         const isStrike = mechanic.type === 'groupStrike';
-        const castName = isStrike ? mechanic.name + ' auf Gruppe ' + (boss.strikeGroupIndex + 1) : mechanic.name;
-        battle.addLog(boss.name + ' bereitet ' + castName + ' vor!', 'warning',
+        const castName = isStrike ? t('combat.onGroup', { name: mechanic.name, number: boss.strikeGroupIndex + 1 }) : mechanic.name;
+        battle.addLog(t('combat.prepares', { boss: boss.name, spell: castName }), 'warning',
           { cast: { state: 'start', name: castName, groupIndex: isStrike ? boss.strikeGroupIndex : null } });
       } else {
         resolveMechanic(battle, boss, mechanic);
@@ -89,8 +90,8 @@ function takeBossTurn(battle, boss) {
 
   const target = battle.getBossTarget();
   battle.logAction(boss, null, bossData.attackFx, [target], false);
-  const source = { key: 'attack:' + bossData.id, name: 'Angriffe von ' + boss.name, type: 'attack' };
-  enemyHits(battle, boss, target, 'schlägt zu', 1.0, bossData.attackDamageType || 'physical', source, true);
+  const source = { key: 'attack:' + bossData.id, name: t('combat.attacksOf', { name: boss.name }), type: 'attack' };
+  enemyHits(battle, boss, target, t('combat.verbStrikes'), 1.0, bossData.attackDamageType || 'physical', source, true);
   if (bossData.tankStacks) {
     addTankStack(battle, boss, target);
   }
@@ -118,7 +119,7 @@ function checkPhaseChange(battle, boss) {
   }
   boss.phaseIndex++;
   boss.phaseStartRound = battle.round;
-  battle.addLog(boss.name + ': ' + nextPhase.name + '! ' + nextPhase.text, 'warning',
+  battle.addLog(t('combat.phase', { boss: boss.name, phase: nextPhase.name, text: nextPhase.text }), 'warning',
     { labels: [{ targetId: boss.id, text: nextPhase.name }] });
 }
 
@@ -143,7 +144,7 @@ function addTankStack(battle, boss, target) {
   if (!otherTank) {
     if (!boss.warnedNoSwapTank) {
       boss.warnedNoSwapTank = true;
-      battle.addLog('Kein zweiter Tank für den Tankwechsel! ' + target.name + ' muss weiter ' + rules.name + ' aushalten.', 'warning',
+      battle.addLog(t('combat.noSecondTank', { target: target.name, stacks: rules.name }), 'warning',
         { labels: [{ targetId: target.id, text: rules.name + ' ×' + target.tankStacks }] });
     }
     return;
@@ -153,9 +154,8 @@ function addTankStack(battle, boss, target) {
   if (battle.forcedTarget && battle.forcedTarget.combatant === target) {
     battle.forcedTarget = null;
   }
-  battle.addLog('Tankwechsel: ' + otherTank.name + ' übernimmt ' + boss.name + ' von ' + target.name +
-    ' (' + rules.name + ' ×' + target.tankStacks + ').', 'info',
-    { labels: [{ targetId: otherTank.id, text: 'Tankwechsel!' }] });
+  battle.addLog(t('combat.tankSwap', { other: otherTank.name, boss: boss.name, target: target.name, stacks: rules.name, count: target.tankStacks }), 'info',
+    { labels: [{ targetId: otherTank.id, text: t('combat.tankSwapLabel') }] });
 }
 
 // Ein anderer lebender Tank, am liebsten der mit den wenigsten Stapeln (null, wenn es keinen gibt)
@@ -192,21 +192,21 @@ function resolveMechanic(battle, boss, mechanic) {
   if (missed) {
     battle.causes.addMissedInterrupt(mechanic.name);
   }
-  const missedLabels = missed ? [{ targetId: boss.id, text: 'Verpasst!' }] : [];
+  const missedLabels = missed ? [{ targetId: boss.id, text: t('combat.missedLabel') }] : [];
   switch (mechanic.type) {
     case 'tankBuster': {
       const target = battle.getBossTarget();
       battle.logAction(boss, mechanic.name, mechanic.fx, [target], true);
-      battle.addLog(boss.name + ': ' + mechanic.name + '!', 'mechanic', { cast: { state: 'end' }, labels: missedLabels });
-      enemyHits(battle, boss, target, 'trifft mit voller Wucht', mechanic.power, mechanic.damageType || 'physical', source);
+      battle.addLog(t('combat.mechanic', { boss: boss.name, name: mechanic.name }), 'mechanic', { cast: { state: 'end' }, labels: missedLabels });
+      enemyHits(battle, boss, target, t('combat.verbFullForce'), mechanic.power, mechanic.damageType || 'physical', source);
       break;
     }
     case 'groupCast':
       battle.logAction(boss, mechanic.name, mechanic.fx, battle.getLivingHeroes(), true);
-      battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die ganze Gruppe!', 'mechanic',
+      battle.addLog(t('combat.hitsGroup', { boss: boss.name, name: mechanic.name }), 'mechanic',
         { cast: { state: 'end' }, labels: missedLabels });
       for (const hero of battle.getLivingHeroes()) {
-        enemyHits(battle, boss, hero, 'trifft', mechanic.power, mechanic.damageType || 'physical', source);
+        enemyHits(battle, boss, hero, t('combat.verbHits'), mechanic.power, mechanic.damageType || 'physical', source);
       }
       break;
     case 'groupStrike': {
@@ -217,10 +217,10 @@ function resolveMechanic(battle, boss, mechanic) {
       }
       const group = battle.getLivingHeroes().filter((hero) => hero.groupIndex === boss.strikeGroupIndex);
       battle.logAction(boss, mechanic.name, mechanic.fx, group, true);
-      battle.addLog(boss.name + ': ' + mechanic.name + ' trifft Gruppe ' + (boss.strikeGroupIndex + 1) + '!', 'mechanic',
+      battle.addLog(t('combat.hitsGroupNumber', { boss: boss.name, name: mechanic.name, number: boss.strikeGroupIndex + 1 }), 'mechanic',
         { cast: { state: 'end' }, labels: missedLabels });
       for (const hero of group) {
-        enemyHits(battle, boss, hero, 'trifft', mechanic.power, mechanic.damageType || 'physical', source);
+        enemyHits(battle, boss, hero, t('combat.verbHits'), mechanic.power, mechanic.damageType || 'physical', source);
       }
       break;
     }
@@ -232,7 +232,7 @@ function resolveMechanic(battle, boss, mechanic) {
       });
       battle.causes.addCounterMechanic(mechanic.name, mechanic.type);
       battle.logAction(boss, mechanic.name, mechanic.fx, [boss], true);
-      battle.addLog(boss.name + ' hüllt sich in ' + mechanic.name + '! Er nimmt kaum noch Schaden.', 'mechanic',
+      battle.addLog(t('combat.shell', { boss: boss.name, name: mechanic.name }), 'mechanic',
         { labels: [{ targetId: boss.id, text: mechanic.name + '!' }] });
       break;
     }
@@ -245,17 +245,17 @@ function resolveMechanic(battle, boss, mechanic) {
       });
       battle.causes.addCounterMechanic(mechanic.name, mechanic.type);
       battle.logAction(boss, mechanic.name, mechanic.fx, [boss], true);
-      battle.addLog(boss.name + ' gerät in ' + mechanic.name + '! Er schlägt viel härter zu.', 'mechanic',
+      battle.addLog(t('combat.frenzy', { boss: boss.name, name: mechanic.name }), 'mechanic',
         { labels: [{ targetId: boss.id, text: mechanic.name + '!' }] });
       break;
     }
     case 'frontWave': {
       const frontRow = battle.getLivingHeroes().filter((hero) => hero.row === 'front');
       battle.logAction(boss, mechanic.name, mechanic.fx, frontRow, true);
-      battle.addLog(boss.name + ': ' + mechanic.name + ' trifft die vordere Reihe!', 'mechanic',
+      battle.addLog(t('combat.hitsFront', { boss: boss.name, name: mechanic.name }), 'mechanic',
         { cast: { state: 'end' }, labels: missedLabels });
       for (const hero of frontRow) {
-        enemyHits(battle, boss, hero, 'trifft', mechanic.power, mechanic.damageType || 'physical', source);
+        enemyHits(battle, boss, hero, t('combat.verbHits'), mechanic.power, mechanic.damageType || 'physical', source);
       }
       break;
     }
@@ -265,7 +265,7 @@ function resolveMechanic(battle, boss, mechanic) {
         spawned.push(battle.spawnMinion(mechanic.minion).describe());
       }
       battle.logAction(boss, mechanic.name, mechanic.fx, [], true);
-      battle.addLog(boss.name + ': ' + mechanic.name + '! ' + mechanic.count + ' Diener erscheinen.', 'mechanic',
+      battle.addLog(t('combat.summons', { boss: boss.name, name: mechanic.name, count: mechanic.count }), 'mechanic',
         { spawn: spawned });
       break;
     }
@@ -282,8 +282,8 @@ function resolveMechanic(battle, boss, mechanic) {
         cause: source, // für "Woran es lag"
       });
       battle.logAction(boss, mechanic.name, mechanic.fx, [target], true);
-      battle.addLog(boss.name + ' belegt ' + target.name + ' mit ' + mechanic.name + '.', 'mechanic',
-        { labels: [{ targetId: target.id, text: 'Verflucht' }] });
+      battle.addLog(t('combat.curses', { boss: boss.name, target: target.name, name: mechanic.name }), 'mechanic',
+        { labels: [{ targetId: target.id, text: t('combat.cursedLabel') }] });
       break;
     }
     default:
@@ -299,8 +299,8 @@ function enemyHits(battle, enemy, target, verb, power, damageType, source, dodge
     return;
   }
   if (dodgeable && target.getDodgeChance() > 0 && battle.random.next() < target.getDodgeChance()) {
-    battle.addLog(target.name + ' weicht dem Angriff von ' + enemy.name + ' aus.', 'info',
-      { labels: [{ targetId: target.id, text: 'Ausgewichen' }] });
+    battle.addLog(t('combat.dodges', { target: target.name, enemy: enemy.name }), 'info',
+      { labels: [{ targetId: target.id, text: t('combat.dodgedLabel') }] });
     return;
   }
   const variation = battle.random.between(1 - COMBAT_RULES.enemyVariation, 1 + COMBAT_RULES.enemyVariation);
@@ -314,33 +314,33 @@ function enemyHits(battle, enemy, target, verb, power, damageType, source, dodge
   enemy.damageDone += result.damage;
   // In Raserei zählt der Schaden zur Raserei: Der Kampf hat zu lange gedauert
   if (enemy.enraged) {
-    battle.causes.addDamage({ key: 'enrage:' + enemy.name, name: 'Raserei von ' + enemy.name, type: 'enrage' }, result.damage);
+    battle.causes.addDamage({ key: 'enrage:' + enemy.name, name: t('combat.enrageOf', { name: enemy.name }), type: 'enrage' }, result.damage);
   } else if (frenzy) {
     battle.causes.addDamage(frenzy.cause, result.damage);
   } else {
     battle.causes.addDamage(source, result.damage);
   }
 
-  const critText = crit ? ' kritisch' : '';
-  let text = enemy.name + ' ' + verb + critText + ': ' + target.name + ' verliert ' + result.damage + ' Leben';
+  const critText = crit ? t('combat.crit') : '';
+  let text = t('combat.loses', { enemy: enemy.name, verb, crit: critText, target: target.name, amount: result.damage });
   if (damageType !== 'physical') {
-    text += ' durch ' + getDamageType(damageType).name; // z.B. "… verliert 37 Leben durch Säure"
+    text += t('combat.byType', { type: getDamageType(damageType).name }); // z.B. "… verliert 37 Leben durch Säure"
   }
   if (result.absorbed > 0) {
-    text += ' (' + result.absorbed + ' vom Schild abgefangen)';
+    text += t('combat.absorbed', { amount: result.absorbed });
   }
   battle.addLog(text + '.', crit ? 'crit' : 'damage',
     { hits: [target.describeHit(result.damage, 'damage', crit, result.absorbed, damageType)] });
   logSavedByTalent(battle, target, result);
   if (!target.alive) {
-    battle.addLog(target.name + ' fällt!', 'death', { heroFallen: true });
+    battle.addLog(t('combat.falls', { name: target.name }), 'death', { heroFallen: true });
   }
 }
 
 // Talent "Letztes Gefecht" u.ä. hat einen Helden gerettet: in Bericht und Szene zeigen
 export function logSavedByTalent(battle, target, result) {
   if (result.savedByTalent) {
-    battle.addLog(target.name + ' überlebt mit letzter Kraft!', 'warning',
-      { labels: [{ targetId: target.id, text: 'Letzte Kraft!' }] });
+    battle.addLog(t('combat.lastStrength', { name: target.name }), 'warning',
+      { labels: [{ targetId: target.id, text: t('combat.lastStrengthLabel') }] });
   }
 }

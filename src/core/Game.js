@@ -22,7 +22,7 @@ import { getSalvageYield, upgradeItem } from '../systems/CraftingSystem.js';
 import { forgeItem, reforgeItem, reforgeSetItem } from '../systems/ForgeSystem.js';
 import { getSlotsWithNewGear, markSlotSeen, markItemSeen } from '../systems/NewGear.js';
 import { countPossibleGroups, groupHeroesByPosition, checkGroup } from '../systems/GroupCounter.js';
-import { getPositionId } from '../data/groupRules.js';
+import { getPositionId, GROUP_NAMES } from '../data/groupRules.js';
 import { getDailyTodos, getEndDayWarnings } from '../systems/DailyTodo.js';
 import { suggestAutoGroup, getCounterStatus } from '../systems/AutoGroup.js';
 import { getFreeGroupName, getMissingMembers, findSubstitute, getAvailableSupplies } from '../systems/StandingGroups.js';
@@ -30,6 +30,7 @@ import { StandingGroup } from '../entities/StandingGroup.js';
 import { updateUnlocks, getUnannouncedUnlocks } from '../systems/Unlocks.js';
 import { UNLOCKS } from '../data/unlocks.js';
 import { getSet } from '../data/sets.js';
+import { getItemName } from '../systems/ItemNames.js';
 import { getKnownCount, getKnowledgeTotal, getKnowledgeLevel, isEncounterKnown, getKnownDamageTypes, getHiddenMechanicNames } from '../systems/DungeonKnowledge.js';
 import { brew } from '../systems/AlchemySystem.js';
 import { START_TEAM_RULES, START_TEAM_CLASSES } from '../data/startTeam.js';
@@ -1065,6 +1066,7 @@ export class Game {
     this.guild.standingGroups = this.guild.standingGroups.filter((other) => other.heroIds.length > 0);
     const group = new StandingGroup(this.guild.nextStandingGroupId, getFreeGroupName(this.guild), dungeonId,
       heroIds.slice(), retreatRuleId, supplyIds.slice());
+    group.nameIndex = GROUP_NAMES.indexOf(group.name);
     this.guild.nextStandingGroupId++;
     this.guild.standingGroups.push(group);
     if (!closedToday) {
@@ -1504,6 +1506,16 @@ export class Game {
     // Alte Spielstände haben noch keine Bewerber
     if (game.guild.candidates.length === 0) {
       game.recruitmentSystem.refreshCandidates(game.guild);
+    }
+    // Item-Namen in der aktuellen Sprache neu bauen (falls seit dem Speichern die Sprache gewechselt hat)
+    for (const item of game.guild.getAllItems()) {
+      item.name = getItemName(item);
+    }
+    // Ebenso die Namen der stehenden Gruppen ("Gruppe A" ↔ "Group A")
+    for (const group of game.guild.standingGroups) {
+      if (group.nameIndex >= 0) {
+        group.name = GROUP_NAMES[group.nameIndex];
+      }
     }
     return game;
   }

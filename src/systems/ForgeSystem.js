@@ -110,6 +110,7 @@ export function reforgeItem(guild, lootSystem, item, targetTemplateId) {
   item.templateId = fresh.templateId;
   item.stats = fresh.stats;
   item.name = fresh.name;
+  item.suffixIndex = fresh.suffixIndex;
   return 'ok';
 }
 

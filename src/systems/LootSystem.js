@@ -10,6 +10,7 @@
 // ============================================================
 
 import { Item } from '../entities/Item.js';
+import { buildItemName } from './ItemNames.js';
 import { ITEM_TEMPLATES, ITEM_SUFFIXES, getItemTemplate } from '../data/items.js';
 import { RESISTANCE_TYPES } from '../data/damageTypes.js';
 import { getRarity, getRarityRank } from '../data/rarities.js';
@@ -130,9 +131,15 @@ export class LootSystem {
       stats[statName] = Math.max(1, Math.round(baseValue * rarity.statMultiplier * levelFactor * variation));
     }
 
-    const name = fixedName || this.createItemName(template, rarityId);
+    // Namenszusatz ("des Bären") als Nummer merken, damit der Name in jeder Sprache neu gebaut werden kann
+    const suffixIndex = fixedName || rarityId === 'common' || rarityId === 'poor' || rarityId === 'legendary'
+      ? null
+      : Math.floor(this.random.next() * ITEM_SUFFIXES.length);
+    const name = fixedName || buildItemName(template, rarityId, suffixIndex);
     const resistances = this.rollResistances(rarity, fixedResistance);
-    return new Item(itemId, template.id, rarityId, name, stats, itemLevel, resistances);
+    const item = new Item(itemId, template.id, rarityId, name, stats, itemLevel, resistances);
+    item.suffixIndex = suffixIndex;
+    return item;
   }
 
   // Resistenz eines neuen Items: fest (Boss-Item) oder mit etwas Glück eine zufällige.
@@ -187,18 +194,5 @@ export class LootSystem {
       return template;
     }
     return getItemTemplate(this.random.pick([...usable]));
-  }
-
-  createItemName(template, rarityId) {
-    if (rarityId === 'legendary') {
-      return template.legendaryName;
-    }
-    if (rarityId === 'poor') {
-      return template.poorName;
-    }
-    if (rarityId === 'common') {
-      return template.name;
-    }
-    return template.name + ' ' + this.random.pick(ITEM_SUFFIXES);
   }
 }

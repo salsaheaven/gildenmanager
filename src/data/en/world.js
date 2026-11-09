@@ -139,21 +139,21 @@ export const UNKNOWN_CAUSE_EN = {
 };
 
 export const SETS_EN = {
-  setWarrior: { name: 'Warlord\'s Defense', pieceNames: { head: 'Warlord\'s Helm', feet: 'Warlord\'s Boots' } },
-  setPaladin: { name: 'Armor of the Light Oath', pieceNames: { head: 'Helm of the Light Oath', feet: 'Steps of the Light Oath' } },
-  setSamurai: { name: 'Bladesmaster\'s Armor', pieceNames: { head: 'Bladesmaster\'s Kabuto', feet: 'Bladesmaster\'s Suneate' } },
-  setShaman: { name: 'Stormcaller\'s Garb', pieceNames: { head: 'Stormcaller\'s Helm', feet: 'Stormcaller\'s Boots' } },
-  setRogue: { name: 'Shadowrunner\'s Shroud', pieceNames: { head: 'Shadowrunner\'s Mask', feet: 'Shadowrunner\'s Soles' } },
-  setMonk: { name: 'Garments of the Silent Mountain', pieceNames: { head: 'Headband of the Silent Mountain', feet: 'Sandals of the Silent Mountain' } },
-  setBarbarian: { name: 'Pelts of the Blood Frenzy', pieceNames: { head: 'Skull of the Blood Frenzy', feet: 'Stompers of the Blood Frenzy' } },
-  setHunter: { name: 'Tracker\'s Gear', pieceNames: { head: 'Tracker\'s Hood', feet: 'Tracker\'s Boots' } },
-  setDruid: { name: 'Grovekeeper\'s Garb', pieceNames: { head: 'Grovekeeper\'s Antlers', feet: 'Grovekeeper\'s Roots' } },
-  setPriest: { name: 'Vestments of the Dawn', pieceNames: { head: 'Coif of the Dawn', feet: 'Shoes of the Dawn' } },
-  setRuneweaver: { name: 'Runemaster\'s Garb', pieceNames: { head: 'Runemaster\'s Hood', feet: 'Runemaster\'s Shoes' } },
-  setMage: { name: 'Robes of the Starfire', pieceNames: { head: 'Hood of the Starfire', feet: 'Shoes of the Starfire' } },
-  setWarlock: { name: 'Vestments of the Soul Harvest', pieceNames: { head: 'Hood of the Soul Harvest', feet: 'Shoes of the Soul Harvest' } },
-  setBard: { name: 'Mastersinger\'s Attire', pieceNames: { head: 'Mastersinger\'s Hat', feet: 'Mastersinger\'s Shoes' } },
-  setChronomancer: { name: 'Robes of the Timekeeper', pieceNames: { head: 'Hood of the Timekeeper', feet: 'Shoes of the Timekeeper' } },
+  setWarrior: { name: 'Warlord\'s Defense', pieceNames: { chest: 'Warlord\'s Breastplate', head: 'Warlord\'s Helm', feet: 'Warlord\'s Boots' } },
+  setPaladin: { name: 'Armor of the Light Oath', pieceNames: { chest: 'Breastplate of the Light Oath', head: 'Helm of the Light Oath', feet: 'Steps of the Light Oath' } },
+  setSamurai: { name: 'Bladesmaster\'s Armor', pieceNames: { chest: 'Bladesmaster\'s Do', head: 'Bladesmaster\'s Kabuto', feet: 'Bladesmaster\'s Suneate' } },
+  setShaman: { name: 'Stormcaller\'s Garb', pieceNames: { chest: 'Stormcaller\'s Breastplate', head: 'Stormcaller\'s Helm', feet: 'Stormcaller\'s Boots' } },
+  setRogue: { name: 'Shadowrunner\'s Shroud', pieceNames: { chest: 'Shadowrunner\'s Jerkin', head: 'Shadowrunner\'s Mask', feet: 'Shadowrunner\'s Soles' } },
+  setMonk: { name: 'Garments of the Silent Mountain', pieceNames: { chest: 'Tunic of the Silent Mountain', head: 'Headband of the Silent Mountain', feet: 'Sandals of the Silent Mountain' } },
+  setBarbarian: { name: 'Pelts of the Blood Frenzy', pieceNames: { chest: 'Pelt of the Blood Frenzy', head: 'Skull of the Blood Frenzy', feet: 'Stompers of the Blood Frenzy' } },
+  setHunter: { name: 'Tracker\'s Gear', pieceNames: { chest: 'Tracker\'s Vest', head: 'Tracker\'s Hood', feet: 'Tracker\'s Boots' } },
+  setDruid: { name: 'Grovekeeper\'s Garb', pieceNames: { chest: 'Grovekeeper\'s Bark', head: 'Grovekeeper\'s Antlers', feet: 'Grovekeeper\'s Roots' } },
+  setPriest: { name: 'Vestments of the Dawn', pieceNames: { chest: 'Robe of the Dawn', head: 'Coif of the Dawn', feet: 'Shoes of the Dawn' } },
+  setRuneweaver: { name: 'Runemaster\'s Garb', pieceNames: { chest: 'Runemaster\'s Robe', head: 'Runemaster\'s Hood', feet: 'Runemaster\'s Shoes' } },
+  setMage: { name: 'Robes of the Starfire', pieceNames: { chest: 'Robe of the Starfire', head: 'Hood of the Starfire', feet: 'Shoes of the Starfire' } },
+  setWarlock: { name: 'Vestments of the Soul Harvest', pieceNames: { chest: 'Robe of the Soul Harvest', head: 'Hood of the Soul Harvest', feet: 'Shoes of the Soul Harvest' } },
+  setBard: { name: 'Mastersinger\'s Attire', pieceNames: { chest: 'Mastersinger\'s Jerkin', head: 'Mastersinger\'s Hat', feet: 'Mastersinger\'s Shoes' } },
+  setChronomancer: { name: 'Robes of the Timekeeper', pieceNames: { chest: 'Robe of the Timekeeper', head: 'Hood of the Timekeeper', feet: 'Shoes of the Timekeeper' } },
 };
 
 export const DUNGEONS_EN = {

@@ -10,6 +10,7 @@
 // Zahlen und Gilden stehen in data/rivalGuilds.js.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { RIVAL_RULES } from '../data/rivalGuilds.js';
 import { DUNGEONS, getDungeon } from '../data/dungeons.js';
 import { getBoss } from '../data/enemies.js';
@@ -23,7 +24,7 @@ function raidKey(bossId) {
 
 // Titel für ein eigenes Server-First an einem Raid-Boss
 export function getRaidServerFirstTitle(bossId) {
-  return 'Erste: ' + getBoss(bossId).name;
+  return t('logic2.firstRaidTitle', { name: getBoss(bossId).name });
 }
 
 // Deine Gilde hat einen Raid-Boss zum ersten Mal besiegt: Meldung, evtl. Server-First mit Titel.
@@ -49,8 +50,8 @@ export function recordPlayerRaidKill(guild, bossId, day) {
 
 function describeRaidKill(guildName, bossId, serverFirst) {
   const raid = RAIDS.find((entry) => entry.encounters.some((encounter) => encounter.bossId === bossId));
-  const text = guildName + ': ' + getBoss(bossId).name + ' besiegt (Raid: ' + raid.name + ')';
-  return serverFirst ? 'Server-First! ' + text.replace(' besiegt', ' als erste Gilde besiegt') : text;
+  const params = { guild: guildName, boss: getBoss(bossId).name, raid: raid.name };
+  return serverFirst ? t('logic.raidKillFirst', params) : t('logic.raidKill', params);
 }
 
 // Eine KI-Gilde an einem Raid-Tag: ein Versuch am nächsten Raid-Boss (Meldung bei Sieg und Niederlage)
@@ -72,13 +73,13 @@ function rivalRaidAttempt(guild, rival, day, random) {
       kind: serverFirst ? 'serverFirst' : 'clear', isPlayer: false };
   }
   rival.raidAttempts[next.bossId] = attempts + 1;
-  return { day: day, text: data.name + ' scheitert an ' + getBoss(next.bossId).name + ' (' + (attempts + 1) + '. Versuch)',
+  return { day: day, text: t('logic.raidFail', { guild: data.name, boss: getBoss(next.bossId).name, attempt: attempts + 1 }),
     color: data.color, kind: 'fail', isPlayer: false };
 }
 
 // Titel für ein eigenes Server-First
 export function getServerFirstTitle(dungeonId) {
-  return 'Erste in: ' + getDungeon(dungeonId).name;
+  return t('logic.firstTitle', { name: getDungeon(dungeonId).name });
 }
 
 // Der letzte Boss eines Dungeons (für die Meldungen, z.B. "besiegen Grimmzahn")
@@ -91,9 +92,9 @@ function getFinalBossName(dungeon) {
 // (Gildenname vorne mit Doppelpunkt, damit es für "Die Eisenfäuste" und "Aschenkrone" gleich gut passt)
 function describeClear(guildName, dungeon, serverFirst) {
   if (serverFirst) {
-    return 'Server-First! ' + guildName + ': ' + getFinalBossName(dungeon) + ' als erste Gilde besiegt (' + dungeon.name + ')';
+    return t('logic.clearFirst', { guild: guildName, boss: getFinalBossName(dungeon), dungeon: dungeon.name });
   }
-  return guildName + ': ' + getFinalBossName(dungeon) + ' besiegt (' + dungeon.name + ')';
+  return t('logic.clear', { guild: guildName, boss: getFinalBossName(dungeon), dungeon: dungeon.name });
 }
 
 // Schreibt eine Meldung in den Ticker (neueste zuerst)
@@ -159,7 +160,7 @@ export function advanceRivals(guild, day, random) {
     } else if (random.next() < RIVAL_RULES.failNewsChance) {
       newNews.push({
         day: day,
-        text: data.name + ': an ' + getFinalBossName(dungeon) + ' gescheitert.',
+        text: t('logic.fail', { guild: data.name, boss: getFinalBossName(dungeon) }),
         color: data.color,
         kind: 'fail',
         isPlayer: false,

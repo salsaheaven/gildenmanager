@@ -13,6 +13,9 @@ export class StandingGroup {
     this.heroIds = heroIds;
     this.retreatRuleId = retreatRuleId;
     this.supplies = supplies;
+    // Nummer des Namens in GROUP_NAMES ("Gruppe A" = 0), damit der Name nach einem Sprachwechsel
+    // neu gesetzt werden kann (siehe Game.fromSaveData); -1 = eigener Name
+    this.nameIndex = -1;
   }
 
   toSaveData() {
@@ -23,10 +26,13 @@ export class StandingGroup {
       heroIds: this.heroIds,
       retreatRuleId: this.retreatRuleId,
       supplies: this.supplies,
+      nameIndex: this.nameIndex,
     };
   }
 
   static fromSaveData(data) {
-    return new StandingGroup(data.id, data.name, data.dungeonId, data.heroIds, data.retreatRuleId, data.supplies);
+    const group = new StandingGroup(data.id, data.name, data.dungeonId, data.heroIds, data.retreatRuleId, data.supplies);
+    group.nameIndex = data.nameIndex;
+    return group;
   }
 }
