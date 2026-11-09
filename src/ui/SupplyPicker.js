@@ -5,12 +5,14 @@
 // ============================================================
 
 import { CONSUMABLES, SUPPLY_SLOTS } from '../data/consumables.js';
+import { createInfoIcon } from './InfoTip.js';
 
 // guild    = die Gilde (Vorratskammer)
 // chosen   = aktuell gewählte Waren (Liste von ids)
 // reserved = Waren, die diese Gruppe schon aus der Kammer genommen hat (geplante Gruppe), sonst []
 // onChange = Funktion(neueListe), wird bei jeder Änderung aufgerufen
-export function createSupplyPicker(guild, chosen, reserved, onChange) {
+// compact  = true: Hinweise ("Vorratskammer leer …") als Info-Blase ⓘ statt als Satz (Dungeon-Karte)
+export function createSupplyPicker(guild, chosen, reserved, onChange, compact = false) {
   const element = document.createElement('div');
   element.className = 'supply-picker';
 
@@ -67,8 +69,13 @@ export function createSupplyPicker(guild, chosen, reserved, onChange) {
   }
   if (chosen.length === 0) {
     const hasAny = runSupplies.some((consumable) => available(consumable.id) > 0);
-    effects.textContent = hasAny ? 'Keine Vorräte gewählt.' : 'Die Vorratskammer ist leer. Tränke gibt es beim Händler in der Schatzkammer.';
-    effects.classList.add('hint');
+    const text = hasAny ? 'Keine Vorräte gewählt.' : 'Die Vorratskammer ist leer. Tränke gibt es beim Händler in der Schatzkammer.';
+    if (compact) {
+      slots.appendChild(createInfoIcon(text + ' Jede Gruppe nimmt bis zu ' + SUPPLY_SLOTS + ' Vorräte mit.'));
+    } else {
+      effects.textContent = text;
+      effects.classList.add('hint');
+    }
   }
   element.appendChild(effects);
   return element;

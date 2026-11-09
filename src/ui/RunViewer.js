@@ -15,8 +15,9 @@ export class RunViewer {
     this.showEmpty();
   }
 
+  // Ohne gewählten Bericht bleibt der Bereich leer (der Hinweis steht als Info-Blase an "Berichte")
   showEmpty() {
-    this.container.innerHTML = '<p class="hint">Tippe einen Bericht an, um den Kampfverlauf zu sehen.</p>';
+    this.container.innerHTML = '';
   }
 
   // Bericht eines beendeten Runs: alle Begegnungen mit Schadensmesser und Kampfbericht

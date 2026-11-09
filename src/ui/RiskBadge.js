@@ -45,7 +45,11 @@ export function getRiskSummary(game, heroes, dungeonId, retreatRuleId, supplies 
 // heroes = Hero-Objekte der Gruppe, retreatRuleId = gewählte Rückzugsregel, supplies = mitgenommene Verbrauchsgüter.
 // Wissen, Vorbereitung durch Erkunden und Kartenraum holt sich die Anzeige selbst aus game.
 export function createRiskBadge(game, heroes, dungeonId, retreatRuleId, supplies = []) {
-  const summary = getRiskSummary(game, heroes, dungeonId, retreatRuleId, supplies);
+  return createRiskBadgeFromSummary(game, getRiskSummary(game, heroes, dungeonId, retreatRuleId, supplies));
+}
+
+// Dasselbe Kästchen aus einer schon berechneten Einschätzung (spart die zweite Simulation)
+export function createRiskBadgeFromSummary(game, summary) {
   const badge = document.createElement('div');
   badge.className = 'risk-badge';
   badge.innerHTML = '<span class="risk-label">Einschätzung:</span> <b class="risk-name"></b> <span class="risk-fall"></span>';

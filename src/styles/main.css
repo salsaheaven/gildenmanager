@@ -3365,6 +3365,63 @@ h3 {
   color: #7fd4ff;
 }
 
+/* ---------- Symbole mit Zahl und Info-Blasen (UiIcons.js, InfoTip.js) ---------- */
+
+.icon-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  font-size: 16px;
+  line-height: 1.2;
+  border: 2px solid var(--border);
+  background: #120d1c;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.icon-chip.ok {
+  border-color: #2ecc40;
+  color: #2ecc40;
+}
+
+.icon-chip.missing {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+.icon-chip.warn {
+  border-color: #ff9f3a;
+  color: #ff9f3a;
+}
+
+.has-info {
+  cursor: help;
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+/* Die eine Info-Blase (Antippen auf dem Handy, Maus drüber am PC) */
+.info-bubble {
+  position: fixed;
+  z-index: 80;
+  max-width: 280px;
+  padding: 6px 10px;
+  font-size: 17px;
+  line-height: 1.25;
+  color: var(--text);
+  background: #0c0914;
+  border: 2px solid var(--gold);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
 /* ---------- Dungeons ---------- */
 
 .dungeon-screen {
@@ -4823,3 +4880,203 @@ body.locked-collection .collection-button {
 @keyframes level-up-spin {
   to { rotate: 360deg; }
 }
+
+/* ---------- Dungeon-Planung, schlanke Fassung (DungeonScreen.js) ---------- */
+
+.group-count-line {
+  margin-bottom: 6px;
+}
+
+.dungeon-chips,
+.dungeon-today {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.dungeon-locked-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  opacity: 0.6;
+  border: 2px solid var(--border);
+}
+
+.dungeon-locked-row .hint {
+  font-size: 15px;
+}
+
+.locked-more-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.plan-head {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 2px;
+}
+
+.slot-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.group-slot {
+  --rarity: var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 64px;
+  padding: 4px 2px;
+  border-bottom: 4px solid var(--rarity);
+}
+
+.group-slot.empty {
+  border-style: dashed;
+  color: var(--text-dim);
+  background: transparent;
+}
+
+.group-slot.needed {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+.group-slot-name {
+  font-size: 13px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slot-buttons,
+.plan-stats,
+.plan-row,
+.plan-live-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.slot-buttons button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  flex: 1;
+  width: auto;
+  margin: 0;
+}
+
+/* Name in der Dungeon-Zeile, daneben das ⓘ mit der Beschreibung */
+.dungeon-card .dungeon-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+/* In der festen Leiste: nur das Wort ("Riskant"), der Zusatz steht in der Info-Blase */
+.plan-live .risk-label,
+.plan-live .risk-fall,
+.plan-live .risk-forecast {
+  display: none;
+}
+
+.auto-group-risk {
+  font-size: 15px;
+}
+
+.retreat-button {
+  min-width: 44px;
+}
+
+.plan-row .supply-picker {
+  flex: 1;
+  min-width: 0;
+}
+
+.plan-row .supply-slots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.plan-row .supply-slots select {
+  flex: 1;
+  min-width: 0;
+}
+
+.plan-live-row {
+  margin-top: 0;
+  gap: 4px;
+}
+
+.plan-live .icon-chip {
+  font-size: 15px;
+  padding: 0 4px;
+}
+
+/* Auswahl der Helden für einen Platz (am PC unter den Plätzen, auf dem Handy als Fenster von unten) */
+.hero-pick-sheet {
+  margin-top: 8px;
+  padding: 8px;
+  border: 2px solid var(--gold);
+  background: var(--panel);
+}
+
+.hero-pick-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: var(--gold);
+}
+
+.hero-pick-close {
+  min-width: 44px;
+  min-height: 40px;
+}
+
+.hero-pick-remove,
+.hero-pick-all {
+  margin: 4px 0;
+}
+
+.run-section > summary {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 11px;
+  color: var(--gold);
+}
+
+@media (max-width: 700px) {
+  .hero-pick-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 70;
+    max-height: 70vh;
+    overflow-y: auto;
+    margin: 0;
+    padding: 10px 12px 20px;
+    box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.7);
+  }
+}
+

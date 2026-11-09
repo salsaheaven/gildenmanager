@@ -25,10 +25,13 @@ export function renderRoleOverview(container, game, selectedHeroId, onSelect) {
 }
 
 // Zeilen pro Position mit Kacheln, angehängt an container.
-// options = { isSelected(hero), isDisabled(hero), onSelect(heroId) }
+// options = { isSelected(hero), isDisabled(hero), onSelect(heroId), onlyPosition (freiwillig: nur diese Position zeigen) }
 export function renderRoleTiles(container, game, options) {
   const byPosition = game.getHeroesByPosition();
   for (const position of POSITIONS) {
+    if (options.onlyPosition && options.onlyPosition !== position.id) {
+      continue;
+    }
     const heroes = byPosition[position.id];
     const row = document.createElement('div');
     row.className = 'role-row';

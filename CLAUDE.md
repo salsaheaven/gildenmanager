@@ -93,7 +93,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                Bildschirme: DayPlanScreen (Tagesplan, Startseite, oben TodoBox = „Was gibt es heute zu tun?“), LootBoxScreen (Kisten öffnen, danach Zerlegen direkt im Ergebnis), ShopScreen (Händler + Vorratskammer),
                HeroScreen (+ RoleOverview = Kacheln nach Position mit Gruppen-Zähler; HeroDetailPanel = Plätze direkt unter dem Porträt, Rest aufklappbar, Blättern ‹ ›; EquipPanel = Ausrüstungsliste für den angetippten Platz,
                auf dem Handy als Fenster von unten, nach Item-Level sortiert, Vergleich pro Wert; „Bestes anlegen“ am Helden), TavernScreen, CombatLabScreen (Kampf-Labor, auch „Test-Raid“ mit 4 Gruppen),
-               DungeonScreen („Ein Dungeon = eine Karte“: Planungs-Karte klappt unter dem Dungeon auf, feste Leiste mit Einschätzung live und Konter ✓/✗;
+               DungeonScreen („Ein Dungeon = eine Karte“, wenig Text: Dungeon-Zeilen mit Symbolen, Planungs-Karte mit 5 Plätzen + Auswahl von unten, feste Leiste mit Symbolen für Gruppe, Konter ✓/✗ und Einschätzung live;
                + DungeonGuide = Dungeonführer: Niveau, Gegner und Bosse im Detail, Beute mit Sammelbuch-Sternen;
                Gruppenwahl mit Kacheln nach Position, Statuszeile, „Auto-Gruppe“ und „Gruppe ausrüsten“; + RunViewer = Bericht eines beendeten Runs zeigen),
                GuildHallScreen (Gildenhalle: Karte pro Gebäude, Bauen, Baustelle mit Balken),
@@ -125,6 +125,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                OrdersPanel = Auswahllisten für Anweisungen mit Vorteil (grün) und Nachteil (rot) (Labor, Dungeon, Tagesplan, Heldenbildschirm).
                Gesperrtes (Tutorial) blendet applyUnlocks in main.js aus: Reiter über NavBar.setHidden, sonst CSS-Klassen locked-… am <body>.
                Leisten: TopBar, NavBar (Abschnitte + Unterreiter, auf dem Handy unten). Helfer: PixelArt, Sound, Toast, format, TraitChip.
+               InfoTip = Info-Blase (Handy: Antippen, PC: Maus drüber) statt Erklärsätzen; UiIcons = kleines Pixel-Symbol mit Zahl (Bilder icon… in sprites.js), Symbole für Positionen und Konter.
                DebugPanel = Test-Menü (Taste F2), öffnet auch das Kampf-Labor
 tests/         Vitest-Tests (prüfen auch, ob die Daten gültig sind)
 tools/         Mess-Werkzeuge für Balancing (Node-Skripte mit der echten Spiellogik, siehe tools/README.md)

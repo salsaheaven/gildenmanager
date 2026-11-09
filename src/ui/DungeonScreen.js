@@ -1,11 +1,17 @@
 // ============================================================
 // DUNGEONSCREEN – Dungeons auswählen, Gruppen einplanen, Berichte ansehen
-//   "Ein Dungeon = eine Karte": Tippt man einen Dungeon an, klappt direkt darunter seine Planungs-Karte auf:
-//     - Abschnitte zum Auf- und Zuklappen: Gruppe, Rückzug & Vorräte, Anweisungen, Dungeonführer
-//     - unten eine feste Leiste (bleibt beim Scrollen sichtbar): Gruppe ✓/✗, Einschätzung, Konter ✓/✗
-//       und "Einplanen". Die Einschätzung rechnet bei jeder Änderung sofort neu (Risiko live).
-//     Noch einmal antippen klappt die Karte wieder zu.
-//   Darunter: die für heute geplanten Runs (absagen möglich) und die Berichte
+// Wenig Text, viele Symbole: Erklärungen stecken in Info-Blasen (Antippen auf dem Handy, Maus drüber am PC,
+// siehe InfoTip.js). Die Symbole stehen in data/sprites.js (iconSword …), siehe UiIcons.js.
+//   Dungeon-Liste: pro Dungeon Name + Symbole (Stufe, empfohlene Ausrüstung, Wissen, Sammelbuch, geschafft).
+//     Gesperrte Dungeons: nur der nächste, der Rest als eine Zeile "🔒 N weitere" (aufklappbar).
+//   "Ein Dungeon = eine Karte": Tippt man einen Dungeon an, klappt darunter seine Planungs-Karte auf:
+//     - 5 Plätze der Gruppe (fehlende Tank/Heiler mit ihrem Symbol). Antippen öffnet die Auswahl von unten
+//       mit den passenden freien Helden. "Auto" füllt die freien Plätze, "Ausrüsten" legt das Beste an.
+//     - Ø Level und Ø Ausrüstung als farbige Symbole (rot = unter der Stufe bzw. Empfehlung)
+//     - Rückzug (3 Knöpfe) und Vorräte, aufklappbar: Anweisungen und Dungeonführer
+//     - unten eine feste Leiste: Gruppe, Einschätzung (live), Konter ✓/✗ als Symbole, "Einplanen"
+//     Noch einmal antippen klappt die Karte zu.
+//   Darunter (aufklappbar): die für heute geplanten Runs und die Berichte
 // Ausgekämpft wird erst bei "Tag beenden".
 // ============================================================
 
@@ -13,20 +19,21 @@ import { DUNGEONS, getDungeon } from '../data/dungeons.js';
 import { RETREAT_RULES } from '../data/retreatRules.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
 import { COMBAT_RULES } from '../data/combatRules.js';
-import { createHeroCanvas } from './PixelArt.js';
+import { createHeroCanvas, createSpriteCanvas } from './PixelArt.js';
 import { renderOrders } from './OrdersPanel.js';
 import { RunViewer } from './RunViewer.js';
-import { createRiskBadge, getRiskSummary } from './RiskBadge.js';
+import { createRiskBadge, createRiskBadgeFromSummary, getRiskSummary } from './RiskBadge.js';
 import { renderDungeonGuide } from './DungeonGuide.js';
 import { getRunTitle, createRunControls } from './StandingGroupControls.js';
-import { renderRoleTiles, createGroupCounter } from './RoleOverview.js';
+import { renderRoleTiles } from './RoleOverview.js';
 import { getCollectionPage, getPageItems } from '../data/collectionBook.js';
 import { announceEquipBest } from './HeroDetailPanel.js';
-import { GROUP_RULES, getPositionName } from '../data/groupRules.js';
+import { GROUP_RULES, getPositionId, getPositionName } from '../data/groupRules.js';
 import { createSupplyPicker, describeSupplies } from './SupplyPicker.js';
+import { createIconChip, POSITION_ICONS, COUNTER_ICONS } from './UiIcons.js';
+import { attachInfo, createInfoIcon } from './InfoTip.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
-
 
 export class DungeonScreen {
   constructor(rootElement, game) {
@@ -38,21 +45,35 @@ export class DungeonScreen {
     this.retreatRuleId = 'never';
     this.chosenSupplies = []; // Vorräte, die die Gruppe mitnehmen soll (siehe SupplyPicker)
     this.expanded = true;     // ist die Karte des gewählten Dungeons aufgeklappt?
+    this.showAllLocked = false; // alle gesperrten Dungeons zeigen (sonst nur den nächsten)
+    // Auswahl von unten: null = zu, sonst { heroId (der ersetzt wird, oder null), positionId (nur diese Position, oder null) }
+    this.picker = null;
     // Welche Abschnitte der Karte offen sind (bleibt beim Neuzeichnen erhalten)
-    this.openSections = { group: true, setup: true, orders: false, guide: false };
+    this.openSections = { orders: false, guide: false };
+    this.openRunSections = { runs: true, reports: false };
 
     this.root.innerHTML = `
       <div class="dungeon-screen">
         <section class="panel dungeon-list"><h2>Dungeons</h2><div class="dungeon-cards"></div></section>
         <section class="panel run-panel">
-          <h2>Heute geplant</h2>
-          <div class="run-list"></div>
-          <h2>Berichte</h2>
-          <div class="report-list"></div>
-          <div class="run-viewer"></div>
+          <details class="run-section" data-section="runs">
+            <summary class="run-section-title"></summary>
+            <div class="run-list"></div>
+          </details>
+          <details class="run-section" data-section="reports">
+            <summary class="run-section-title"></summary>
+            <div class="report-list"></div>
+            <div class="run-viewer"></div>
+          </details>
         </section>
       </div>
     `;
+    for (const section of this.root.querySelectorAll('.run-section')) {
+      section.open = this.openRunSections[section.dataset.section];
+      section.addEventListener('toggle', () => {
+        this.openRunSections[section.dataset.section] = section.open;
+      });
+    }
 
     this.viewer = new RunViewer(this.root.querySelector('.run-viewer'), game);
 
@@ -82,65 +103,134 @@ export class DungeonScreen {
     if (this.game.areDungeonsClosedToday()) {
       const notice = document.createElement('div');
       notice.className = 'raid-day-notice';
-      notice.textContent = 'Heute ist Raid-Tag: Die Dungeons sind geschlossen. Neue Gruppen ziehen ab dem nächsten Dungeon-Tag los.';
+      notice.textContent = 'Raid-Tag: Dungeons geschlossen';
+      attachInfo(notice, 'An Raid-Tagen gibt es keine Dungeon-Runs. Neue Gruppen ziehen ab dem nächsten Dungeon-Tag los.');
       container.appendChild(notice);
     }
-    // Oben einmal: Wie viele vollständige Gruppen sind heute noch frei, was fehlt? (wie in der Heldenübersicht)
+    // Oben einmal: Wie viele vollständige Gruppen sind heute noch frei?
     if (this.game.guild.heroes.length > 0) {
-      container.appendChild(createGroupCounter(this.game));
+      container.appendChild(this.createGroupCountLine());
     }
+
+    const lockedDungeons = DUNGEONS.filter((dungeon) => !this.game.isDungeonUnlocked(dungeon.id));
     for (const dungeon of DUNGEONS) {
       const unlocked = this.game.isDungeonUnlocked(dungeon.id);
-      const clears = this.game.guild.getClears(dungeon.id);
-      const card = document.createElement('button');
-      card.className = 'dungeon-card';
-      card.classList.toggle('selected', dungeon.id === this.dungeonId);
-      card.classList.toggle('locked', !unlocked);
-      card.innerHTML = `
-        <span class="dungeon-name"></span>
-        <span class="dungeon-sub"></span>
-        <span class="dungeon-today"></span>
-      `;
-      card.querySelector('.dungeon-name').textContent = dungeon.name;
-      card.querySelector('.dungeon-sub').textContent = unlocked
-        ? 'Stufe ' + dungeon.level + ' · Empf. AW ' + dungeon.recommendedGearScore + (clears > 0 ? ' · geschafft: ' + clears + '×' : ' · noch nie geschafft') +
-          ' · Wissen ' + this.game.getDungeonKnowledge(dungeon.id).known + '/' + this.game.getDungeonKnowledge(dungeon.id).total +
-          (this.game.isDungeonScouted(dungeon.id) ? ' · Vorbereitet ✓' : '')
-        : 'Gesperrt: erst ' + getDungeon(dungeon.unlockAfter).name + ' schaffen';
-      if (unlocked) {
-        this.fillTodayLine(card.querySelector('.dungeon-today'), dungeon);
+      if (!unlocked) {
+        // Gesperrt: nur der nächste, die übrigen erst nach "N weitere" (siehe unten)
+        const index = lockedDungeons.indexOf(dungeon);
+        if (index > 0 && !this.showAllLocked) {
+          continue;
+        }
+        container.appendChild(this.createLockedRow(dungeon));
+        continue;
       }
-      card.addEventListener('click', () => {
-        Sound.click();
-        // Derselbe Dungeon: Karte auf- bzw. zuklappen; ein anderer: dessen Karte öffnen
-        this.expanded = dungeon.id === this.dungeonId ? !this.expanded : true;
-        this.dungeonId = dungeon.id;
-        this.render();
-      });
-      container.appendChild(card);
+      container.appendChild(this.createDungeonCard(dungeon));
       // Die Planungs-Karte steht direkt unter dem gewählten Dungeon
       if (dungeon.id === this.dungeonId && this.expanded) {
         container.appendChild(this.createPlanCard(dungeon));
       }
     }
+    if (lockedDungeons.length > 1) {
+      const more = document.createElement('button');
+      more.className = 'locked-more-button';
+      more.appendChild(createSpriteCanvas('iconLock', 2));
+      more.insertAdjacentHTML('beforeend', '<span></span>');
+      more.querySelector('span').textContent = this.showAllLocked
+        ? 'Gesperrte zuklappen'
+        : (lockedDungeons.length - 1) + ' weitere Dungeons';
+      more.addEventListener('click', () => {
+        Sound.click();
+        this.showAllLocked = !this.showAllLocked;
+        this.render();
+      });
+      container.appendChild(more);
+    }
   }
 
-  // Zweite Zeile einer Dungeon-Karte: welche Gruppe heute dort kämpft (mit Einschätzung) und der Sammelbuch-Stand,
-  // z.B. "Heute: Gruppe A · Sammelbuch 2/3"
+  // Kurz: "1 Gruppe frei", Details (was für die nächste fehlt) in der Info-Blase
+  createGroupCountLine() {
+    const result = this.game.countPossibleGroups();
+    const missingParts = [];
+    for (const positionId in GROUP_RULES.required) {
+      if (result.missing[positionId]) {
+        missingParts.push(result.missing[positionId] + ' ' + getPositionName(positionId));
+      }
+    }
+    if (result.missing.any) {
+      missingParts.push(result.missing.any + (result.missing.any === 1 ? ' weiterer Held' : ' weitere Helden'));
+    }
+    const text = result.groups === 1 ? '1 Gruppe frei' : result.groups + ' Gruppen frei';
+    const info = 'Gezählt werden freie Helden (nicht verletzt, heute nicht eingeplant). Eine Gruppe braucht 1 Tank, 1 Heiler und 3 beliebige Helden. ' +
+      'Für Gruppe ' + (result.groups + 1) + ' fehlen: ' + missingParts.join(', ') + '.';
+    const line = createIconChip('iconHero', text, info, result.groups > 0 ? 'ok' : 'missing');
+    line.classList.add('group-count-line');
+    return line;
+  }
+
+  // Ein offener Dungeon: Name, dazu Symbole mit Zahl (Erklärung per Info-Blase)
+  createDungeonCard(dungeon) {
+    const clears = this.game.guild.getClears(dungeon.id);
+    const knowledge = this.game.getDungeonKnowledge(dungeon.id);
+    const card = document.createElement('button');
+    card.className = 'dungeon-card';
+    card.classList.toggle('selected', dungeon.id === this.dungeonId && this.expanded);
+    card.innerHTML = '<span class="dungeon-name"></span><span class="dungeon-chips"></span><span class="dungeon-today"></span>';
+    card.querySelector('.dungeon-name').textContent = dungeon.name;
+    // Beschreibung des Dungeons als Info-Blase statt als Text
+    card.querySelector('.dungeon-name').appendChild(createInfoIcon(dungeon.description));
+    const chips = card.querySelector('.dungeon-chips');
+    chips.appendChild(createIconChip('iconSword', String(dungeon.level),
+      'Stufe ' + dungeon.level + ': So stark sind die Gegner. Helden auf diesem Level passen zum Dungeon, Items aus der Boss-Kiste haben diese Stufe.'));
+    chips.appendChild(createIconChip('iconArmor', String(dungeon.recommendedGearScore),
+      'Empfohlener Ausrüstungswert (AW) der Gruppe: ' + dungeon.recommendedGearScore + '.'));
+    chips.appendChild(createIconChip('iconLens', knowledge.known + '/' + knowledge.total,
+      'Wissen: ' + knowledge.known + ' von ' + knowledge.total + ' Bossen erkundet. Erkunden (Tagesplan) deckt Mechaniken auf und macht die Einschätzung genauer.' +
+      (this.game.isDungeonScouted(dungeon.id) ? ' Vorbereitet: Der nächste Kampftag hier bekommt einen Vorteil.' : ''),
+      this.game.isDungeonScouted(dungeon.id) ? 'ok' : ''));
+    const page = getCollectionPage(dungeon.id);
+    if (page) {
+      const found = this.game.guild.collection.countFoundOnPage(page);
+      const total = getPageItems(page).length;
+      chips.appendChild(createIconChip('iconBook', found + '/' + total,
+        'Sammelbuch: ' + found + ' von ' + total + ' Boss-Items dieses Dungeons gefunden. Eine volle Seite bringt einen Titel und mehr Gold.',
+        found === total ? 'ok' : ''));
+    }
+    const clearChip = document.createElement('span');
+    clearChip.className = 'icon-chip' + (clears > 0 ? ' ok' : '');
+    clearChip.textContent = clears > 0 ? '✓' + clears : 'neu';
+    attachInfo(clearChip, clears > 0 ? clears + '× geschafft.' : 'Noch nie geschafft.');
+    chips.appendChild(clearChip);
+    this.fillTodayLine(card.querySelector('.dungeon-today'), dungeon);
+    card.addEventListener('click', () => {
+      Sound.click();
+      // Derselbe Dungeon: Karte auf- bzw. zuklappen; ein anderer: dessen Karte öffnen
+      this.expanded = dungeon.id === this.dungeonId ? !this.expanded : true;
+      this.dungeonId = dungeon.id;
+      this.picker = null;
+      this.render();
+    });
+    return card;
+  }
+
+  // Ein gesperrter Dungeon als kurze Zeile: "🔒 Die Frostzinne · erst Die Brutnester schaffen"
+  createLockedRow(dungeon) {
+    const row = document.createElement('div');
+    row.className = 'dungeon-locked-row';
+    row.appendChild(createSpriteCanvas('iconLock', 2));
+    row.insertAdjacentHTML('beforeend', '<span class="dungeon-name"></span><span class="hint"></span>');
+    row.querySelector('.dungeon-name').textContent = dungeon.name;
+    row.querySelector('.hint').textContent = 'erst ' + getDungeon(dungeon.unlockAfter).name;
+    attachInfo(row, 'Gesperrt: Schaffe zuerst ' + getDungeon(dungeon.unlockAfter).name + '. Stufe ' + dungeon.level + '.');
+    return row;
+  }
+
+  // Heute eingeplante Gruppen in diesem Dungeon (mit Einschätzung der ersten)
   fillTodayLine(line, dungeon) {
-    const parts = [];
     const expeditions = this.game.guild.expeditions.filter((expedition) => expedition.dungeonId === dungeon.id);
     for (const expedition of expeditions) {
       const group = this.game.findStandingGroup(expedition.standingGroupId);
-      parts.push('Heute: ' + (group ? group.name : 'eine Gruppe'));
+      line.appendChild(createIconChip('iconHero', group ? group.name : 'Gruppe', 'Diese Gruppe zieht heute hierher.'));
     }
-    const page = getCollectionPage(dungeon.id);
-    if (page) {
-      const book = this.game.guild.collection;
-      parts.push('Sammelbuch ' + book.countFoundOnPage(page) + '/' + getPageItems(page).length);
-    }
-    line.textContent = parts.join(' · ');
-    // Einschätzung der ersten heutigen Gruppe hier (nur, wenn eine eingeplant ist)
     if (expeditions.length > 0) {
       const expedition = expeditions[0];
       const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
@@ -150,46 +240,23 @@ export class DungeonScreen {
 
   // ---------- Planungs-Karte des gewählten Dungeons ----------
 
-  // Die ganze Planung auf einer Karte: Abschnitte zum Aufklappen und die feste Leiste unten
   createPlanCard(dungeon) {
     const unlocked = this.game.isDungeonUnlocked(dungeon.id);
     const card = document.createElement('div');
     card.className = 'dungeon-plan-card';
     card.innerHTML = `
-      <p class="hint dungeon-description"></p>
-      <details class="plan-section" data-section="group">
-        <summary title="${GROUP_RULES.size} Helden: 1 Tank, 1 Heiler und 3 beliebige">Gruppe</summary>
-        <div class="group-picker"></div>
-        <div class="group-check"></div>
-        <button class="equip-group-button" title="Rüstet die Gruppe mit dem Besten aus dem Inventar aus. Wer zuerst gewählt wurde, ist zuerst dran.">Gruppe ausrüsten</button>
-      </details>
-      <details class="plan-section" data-section="setup">
-        <summary>Rückzug &amp; Vorräte</summary>
-        <div class="button-row retreat-buttons"></div>
-        <p class="hint">Der Rückzug dauert ${COMBAT_RULES.retreatRounds} Runden, in denen der Gegner weiter angreift. Danach gibt es keine Beute.</p>
-        <div class="supply-line"></div>
-      </details>
-      <details class="plan-section" data-section="orders">
-        <summary>Anweisungen</summary>
-        <div class="orders-list"></div>
-      </details>
-      <details class="plan-section" data-section="guide">
-        <summary>Dungeonführer: Gegner, Bosse, Beute</summary>
-        <div class="dungeon-guide"></div>
-      </details>
-      <p class="hint">Die Gruppe kämpft am Ende jedes Tages hier, bis du sie im Tagesplan auflöst. Verletzte fehlen, bis sie wieder fit sind.</p>
+      <div class="plan-slots"></div>
+      <div class="hero-pick-sheet" hidden></div>
+      <div class="plan-stats"></div>
+      <div class="plan-row plan-retreat"></div>
+      <div class="plan-row plan-supplies"></div>
+      <details class="plan-section" data-section="orders"><summary>Anweisungen</summary><div class="orders-list"></div></details>
+      <details class="plan-section" data-section="guide"><summary>Dungeonführer</summary><div class="dungeon-guide"></div></details>
       <div class="plan-sticky-bar">
         <div class="plan-live"></div>
         <button class="big-button start-button">Einplanen</button>
       </div>
     `;
-    const description = card.querySelector('.dungeon-description');
-    description.textContent = dungeon.description;
-    if (this.game.isDungeonScouted(dungeon.id)) {
-      description.insertAdjacentHTML('beforeend',
-        ' <span class="scouted-chip" title="Durch Erkunden vorbereitet: Der nächste Kampftag hier (alle Gruppen) bekommt einen Vorteil, der mit dem Wissen wächst">Vorbereitet ✓</span>');
-    }
-    // Offene Abschnitte merken
     for (const section of card.querySelectorAll('.plan-section')) {
       section.open = this.openSections[section.dataset.section];
       section.addEventListener('toggle', () => {
@@ -197,214 +264,291 @@ export class DungeonScreen {
       });
     }
 
-    // Dungeonführer: Niveau, Gegner und Beute (siehe DungeonGuide.js)
-    renderDungeonGuide(card.querySelector('.dungeon-guide'), this.game, dungeon, this.guideSections);
-    this.renderGroupPicker(card.querySelector('.group-picker'));
-    this.renderGroupCheck(card.querySelector('.group-check'), dungeon);
-    const equipGroupButton = card.querySelector('.equip-group-button');
-    equipGroupButton.hidden = this.selectedHeroIds.size === 0;
-    equipGroupButton.addEventListener('click', () => {
-      // Reihenfolge der Auswahl = Reihenfolge beim Ausrüsten (ein Set merkt sich, was zuerst kam)
-      const heroIds = [...this.selectedHeroIds];
-      const snapshot = this.game.getEquipmentSnapshot(heroIds);
-      const count = this.game.equipBestForGroup(heroIds);
-      announceEquipBest(this.game, count, 'Gruppe', snapshot);
-    });
-    this.fillButtonRow(card.querySelector('.retreat-buttons'), RETREAT_RULES.map((r) => ({ label: r.name, value: r.id })),
-      (value) => value === this.retreatRuleId, (value) => { this.retreatRuleId = value; });
-
     const group = this.getSelectedHeroes();
-    // Gewählte Vorräte, die nicht mehr in der Kammer liegen (z.B. von einer anderen Gruppe genommen), fallen weg
+    this.renderSlots(card.querySelector('.plan-slots'), card);
+    this.renderStats(card.querySelector('.plan-stats'), dungeon, group);
+    this.renderRetreat(card.querySelector('.plan-retreat'));
+
+    // Vorräte: kompakt, der Hinweis "Vorratskammer leer" steckt in der Info-Blase
     this.chosenSupplies = this.keepAvailableSupplies(this.chosenSupplies);
-    card.querySelector('.supply-line').appendChild(createSupplyPicker(this.game.guild, this.chosenSupplies, [], (next) => {
+    const supplies = card.querySelector('.plan-supplies');
+    supplies.appendChild(createIconChip('iconPotion', '', 'Vorräte: Tränke aus der Vorratskammer, die die Gruppe mitnimmt (kaufen beim Händler).'));
+    supplies.appendChild(createSupplyPicker(this.game.guild, this.chosenSupplies, [], (next) => {
       Sound.click();
       this.chosenSupplies = next;
       this.render();
-    }));
+    }, true));
+
     renderOrders(card.querySelector('.orders-list'), group, (hero, orderId, optionId) => {
       this.game.setHeroOrder(hero.id, orderId, optionId);
     });
     if (group.length === 0) {
       card.querySelector('.orders-list').innerHTML = '<p class="hint">Wähle zuerst Helden aus.</p>';
     }
+    // Dungeonführer: Niveau, Gegner und Beute (siehe DungeonGuide.js)
+    renderDungeonGuide(card.querySelector('.dungeon-guide'), this.game, dungeon, this.guideSections);
+
+    // Auswahl von unten (offen, wenn ein Platz angetippt wurde)
+    if (this.picker) {
+      this.renderPicker(card.querySelector('.hero-pick-sheet'));
+    }
 
     // Feste Leiste: alles, was man beim Zusammenstellen sehen will
-    this.renderLiveBar(card.querySelector('.plan-live'), dungeon, group, unlocked);
+    const live = card.querySelector('.plan-live');
+    this.renderLiveBar(live, dungeon, group, unlocked);
     const startButton = card.querySelector('.start-button');
     startButton.disabled = !unlocked || group.length === 0;
     startButton.addEventListener('click', () => this.start());
+    card.querySelector('.plan-sticky-bar').insertBefore(
+      createInfoIcon('Einplanen macht die Gruppe zu einer festen Gruppe: Sie kämpft am Ende jedes Tages hier, bis du sie im Tagesplan auflöst. Verletzte fehlen, bis sie wieder fit sind.'),
+      startButton);
     return card;
   }
 
-  // Inhalt der festen Leiste: kurzer Gruppen-Stand, Einschätzung (neu bei jeder Änderung) und Konter ✓/✗
-  renderLiveBar(container, dungeon, group, unlocked) {
-    const check = this.game.checkGroup([...this.selectedHeroIds]);
-    const status = document.createElement('div');
-    status.className = 'plan-live-group' + (check.complete ? ' complete' : '');
-    const parts = [check.count + '/' + check.size];
-    for (const positionId in check.required) {
-      const part = check.required[positionId];
-      parts.push(getPositionName(positionId) + ' ' + (part.have >= part.need ? '✓' : '✗'));
-    }
-    status.textContent = parts.join(' · ');
-    container.appendChild(status);
-
-    if (unlocked && group.length > 0) {
-      container.appendChild(createRiskBadge(this.game, group, dungeon.id, this.retreatRuleId, this.chosenSupplies));
-    }
-
-    // Konter für die bekannten Mechaniken: ✓ = jemand in der Gruppe kann es, ✗ = niemand
-    const counterStatus = this.game.getCounterStatus(dungeon.id, [...this.selectedHeroIds]);
-    const counters = document.createElement('div');
-    counters.className = 'plan-live-counters';
-    for (const counter of counterStatus.counters) {
-      const chip = document.createElement('span');
-      chip.className = 'counter-chip ' + (counter.covered ? 'ok' : 'missing');
-      chip.textContent = counter.name + ' ' + (counter.covered ? '✓' : '✗');
-      chip.title = counter.covered ? 'Jemand in der Gruppe kann das.' : 'Niemand in der Gruppe kann das. Der Dungeonführer zeigt, wer es kann.';
-      counters.appendChild(chip);
-    }
-    if (counterStatus.unknownBosses > 0) {
-      const unknown = document.createElement('span');
-      unknown.className = 'counter-chip unknown';
-      unknown.textContent = counterStatus.unknownBosses + (counterStatus.unknownBosses === 1 ? ' Boss' : ' Bosse') + ' unerkundet';
-      unknown.title = 'Erkunden (Tagesplan) deckt die Mechaniken auf.';
-      counters.appendChild(unknown);
-    }
-    if (counters.children.length > 0) {
-      container.appendChild(counters);
-    }
-  }
-
-  // Gruppenwahl nach Position (wie die Heldenübersicht):
-  //   - oben die Statuszeile "Tank ✓ · Heiler ✗ · 4/5 Helden" und die gewählten Helden (antippen = wieder raus)
-  //   - darunter alle Helden als Kacheln pro Position; eingeplante und verletzte sind gesperrt
-  renderGroupPicker(container) {
+  // Die 5 Plätze: gewählte Helden, dann leere Plätze (fehlende Tank/Heiler mit Symbol). Daneben "Auto" und "Ausrüsten".
+  renderSlots(container) {
     if (this.game.guild.heroes.length === 0) {
       container.innerHTML = '<p class="empty">Noch keine Helden. Heuere welche in der Taverne an!</p>';
       return;
     }
-    container.appendChild(this.createGroupStatus());
-    container.appendChild(this.createAutoGroupButton());
-
-    const chosen = document.createElement('div');
-    chosen.className = 'group-chosen';
-    for (const hero of this.getSelectedHeroes()) {
-      const chip = document.createElement('button');
-      chip.className = 'group-chosen-hero';
-      chip.style.setProperty('--rarity', hero.getRarity().color);
-      chip.title = hero.name + ' aus der Gruppe nehmen';
-      chip.appendChild(createHeroCanvas(hero, 2));
-      chip.insertAdjacentHTML('beforeend', '<span>✕</span>');
-      chip.addEventListener('click', () => this.toggleHero(hero.id));
-      chosen.appendChild(chip);
+    const heroes = this.getSelectedHeroes();
+    const check = this.game.checkGroup([...this.selectedHeroIds]);
+    // Welche Pflicht-Positionen fehlen noch? Die ersten leeren Plätze zeigen sie
+    const missingPositions = [];
+    for (const positionId in check.required) {
+      for (let i = check.required[positionId].have; i < check.required[positionId].need; i++) {
+        missingPositions.push(positionId);
+      }
     }
-    // Leere Plätze als gestrichelte Kästchen
-    for (let i = this.selectedHeroIds.size; i < GROUP_RULES.size; i++) {
-      chosen.insertAdjacentHTML('beforeend', '<span class="group-empty-slot"></span>');
-    }
-    container.appendChild(chosen);
 
-    renderRoleTiles(container, this.game, {
-      isSelected: (hero) => this.selectedHeroIds.has(hero.id),
-      isDisabled: (hero) => this.game.guild.isHeroBusy(hero.id) || hero.isInjured(),
-      onSelect: (heroId) => this.toggleHero(heroId),
+    const row = document.createElement('div');
+    row.className = 'slot-row';
+    for (const hero of heroes) {
+      const slot = document.createElement('button');
+      slot.className = 'group-slot filled';
+      slot.style.setProperty('--rarity', hero.getRarity().color);
+      slot.title = hero.name + ' · ' + hero.getClass().name + ' · Lv ' + hero.level;
+      slot.appendChild(createHeroCanvas(hero, 2));
+      slot.insertAdjacentHTML('beforeend', '<span class="group-slot-name"></span>');
+      slot.querySelector('.group-slot-name').textContent = hero.name.split(' ')[0];
+      slot.addEventListener('click', () => this.openPicker(hero.id, null));
+      row.appendChild(slot);
+    }
+    for (let i = heroes.length; i < GROUP_RULES.size; i++) {
+      const positionId = missingPositions[i - heroes.length] || null;
+      const slot = document.createElement('button');
+      slot.className = 'group-slot empty' + (positionId ? ' needed' : '');
+      slot.appendChild(createSpriteCanvas(positionId ? POSITION_ICONS[positionId] : 'iconHero', 2));
+      slot.insertAdjacentHTML('beforeend', '<span class="group-slot-name"></span>');
+      slot.querySelector('.group-slot-name').textContent = positionId ? getPositionName(positionId) : '+';
+      slot.addEventListener('click', () => this.openPicker(null, positionId));
+      row.appendChild(slot);
+    }
+    container.appendChild(row);
+
+    const buttons = document.createElement('div');
+    buttons.className = 'slot-buttons';
+    buttons.appendChild(this.createAutoGroupButton());
+    const equipButton = document.createElement('button');
+    equipButton.className = 'equip-group-button';
+    equipButton.appendChild(createSpriteCanvas('iconArmor', 2));
+    equipButton.insertAdjacentHTML('beforeend', '<span>Ausrüsten</span>');
+    equipButton.title = 'Rüstet die Gruppe mit dem Besten aus dem Inventar aus. Wer zuerst gewählt wurde, ist zuerst dran.';
+    equipButton.disabled = heroes.length === 0;
+    equipButton.addEventListener('click', () => {
+      const heroIds = [...this.selectedHeroIds];
+      const snapshot = this.game.getEquipmentSnapshot(heroIds);
+      const count = this.game.equipBestForGroup(heroIds);
+      announceEquipBest(this.game, count, 'Gruppe', snapshot);
     });
+    buttons.appendChild(equipButton);
+    container.appendChild(buttons);
   }
 
-  // Knopf "Auto-Gruppe · Machbar": füllt leere Plätze mit freien Helden (Tank/Heiler zuerst, dann Konter
-  // für bekannte Mechaniken, siehe systems/AutoGroup.js). Auf dem Knopf steht schon, wie riskant der Vorschlag wäre.
+  // Auswahl von unten öffnen. heroId = dieser Held wird ersetzt (oder null), positionId = nur diese Position zeigen
+  openPicker(heroId, positionId) {
+    Sound.click();
+    this.picker = { heroId: heroId, positionId: positionId };
+    this.render();
+  }
+
+  // Die Auswahl: passende Helden als Kacheln nach Position, "Entfernen" beim Ersetzen, Schließen
+  renderPicker(sheet) {
+    sheet.hidden = false;
+    const replacing = this.picker.heroId !== null ? this.game.guild.findHero(this.picker.heroId) : null;
+    const title = replacing ? replacing.name + ' ersetzen' :
+      (this.picker.positionId ? getPositionName(this.picker.positionId) + ' wählen' : 'Held wählen');
+    sheet.innerHTML = '<div class="hero-pick-head"><b></b><button class="hero-pick-close">✕</button></div><div class="hero-pick-list"></div>';
+    sheet.querySelector('b').textContent = title;
+    sheet.querySelector('.hero-pick-close').addEventListener('click', () => {
+      Sound.click();
+      this.picker = null;
+      this.render();
+    });
+    if (replacing) {
+      const remove = document.createElement('button');
+      remove.className = 'hero-pick-remove';
+      remove.textContent = '✕ ' + replacing.name.split(' ')[0] + ' aus der Gruppe nehmen';
+      remove.addEventListener('click', () => {
+        Sound.click();
+        this.selectedHeroIds.delete(replacing.id);
+        this.picker = null;
+        this.render();
+      });
+      sheet.querySelector('.hero-pick-head').after(remove);
+    }
+    // Beim Ersetzen zeigt die Liste dieselbe Position wie der bisherige Held
+    const onlyPosition = this.picker.showAll ? null : (this.picker.positionId || (replacing ? getPositionId(replacing.getClass()) : null));
+    renderRoleTiles(sheet.querySelector('.hero-pick-list'), this.game, {
+      onlyPosition: onlyPosition,
+      isSelected: (hero) => this.selectedHeroIds.has(hero.id),
+      isDisabled: (hero) => this.game.guild.isHeroBusy(hero.id) || hero.isInjured() ||
+        (this.selectedHeroIds.has(hero.id) && hero !== replacing),
+      onSelect: (heroId) => this.pickHero(heroId),
+    });
+    if (onlyPosition) {
+      const all = document.createElement('button');
+      all.className = 'hero-pick-all';
+      all.textContent = 'Alle Positionen zeigen';
+      all.addEventListener('click', () => {
+        Sound.click();
+        this.picker = { heroId: this.picker.heroId, positionId: null, showAll: true };
+        this.render();
+      });
+      if (!this.picker.showAll) {
+        sheet.appendChild(all);
+      }
+    }
+  }
+
+  // Ein Held wurde in der Auswahl angetippt: einsetzen (bzw. den ersetzten herausnehmen)
+  pickHero(heroId) {
+    Sound.click();
+    const replacingId = this.picker.heroId;
+    if (replacingId === heroId) {
+      this.picker = null;
+      this.render();
+      return;
+    }
+    // Reihenfolge erhalten: Der neue Held kommt an die Stelle des ersetzten
+    const order = [...this.selectedHeroIds];
+    if (replacingId !== null) {
+      order[order.indexOf(replacingId)] = heroId;
+    } else if (order.length < GROUP_RULES.size) {
+      order.push(heroId);
+    }
+    this.selectedHeroIds = new Set(order);
+    this.picker = null;
+    this.render();
+  }
+
+  // Knopf "Auto · Machbar": füllt leere Plätze mit freien Helden (siehe systems/AutoGroup.js),
+  // die Einschätzung des Vorschlags steht schon auf dem Knopf
   createAutoGroupButton() {
     const button = document.createElement('button');
     button.className = 'auto-group-button';
+    button.appendChild(createSpriteCanvas('iconBolt', 2));
     const selected = [...this.selectedHeroIds];
     const proposal = this.game.suggestAutoGroup(this.dungeonId, selected);
+    button.title = 'Füllt die leeren Plätze mit freien Helden: zuerst Tank und Heiler, dann wer bekannte Mechaniken kontert, dann die Stärksten. Gewählte Helden bleiben drin.';
     if (proposal.length === selected.length) {
-      button.textContent = selected.length >= GROUP_RULES.size ? 'Auto-Gruppe: Gruppe ist voll' : 'Auto-Gruppe: niemand frei';
+      button.insertAdjacentHTML('beforeend', '<span>Auto</span>');
       button.disabled = true;
       return button;
     }
     const heroes = proposal.map((heroId) => this.game.guild.findHero(heroId));
     const summary = getRiskSummary(this.game, heroes, this.dungeonId, this.retreatRuleId, this.chosenSupplies);
-    button.innerHTML = 'Auto-Gruppe <span class="auto-group-risk"></span>';
+    button.insertAdjacentHTML('beforeend', '<span>Auto</span><span class="auto-group-risk"></span>');
     const risk = button.querySelector('.auto-group-risk');
-    risk.textContent = '· ' + summary.name;
+    risk.textContent = summary.name;
     risk.style.color = summary.color;
-    button.title = 'Füllt die leeren Plätze mit freien Helden: zuerst Tank und Heiler, dann wer bekannte Mechaniken kontert, dann die Stärksten. Gewählte Helden bleiben drin.';
     button.addEventListener('click', () => {
       Sound.click();
       this.selectedHeroIds = new Set(proposal);
+      this.picker = null;
       this.render();
     });
     return button;
   }
 
-  // Held in die Gruppe nehmen oder wieder heraus (höchstens GROUP_RULES.size Helden)
-  toggleHero(heroId) {
-    Sound.click();
-    if (this.selectedHeroIds.has(heroId)) {
-      this.selectedHeroIds.delete(heroId);
-    } else if (this.selectedHeroIds.size < GROUP_RULES.size) {
-      this.selectedHeroIds.add(heroId);
-    }
-    this.render();
-  }
-
-  // "Tank ✓ · Heiler ✗ · 4/5 Helden": grün = erfüllt, rot = fehlt
-  createGroupStatus() {
-    const check = this.game.checkGroup([...this.selectedHeroIds]);
-    const status = document.createElement('div');
-    status.className = 'group-status' + (check.complete ? ' complete' : '');
-    for (const positionId in check.required) {
-      const part = check.required[positionId];
-      const ok = part.have >= part.need;
-      status.insertAdjacentHTML('beforeend', '<span class="group-status-part ' + (ok ? 'ok' : 'missing') + '">' +
-        getPositionName(positionId) + ' ' + (ok ? '✓' : '✗') + '</span>');
-    }
-    const full = check.count === check.size;
-    status.insertAdjacentHTML('beforeend', '<span class="group-status-part ' + (full ? 'ok' : 'missing') + '">' +
-      check.count + '/' + check.size + ' Helden</span>');
-    if (check.complete) {
-      status.insertAdjacentHTML('beforeend', '<span class="group-status-done">Gruppe komplett!</span>');
-    }
-    return status;
-  }
-
   getSelectedHeroes() {
-    return this.game.guild.heroes.filter((hero) => this.selectedHeroIds.has(hero.id));
+    // In der Reihenfolge der Auswahl (wichtig für "Ausrüsten": wer zuerst gewählt wurde, ist zuerst dran)
+    return [...this.selectedHeroIds].map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
   }
 
-  // Hinweise zur Stärke: Ø Level und Ø Ausrüstungswert (fehlende Rollen zeigt die Statuszeile der Gruppenwahl)
-  renderGroupCheck(container, dungeon) {
-    const group = this.getSelectedHeroes();
+  // Ø Level und Ø Ausrüstungswert als farbige Symbole (rot = unter Stufe bzw. Empfehlung)
+  renderStats(container, dungeon, group) {
     if (group.length === 0) {
-      container.innerHTML = '';
       return;
     }
     const averageGear = Math.round(group.reduce((sum, hero) => sum + hero.getGearScore(), 0) / group.length);
     const averageLevel = Math.round(group.reduce((sum, hero) => sum + hero.level, 0) / group.length * 10) / 10;
-
-    const levelClass = averageLevel >= dungeon.level ? 'good' : 'bad';
-    const gearClass = averageGear >= dungeon.recommendedGearScore ? 'good' : 'bad';
-    container.innerHTML =
-      '<div class="gear-check ' + levelClass + '">Ø Level: ' + averageLevel + ' (Stufe des Dungeons: ' + dungeon.level + ')</div>' +
-      '<div class="gear-check ' + gearClass + '">Ø Ausrüstungswert: ' + averageGear +
-      ' (empfohlen: ' + dungeon.recommendedGearScore + ')</div>';
+    const levelOk = averageLevel >= dungeon.level;
+    const gearOk = averageGear >= dungeon.recommendedGearScore;
+    container.appendChild(createIconChip('iconSword', 'Lv ' + averageLevel + '/' + dungeon.level,
+      'Ø Level der Gruppe: ' + averageLevel + ', Stufe des Dungeons: ' + dungeon.level + '.' +
+      (levelOk ? '' : ' Zu niedrig: Darunter sinkt die Siegchance stark. Erst leveln (Training, leichtere Dungeons).'),
+      levelOk ? 'ok' : 'missing'));
+    container.appendChild(createIconChip('iconArmor', 'AW ' + averageGear + '/' + dungeon.recommendedGearScore,
+      'Ø Ausrüstungswert der Gruppe: ' + averageGear + ', empfohlen: ' + dungeon.recommendedGearScore + '.' +
+      (gearOk ? '' : ' Bessere Ausrüstung anlegen („Ausrüsten“) oder Items verbessern.'),
+      gearOk ? 'ok' : 'warn'));
   }
 
-  fillButtonRow(container, options, isActive, onClick) {
-    container.innerHTML = '';
-    for (const option of options) {
+  // Rückzug: drei kurze Knöpfe ("Nie", "☠1", "☠2"), die Erklärung steckt im ⓘ
+  renderRetreat(container) {
+    container.appendChild(createIconChip('iconSkull', '', null));
+    for (const rule of RETREAT_RULES) {
       const button = document.createElement('button');
-      button.className = 'filter-button';
-      button.textContent = option.label;
-      button.classList.toggle('active', isActive(option.value));
+      button.className = 'filter-button retreat-button';
+      button.classList.toggle('active', rule.id === this.retreatRuleId);
+      button.textContent = rule.afterFallen === null ? 'Nie' : String(rule.afterFallen);
+      button.title = rule.name;
       button.addEventListener('click', () => {
         Sound.click();
-        onClick(option.value);
+        this.retreatRuleId = rule.id;
         this.render();
       });
       container.appendChild(button);
+    }
+    container.appendChild(createInfoIcon('Rückzug: Die Gruppe zieht sich zurück, sobald so viele Helden gefallen sind (Nie, nach 1 oder nach 2 Gefallenen). ' +
+      'Der Rückzug dauert ' + COMBAT_RULES.retreatRounds + ' Runden, in denen der Gegner weiter angreift. Danach gibt es keine Beute.'));
+  }
+
+  // Inhalt der festen Leiste: Gruppe, Einschätzung (neu bei jeder Änderung) und Konter ✓/✗ als Symbole
+  renderLiveBar(container, dungeon, group, unlocked) {
+    const check = this.game.checkGroup([...this.selectedHeroIds]);
+    const statusRow = document.createElement('div');
+    statusRow.className = 'plan-live-row';
+    statusRow.appendChild(createIconChip('iconHero', check.count + '/' + check.size,
+      'Gruppe: ' + check.count + ' von ' + check.size + ' Helden.', check.count === check.size ? 'ok' : 'missing'));
+    for (const positionId in check.required) {
+      const part = check.required[positionId];
+      const ok = part.have >= part.need;
+      statusRow.appendChild(createIconChip(POSITION_ICONS[positionId], ok ? '✓' : '✗',
+        getPositionName(positionId) + (ok ? ' ist dabei.' : ' fehlt: Jede Gruppe braucht mindestens ' + part.need + '.'), ok ? 'ok' : 'missing'));
+    }
+    // Konter für die bekannten Mechaniken: ✓ = jemand in der Gruppe kann es, ✗ = niemand
+    const counterStatus = this.game.getCounterStatus(dungeon.id, [...this.selectedHeroIds]);
+    for (const counter of counterStatus.counters) {
+      statusRow.appendChild(createIconChip(COUNTER_ICONS[counter.id] || 'iconStar', counter.covered ? '✓' : '✗',
+        counter.name + (counter.covered ? ': Jemand in der Gruppe kann das.' : ': Niemand in der Gruppe kann das. Der Dungeonführer zeigt, wer es kann.'),
+        counter.covered ? 'ok' : 'missing'));
+    }
+    if (counterStatus.unknownBosses > 0) {
+      statusRow.appendChild(createIconChip('iconLens', counterStatus.unknownBosses + '?',
+        counterStatus.unknownBosses + (counterStatus.unknownBosses === 1 ? ' Boss ist' : ' Bosse sind') +
+        ' noch nicht erkundet: Seine Mechaniken sind unbekannt. Erkunden (Tagesplan) deckt sie auf.'));
+    }
+    container.appendChild(statusRow);
+
+    if (unlocked && group.length > 0) {
+      // Kurz nur das Wort ("Riskant"), die Einzelheiten stehen in der Info-Blase
+      const summary = getRiskSummary(this.game, group, dungeon.id, this.retreatRuleId, this.chosenSupplies);
+      const badge = createRiskBadgeFromSummary(this.game, summary);
+      const forecast = this.game.hasDefeatForecast() && summary.likelyCause ? ' Größte Gefahr: ' + summary.likelyCause.name + '.' : '';
+      attachInfo(badge, 'Einschätzung: ' + summary.name + ' ' + summary.detail + '. ' + summary.title + forecast);
+      container.appendChild(badge);
     }
   }
 
@@ -436,22 +580,25 @@ export class DungeonScreen {
     showToast(group.name + ' zieht ' + when + ' jeden Tag in ' + getDungeon(this.dungeonId).name + '.', '#ffd23f');
     this.selectedHeroIds.clear();
     this.chosenSupplies = [];
+    this.picker = null;
     this.render();
   }
 
   // ---------- Geplante Runs ----------
 
   renderRuns() {
+    const expeditions = this.game.guild.expeditions;
+    this.root.querySelector('[data-section="runs"] .run-section-title').textContent = 'Heute geplant (' + expeditions.length + ')';
     const list = this.root.querySelector('.run-list');
     list.innerHTML = '';
-    if (this.game.guild.expeditions.length === 0) {
-      list.innerHTML = '<p class="empty">Heute ist noch keine Gruppe eingeplant. Wer nichts zu tun hat, ruht sich aus.</p>';
+    if (expeditions.length === 0) {
+      list.innerHTML = '<p class="empty">Noch keine Gruppe eingeplant.</p>';
     }
-    for (const expedition of this.game.guild.expeditions) {
+    for (const expedition of expeditions) {
       const heroNames = expedition.getHeroIds()
         .map((heroId) => this.game.guild.findHero(heroId))
         .filter((hero) => hero)
-        .map((hero) => hero.name);
+        .map((hero) => hero.name.split(' ')[0]);
       const retreatRule = RETREAT_RULES.find((rule) => rule.id === expedition.retreatRuleId);
 
       const row = document.createElement('div');
@@ -464,8 +611,8 @@ export class DungeonScreen {
       `;
       row.querySelector('.run-name').textContent = getRunTitle(this.game, expedition);
       row.querySelector('.run-status').textContent = heroNames.join(', ') +
-        (retreatRule ? ' · Rückzug: ' + retreatRule.name : '') +
-        (expedition.supplies.length > 0 ? ' · Vorräte: ' + describeSupplies(expedition.supplies) : '');
+        (retreatRule && retreatRule.afterFallen !== null ? ' · Rückzug nach ' + retreatRule.afterFallen : '') +
+        (expedition.supplies.length > 0 ? ' · ' + describeSupplies(expedition.supplies) : '');
       const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
       row.querySelector('.run-head').after(createRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId,
         expedition.supplies));
@@ -477,12 +624,15 @@ export class DungeonScreen {
   // ---------- Berichte ----------
 
   renderReports() {
+    const reports = this.game.guild.reports;
+    const title = this.root.querySelector('[data-section="reports"] .run-section-title');
+    title.textContent = 'Berichte (' + reports.length + ')';
     const list = this.root.querySelector('.report-list');
     list.innerHTML = '';
-    if (this.game.guild.reports.length === 0) {
+    if (reports.length === 0) {
       list.innerHTML = '<p class="empty">Noch keine Berichte.</p>';
     }
-    for (const report of this.game.guild.reports) {
+    for (const report of reports) {
       const dungeon = getDungeon(report.dungeonId);
       const row = document.createElement('button');
       row.className = 'report-row outcome-' + report.outcome;
@@ -503,6 +653,7 @@ export class DungeonScreen {
         }
       }
       row.textContent = text;
+      row.title = 'Antippen zeigt den Kampfverlauf';
       row.addEventListener('click', () => {
         Sound.click();
         this.viewer.showReport(report);

@@ -152,6 +152,8 @@ Umgesetzt (2026-11-06) aus dem Bericht: **Risiko live mit Konter-Symbolen** und 
 
 **Inventar (2026-11-06):** automatische Schrott-Verwertung für neue Kisten-Items (Weiß und Grau, `junkMaxRarity`, Einstellung `guild.autoJunk`), Massen-Verkauf/-Zerlegen mit Mehrfachauswahl (`Game.sellItems`, `Game.salvageItems`), „Schrott verkaufen/zerlegen“ gilt jetzt für Weiß und Grau. Spielstand-Version 27.
 
+**Dungeon-Planung entschlackt (2026-11-09):** Pixel-Symbole (`icon…` in sprites.js, `UiIcons.js`), Info-Blasen (`InfoTip.js`: Antippen/Maus drüber), Dungeon-Zeilen mit Symbolen, gesperrte Dungeons zusammengefasst, 5 Plätze + Auswahl von unten, eine Status-Leiste mit Symbolen (Gruppe, Tank/Heiler, Konter, Einschätzung), Erklärsätze in Blasen, „Heute geplant“/„Berichte“ einklappbar. Handy: Seite 2.850 → 1.230 Pixel, Text 260 → 50 Wörter.
+
 Offen aus dem Bericht (größere Umbauten): vorbelegte Vorräte, Ausrüstung vom Vorgänger übernehmen, kompakte Listenansicht für den Raid.
 
 **M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.
