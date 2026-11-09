@@ -4,6 +4,7 @@
 // Unter jeder Auswahl stehen Vorteil (grün) und Nachteil (rot) der gewählten Option.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { getOrdersForClass } from '../data/heroOrders.js';
 import { createHeroCanvas } from './PixelArt.js';
 
@@ -59,7 +60,7 @@ function createEffectsLine(option) {
   const line = document.createElement('div');
   line.className = 'order-effects';
   if (!option.pro && !option.contra) {
-    line.textContent = 'keine Vor- und Nachteile';
+    line.textContent = t('parts.noProsCons');
     return line;
   }
   const pro = document.createElement('span');

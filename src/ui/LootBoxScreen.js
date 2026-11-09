@@ -13,6 +13,7 @@
 //      "Schwache markieren" markiert alles unter Episch (ohne Boss-Items und gesperrte Items).
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { LOOT_BOXES, getLootBoxType } from '../data/lootBoxes.js';
 import { formatItemValues } from './format.js';
 import { BALANCING } from '../data/balancing.js';
@@ -51,7 +52,7 @@ export class LootBoxScreen {
       <div class="lootbox-screen">
         <section class="panel box-panel">
           <button class="collection-button"></button>
-          <h2>Deine Kisten</h2>
+          <h2>${t('loot.yourChests')}</h2>
           <div class="box-list"></div>
           <div class="pity"></div>
         </section>
@@ -124,14 +125,14 @@ export class LootBoxScreen {
     if (totalBoxes >= 2) {
       const allButton = document.createElement('button');
       allButton.className = 'open-all-button';
-      allButton.textContent = 'Alle öffnen (' + totalBoxes + ')';
+      allButton.textContent = t('loot.openAll', { count: totalBoxes });
       allButton.disabled = this.isOpening;
       allButton.addEventListener('click', () => this.openAll());
       list.appendChild(allButton);
     }
 
     if (list.children.length === 0) {
-      list.innerHTML = '<p class="empty">Keine Kisten. Schaffe einen Dungeon für eine Boss-Kiste!</p>';
+      list.innerHTML = '<p class="empty">' + t('loot.noChests') + '</p>';
     }
   }
 
@@ -149,7 +150,7 @@ export class LootBoxScreen {
       const raidHint = getPityHint(this.game.guild.raidChestsSinceLegendary / BALANCING.raidLegendaryPityAfter);
       const line = document.createElement('div');
       line.className = 'pity-raid pity-level-' + raidHint.level;
-      line.textContent = 'Raid-Kisten (Legendär): ' + raidHint.text;
+      line.textContent = t('loot.raidPity', { text: raidHint.text });
       pity.appendChild(line);
     }
   }
@@ -164,7 +165,7 @@ export class LootBoxScreen {
     // Eine Holzkiste als Deko, damit die Bühne nicht leer ist
     this.chestElement.appendChild(createChestCanvas(getLootBoxType('wood'), 10));
     this.chestElement.classList.add('idle');
-    this.hintElement.textContent = 'Wähle eine Kiste zum Öffnen';
+    this.hintElement.textContent = t('loot.pickChest');
   }
 
   startOpening(boxTypeId) {
@@ -301,7 +302,7 @@ export class LootBoxScreen {
       document.body.classList.remove('screen-shake');
       void document.body.offsetWidth;
       document.body.classList.add('screen-shake');
-      showToast('LEGENDÄR! ' + item.name, item.getRarity().color);
+      showToast(t('loot.legendary', { name: item.name }), item.getRarity().color);
     }
   }
 
@@ -320,7 +321,7 @@ export class LootBoxScreen {
 
     const rarityLabel = document.createElement('div');
     rarityLabel.className = 'card-rarity';
-    rarityLabel.textContent = rarity.name + ' · Stufe ' + item.itemLevel;
+    rarityLabel.textContent = t('loot.rarityLevel', { rarity: rarity.name, level: item.itemLevel });
     card.appendChild(rarityLabel);
 
     const stats = document.createElement('div');
@@ -333,7 +334,7 @@ export class LootBoxScreen {
       card.classList.add('auto-junked');
       const stamp = document.createElement('div');
       stamp.className = 'auto-junk-stamp';
-      stamp.textContent = item.autoJunked === 'sell' ? 'verkauft' : 'zerlegt';
+      stamp.textContent = item.autoJunked === 'sell' ? t('loot.sold') : t('loot.salvaged');
       card.appendChild(stamp);
     }
 
@@ -349,12 +350,13 @@ export class LootBoxScreen {
 
   // Großes Banner, wenn eine Sammelbuch-Seite gerade voll geworden ist
   showPageBanner(page) {
-    this.bannerElement.innerHTML = '<div class="collection-banner-title">Seite vollständig!</div><div class="collection-banner-text"></div>';
+    this.bannerElement.innerHTML = '<div class="collection-banner-title"></div><div class="collection-banner-text"></div>';
+    this.bannerElement.querySelector('.collection-banner-title').textContent = t('loot.pageComplete');
     this.bannerElement.querySelector('.collection-banner-text').textContent =
-      'Neuer Titel: „' + page.title + '“ · +' + Math.round(page.goldBonus * 100) + ' % Gold in diesem Dungeon';
+      t('loot.newTitle', { title: page.title, percent: Math.round(page.goldBonus * 100) });
     this.bannerElement.hidden = false;
     Sound.collectionPage();
-    showToast('Sammelbuch: Titel „' + page.title + '“ freigeschaltet!', '#ffd23f');
+    showToast(t('loot.titleUnlocked', { title: page.title }), '#ffd23f');
   }
 
   // ---------- Zerlegen im Ergebnis ----------
@@ -402,8 +404,8 @@ export class LootBoxScreen {
     }
     button.disabled = this.salvageIds.size === 0;
     button.textContent = this.salvageIds.size === 0
-      ? 'Antippen zum Markieren, dann zerlegen'
-      : this.salvageIds.size + ' zerlegen (' + describeMaterials(total) + ')';
+      ? t('loot.tapToMark')
+      : t('loot.salvageCount', { count: this.salvageIds.size, materials: describeMaterials(total) });
   }
 
   // Knöpfe zum Zerlegen unter dem Ergebnis
@@ -412,8 +414,8 @@ export class LootBoxScreen {
     row.className = 'button-row salvage-result-row';
     const markButton = document.createElement('button');
     markButton.className = 'salvage-mark-weak-button';
-    markButton.textContent = 'Schwache markieren';
-    markButton.title = 'Markiert alle Items unter Episch, außer Boss-Items und gesperrten Items';
+    markButton.textContent = t('loot.markWeak');
+    markButton.title = t('loot.markWeakInfo');
     markButton.addEventListener('click', () => {
       Sound.click();
       for (const item of this.currentItems) {
@@ -453,7 +455,7 @@ export class LootBoxScreen {
     this.salvageIds.clear();
     if (count > 0) {
       Sound.salvage();
-      showToast(count + (count === 1 ? ' Item' : ' Items') + ' zerlegt: +' + describeMaterials(total), '#c9b8ff');
+      showToast(t('loot.itemsSalvaged', { count, materials: describeMaterials(total) }), '#c9b8ff');
     }
     this.updateSalvageMarks();
   }
@@ -462,12 +464,12 @@ export class LootBoxScreen {
     // Automatische Verwertung melden
     if (this.currentItems && this.currentItems.autoJunk && this.currentItems.autoJunk.count > 0) {
       const auto = this.currentItems.autoJunk;
-      showToast('Schrott automatisch ' + (auto.mode === 'sell' ? 'verkauft: +' + auto.gold + ' Gold' :
-        'zerlegt: +' + describeMaterials(auto.materials)) + ' (' + auto.count + ' Items)', '#9d9d9d');
+      showToast(auto.mode === 'sell' ? t('loot.autoSold', { count: auto.count, gold: auto.gold })
+        : t('loot.autoSalvaged', { count: auto.count, materials: describeMaterials(auto.materials) }), '#9d9d9d');
     }
     // Raid-Kisten: die Raid-Zutaten dazu melden
     if (this.currentItems && this.currentItems.ingredients) {
-      showToast('+' + describeMaterials(this.currentItems.ingredients) + ' Aschenessenz (zum Umschmieden von Set-Teilen)', '#ff8000');
+      showToast(t('loot.ashEssence', { materials: describeMaterials(this.currentItems.ingredients) }), '#ff8000');
     }
     this.isOpening = false;
     this.timers = [];
@@ -486,7 +488,7 @@ export class LootBoxScreen {
     // "Fertig": Die Items liegen schon im Inventar, die Bühne wird wieder frei
     const doneButton = document.createElement('button');
     doneButton.className = 'big-button';
-    doneButton.textContent = 'Fertig';
+    doneButton.textContent = t('loot.done');
     doneButton.addEventListener('click', () => {
       Sound.click();
       this.showIdle();
@@ -500,7 +502,7 @@ export class LootBoxScreen {
     if (remaining > 0) {
       const againButton = document.createElement('button');
       againButton.className = 'big-button';
-      againButton.textContent = 'Noch eine ' + this.currentBoxType.name + ' öffnen (' + remaining + ')';
+      againButton.textContent = t('loot.openAnother', { name: this.currentBoxType.name, count: remaining });
       againButton.addEventListener('click', () => this.startOpening(this.currentBoxType.id));
       this.actionsElement.appendChild(againButton);
     }

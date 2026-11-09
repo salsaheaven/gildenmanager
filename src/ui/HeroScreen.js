@@ -6,6 +6,7 @@
 // ("‹ Übersicht" führt zurück). Die Ausrüstungsliste öffnet sich dort als Fenster von unten.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { POSITIONS } from '../data/groupRules.js';
 import { HeroDetailPanel } from './HeroDetailPanel.js';
 import { EquipPanel } from './EquipPanel.js';
@@ -25,15 +26,15 @@ export class HeroScreen {
     this.root.innerHTML = `
       <div class="hero-screen">
         <section class="panel roster">
-          <h2>Helden <span class="roster-count"></span></h2>
+          <h2>${t('heroes.title')} <span class="roster-count"></span></h2>
           <div class="role-overview"></div>
         </section>
         <section class="panel hero-detail">
           <div class="hero-nav">
-            <button class="hero-nav-back">‹ Übersicht</button>
-            <button class="hero-nav-prev" title="Voriger Held">‹</button>
+            <button class="hero-nav-back">${t('heroes.back')}</button>
+            <button class="hero-nav-prev" title="${t('heroes.prev')}">‹</button>
             <span class="hero-nav-position"></span>
-            <button class="hero-nav-next" title="Nächster Held">›</button>
+            <button class="hero-nav-next" title="${t('heroes.next')}">›</button>
           </div>
           <div class="hero-detail-body"></div>
         </section>
@@ -130,7 +131,7 @@ export class HeroScreen {
     this.root.querySelector('.roster-count').textContent = '(' + heroes.length + ' / ' + this.game.guild.getMaxHeroes() + ')';
     const overview = this.root.querySelector('.role-overview');
     if (heroes.length === 0) {
-      overview.innerHTML = '<p class="empty">Noch keine Helden. Heuere welche in der Taverne an!</p>';
+      overview.innerHTML = '<p class="empty">' + t('heroes.noHeroes') + '</p>';
     } else {
       renderRoleOverview(overview, this.game, this.selectedHeroId, (heroId) => {
         this.selectedHeroId = heroId;

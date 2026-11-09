@@ -10,6 +10,7 @@
 // Schließen mit dem X oder der Escape-Taste.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { STAT_NAMES, SLOT_NAMES } from '../data/items.js';
 import { DAMAGE_TYPES } from '../data/damageTypes.js';
 import { EQUIPMENT_SLOTS } from '../entities/Hero.js';
@@ -42,13 +43,13 @@ export class InventoryOverlay {
     this.root.hidden = true;
     this.root.innerHTML = `
       <div class="inventory-header">
-        <h2>Inventar <span class="inventory-count"></span></h2>
-        <span class="inventory-materials" title="Material zum Verbessern, Schmieden und Brauen. Staub, Kristalle und Rohstoffe gibt es durchs Zerlegen, Rohstoffe und Kräuter auch über Tagesaufgaben."></span>
-        <button class="close-button" title="Schließen (Esc)">✕</button>
+        <h2>${t('loot.inventory')} <span class="inventory-count"></span></h2>
+        <span class="inventory-materials" title="${t('loot.materialsInfo')}"></span>
+        <button class="close-button" title="${t('loot.closeEsc')}">✕</button>
       </div>
       <div class="inventory-categories"></div>
       <div class="button-row inventory-select-row">
-        <button class="select-mode-button">Mehrere auswählen</button>
+        <button class="select-mode-button">${t('loot.selectMode')}</button>
       </div>
       <div class="inventory-body">
         <div class="inventory-grid"></div>
@@ -59,7 +60,7 @@ export class InventoryOverlay {
             <button class="salvage-junk-button"></button>
           </div>
           <div class="auto-junk">
-            <div class="hint">Schrott (Weiß und Grau) aus neuen Kisten automatisch:</div>
+            <div class="hint">${t('loot.autoJunkLabel')}</div>
             <div class="button-row auto-junk-buttons"></div>
           </div>
         </div>
@@ -73,7 +74,7 @@ export class InventoryOverlay {
       const result = this.game.sellItems(this.game.getJunkItems().map((item) => item.id));
       if (result.count > 0) {
         Sound.coin();
-        showToast('Schrott verkauft: ' + result.count + ' Items, +' + result.gold + ' Gold');
+        showToast(t('loot.junkSold', { count: result.count, gold: result.gold }));
       }
     });
 
@@ -81,7 +82,7 @@ export class InventoryOverlay {
       const result = this.game.salvageItems(this.game.getJunkItems().map((item) => item.id));
       if (result.count > 0) {
         Sound.salvage();
-        showToast('Schrott zerlegt: ' + result.count + ' Items, +' + describeMaterials(result.materials));
+        showToast(t('loot.junkSalvaged', { count: result.count, materials: describeMaterials(result.materials) }));
       }
     });
 
@@ -196,9 +197,9 @@ export class InventoryOverlay {
       grid.appendChild(this.createSlot(item));
     }
     if (items.length === 0) {
-      grid.innerHTML = '<p class="empty">Noch leer. Öffne eine Kiste in der Schatzkammer!</p>';
+      grid.innerHTML = '<p class="empty">' + t('loot.emptyInventory') + '</p>';
     } else if (shownItems.length === 0) {
-      grid.innerHTML = '<p class="empty">In dieser Kategorie liegt nichts.</p>';
+      grid.innerHTML = '<p class="empty">' + t('loot.emptyCategory') + '</p>';
     }
 
     this.root.querySelector('.select-mode-button').textContent = this.selectMode ? 'Fertig' : 'Mehrere auswählen';
@@ -234,19 +235,19 @@ export class InventoryOverlay {
     }
     const details = this.root.querySelector('.item-details');
     details.innerHTML = `
-      <div class="detail-name">${selected.length} ausgewählt</div>
-      <p class="hint">Tippe Items an, um sie zu markieren. Gesperrte Items (🔒) lassen sich nicht auswählen.</p>
+      <div class="detail-name">${t('loot.selected', { count: selected.length })}</div>
+      <p class="hint">${t('loot.selectHint')}</p>
       <div class="button-row">
-        <button class="select-all-button">Alle hier markieren</button>
-        <button class="select-weak-button">Bis Grün markieren</button>
-        <button class="select-none-button">Auswahl aufheben</button>
+        <button class="select-all-button">${t('loot.selectAll')}</button>
+        <button class="select-weak-button">${t('loot.selectWeak')}</button>
+        <button class="select-none-button">${t('loot.selectNone')}</button>
       </div>
       <div class="detail-actions">
-        <button class="mass-sell-button">Verkaufen (${gold} Gold)</button>
+        <button class="mass-sell-button">${t('loot.sellFor', { gold })}</button>
         <button class="mass-salvage-button salvage-button"></button>
       </div>
     `;
-    details.querySelector('.mass-salvage-button').textContent = 'Zerlegen (' + (describeMaterials(materials) || '✧ 0') + ')';
+    details.querySelector('.mass-salvage-button').textContent = t('loot.salvageFor', { materials: describeMaterials(materials) || '✧ 0' });
     details.querySelector('.mass-sell-button').disabled = selected.length === 0;
     details.querySelector('.mass-salvage-button').disabled = selected.length === 0;
     const selectable = (item) => !item.locked;
@@ -271,13 +272,13 @@ export class InventoryOverlay {
       const result = this.game.sellItems([...this.selectedIds]);
       this.selectedIds.clear();
       Sound.coin();
-      showToast(result.count + ' Items verkauft: +' + result.gold + ' Gold', '#ffd23f');
+      showToast(t('loot.itemsSold', { count: result.count, gold: result.gold }), '#ffd23f');
     });
     details.querySelector('.mass-salvage-button').addEventListener('click', () => {
       const result = this.game.salvageItems([...this.selectedIds]);
       this.selectedIds.clear();
       Sound.salvage();
-      showToast(result.count + ' Items zerlegt: +' + describeMaterials(result.materials), '#c9b8ff');
+      showToast(t('loot.itemsSalvaged', { count: result.count, materials: describeMaterials(result.materials) }), '#c9b8ff');
     });
   }
 
@@ -285,7 +286,7 @@ export class InventoryOverlay {
   renderAutoJunk() {
     const container = this.root.querySelector('.auto-junk-buttons');
     container.innerHTML = '';
-    for (const option of [{ id: 'off', label: 'Aus' }, { id: 'sell', label: 'Verkaufen' }, { id: 'salvage', label: 'Zerlegen' }]) {
+    for (const option of [{ id: 'off', label: t('loot.off') }, { id: 'sell', label: t('loot.sell') }, { id: 'salvage', label: t('loot.salvage') }]) {
       const button = document.createElement('button');
       button.className = 'filter-button' + (option.id === 'salvage' ? ' auto-junk-salvage' : '');
       button.textContent = option.label;
@@ -310,7 +311,7 @@ export class InventoryOverlay {
       const button = document.createElement('button');
       button.className = 'category-button';
       button.classList.toggle('active', category === this.category);
-      const name = category === null ? 'Alle' : SLOT_NAMES[category];
+      const name = category === null ? t('loot.all') : SLOT_NAMES[category];
       button.textContent = name + ' ' + itemsInCategory.length;
       if (hasNew) {
         button.insertAdjacentHTML('beforeend', '<span class="new-dot"></span>');
@@ -377,18 +378,18 @@ export class InventoryOverlay {
     const item = this.game.guild.findItem(this.selectedItemId);
 
     if (!item || this.hiddenItemIds.has(item.id)) {
-      details.innerHTML = '<p class="hint">Tippe ein Item an.</p>';
+      details.innerHTML = '<p class="hint">' + t('loot.tapItem') + '</p>';
       return;
     }
 
     const rarity = item.getRarity();
     details.innerHTML = `
       <div class="detail-name" style="color: ${rarity.color}"></div>
-      <div class="detail-sub">${rarity.name} · ${describeItemKind(item)} · Stufe ${item.itemLevel}</div>
+      <div class="detail-sub">${t('loot.itemSub', { rarity: rarity.name, kind: describeItemKind(item), level: item.itemLevel })}</div>
       <div class="detail-for">${describeSuitableClasses(item)}</div>
       <ul class="detail-stats"></ul>
       <div class="detail-actions">
-        <button class="sell-button">Verkaufen (${item.getSellValue()} Gold)</button>
+        <button class="sell-button">${t('loot.sellFor', { gold: item.getSellValue() })}</button>
         <button class="salvage-button"></button>
       </div>
       <p class="hint detail-upgrade-hint"></p>
@@ -398,7 +399,7 @@ export class InventoryOverlay {
     if (setLine) {
       details.querySelector('.detail-for').after(setLine);
     }
-    details.querySelector('.salvage-button').textContent = 'Zerlegen (' + describeMaterials(getSalvageYield(item)) + ')';
+    details.querySelector('.salvage-button').textContent = t('loot.salvageFor', { materials: describeMaterials(getSalvageYield(item)) });
     details.querySelector('.detail-actions').appendChild(createUpgradeButton(this.game, item, details));
     details.querySelector('.detail-actions').appendChild(createLockButton(this.game, item));
     // Gesperrte Items kann man nicht verkaufen oder zerlegen
@@ -416,10 +417,10 @@ export class InventoryOverlay {
       details.querySelector('.detail-upgrade-hint').after(setReforgeControls);
     }
     details.querySelector('.detail-upgrade-hint').textContent = item.locked
-      ? 'Gesperrt: Zum Verkaufen oder Zerlegen erst entsperren.'
+      ? t('loot.lockedHint')
       : item.upgradeLevel > 0
-      ? 'Verkaufen und Zerlegen bringen nur den Grundwert, die Verbesserung geht verloren.'
-      : 'Jede Stufe gibt +6 % auf alle Werte. Ab +6 kann es fehlschlagen.';
+      ? t('loot.upgradedHint')
+      : t('loot.upgradeHint');
 
     const statList = details.querySelector('.detail-stats');
     const itemStats = item.getStats();
@@ -432,14 +433,14 @@ export class InventoryOverlay {
       const line = document.createElement('li');
       line.className = 'detail-resistance';
       line.style.color = DAMAGE_TYPES[damageTypeId].color;
-      line.textContent = '+' + item.resistances[damageTypeId] + ' % ' + DAMAGE_TYPES[damageTypeId].name + '-Resistenz';
+      line.textContent = t('loot.resistanceLine', { value: item.resistances[damageTypeId], type: DAMAGE_TYPES[damageTypeId].name });
       statList.appendChild(line);
     }
 
     details.querySelector('.sell-button').addEventListener('click', () => {
       const gold = this.game.sellItem(item.id);
       Sound.coin();
-      showToast(item.getDisplayName() + ' verkauft: +' + gold + ' Gold', rarity.color);
+      showToast(t('loot.itemSold', { name: item.getDisplayName(), gold }), rarity.color);
       this.selectedItemId = null;
       this.render();
     });
@@ -448,7 +449,7 @@ export class InventoryOverlay {
       this.selectedItemId = null;
       const materials = this.game.salvageItem(item.id);
       Sound.salvage();
-      showToast(item.getDisplayName() + ' zerlegt: +' + describeMaterials(materials), rarity.color);
+      showToast(t('loot.itemSalvaged', { name: item.getDisplayName(), materials: describeMaterials(materials) }), rarity.color);
     });
   }
 
@@ -457,7 +458,7 @@ export class InventoryOverlay {
     const junk = items.filter((item) => this.game.isJunk(item));
     const sellButton = this.root.querySelector('.sell-junk-button');
     const goldValue = junk.reduce((sum, item) => sum + item.getSellValue(), 0);
-    sellButton.textContent = 'Schrott verkaufen (' + junk.length + ' = ' + goldValue + ' Gold)';
+    sellButton.textContent = t('loot.sellJunk', { count: junk.length, gold: goldValue });
     sellButton.disabled = junk.length === 0;
 
     const salvageButton = this.root.querySelector('.salvage-junk-button');
@@ -468,7 +469,7 @@ export class InventoryOverlay {
         total[materialId] = (total[materialId] || 0) + materials[materialId];
       }
     }
-    salvageButton.textContent = 'Schrott zerlegen (' + junk.length + ' = ' + (describeMaterials(total) || '✧ 0') + ')';
+    salvageButton.textContent = t('loot.salvageJunk', { count: junk.length, materials: describeMaterials(total) || '✧ 0' });
     salvageButton.disabled = junk.length === 0;
   }
 }

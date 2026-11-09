@@ -6,6 +6,7 @@
 // createLockBadge = kleines 🔒 für Kacheln und Ausrüstungsplätze.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
 
@@ -14,15 +15,13 @@ export function createLockButton(game, item) {
   const button = document.createElement('button');
   button.className = 'lock-button';
   button.classList.toggle('locked', item.locked);
-  button.textContent = item.locked ? '🔒 Gesperrt' : '🔓 Sperren';
-  button.title = item.locked
-    ? 'Gesperrt: „Bestes anlegen“ tauscht es nicht aus, Verkaufen und Zerlegen gehen nicht. Tippen zum Entsperren.'
-    : 'Sperren: „Bestes anlegen“ tauscht es dann nicht mehr aus, und es kann nicht verkauft oder zerlegt werden.';
+  button.textContent = item.locked ? t('parts.locked') : t('parts.lock');
+  button.title = item.locked ? t('parts.lockedInfo') : t('parts.lockInfo');
   button.addEventListener('click', () => {
     Sound.click();
     const locked = game.toggleItemLock(item.id);
     if (locked !== null) {
-      showToast(item.getDisplayName() + (locked ? ' ist gesperrt' : ' ist entsperrt'), item.getRarity().color);
+      showToast(t(locked ? 'parts.isLocked' : 'parts.isUnlocked', { name: item.getDisplayName() }), item.getRarity().color);
     }
   });
   return button;
@@ -35,7 +34,7 @@ export function createLockBadge(item) {
   }
   const badge = document.createElement('span');
   badge.className = 'lock-badge';
-  badge.title = 'Gesperrt';
+  badge.title = t('parts.lockedShort');
   badge.textContent = '🔒';
   return badge;
 }

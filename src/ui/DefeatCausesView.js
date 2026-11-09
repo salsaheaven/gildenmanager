@@ -20,7 +20,8 @@ export function createDefeatCausesView(analysis) {
     box.hidden = true;
     return box;
   }
-  box.innerHTML = '<div class="defeat-title">Woran es lag</div>';
+  box.innerHTML = '<div class="defeat-title"></div>';
+  box.querySelector('.defeat-title').textContent = t('parts.defeatTitle');
 
   for (const cause of analysis.causes) {
     const percent = Math.round(cause.share * 100);
@@ -49,15 +50,16 @@ export function createDefeatCausesView(analysis) {
   if (analysis.tip) {
     const tip = document.createElement('div');
     tip.className = 'defeat-tip';
-    tip.textContent = 'Tipp: ' + analysis.tip;
+    tip.textContent = t('parts.tip', { text: analysis.tip });
     box.appendChild(tip);
   }
   // Konkrete Klassen, die helfen würden (z.B. "Panzer brechen: Samurai, Barbar, Mönch")
   if (analysis.classTip) {
     const classTip = document.createElement('div');
     classTip.className = 'defeat-class-tip';
-    classTip.textContent = 'Helfen würde: ' + analysis.classTip;
+    classTip.textContent = t('parts.classTip', { text: analysis.classTip });
     box.appendChild(classTip);
   }
   return box;
 }
+import { t } from '../core/Language.js';

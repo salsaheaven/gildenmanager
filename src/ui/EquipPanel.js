@@ -8,6 +8,7 @@
 // Bewusst ohne "bestes Item" und ohne Gesamtnote: Welches Teil besser passt, entscheidet der Spieler.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { SLOT_NAMES } from '../data/items.js';
 import { createItemCanvas } from './PixelArt.js';
 import { formatItemValues, describeItemKind, describeClassArmor, describeStatDifferences } from './format.js';
@@ -43,8 +44,8 @@ export class EquipPanel {
     }
     if (!this.slot) {
       this.root.innerHTML = `
-        <h2>Ausrüstung</h2>
-        <p class="hint">Tippe links auf einen Ausrüstungsplatz, um passende Items aus dem Inventar zu sehen.</p>
+        <h2>${t('heroes.gear')}</h2>
+        <p class="hint">${t('heroes.equipPanelHint')}</p>
         <p class="hint equip-armor-hint"></p>
       `;
       this.root.querySelector('.equip-armor-hint').textContent = describeClassArmor(this.hero.getClass()) + '. Ringe passen allen.';
@@ -53,7 +54,7 @@ export class EquipPanel {
 
     const currentItem = this.hero.equipment[this.slot];
     this.root.innerHTML = `
-      <div class="equip-head"><h2></h2><button class="sheet-close-button">✕ Schließen</button></div>
+      <div class="equip-head"><h2></h2><button class="sheet-close-button">${t('heroes.closeSheet')}</button></div>
       <p class="hint equip-armor-hint"></p>
       <div class="equip-current"></div>
       <div class="equip-list"></div>
@@ -72,22 +73,22 @@ export class EquipPanel {
       list.appendChild(this.createItemRow(item, currentItem));
     }
     if (items.length === 0) {
-      list.innerHTML = '<p class="empty">Keine passenden Items im Inventar. Öffne Kisten in der Schatzkammer!</p>';
+      list.innerHTML = '<p class="empty">' + t('heroes.noFittingItems') + '</p>';
     }
   }
 
   // "Angelegt: …" mit den Werten des getragenen Items und dem Verbessern-Knopf, oder "Angelegt: nichts"
   renderCurrentItem(container, currentItem) {
     if (!currentItem) {
-      container.innerHTML = '<span class="equip-current-label">Angelegt:</span> <span class="hint">nichts</span>';
+      container.innerHTML = '<span class="equip-current-label">' + t('heroes.wearing') + '</span> <span class="hint">' + t('heroes.nothing') + '</span>';
       return;
     }
-    container.innerHTML = '<span class="equip-current-label">Angelegt:</span> <b></b><div class="equip-stats"></div>';
+    container.innerHTML = '<span class="equip-current-label">' + t('heroes.wearing') + '</span> <b></b><div class="equip-stats"></div>';
     const name = container.querySelector('b');
     name.textContent = currentItem.getDisplayName();
     name.style.color = currentItem.getRarity().color;
     container.querySelector('.equip-stats').textContent =
-      describeItemKind(currentItem) + ' · Stufe ' + currentItem.itemLevel + ' · ' + formatItemValues(currentItem);
+      t('heroes.itemLine', { kind: describeItemKind(currentItem), level: currentItem.itemLevel, values: formatItemValues(currentItem) });
     // Funken oder Riss erscheinen über der ganzen rechten Seite (die bleibt beim Neuzeichnen erhalten)
     container.appendChild(createUpgradeButton(this.game, currentItem, this.root));
     // Sperren: "Bestes anlegen" tauscht dieses Item dann nicht mehr aus
@@ -117,9 +118,9 @@ export class EquipPanel {
     `);
     row.querySelector('.equip-name').textContent = item.getDisplayName();
     if (this.inventory.isNew(item.id)) {
-      row.querySelector('.equip-name').insertAdjacentHTML('beforeend', ' <span class="new-chip">neu</span>');
+      row.querySelector('.equip-name').insertAdjacentHTML('beforeend', ' <span class="new-chip">' + t('common.new') + '</span>');
     }
-    row.querySelector('.equip-stats').textContent = describeItemKind(item) + ' · Stufe ' + item.itemLevel + ' · ' + formatItemValues(item);
+    row.querySelector('.equip-stats').textContent = t('heroes.itemLine', { kind: describeItemKind(item), level: item.itemLevel, values: formatItemValues(item) });
     const setLine = createSetLine(item);
     if (setLine) {
       row.querySelector('.equip-stats').after(setLine);
@@ -129,7 +130,7 @@ export class EquipPanel {
     const compare = row.querySelector('.equip-compare');
     const differences = describeStatDifferences(item, currentItem);
     if (differences.length === 0) {
-      compare.textContent = 'gleiche Werte wie angelegt';
+      compare.textContent = t('heroes.sameStats');
     }
     for (const difference of differences) {
       const part = document.createElement('span');

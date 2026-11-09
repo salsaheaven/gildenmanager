@@ -12,6 +12,7 @@
 // Die Aufgaben selbst stehen in data/heroTasks.js, die Rechnung in systems/DayPlan.js.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { getDayPlan } from '../systems/DayPlan.js';
 import { HERO_TASKS } from '../data/heroTasks.js';
 import { getJobGold, getTrainingCost } from '../systems/HeroTaskSystem.js';
@@ -54,25 +55,25 @@ export class DayPlanScreen {
           <div class="day-plan-hint"></div>
           <div class="day-plan-wages hint"></div>
           <div class="day-plan-actions">
-            <button class="go-dungeons-button">Gruppe einplanen</button>
-            <button class="yesterday-button" hidden>Bericht von gestern</button>
-            <button class="big-button plan-end-day-button">Tag beenden ▶</button>
+            <button class="go-dungeons-button">${t('dayPlan.planGroup')}</button>
+            <button class="yesterday-button" hidden>${t('dayPlan.yesterday')}</button>
+            <button class="big-button plan-end-day-button">${t('topBar.endDay')}</button>
           </div>
         </section>
         <section class="panel day-plan-server">
-          <h2>Neues vom Server</h2>
+          <h2>${t('dayPlan.serverNews')}</h2>
           <div class="news-ticker"></div>
           <details class="leaderboard">
-            <summary>Rangliste</summary>
+            <summary>${t('dayPlan.leaderboard')}</summary>
             <div class="leaderboard-list"></div>
           </details>
         </section>
         <section class="panel">
-          <h2>Gruppen</h2>
+          <h2>${t('dayPlan.groups')}</h2>
           <div class="day-plan-runs"></div>
         </section>
         <section class="panel">
-          <h2>Ohne Kampf</h2>
+          <h2>${t('dayPlan.noFight')}</h2>
           <div class="day-plan-others"></div>
         </section>
       </div>
@@ -119,7 +120,8 @@ export class DayPlanScreen {
       ticker.appendChild(createNewsLine(news));
     }
     if (latest.length === 0) {
-      ticker.innerHTML = '<p class="empty">Noch ist es ruhig auf dem Server.</p>';
+      ticker.innerHTML = '<p class="empty"></p>';
+      ticker.querySelector('.empty').textContent = t('dayPlan.quiet');
     }
 
     const list = this.root.querySelector('.leaderboard-list');
@@ -134,12 +136,12 @@ export class DayPlanScreen {
       row.querySelector('.leaderboard-name').textContent = entry.name;
       // Im Raid-Rennen zählt der Raid-Fortschritt, sonst die Dungeons
       if (entry.raidBest > 0) {
-        row.querySelector('.leaderboard-progress').textContent = 'Raid: ' + entry.raidBest + ' / ' + entry.raidBossCount +
-          ' Bosse · zuletzt Tag ' + entry.raidBestDay;
+        row.querySelector('.leaderboard-progress').textContent = t('dayPlan.raidProgress',
+          { best: entry.raidBest, total: entry.raidBossCount, day: entry.raidBestDay });
       } else {
         row.querySelector('.leaderboard-progress').textContent = entry.best === 0
-          ? 'noch kein Dungeon'
-          : entry.best + ' / ' + DUNGEONS.length + ' Dungeons · zuletzt Tag ' + entry.bestDay;
+          ? t('dayPlan.noDungeonYet')
+          : t('dayPlan.dungeonProgress', { best: entry.best, total: DUNGEONS.length, day: entry.bestDay });
       }
       list.appendChild(row);
     });
@@ -148,8 +150,8 @@ export class DayPlanScreen {
   // ---------- Überblick ----------
 
   renderHeader(plan) {
-    this.root.querySelector('.day-plan-title').textContent = 'Tagesplan – Tag ' + this.game.day +
-      (this.game.areDungeonsClosedToday() ? ' · Raid-Tag' : '');
+    this.root.querySelector('.day-plan-title').textContent = t('dayPlan.title', { day: this.game.day }) +
+      (this.game.areDungeonsClosedToday() ? t('dayPlan.raidDay') : '');
 
     const counts = this.root.querySelector('.day-plan-counts');
     counts.innerHTML = '';
@@ -169,23 +171,21 @@ export class DayPlanScreen {
     wages.innerHTML = '';
     if (plan.entries.length > 0) {
       const costs = this.game.getDailyWages() + training;
-      wages.appendChild(createIconChip('coin', '−' + costs, 'Heute Abend fällig: Sold ' + this.game.getDailyWages() + ' Gold' +
-        (training > 0 ? ', Training ' + training + ' Gold' : '') + '.'));
+      wages.appendChild(createIconChip('coin', '−' + costs, t('dayPlan.costsInfo', { wages: this.game.getDailyWages(), training })));
     }
 
     // Hinweis, was man als Nächstes tun könnte: kurz, die Erklärung in der Info-Blase
     const hint = this.root.querySelector('.day-plan-hint');
     hint.innerHTML = '';
     if (plan.entries.length === 0) {
-      hint.textContent = 'Noch keine Helden: In der Taverne warten Bewerber.';
+      hint.textContent = t('dayPlan.noHeroes');
     } else if (plan.counts.rest > 0) {
-      hint.appendChild(createIconChip('iconHero', plan.counts.rest + ' ohne Aufgabe',
-        'Diese Helden ruhen sich nur aus. Schick sie in einen Dungeon oder gib ihnen unten eine Aufgabe (Training, Sammeln, Aufträge, Erkunden).', 'warn'));
+      hint.appendChild(createIconChip('iconHero', t('dayPlan.idle', { count: plan.counts.rest }), t('dayPlan.idleInfo'), 'warn'));
     } else {
-      hint.appendChild(createIconChip('iconHero', 'Alle haben eine Aufgabe', 'Zeit, den Tag zu beenden!', 'ok'));
+      hint.appendChild(createIconChip('iconHero', t('dayPlan.allBusy'), t('dayPlan.allBusyInfo'), 'ok'));
     }
     const goButton = this.root.querySelector('.go-dungeons-button');
-    goButton.textContent = plan.entries.length === 0 ? 'Zur Taverne' : 'Gruppe einplanen';
+    goButton.textContent = plan.entries.length === 0 ? t('dayPlan.toTavern') : t('dayPlan.planGroup');
     goButton.dataset.target = plan.entries.length === 0 ? 'tavern' : 'dungeons';
     goButton.classList.toggle('glow', plan.counts.rest > 0 || plan.entries.length === 0);
   }
@@ -207,21 +207,21 @@ export class DayPlanScreen {
     const status = row.querySelector('.run-status');
     const nextIndex = game.getNextRaidEncounterIndex();
     if (nextIndex === null) {
-      status.textContent = 'Alle Bosse dieser Woche sind besiegt';
+      status.textContent = t('dayPlan.raidAllDefeated');
     } else if (plan.lastFoughtDay === game.day) {
-      status.textContent = 'heute schon geraidet';
+      status.textContent = t('dayPlan.raidDone');
     } else if (plan.skippedDay === game.day) {
-      status.textContent = 'setzt heute aus';
+      status.textContent = t('dayPlan.raidSkipped');
     } else if (plan.activeToday) {
       const nextBoss = raid.encounters.slice(nextIndex).find((encounter) => encounter.type === 'boss');
-      status.textContent = game.checkRaid().heroCount + ' Helden ziehen los · nächster Boss: ' + getBoss(nextBoss.bossId).name;
+      status.textContent = t('dayPlan.raidGoes', { count: game.checkRaid().heroCount, boss: getBoss(nextBoss.bossId).name });
     } else {
-      status.textContent = 'Aufstellung reicht nicht: ' + game.checkRaid().problems.join(', ');
+      status.textContent = t('dayPlan.raidNotReady', { problems: game.checkRaid().problems.join(', ') });
       row.classList.add('raid-not-ready');
     }
     const controls = row.querySelector('.run-controls');
     const goButton = document.createElement('button');
-    goButton.textContent = 'Aufstellung';
+    goButton.textContent = t('dayPlan.lineup');
     goButton.addEventListener('click', () => {
       Sound.click();
       this.onGoTo('raid');
@@ -246,8 +246,9 @@ export class DayPlanScreen {
       return;
     }
     if (this.game.guild.expeditions.length === 0 && this.game.guild.standingGroups.length === 0) {
-      list.innerHTML = '<p class="empty">Heute zieht keine Gruppe los.</p>';
-      list.appendChild(createInfoIcon('Bilde eine Gruppe im Abschnitt Dungeons: Sie zieht dann jeden Tag los, bis du sie auflöst.'));
+      list.innerHTML = '<p class="empty"></p>';
+      list.querySelector('.empty').textContent = t('dayPlan.noGroupToday');
+      list.appendChild(createInfoIcon(t('dayPlan.noGroupInfo')));
       return;
     }
     for (const expedition of this.game.guild.expeditions) {
@@ -265,9 +266,9 @@ export class DayPlanScreen {
       card.querySelector('.run-name').textContent = getRunTitle(this.game, expedition);
       // Stufe, Rückzug und Einschätzung als Symbole (Einzelheiten per Antippen / Maus drüber)
       const status = card.querySelector('.run-status');
-      status.appendChild(createIconChip('iconSword', String(dungeon.level), 'Stufe des Dungeons: ' + dungeon.level + '.'));
+      status.appendChild(createIconChip('iconSword', String(dungeon.level), t('dayPlan.levelInfo', { level: dungeon.level })));
       if (retreatRule && retreatRule.afterFallen !== null) {
-        status.appendChild(createIconChip('iconSkull', String(retreatRule.afterFallen), 'Rückzug: ' + retreatRule.name + '.'));
+        status.appendChild(createIconChip('iconSkull', String(retreatRule.afterFallen), t('dayPlan.retreatInfo', { name: retreatRule.name })));
       }
 
       const heroList = card.querySelector('.day-plan-heroes');
@@ -291,13 +292,13 @@ export class DayPlanScreen {
     const tile = document.createElement('button');
     tile.className = 'day-plan-hero-tile';
     tile.style.setProperty('--rarity', hero.getRarity().color);
-    tile.title = hero.name + ' · ' + hero.getClass().name + ' · Lv ' + hero.level;
+    tile.title = hero.name + ' · ' + hero.getClass().name + ' · ' + t('common.lv') + ' ' + hero.level;
     tile.appendChild(createHeroCanvas(hero, 2));
     tile.insertAdjacentHTML('beforeend', '<span class="group-slot-name"></span><span class="hero-tile-level"></span>');
     tile.querySelector('.group-slot-name').textContent = hero.name.split(' ')[0];
     tile.querySelector('.hero-tile-level').textContent = 'Lv ' + hero.level;
     if (this.game.getSlotsWithNewGear(hero.id).length > 0) {
-      tile.insertAdjacentHTML('beforeend', '<span class="new-gear-badge">neu</span>');
+      tile.insertAdjacentHTML('beforeend', '<span class="new-gear-badge">' + t('common.new') + '</span>');
     }
     tile.addEventListener('click', () => {
       Sound.click();
@@ -310,7 +311,7 @@ export class DayPlanScreen {
   createSupplySection(expedition) {
     const section = document.createElement('div');
     section.className = 'day-plan-supplies plan-row';
-    section.appendChild(createIconChip('iconPotion', '', 'Vorräte: Tränke aus der Vorratskammer, die die Gruppe mitnimmt. Tauschen geht bis zum Tagesende.'));
+    section.appendChild(createIconChip('iconPotion', '', t('dayPlan.suppliesInfo')));
     section.appendChild(createSupplyPicker(this.game.guild, expedition.supplies, expedition.supplies, (next) => {
       Sound.click();
       this.game.setExpeditionSupplies(expedition.id, next);
@@ -323,7 +324,7 @@ export class DayPlanScreen {
     const section = document.createElement('details');
     section.className = 'day-plan-orders';
     section.open = this.openOrders.has(expedition.id);
-    section.innerHTML = '<summary>Anweisungen</summary><div class="orders-list"></div>';
+    section.innerHTML = '<summary>' + t('common.orders') + '</summary><div class="orders-list"></div>';
     section.addEventListener('toggle', () => {
       if (section.open) {
         this.openOrders.add(expedition.id);
@@ -345,7 +346,8 @@ export class DayPlanScreen {
     list.innerHTML = '';
     const others = plan.entries.filter((entry) => entry.taskId !== 'dungeon');
     if (others.length === 0) {
-      list.innerHTML = '<p class="empty">Niemand. Alle Helden kämpfen heute.</p>';
+      list.innerHTML = '<p class="empty"></p>';
+      list.querySelector('.empty').textContent = t('dayPlan.nobodyIdle');
       return;
     }
     for (const entry of others) {
@@ -362,14 +364,14 @@ export class DayPlanScreen {
     text.className = 'day-plan-hero-text';
     text.innerHTML = '<b></b><span class="roster-sub"></span>';
     text.querySelector('b').textContent = hero.name.split(' ')[0];
-    text.querySelector('.roster-sub').textContent = hero.getClass().name + ' · Lv ' + hero.level;
+    text.querySelector('.roster-sub').textContent = hero.getClass().name + ' · ' + t('common.lv') + ' ' + hero.level;
     text.title = hero.name;
     // Neue Ausrüstung für diesen Helden: antippen springt zu ihm in den Heldenbildschirm
     if (this.game.getSlotsWithNewGear(hero.id).length > 0) {
       const badge = document.createElement('button');
       badge.className = 'new-gear-badge new-gear-button';
-      badge.textContent = 'neu';
-      badge.title = 'Zum Helden, um sie anzuschauen';
+      badge.textContent = t('common.new');
+      badge.title = t('dayPlan.newGearInfo');
       badge.addEventListener('click', () => {
         Sound.click();
         this.onShowHero(hero.id);
@@ -440,7 +442,7 @@ export class DayPlanScreen {
     if (hero.task.taskId === 'jobs') {
       const hint = document.createElement('span');
       hint.className = 'task-hint';
-      hint.textContent = '≈ ' + getJobGold(hero) + ' Gold';
+      hint.textContent = t('dayPlan.jobGold', { gold: getJobGold(hero) });
       picker.appendChild(hint);
     }
     return picker;
@@ -457,8 +459,8 @@ export class DayPlanScreen {
     const count = this.game.guild.countSupply(bandages.id);
     const button = document.createElement('button');
     button.className = 'bandage-button';
-    button.textContent = bandages.icon + ' Verband (' + count + ')';
-    button.title = bandages.description + (count === 0 ? '. Gibt es beim Händler in der Schatzkammer.' : '');
+    button.textContent = t('dayPlan.bandage', { icon: bandages.icon, count });
+    button.title = bandages.description + (count === 0 ? t('dayPlan.bandageMissing') : '');
     button.disabled = count === 0;
     button.addEventListener('click', () => {
       if (this.game.useSupplyOnHero(bandages.id, hero.id)) {

@@ -7,6 +7,7 @@
 // Klick auf einen Ausrüstungsplatz öffnet die Ausrüstungsliste für diesen Platz (EquipPanel).
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { getUnlock } from '../data/unlocks.js';
 import { renderTalents } from './TalentPanel.js';
 import { ROLE_NAMES, ROW_NAMES } from '../data/heroClasses.js';
@@ -45,8 +46,8 @@ export class HeroDetailPanel {
     this.selectedSlot = selectedSlot;
     if (!hero) {
       this.root.innerHTML = `
-        <p class="empty">Wähle links einen Helden aus.</p>
-        <button class="go-tavern-button">Zur Taverne</button>
+        <p class="empty">${t('heroes.pickHero')}</p>
+        <button class="go-tavern-button">${t('heroes.toTavern')}</button>
       `;
       this.root.querySelector('.go-tavern-button').addEventListener('click', () => this.callbacks.onGoToTavern());
       return;
@@ -66,44 +67,44 @@ export class HeroDetailPanel {
             <span>Level ${hero.level}</span>
             <div class="bar" title="Erfahrung gibt es für gewonnene Begegnungen in Dungeons"><div class="bar-fill xp-fill" style="width: ${Math.round(hero.getXpProgress() * 100)}%"></div></div>
           </div>
-          <div class="detail-xp">${hero.isMaxLevel() ? 'Höchstes Level erreicht!' : hero.xp + ' / ' + hero.getXpForNextLevel() + ' EP'}</div>
+          <div class="detail-xp">${hero.isMaxLevel() ? t('heroes.maxLevel') : t('heroes.xp', { xp: hero.xp, needed: hero.getXpForNextLevel() })}</div>
           <div class="detail-injury"></div>
           <div class="detail-unhappy"></div>
           <div class="trait-list"></div>
-          <button class="dismiss-button" title="Der Held verlässt die Gilde, seine Ausrüstung kommt ins Inventar">Entlassen</button>
+          <button class="dismiss-button" title="${t('heroes.dismissInfo')}">${t('heroes.dismiss')}</button>
         </div>
       </div>
 
       <div class="equipment-head">
-        <h3>Ausrüstung</h3>
-        <button class="equip-best-button" title="Legt für jeden Platz das Item mit den meisten nützlichen Werten an. Resistenzen und Set-Boni zählen nicht, getragene und gesperrte Teile bleiben dran.">Bestes anlegen</button>
+        <h3>${t('heroes.gear')}</h3>
+        <button class="equip-best-button" title="${t('heroes.equipBestInfo')}">${t('heroes.equipBest')}</button>
       </div>
       <div class="equipment-grid"></div>
       <div class="hero-set-slot"></div>
 
       <details class="detail-section" data-section="talents">
-        <summary>Talente <span class="talent-lock-hint">· ab Level ${getUnlock('talents').condition.heroLevel}</span>${hero.getFreeTalentPicks() > 0 ? ' <span class="talent-free-chip">Talent frei!</span>' : ''}</summary>
+        <summary>${t('heroes.talents')} <span class="talent-lock-hint">${t('heroes.fromLevel', { level: getUnlock('talents').condition.heroLevel })}</span>${hero.getFreeTalentPicks() > 0 ? ' <span class="talent-free-chip">' + t('heroes.talentFree') + '</span>' : ''}</summary>
         <div class="hero-talents"></div>
       </details>
 
       <details class="detail-section" data-section="stats">
-        <summary>Werte und Skills <span class="hint">· AW ${hero.getGearScore()}</span></summary>
+        <summary>${t('heroes.statsSkills')} <span class="hint">· ${t('heroes.gs')} ${hero.getGearScore()}</span></summary>
         <div class="detail-columns">
           <div>
-            <h3>Werte</h3>
+            <h3>${t('heroes.stats')}</h3>
             <table class="stat-table"></table>
-            <div class="gear-score">Ausrüstungswert: <b>${hero.getGearScore()}</b></div>
+            <div class="gear-score">${t('heroes.gearScore')} <b>${hero.getGearScore()}</b></div>
             <div class="hero-resistances"></div>
           </div>
           <div>
-            <h3>Skills</h3>
+            <h3>${t('heroes.skills')}</h3>
             <ul class="skill-list"></ul>
           </div>
         </div>
       </details>
 
       <details class="detail-section" data-section="orders">
-        <summary>Anweisungen für den Kampf</summary>
+        <summary>${t('heroes.ordersTitle')}</summary>
         <div class="hero-orders"></div>
       </details>
     `;
@@ -113,17 +114,15 @@ export class HeroDetailPanel {
     this.root.querySelector('.detail-hero-name').textContent = hero.name;
     // Klasse mit Positions-Symbol; Rolle und Reihe stehen in der Info-Blase
     this.root.querySelector('.detail-hero-class').appendChild(createIconChip(POSITION_ICONS[getPositionId(heroClass)], heroClass.name,
-      heroClass.name + ' · ' + ROLE_NAMES[heroClass.role] + ' · steht ' + ROW_NAMES[heroClass.row] + '. ' + getPositionName(getPositionId(heroClass)) + '.'));
+      t('heroes.classInfo', { className: heroClass.name, role: ROLE_NAMES[heroClass.role], row: ROW_NAMES[heroClass.row], position: getPositionName(getPositionId(heroClass)) })));
     this.root.querySelector('.equipment-head h3').appendChild(createInfoIcon(
-      'Tippe einen Platz an: Dann erscheinen alle passenden Items, nach Item-Level sortiert, mit dem Unterschied Wert für Wert. „neu“ = neue passende Ausrüstung im Inventar.'));
+      t('heroes.slotsInfo')));
     if (hero.isInjured()) {
-      const days = hero.injuryDays === 1 ? '1 Tag' : hero.injuryDays + ' Tage';
-      this.root.querySelector('.detail-injury').textContent = 'Verletzt, noch ' + days + ' – kann nicht in Dungeons';
+      this.root.querySelector('.detail-injury').textContent = t('heroes.injured', { days: hero.injuryDays });
     }
     if (hero.isUnhappy()) {
       const percent = Math.round(-WAGE_RULES.unhappyEffects.damageDone * 100);
-      this.root.querySelector('.detail-unhappy').textContent = 'Unzufrieden: hat keinen Sold bekommen, macht ' + percent +
-        ' % weniger Schaden, bis er wieder bezahlt wird';
+      this.root.querySelector('.detail-unhappy').textContent = t('heroes.unhappy', { percent });
     }
 
     const traitList = this.root.querySelector('.trait-list');
@@ -147,7 +146,7 @@ export class HeroDetailPanel {
       },
       // Umskillen kostet Gold (siehe respec)
       onReset: (changedHero) => this.respec(changedHero),
-      resetLabel: 'Umskillen (' + hero.getRespecCost() + ' Gold)',
+      resetLabel: t('heroes.respec', { cost: hero.getRespecCost() }),
     });
     renderOrders(this.root.querySelector('.hero-orders'), [hero], (changedHero, orderId, optionId) => {
       this.game.setHeroOrder(changedHero.id, orderId, optionId);
@@ -178,9 +177,9 @@ export class HeroDetailPanel {
     const result = this.game.respecHero(hero.id);
     if (result === 'ok') {
       Sound.coin();
-      showToast(hero.name + ' hat umgeskillt. Die Talente sind wieder frei.', '#ffd23f');
+      showToast(t('heroes.respecDone', { name: hero.name }), '#ffd23f');
     } else if (result === 'noGold') {
-      showToast('Nicht genug Gold zum Umskillen (' + hero.getRespecCost() + ' Gold).', '#ff6b6b');
+      showToast(t('heroes.respecNoGold', { cost: hero.getRespecCost() }), '#ff6b6b');
     }
   }
 
@@ -189,16 +188,16 @@ export class HeroDetailPanel {
     const container = this.root.querySelector('.hero-resistances');
     const resistances = this.hero.getResistances();
     if (Object.keys(resistances).length === 0) {
-      container.innerHTML = '<span class="hint">Keine Resistenzen</span>';
+      container.innerHTML = '<span class="hint">' + t('heroes.noResistances') + '</span>';
       return;
     }
-    container.innerHTML = '<span class="hint">Resistenzen:</span> ';
+    container.innerHTML = '<span class="hint">' + t('heroes.resistances') + '</span> ';
     for (const damageTypeId in resistances) {
       const part = document.createElement('span');
       part.className = 'resistance-chip';
       part.style.color = DAMAGE_TYPES[damageTypeId].color;
       part.textContent = DAMAGE_TYPES[damageTypeId].name + ' ' + resistances[damageTypeId] + ' %' +
-        (resistances[damageTypeId] >= MAX_RESISTANCE ? ' (Maximum)' : '');
+        (resistances[damageTypeId] >= MAX_RESISTANCE ? t('heroes.maximum') : '');
       container.appendChild(part);
     }
   }
@@ -214,7 +213,7 @@ export class HeroDetailPanel {
       row.innerHTML = `
         <td>${STAT_NAMES[statName]}</td>
         <td class="stat-value">${stats[statName]}</td>
-        <td class="stat-bonus" title="Bonus durch Ausrüstung und Eigenschaften">${bonus > 0 ? '(+' + bonus + ')' : ''}</td>
+        <td class="stat-bonus" title="${t('heroes.bonusInfo')}">${bonus > 0 ? '(+' + bonus + ')' : ''}</td>
       `;
       table.appendChild(row);
     }
@@ -227,7 +226,7 @@ export class HeroDetailPanel {
     if (passive) {
       const line = document.createElement('li');
       line.innerHTML = '<b></b><span></span>';
-      line.querySelector('b').textContent = passive.name + ' (immer aktiv)';
+      line.querySelector('b').textContent = t('heroes.alwaysActive', { name: passive.name });
       line.querySelector('span').textContent = passive.description;
       list.appendChild(line);
     }
@@ -255,7 +254,7 @@ export class HeroDetailPanel {
       // Neue, passende Ausrüstung im Inventar: grüne Markierung, bis man die Liste geöffnet hat
       if (slotsWithNewGear.includes(slot)) {
         slotElement.classList.add('has-new-gear');
-        slotElement.insertAdjacentHTML('beforeend', '<span class="new-gear-badge" title="Neue Ausrüstung für diesen Platz">neu</span>');
+        slotElement.insertAdjacentHTML('beforeend', '<span class="new-gear-badge" title="' + t('heroes.newGearSlot') + '">' + t('common.new') + '</span>');
       }
 
       if (item) {
@@ -272,7 +271,7 @@ export class HeroDetailPanel {
         const removeButton = document.createElement('button');
         removeButton.className = 'unequip-button';
         removeButton.textContent = 'x';
-        removeButton.title = 'Ablegen';
+        removeButton.title = t('heroes.unequip');
         removeButton.addEventListener('click', (event) => {
           event.stopPropagation();
           Sound.click();
@@ -294,19 +293,19 @@ export class HeroDetailPanel {
     const button = this.root.querySelector('.dismiss-button');
     if (this.game.guild.isHeroBusy(this.hero.id)) {
       button.disabled = true;
-      button.textContent = 'Heute eingeplant';
+      button.textContent = t('heroes.busyToday');
       return;
     }
     button.addEventListener('click', () => {
       if (button.classList.contains('confirm')) {
         const name = this.hero.name;
         this.game.dismissHero(this.hero.id);
-        showToast(name + ' hat die Gilde verlassen.', '#9d9d9d');
+        showToast(t('heroes.dismissed', { name }), '#9d9d9d');
         this.callbacks.onDismissed();
         return;
       }
       button.classList.add('confirm');
-      button.textContent = 'Wirklich entlassen?';
+      button.textContent = t('heroes.dismissConfirm');
     });
   }
 }
@@ -316,8 +315,8 @@ export class HeroDetailPanel {
 export function announceEquipBest(game, count, name, snapshot) {
   if (count > 0) {
     Sound.itemReveal(2);
-    showToast(name + ': ' + count + (count === 1 ? ' Teil' : ' Teile') + ' angelegt', '#1eff00', {
-      label: 'Rückgängig',
+    showToast(t('heroes.equipped', { name, count }), '#1eff00', {
+      label: t('heroes.undo'),
       onClick: () => {
         Sound.click();
         game.restoreEquipment(snapshot);
@@ -325,6 +324,6 @@ export function announceEquipBest(game, count, name, snapshot) {
     });
   } else {
     Sound.click();
-    showToast(name + ': Nichts Besseres im Inventar', '#9d9d9d');
+    showToast(t('heroes.nothingBetter', { name }), '#9d9d9d');
   }
 }

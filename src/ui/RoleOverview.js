@@ -9,6 +9,7 @@
 // Die Positionen und die Gruppenregel stehen in data/groupRules.js.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { POSITIONS, GROUP_RULES, getPositionName } from '../data/groupRules.js';
 import { createHeroCanvas, createSpriteCanvas } from './PixelArt.js';
 import { createIconChip, POSITION_ICONS } from './UiIcons.js';
@@ -42,13 +43,13 @@ export function renderRoleTiles(container, game, options) {
     head.appendChild(createSpriteCanvas(POSITION_ICONS[position.id], 2));
     head.insertAdjacentHTML('beforeend', '<span></span>');
     head.querySelector('span').textContent = position.name + ' ' + heroes.length +
-      (freeCount < heroes.length ? ' · ' + freeCount + ' frei' : '');
+      (freeCount < heroes.length ? t('heroes.free', { count: freeCount }) : '');
     const tiles = row.querySelector('.role-tiles');
     for (const hero of heroes) {
       tiles.appendChild(createHeroTile(game, hero, options));
     }
     if (heroes.length === 0) {
-      tiles.innerHTML = '<span class="hint">niemand</span>';
+      tiles.innerHTML = '<span class="hint">' + t('heroes.nobody') + '</span>';
     }
     container.appendChild(row);
   }
@@ -64,11 +65,11 @@ export function createGroupCounter(game) {
     }
   }
   if (result.missing.any) {
-    missingParts.push(result.missing.any + (result.missing.any === 1 ? ' weiterer Held' : ' weitere Helden'));
+    missingParts.push(t('heroes.moreHeroes', { count: result.missing.any }));
   }
-  const text = result.groups === 1 ? '1 Gruppe frei' : result.groups + ' Gruppen frei';
-  const chip = createIconChip('iconHero', text + ' · für Gruppe ' + (result.groups + 1) + ': ' + missingParts.join(', '),
-    'Gezählt werden freie Helden (nicht verletzt, heute nicht eingeplant). Eine Gruppe braucht 1 Tank, 1 Heiler und 3 beliebige Helden.',
+  const text = t('heroes.groupsFree', { count: result.groups });
+  const chip = createIconChip('iconHero', text + t('heroes.forGroup', { number: result.groups + 1, missing: missingParts.join(', ') }),
+    t('heroes.groupCountInfo'),
     result.groups > 0 ? 'ok' : 'missing');
   chip.classList.add('group-count-line');
   return chip;
@@ -83,8 +84,8 @@ function createHeroTile(game, hero, options) {
   tile.disabled = options.isDisabled(hero);
   tile.classList.toggle('busy', game.guild.isHeroBusy(hero.id));
   tile.classList.toggle('injured', hero.isInjured());
-  tile.title = hero.name + ' · ' + hero.getClass().name + ' · Lv ' + hero.level +
-    (game.guild.isHeroBusy(hero.id) ? ' · heute im Dungeon' : '') + (hero.isInjured() ? ' · verletzt' : '');
+  tile.title = hero.name + ' · ' + hero.getClass().name + ' · ' + t('common.lv') + ' ' + hero.level +
+    (game.guild.isHeroBusy(hero.id) ? t('heroes.inDungeonToday') : '') + (hero.isInjured() ? t('heroes.injuredShort') : '');
   tile.appendChild(createHeroCanvas(hero, 3));
   tile.insertAdjacentHTML('beforeend', '<span class="hero-tile-name"></span><span class="hero-tile-level"></span><span class="hero-tile-marks"></span>');
   tile.querySelector('.hero-tile-name').textContent = hero.name.split(' ')[0];
@@ -92,16 +93,16 @@ function createHeroTile(game, hero, options) {
 
   const marks = tile.querySelector('.hero-tile-marks');
   if (game.getSlotsWithNewGear(hero.id).length > 0) {
-    marks.insertAdjacentHTML('beforeend', '<span class="new-gear-badge" title="Neue Ausrüstung verfügbar">neu</span>');
+    marks.insertAdjacentHTML('beforeend', '<span class="new-gear-badge" title="' + t('heroes.newGearAvailable') + '">' + t('common.new') + '</span>');
   }
   if (hero.getFreeTalentPicks() > 0) {
-    marks.insertAdjacentHTML('beforeend', '<span class="talent-free-chip" title="Talent frei">★</span>');
+    marks.insertAdjacentHTML('beforeend', '<span class="talent-free-chip" title="' + t('heroes.talentFreeShort') + '">★</span>');
   }
   if (hero.isInjured()) {
-    marks.insertAdjacentHTML('beforeend', '<span class="mark-injured" title="Verletzt">✚</span>');
+    marks.insertAdjacentHTML('beforeend', '<span class="mark-injured" title="' + t('heroes.injuredMark') + '">✚</span>');
   }
   if (hero.isUnhappy()) {
-    marks.insertAdjacentHTML('beforeend', '<span class="unhappy-chip" title="Unzufrieden">☹</span>');
+    marks.insertAdjacentHTML('beforeend', '<span class="unhappy-chip" title="' + t('heroes.unhappyMark') + '">☹</span>');
   }
 
   tile.addEventListener('click', () => {

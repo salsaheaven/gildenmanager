@@ -2,6 +2,7 @@
 // FORMAT – kleine Helfer, um Zahlen und Werte als Text anzuzeigen
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { STAT_NAMES, SLOT_NAMES, ARMOR_TYPES, getArmorTypeName } from '../data/items.js';
 import { DAMAGE_TYPES } from '../data/damageTypes.js';
 import { getSuitableClasses } from '../data/heroClasses.js';
@@ -76,10 +77,10 @@ export function describeItemKind(item) {
 // Für welche Klassen das Item gedacht ist, z.B. "Für: Priester, Runenwirker, Magier"
 export function describeSuitableClasses(item) {
   const names = getSuitableClasses(item.getTemplate()).map((heroClass) => heroClass.name);
-  return 'Für: ' + names.join(', ');
+  return t('parts.for', { names: names.join(', ') });
 }
 
 // Welche Rüstung eine Klasse trägt, z.B. "Krieger: nur Platte"
 export function describeClassArmor(heroClass) {
-  return heroClass.name + ': nur ' + ARMOR_TYPES[heroClass.armorType].name;
+  return t('parts.classArmor', { className: heroClass.name, armor: ARMOR_TYPES[heroClass.armorType].name });
 }

@@ -9,6 +9,7 @@
 // Die Regeln stehen in systems/StandingGroups.js, die Aktionen in Game.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { getDungeon } from '../data/dungeons.js';
 import { getPositionName } from '../data/groupRules.js';
 import { Sound } from './Sound.js';
@@ -29,7 +30,7 @@ export function createRunControls(game, expedition) {
   const group = game.findStandingGroup(expedition.standingGroupId);
 
   if (!group) {
-    container.appendChild(createButton('Absagen', () => game.cancelExpedition(expedition.id)));
+    container.appendChild(createButton(t('parts.cancelRun'), () => game.cancelExpedition(expedition.id)));
     return container;
   }
 
@@ -38,24 +39,24 @@ export function createRunControls(game, expedition) {
   if (missing.length > 0) {
     const line = document.createElement('div');
     line.className = 'group-missing-line';
-    line.textContent = 'Fehlt heute: ' + missing.map((entry) =>
-      entry.hero.name + ' (' + getPositionName(entry.positionId) + ', verletzt)').join(', ');
+    line.textContent = t('parts.missingToday', { list: missing.map((entry) =>
+      t('parts.injuredMember', { name: entry.hero.name, position: getPositionName(entry.positionId) })).join(', ') });
     container.appendChild(line);
     if (expedition.getHeroIds().length < 5) {
-      container.appendChild(createButton('Ersatz einsetzen', () => {
+      container.appendChild(createButton(t('parts.substitute'), () => {
         const substitute = game.addSubstitute(group.id);
         if (substitute) {
-          showToast(substitute.name + ' springt heute in ' + group.name + ' ein.', '#1eff00');
+          showToast(t('parts.substituteIn', { name: substitute.name, group: group.name }), '#1eff00');
         } else {
-          showToast('Kein passender freier Held für den Ersatz.', '#ff6b6b');
+          showToast(t('parts.noSubstitute'), '#ff6b6b');
         }
       }));
     }
   }
   // Wer heute mitgeht (mit Ersatz), wird ausgerüstet
   container.appendChild(createEquipBestButton(game, group.name, expedition.getHeroIds()));
-  const skip = createButton('Aussetzen', () => game.skipStandingGroupToday(group.id));
-  skip.title = 'Die Gruppe setzt heute aus und zieht morgen wieder los.';
+  const skip = createButton(t('parts.skip'), () => game.skipStandingGroupToday(group.id));
+  skip.title = t('parts.skipInfo');
   container.appendChild(skip);
   container.appendChild(createDisbandButton(game, group));
   return container;
@@ -76,12 +77,12 @@ export function createPausedGroupRows(game) {
     });
     row.innerHTML = '<div class="run-head"><b class="run-name"></b><span class="run-status"></span></div><div class="run-controls"></div>';
     row.querySelector('.run-name').textContent = group.name + ' · ' + getDungeon(group.dungeonId).name;
-    row.querySelector('.run-status').textContent = allInjured ? 'alle verletzt, zieht heute nicht los' : 'setzt heute aus';
+    row.querySelector('.run-status').textContent = allInjured ? t('parts.allInjured') : t('parts.sittingOut');
     const controls = row.querySelector('.run-controls');
     if (!allInjured) {
-      controls.appendChild(createButton('Wieder einplanen', () => {
+      controls.appendChild(createButton(t('parts.replan'), () => {
         if (!game.planStandingGroup(group.id)) {
-          showToast('Heute kann niemand aus ' + group.name + ' los.', '#ff6b6b');
+          showToast(t('parts.nobodyCanGo', { group: group.name }), '#ff6b6b');
         }
         game.emit('changed');
       }));
@@ -108,8 +109,8 @@ function createButton(label, onClick) {
 function createEquipBestButton(game, groupName, heroIds) {
   const button = document.createElement('button');
   button.className = 'equip-group-button';
-  button.textContent = 'Ausrüsten';
-  button.title = 'Legt allen Mitgliedern das Beste aus dem Inventar an. Gesperrte Items (🔒) und eigene Set-Teile bleiben dran.';
+  button.textContent = t('common.equip');
+  button.title = t('parts.equipInfo');
   button.addEventListener('click', () => {
     const snapshot = game.getEquipmentSnapshot(heroIds);
     const count = game.equipBestForGroup(heroIds);
@@ -123,16 +124,16 @@ function createEquipBestButton(game, groupName, heroIds) {
 function createDisbandButton(game, group) {
   const button = document.createElement('button');
   button.className = 'disband-button';
-  button.textContent = 'Auflösen';
+  button.textContent = t('parts.disband');
   button.addEventListener('click', () => {
     Sound.click();
     if (button.classList.contains('confirm')) {
       game.disbandStandingGroup(group.id);
-      showToast(group.name + ' ist aufgelöst.', '#9d9d9d');
+      showToast(t('parts.disbanded', { group: group.name }), '#9d9d9d');
       return;
     }
     button.classList.add('confirm');
-    button.textContent = 'Wirklich auflösen?';
+    button.textContent = t('parts.disbandConfirm');
   });
   return button;
 }

@@ -6,6 +6,7 @@
 // Die Waren stehen in data/consumables.js.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { CONSUMABLES, SUPPLY_SLOTS } from '../data/consumables.js';
 import { createSpriteCanvas } from './PixelArt.js';
 import { Sound } from './Sound.js';
@@ -17,13 +18,13 @@ export class ShopScreen {
     this.game = game;
     this.root.innerHTML = `
       <section class="panel shop-screen">
-        <h2>Händler</h2>
+        <h2>${t('loot.merchant')}</h2>
         <p class="hint shop-hint"></p>
-        <h3>Immer da</h3>
+        <h3>${t('loot.always')}</h3>
         <div class="shop-list shop-always"></div>
-        <h3>Heute im Angebot</h3>
+        <h3>${t('loot.todayOffer')}</h3>
         <div class="shop-list shop-daily"></div>
-        <h3>Vorratskammer</h3>
+        <h3>${t('loot.storeroom')}</h3>
         <div class="supply-storage"></div>
       </section>
     `;
@@ -38,8 +39,7 @@ export class ShopScreen {
 
   // Händler: Grundware (immer da) und das heutige Tagesangebot (wechselt jeden Tag)
   renderShop() {
-    this.root.querySelector('.shop-hint').textContent = 'Tränke für einen Run. Jede Gruppe nimmt bis zu ' + SUPPLY_SLOTS +
-      ' Vorräte mit (beim Einplanen im Dungeon oder im Tagesplan). Das Angebot wechselt jeden Tag.';
+    this.root.querySelector('.shop-hint').textContent = t('loot.shopHint', { count: SUPPLY_SLOTS });
     const always = CONSUMABLES.filter((consumable) => consumable.stock === 'always');
     const daily = this.game.guild.dailyOffer.map((id) => CONSUMABLES.find((consumable) => consumable.id === id));
     this.fillShopList(this.root.querySelector('.shop-always'), always);
@@ -68,7 +68,7 @@ export class ShopScreen {
       buyButton.addEventListener('click', () => {
         if (this.game.buySupply(consumable.id)) {
           Sound.coin();
-          showToast(consumable.name + ' gekauft!', consumable.color);
+          showToast(t('loot.bought', { name: consumable.name }), consumable.color);
         }
       });
       list.appendChild(row);
@@ -92,7 +92,7 @@ export class ShopScreen {
       storage.appendChild(chip);
     }
     if (storage.children.length === 0) {
-      storage.innerHTML = '<p class="empty">Noch leer.</p>';
+      storage.innerHTML = '<p class="empty">' + t('loot.storeEmpty') + '</p>';
     }
   }
 }

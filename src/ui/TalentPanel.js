@@ -8,6 +8,7 @@
 // Die Regeln stehen in Hero.js (canChooseTalent), die Talente in data/talents.js.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { getTalentRows, TALENT_RULES } from '../data/talents.js';
 import { createInfoIcon } from './InfoTip.js';
 
@@ -19,7 +20,7 @@ export function renderTalents(container, hero, callbacks) {
   if (free > 0) {
     const hint = document.createElement('div');
     hint.className = 'talent-free-hint';
-    hint.textContent = free === 1 ? '1 Talent frei!' : free + ' Talente frei!';
+    hint.textContent = t('parts.talentsFree', { count: free });
     container.appendChild(hint);
   }
 
@@ -30,8 +31,7 @@ export function renderTalents(container, hero, callbacks) {
     const head = document.createElement('div');
     head.className = 'talent-row-head';
     const picks = hero.getTalentPicksAllowed(rowIndex);
-    head.textContent = 'Reihe ' + (rowIndex + 1) + ' · ab Level ' + TALENT_RULES.rowLevels[rowIndex] +
-      (picks === 2 ? ' · Doppelwahl: beide wählbar' : '');
+    head.textContent = t('parts.talentRow', { row: rowIndex + 1, level: TALENT_RULES.rowLevels[rowIndex], double: picks === 2 });
     rowElement.appendChild(head);
 
     const options = document.createElement('div');
@@ -65,7 +65,7 @@ export function renderTalents(container, hero, callbacks) {
   if (callbacks.onReset && hero.talentIds.length > 0) {
     const reset = document.createElement('button');
     reset.className = 'talent-reset-button';
-    reset.textContent = callbacks.resetLabel || 'Talente zurücksetzen';
+    reset.textContent = callbacks.resetLabel || t('parts.talentsReset');
     reset.addEventListener('click', () => callbacks.onReset(hero));
     container.appendChild(reset);
   }

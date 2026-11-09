@@ -5,6 +5,7 @@
 //     und welche Boni aktiv sind (grün) oder noch fehlen (grau)
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { SETS, getSet, getSetBonus, SET_BONUS_COUNTS, SET_SLOTS } from '../data/sets.js';
 import { getHeroClass } from '../data/heroClasses.js';
 
@@ -16,7 +17,7 @@ export function createSetLine(item) {
   const set = getSet(item.setId);
   const line = document.createElement('div');
   line.className = 'set-line';
-  line.textContent = 'Set: ' + set.name + ' (' + getHeroClass(set.classId).name + ')';
+  line.textContent = t('parts.setLine', { set: set.name, className: getHeroClass(set.classId).name });
   return line;
 }
 
@@ -38,7 +39,7 @@ export function createHeroSetView(hero) {
     const bonus = getSetBonus(set, needed);
     const entry = document.createElement('li');
     entry.className = count >= needed ? 'active' : 'inactive';
-    entry.textContent = needed + ' Teile: ' + bonus.text;
+    entry.textContent = t('parts.setPieces', { count: needed, text: bonus.text });
     list.appendChild(entry);
   }
   return box;

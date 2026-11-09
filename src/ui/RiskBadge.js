@@ -8,6 +8,7 @@
 // Die Stufen und Farben stehen in data/riskLevels.js.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { estimateRunChances } from '../systems/combat/ChanceEstimator.js';
 import { attachInfo } from './InfoTip.js';
 import { getRiskLevel, getFallLevel, getPartialRiskLevel, UNKNOWN_RISK, RISK_SIMULATION_COUNT } from '../data/riskLevels.js';
@@ -19,7 +20,7 @@ export function getRiskSummary(game, heroes, dungeonId, retreatRuleId, supplies 
   if (knowledge.level === 'none' || heroes.length === 0) {
     return {
       name: UNKNOWN_RISK.name, color: UNKNOWN_RISK.color, detail: '(' + UNKNOWN_RISK.hint + ')', likelyCause: null,
-      title: 'Schicke einen Helden zum Erkunden (Tagesplan), dann wird die Einschätzung genauer.',
+      title: t('parts.riskUnknownTitle'),
     };
   }
   const chances = estimateRunChances({
@@ -31,14 +32,14 @@ export function getRiskSummary(game, heroes, dungeonId, retreatRuleId, supplies 
     const level = getPartialRiskLevel(chances.winRate);
     return {
       name: level.name, color: level.color, likelyCause: null,
-      detail: '(erkundet ' + knowledge.known + ' von ' + knowledge.total + ' Bossen)',
-      title: 'Erst wenn alle Bosse erkundet sind, wird die Einschätzung genau.',
+      detail: t('parts.riskPartialDetail', { known: knowledge.known, total: knowledge.total }),
+      title: t('parts.riskPartialTitle'),
     };
   }
   const risk = getRiskLevel(chances.winRate);
   return {
     name: risk.name, color: risk.color, title: '',
-    detail: '· Gefallene: ' + getFallLevel(chances.fallenRate).name,
+    detail: t('parts.riskFallen', { level: getFallLevel(chances.fallenRate).name }),
     likelyCause: chances.likelyCause,
   };
 }
@@ -53,7 +54,8 @@ export function createRiskBadge(game, heroes, dungeonId, retreatRuleId, supplies
 export function createRiskBadgeFromSummary(game, summary) {
   const badge = document.createElement('div');
   badge.className = 'risk-badge';
-  badge.innerHTML = '<span class="risk-label">Einschätzung:</span> <b class="risk-name"></b> <span class="risk-fall"></span>';
+  badge.innerHTML = '<span class="risk-label"></span> <b class="risk-name"></b> <span class="risk-fall"></span>';
+  badge.querySelector('.risk-label').textContent = t('parts.riskLabel');
   badge.style.setProperty('--risk-color', summary.color);
   badge.querySelector('.risk-name').textContent = summary.name;
   badge.querySelector('.risk-fall').textContent = summary.detail;
@@ -62,7 +64,7 @@ export function createRiskBadgeFromSummary(game, summary) {
   if (game.hasDefeatForecast() && summary.likelyCause) {
     const forecastLine = document.createElement('div');
     forecastLine.className = 'risk-forecast';
-    forecastLine.textContent = 'Kartenraum: Größte Gefahr ist „' + summary.likelyCause.name + '“';
+    forecastLine.textContent = t('parts.riskForecast', { name: summary.likelyCause.name });
     badge.appendChild(forecastLine);
   }
   return badge;
@@ -73,7 +75,7 @@ export function createCompactRiskBadge(game, heroes, dungeonId, retreatRuleId, s
   const summary = getRiskSummary(game, heroes, dungeonId, retreatRuleId, supplies);
   const badge = createRiskBadgeFromSummary(game, summary);
   badge.classList.add('compact');
-  const forecast = game.hasDefeatForecast() && summary.likelyCause ? ' Größte Gefahr: ' + summary.likelyCause.name + '.' : '';
-  attachInfo(badge, 'Einschätzung: ' + summary.name + ' ' + summary.detail + '. ' + summary.title + forecast);
+  const forecast = game.hasDefeatForecast() && summary.likelyCause ? t('parts.riskBiggest', { name: summary.likelyCause.name }) : '';
+  attachInfo(badge, t('parts.riskInfo', { name: summary.name, detail: summary.detail, title: summary.title, forecast }));
   return badge;
 }

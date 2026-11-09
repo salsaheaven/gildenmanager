@@ -8,6 +8,7 @@
 // Die Regeln stehen in systems/CraftingSystem.js, die Zahlen in data/crafting.js.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { MATERIALS, UPGRADE_RULES } from '../data/crafting.js';
 import { getUpgradeCost, canAffordUpgrade } from '../systems/CraftingSystem.js';
 import { Sound } from './Sound.js';
@@ -31,11 +32,11 @@ export function describeMaterials(materials, showZero = false) {
 
 // Text für den Knopf, z.B. "Verbessern auf +7 (✧ 21 · ◆ 2 · 70 Gold · 65 %)"
 function describeUpgradeCost(cost) {
-  const parts = [describeMaterials(cost), cost.gold + ' Gold'];
+  const parts = [describeMaterials(cost), cost.gold + ' ' + t('common.gold')];
   if (cost.chance < 1) {
     parts.push(Math.round(cost.chance * 100) + ' %');
   }
-  return 'Verbessern auf +' + cost.targetLevel + ' (' + parts.join(' · ') + ')';
+  return t('parts.upgradeTo', { level: cost.targetLevel, cost: parts.join(' · ') });
 }
 
 // Baut den Verbessern-Knopf für ein Item.
@@ -46,7 +47,7 @@ export function createUpgradeButton(game, item, effectTarget) {
   const cost = getUpgradeCost(item, game.guild.hall.getEffect('upgradeChanceBonus', 0));
 
   if (cost === null) {
-    button.textContent = 'Höchste Stufe (+' + UPGRADE_RULES.maxLevel + ')';
+    button.textContent = t('parts.upgradeMax', { level: UPGRADE_RULES.maxLevel });
     button.disabled = true;
     return button;
   }
@@ -55,7 +56,7 @@ export function createUpgradeButton(game, item, effectTarget) {
   const affordable = canAffordUpgrade(game.guild, cost);
   button.disabled = !affordable;
   if (!affordable) {
-    button.title = 'Zu wenig Material oder Gold. Material bekommst du durchs Zerlegen.';
+    button.title = t('parts.upgradeMissing');
   }
   if (cost.chance < 1) {
     button.classList.add('risky');
@@ -69,7 +70,7 @@ export function createUpgradeButton(game, item, effectTarget) {
       playUpgradeEffect(effectTarget, 'success');
     } else if (result === 'failed') {
       Sound.upgradeFail();
-      showToast('Fehlgeschlagen! Material weg, ' + item.getDisplayName() + ' bleibt', '#ff5a5a');
+      showToast(t('parts.upgradeFailed', { name: item.getDisplayName() }), '#ff5a5a');
       playUpgradeEffect(effectTarget, 'failed');
     }
   });

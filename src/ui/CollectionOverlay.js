@@ -8,6 +8,7 @@
 // Schließen mit dem X oder der Escape-Taste.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { COLLECTION_PAGES, getPageItems, getPageName } from '../data/collectionBook.js';
 import { getRarity, getRarityRank } from '../data/rarities.js';
 import { Item } from '../entities/Item.js';
@@ -27,11 +28,11 @@ export class CollectionOverlay {
     this.root.hidden = true;
     this.root.innerHTML = `
       <div class="inventory-header">
-        <h2>Sammelbuch <span class="collection-count"></span></h2>
-        <button class="close-button" title="Schließen (Esc)">✕</button>
+        <h2>${t('loot.collection')} <span class="collection-count"></span></h2>
+        <button class="close-button" title="${t('loot.closeEsc')}">✕</button>
       </div>
       <label class="collection-title-row">
-        <span>Gildentitel</span>
+        <span>${t('loot.guildTitle')}</span>
         <select class="collection-title-select"></select>
       </label>
       <div class="collection-pages"></div>
@@ -91,7 +92,7 @@ export class CollectionOverlay {
     select.innerHTML = '';
     const none = document.createElement('option');
     none.value = '';
-    none.textContent = 'kein Titel';
+    none.textContent = t('loot.noTitle');
     select.appendChild(none);
     for (const title of titles) {
       const option = document.createElement('option');
@@ -127,8 +128,8 @@ export class CollectionOverlay {
 
     const bonusPercent = Math.round(page.goldBonus * 100);
     element.querySelector('.collection-reward').textContent = complete
-      ? 'Titel „' + page.title + '“ · +' + bonusPercent + ' % Gold in diesem Dungeon'
-      : 'Volle Seite: Titel „' + page.title + '“ und +' + bonusPercent + ' % Gold';
+      ? t('loot.pageRewardDone', { title: page.title, percent: bonusPercent })
+      : t('loot.pageReward', { title: page.title, percent: bonusPercent });
     return element;
   }
 
@@ -152,7 +153,7 @@ export class CollectionOverlay {
     element.querySelector('.collection-entry-name').textContent = entry.name;
     const stars = element.querySelector('.collection-stars');
     stars.textContent = STARS[bestRarity] || '';
-    stars.title = 'Beste gefundene Seltenheit: ' + rarity.name;
+    stars.title = t('loot.bestRarity', { rarity: rarity.name });
     if (getRarityRank(bestRarity) >= getRarityRank('epic')) {
       element.classList.add('shiny');
     }

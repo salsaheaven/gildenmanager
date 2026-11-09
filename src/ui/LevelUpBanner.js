@@ -5,6 +5,7 @@
 // hold() hält Banner zurück (z.B. während der Tagesabschluss die Kämpfe zeigt), release() zeigt sie dann.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { createHeroCanvas } from './PixelArt.js';
 import { Sound } from './Sound.js';
 
@@ -67,7 +68,7 @@ export class LevelUpBanner {
       <div class="level-up-rays"></div>
       <div class="level-up-card">
         <div class="level-up-portrait"></div>
-        <div class="level-up-title">Level Up!</div>
+        <div class="level-up-title">${t('parts.levelUp')}</div>
         <div class="level-up-text"></div>
       </div>
     `;
@@ -80,12 +81,12 @@ export class LevelUpBanner {
     const talentFree = batch.some((entry) => entry.hero.getFreeTalentPicks() > 0);
     let text;
     if (batch.length === 1) {
-      text = batch[0].hero.name + ' erreicht Level ' + batch[0].newLevel + '!';
+      text = t('parts.levelUpOne', { name: batch[0].hero.name, level: batch[0].newLevel });
     } else {
-      text = batch.length + ' Helden steigen auf: ' +
-        batch.map((entry) => entry.hero.name.split(' ')[0] + ' ' + entry.newLevel).join(', ');
+      text = t('parts.levelUpMany', { count: batch.length,
+        list: batch.map((entry) => entry.hero.name.split(' ')[0] + ' ' + entry.newLevel).join(', ') });
     }
-    this.root.querySelector('.level-up-text').textContent = text + (talentFree ? ' Talent frei!' : '');
+    this.root.querySelector('.level-up-text').textContent = text + (talentFree ? t('parts.talentFree') : '');
     Sound.levelUp();
     this.timer = setTimeout(() => this.showNext(), SHOW_TIME);
   }

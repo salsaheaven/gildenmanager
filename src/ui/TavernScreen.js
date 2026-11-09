@@ -4,6 +4,7 @@
 // Seltene Bewerber werden mit Sound und Leuchten angekündigt.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { HERO_RARITIES } from '../data/heroRarities.js';
 import { BALANCING } from '../data/balancing.js';
 import { ROLE_NAMES, ROW_NAMES } from '../data/heroClasses.js';
@@ -22,10 +23,10 @@ export class TavernScreen {
     this.root.innerHTML = `
       <div class="tavern-screen">
         <section class="panel tavern-header">
-          <h2>Taverne „Zum durstigen Greif“</h2>
+          <h2>${t('heroes.tavernTitle')}</h2>
           <div class="tavern-info">
             <span class="hero-count"></span>
-            <div class="tavern-timer">Neue Bewerber kommen jeden Morgen.</div>
+            <div class="tavern-timer">${t('heroes.tavernTimer')}</div>
             <button class="reroll-button"></button>
           </div>
         </section>
@@ -35,7 +36,7 @@ export class TavernScreen {
 
     const rerollButton = this.root.querySelector('.reroll-button');
     rerollButton.prepend(createSpriteCanvas('coin', 2));
-    rerollButton.append(' Sofort neue Bewerber (' + BALANCING.candidateRerollCost + ')');
+    rerollButton.append(t('heroes.reroll', { cost: BALANCING.candidateRerollCost }));
     rerollButton.addEventListener('click', () => {
       if (this.game.rerollCandidates()) {
         Sound.coin();
@@ -58,14 +59,14 @@ export class TavernScreen {
     }
     if (bestCandidate.getRarityRank() >= 4) {
       Sound.itemReveal(bestCandidate.getRarityRank());
-      showToast(bestCandidate.getRarity().name + 'er Bewerber in der Taverne: ' + bestCandidate.name + '!',
+      showToast(t('heroes.rareApplicant', { rarity: bestCandidate.getRarity().name, name: bestCandidate.name }),
         bestCandidate.getRarity().color);
     }
   }
 
   render(animate) {
     const guild = this.game.guild;
-    this.root.querySelector('.hero-count').textContent = 'Helden: ' + guild.heroes.length + ' / ' + guild.getMaxHeroes();
+    this.root.querySelector('.hero-count').textContent = t('heroes.heroCount', { count: guild.heroes.length, max: guild.getMaxHeroes() });
     this.root.querySelector('.reroll-button').disabled = !guild.canAfford(BALANCING.candidateRerollCost);
 
     const list = this.root.querySelector('.candidate-list');
@@ -79,7 +80,7 @@ export class TavernScreen {
       list.appendChild(card);
     }
     if (guild.candidates.length === 0) {
-      list.innerHTML = '<p class="empty">Gerade ist niemand da. Bald kommen neue Bewerber!</p>';
+      list.innerHTML = '<p class="empty">' + t('heroes.nobodyThere') + '</p>';
     }
   }
 
@@ -113,18 +114,18 @@ export class TavernScreen {
 
     const hireButton = card.querySelector('.hire-button');
     hireButton.prepend(createSpriteCanvas('coin', 2));
-    hireButton.append(' Anheuern (' + candidate.getHireCost() + ')');
+    hireButton.append(t('heroes.hire', { cost: candidate.getHireCost() }));
     // Sold pro Tag, damit man die laufenden Kosten vor dem Anheuern kennt
     const wage = document.createElement('div');
     wage.className = 'hero-card-wage';
-    wage.textContent = 'Sold: ' + HERO_RARITIES[candidate.rarityId].dailyWage + ' Gold pro Tag';
+    wage.textContent = t('heroes.wage', { wage: HERO_RARITIES[candidate.rarityId].dailyWage });
     hireButton.before(wage);
     hireButton.disabled = !this.game.guild.canAfford(candidate.getHireCost()) || !this.game.guild.hasRoomForHero();
     hireButton.addEventListener('click', () => {
       const result = this.game.hireHero(candidate.id);
       if (result === 'ok') {
         Sound.itemReveal(candidate.getRarityRank());
-        showToast(candidate.name + ' tritt der Gilde bei!', rarity.color);
+        showToast(t('heroes.joins', { name: candidate.name }), rarity.color);
       }
     });
     return card;
