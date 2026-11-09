@@ -1,98 +1,78 @@
 <div align="center">
 
-<img src="public/apple-touch-icon.png" width="96" alt="Pixel-Schatzkiste" />
+<img src="public/apple-touch-icon.png" width="96" alt="Pixel treasure chest" />
 
-# Gildenmanager
+# Guild Manager
 
-**Führe deine MMORPG-Gilde – ohne selbst zu kämpfen.**<br>
-Ein Pixel-Art-Managementspiel für Browser und Handy.
+**Run your MMORPG guild – without fighting yourself.**<br>
+A pixel-art management game for browser and phone.
 
-[![Jetzt spielen](https://img.shields.io/badge/▶_Jetzt_spielen-im_Browser-ffd23f?style=for-the-badge&labelColor=1a1228)](https://salsaheaven.github.io/gildenmanager/)
+[![Play now](https://img.shields.io/badge/▶_Play_now-in_your_browser-ffd23f?style=for-the-badge&labelColor=1a1228)](https://salsaheaven.github.io/gildenmanager/)
 
-![Sprachen](https://img.shields.io/badge/Sprachen-Deutsch_·_English-a335ee?style=flat-square&labelColor=1a1228)
-![Plattform](https://img.shields.io/badge/läuft_auf-PC_·_Handy-1eff00?style=flat-square&labelColor=1a1228)
-![Status](https://img.shields.io/badge/Status-in_Entwicklung-0070dd?style=flat-square&labelColor=1a1228)
+![Languages](https://img.shields.io/badge/languages-English_·_German-a335ee?style=flat-square&labelColor=1a1228)
+![Platform](https://img.shields.io/badge/runs_on-desktop_·_mobile-1eff00?style=flat-square&labelColor=1a1228)
+![Status](https://img.shields.io/badge/status-in_development-0070dd?style=flat-square&labelColor=1a1228)
 
-[Deutsch](#worum-gehts) · [English](#english)
-
-<img src="docs/screenshots/kampf.png" width="860" alt="Kampfszene gegen Grimmzahn in der Bärenhöhle" />
+<img src="docs/screenshots/battle.png" width="860" alt="Battle scene against Grimfang in the Bear Cave" />
 
 </div>
 
-## Worum geht's?
+## What is it about?
 
-Du bist Gildenmeister. Du heuerst Helden an, stellst Gruppen aus Tank, Heiler und Schadensausteilern zusammen,
-gibst ihnen Anweisungen und schickst sie in Dungeons. Gekämpft wird automatisch: Am Ende jedes Tages siehst du zu,
-wie sich deine Gruppen schlagen – und öffnest danach die Beute.
+You are the guild master. You hire heroes, build groups of tanks, healers and damage dealers,
+give them orders and send them into dungeons. The fighting happens on its own: at the end of each day you watch
+how your groups do – and then you open the loot.
 
-Mit jeder Kiste wirst du stärker, jeder Boss hat seine Tricks, und vier andere Gilden kämpfen um dieselben Server-Firsts.
-Am Ende wartet ein 20-Mann-Raid mit dem Endboss. Gewertet wird, nach wie vielen Tagen deine Gilde die Welt gerettet hat.
+Every chest makes you stronger, every boss has its tricks, and four rival guilds race you for the server firsts.
+At the end awaits a 20-player raid against the final boss. Your score: how many days your guild needed to save the world.
 
-## So spielt es sich
+## How it plays
 
 | | | | |
 |:-:|:-:|:-:|:-:|
-| <img src="docs/screenshots/tagesplan.png" width="190" alt="Tagesplan" /> | <img src="docs/screenshots/dungeon.png" width="190" alt="Dungeon planen" /> | <img src="docs/screenshots/held.png" width="190" alt="Held mit Ausrüstung" /> | <img src="docs/screenshots/kampf-handy.png" width="190" alt="Kampf auf dem Handy" /> |
-| **Planen**<br>Was gibt es heute zu tun? | **Gruppe bilden**<br>Tank, Heiler, Konter | **Ausrüsten**<br>Items, Talente, Sets | **Zuschauen**<br>Kämpfe als Szene |
+| <img src="docs/screenshots/day-plan.png" width="190" alt="Day plan" /> | <img src="docs/screenshots/dungeon.png" width="190" alt="Planning a dungeon" /> | <img src="docs/screenshots/hero.png" width="190" alt="Hero with gear" /> | <img src="docs/screenshots/battle-mobile.png" width="190" alt="Battle on a phone" /> |
+| **Plan**<br>What needs doing today? | **Build a group**<br>Tank, healer, counters | **Gear up**<br>Items, talents, sets | **Watch**<br>Fights as a scene |
 
 <p align="center">
-  <img src="docs/screenshots/beute.png" width="420" alt="Schatzkiste öffnen" />
-  <img src="docs/screenshots/raid-kampf.png" width="420" alt="Raid mit 20 Helden" />
+  <img src="docs/screenshots/loot.png" width="420" alt="Opening a treasure chest" />
+  <img src="docs/screenshots/raid.png" width="420" alt="Raid with 20 heroes" />
 </p>
 
-1. **Morgens planen:** Wer zieht in welchen Dungeon, wer trainiert, sammelt Kräuter oder erkundet den nächsten Boss?
-2. **„Tag beenden“:** Alle Kämpfe laufen als Pixel-Szene ab – oder du überspringst sie.
-3. **Abends ernten:** Gold, Erfahrung, Level-Ups und Boss-Kisten. „Woran es lag“ erklärt jede Niederlage.
-4. **Stärker werden:** Ausrüstung anlegen und verbessern, Talente wählen, die Gildenhalle ausbauen.
-5. **Weiter nach oben:** neue Dungeons, Raid-Tage am Wochenende, das Rennen gegen die anderen Gilden.
+1. **Plan in the morning:** who goes into which dungeon, who trains, gathers herbs or scouts the next boss?
+2. **"End day":** all fights play out as a pixel scene – or you skip them.
+3. **Reap in the evening:** gold, experience, level-ups and boss chests. "What went wrong" explains every defeat.
+4. **Get stronger:** equip and upgrade gear, pick talents, expand the guild hall.
+5. **Climb higher:** new dungeons, raid days on the weekend, the race against the other guilds.
 
-## Was drin ist
+## What's inside
 
-- 🛡️ **15 Klassen** mit eigenen Skills, Talenten und Kampf-Anweisungen – jede Wahl hat Vor- und Nachteile
-- 🗺️ **10 Dungeons** mit Trash-Gruppen und Bossen, deren Mechaniken man kontern muss (unterbrechen, Flüche lösen, abfangen, Panzer brechen, Wutanfall dämpfen)
-- 🐉 **2 Raids mit 20 Helden** in vier Gruppen: Phasen, Tankwechsel, Gruppenschläge – und Vaelor, der Weltenverschlinger
-- 🎁 **Lootboxen** mit Seltenheiten von <img src="https://img.shields.io/badge/-Grau-9d9d9d?style=flat-square" /> <img src="https://img.shields.io/badge/-Weiß-ffffff?style=flat-square" /> <img src="https://img.shields.io/badge/-Grün-1eff00?style=flat-square" /> <img src="https://img.shields.io/badge/-Blau-0070dd?style=flat-square" /> <img src="https://img.shields.io/badge/-Lila-a335ee?style=flat-square" /> bis <img src="https://img.shields.io/badge/-Orange-ff8000?style=flat-square" />, mit Pity-System
-- 📖 **Sammelbuch und 15 Klassen-Sets** zum Vervollständigen, Titel für volle Seiten
-- 🏰 **Gildenhalle** mit 6 Gebäuden, Schmieden, Umschmieden, Brauen und Verbessern bis +10
-- ⚔️ **Rivalisierende KI-Gilden** mit Neuigkeiten-Ticker, Server-Firsts und Rangliste
-- 🏆 **Endauswertung** mit Rang von S bis D und einer Bestenliste
-- 📱 Läuft im Browser auf **PC und Handy**, speichert automatisch, **Deutsch und Englisch**
+- 🛡️ **15 classes** with their own skills, talents and combat orders – every choice has pros and cons
+- 🗺️ **10 dungeons** with trash groups and bosses whose mechanics you need to counter (interrupt, cleanse curses, intercept, break shells, calm frenzies)
+- 🐉 **2 raids with 20 heroes** in four groups: phases, tank swaps, group strikes – and Vaelor, the World Devourer
+- 🎁 **Loot boxes** with rarities from <img src="https://img.shields.io/badge/-grey-9d9d9d?style=flat-square" /> <img src="https://img.shields.io/badge/-white-ffffff?style=flat-square" /> <img src="https://img.shields.io/badge/-green-1eff00?style=flat-square" /> <img src="https://img.shields.io/badge/-blue-0070dd?style=flat-square" /> <img src="https://img.shields.io/badge/-purple-a335ee?style=flat-square" /> to <img src="https://img.shields.io/badge/-orange-ff8000?style=flat-square" />, with a pity system
+- 📖 **Collection book and 15 class sets** to complete, titles for full pages
+- 🏰 **Guild hall** with 6 buildings, forging, reforging, brewing and upgrades up to +10
+- ⚔️ **Rival AI guilds** with a news ticker, server firsts and a leaderboard
+- 🏆 **Final evaluation** with a rank from S to D and a high-score list
+- 📱 Runs in the browser on **desktop and mobile**, saves automatically, **English and German** (switch with the DE/EN button)
 
-## Mitentwickeln
+## Contributing
 
 ```bash
 npm install
-npm run dev     # Spiel unter http://localhost:5173
-npm test        # alle Tests
-npm run build   # fertige Version in dist/
+npm run dev     # game at http://localhost:5173
+npm test        # all tests
+npm run build   # production build in dist/
 ```
 
-Im Spiel öffnet **F2** ein Test-Menü (alles freischalten, Gold, Kisten, Raid-Test …).
-Jeder Push auf `main` wird getestet und automatisch auf GitHub Pages veröffentlicht.
+In the game, **F2** opens a test menu (unlock everything, gold, chests, raid test …).
+Every push to `main` is tested and published to GitHub Pages automatically.
 
-- [KONZEPT.md](KONZEPT.md) – Spielidee und alle Design-Entscheidungen
-- [PLAN.md](PLAN.md) – Technik, Meilensteine und was als Nächstes kommt
-- [CLAUDE.md](CLAUDE.md) – Aufbau des Codes und Regeln fürs Weiterbauen
+Vanilla JavaScript, Vite and Vitest, no framework. The pixel art is stored as text in `src/data/sprites.js`.
+English texts live in `src/data/texts/en.js` (interface) and `src/data/en/` (game content).
+Screenshots can be retaken with `node tools/screenshots.cjs` while `npm run dev` is running.
 
-Vanilla JavaScript, Vite und Vitest, ohne Framework. Die Pixel-Art steht als Text in `src/data/sprites.js`.
-Ein Lern- und Vibecoding-Projekt, entwickelt zusammen mit [Claude Code](https://claude.ai/code).
+The design documents and code comments are written in German:
+[KONZEPT.md](KONZEPT.md) (game design and decisions), [PLAN.md](PLAN.md) (milestones), [CLAUDE.md](CLAUDE.md) (code structure and rules).
 
----
-
-## English
-
-**Run an MMORPG guild – without fighting yourself.** A pixel-art management game for browser and phone.
-
-You are the guild master: hire heroes, build groups of tank, healer and damage dealers, give them orders and send them
-into dungeons. Fights play out automatically at the end of each day – then you open the loot.
-Every chest makes you stronger, every boss has its tricks, and four rival guilds race you for server firsts.
-At the end awaits a 20-player raid against the final boss. Your score: how many days your guild needed to save the world.
-
-- 15 classes with skills, talents and combat orders
-- 10 dungeons and 2 raids (20 heroes in four groups, phases, tank swaps)
-- Loot boxes from grey to orange, pity system, collection book and 15 class sets
-- Guild hall with 6 buildings, forging, brewing and upgrades up to +10
-- Rival AI guilds, news ticker, leaderboard and a final ranking from S to D
-- Runs in the browser on desktop and mobile, autosaves, **English and German** (switch with the DE/EN button)
-
-**[▶ Play now](https://salsaheaven.github.io/gildenmanager/)**
+A learning and vibe-coding project, built together with [Claude Code](https://claude.ai/code).

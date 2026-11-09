@@ -24,4 +24,4 @@ Bei Balancing-Änderungen: vorher und nachher messen und beide Zahlen vergleiche
 
 | Werkzeug | Wozu | Aufruf |
 |---|---|---|
-| `screenshots.cjs` | Nimmt die Bilder für die README neu auf (`docs/screenshots/`, Handy und PC, Deutsch) | erst `npm run dev`, dann `node tools/screenshots.cjs` |
+| `screenshots.cjs` | Nimmt die Bilder für die README neu auf (`docs/screenshots/`, Handy und PC, Englisch; mit `de` als Zusatz auf Deutsch) | erst `npm run dev`, dann `node tools/screenshots.cjs` |
