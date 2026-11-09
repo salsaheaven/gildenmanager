@@ -189,3 +189,9 @@ Alle Formeln und Zahlen dafür stehen in `src/data/` (`scaling.js`, `experience.
   - **Zeitgerüst (entschieden 2026-10-30), etwa 90 Tage:** Tag 1–40 leveln in den normalen Dungeons. Ab etwa Tag 40 Max-Level möglich; dann laufen Set-Dungeons und Raids parallel (pro Woche 5 Dungeon-Tage, 2 Raid-Tage), bis zum Ende also etwa 14 Raid-Tage (z.B. 6× Raid 1, 8× Raid 2). Beute-Aufteilung siehe „Klassen-Sets und Heroisch“.
   - Der Tagesabschluss (Kampfszenen, Kisten) bleibt der Höhepunkt des Tages.
 - **Spieldauer – entschieden 2026-10-30:** Ein kompletter Durchlauf bis zum Endboss soll **etwa 2–3 Stunden** dauern. Deshalb sind die Raids auf **20 Helden** verkleinert.
+
+## Spieltest-Entscheidungen (2026-11-09)
+- **Freischaltungen:** höchstens eine pro Tag (Reihenfolge wie in `data/unlocks.js`), ihr „Neu:“-Hinweis steht einen Tag im Aufgaben-Kasten.
+- **Beute:** Waffen und Schilde aus Kisten passen zu etwa 70 % zu einer Klasse im eigenen Kader; Rüstung und Ringe bleiben zufällig.
+- **Staub:** Die Gildenhalle erklärt bei fehlendem Staub, dass er vom Zerlegen kommt, und bietet „Schrott zerlegen“ an (kein automatisches Zerlegen ab Start).
+- **Neuer Dungeon:** Ein offener, nie versuchter Dungeon ohne Gruppe steht im Aufgaben-Kasten; stehende Gruppen lassen sich in einen anderen Dungeon verlegen.

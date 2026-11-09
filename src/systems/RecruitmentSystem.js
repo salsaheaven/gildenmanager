@@ -19,23 +19,28 @@ export class RecruitmentSystem {
   refreshCandidates(guild) {
     guild.candidates = [];
     for (let i = 0; i < BALANCING.candidateCount; i++) {
-      guild.candidates.push(this.createCandidate(guild.createHeroId()));
+      // Vornamen, die es schon gibt (Helden der Gilde und die anderen Bewerber), werden nicht noch einmal vergeben
+      const takenNames = guild.heroes.concat(guild.candidates).map((hero) => getFirstName(hero.name));
+      guild.candidates.push(this.createCandidate(guild.createHeroId(), null, takenNames));
     }
     return guild.candidates;
   }
 
   // forcedRarityId = optional eine feste Seltenheit (für das Test-Menü)
-  createCandidate(heroId, forcedRarityId = null) {
+  // takenNames     = Vornamen, die nicht noch einmal vorkommen sollen
+  createCandidate(heroId, forcedRarityId = null, takenNames = []) {
     const rarityId = forcedRarityId || this.rollRarity();
     const heroClass = this.random.pick(HERO_CLASSES);
-    return this.createHero(heroId, heroClass.id, rarityId);
+    return this.createHero(heroId, heroClass.id, rarityId, takenNames);
   }
 
   // Ein Held mit fester Klasse und Seltenheit; Eigenschaften, Name und Aussehen werden gewürfelt
   // (für Bewerber und für die Starttruppe)
-  createHero(heroId, classId, rarityId) {
+  // takenNames = Vornamen, die schon vergeben sind (sind alle vergeben, darf sich einer wiederholen)
+  createHero(heroId, classId, rarityId, takenNames = []) {
     const traitIds = this.rollTraits(HERO_RARITIES[rarityId].traitCount);
-    const name = this.random.pick(FIRST_NAMES) + ' ' + this.random.pick(LAST_NAMES);
+    const freeNames = FIRST_NAMES.filter((firstName) => !takenNames.includes(firstName));
+    const name = this.random.pick(freeNames.length > 0 ? freeNames : FIRST_NAMES) + ' ' + this.random.pick(LAST_NAMES);
     const looks = {
       skin: this.random.pick(SKIN_TONES),
       hair: this.random.pick(HAIR_COLORS),
@@ -62,4 +67,9 @@ export class RecruitmentSystem {
     }
     return chosen;
   }
+}
+
+// Der Vorname eines Helden ("Rurik Kupferkessel" → "Rurik")
+function getFirstName(fullName) {
+  return fullName.split(' ')[0];
 }

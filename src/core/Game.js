@@ -675,7 +675,8 @@ export class Game {
     const cleanName = (guildName || '').trim().slice(0, START_TEAM_RULES.maxGuildNameLength);
     this.guild.name = cleanName || START_TEAM_RULES.defaultGuildName;
     for (const classId of classIds) {
-      const hero = this.recruitmentSystem.createHero(this.guild.createHeroId(), classId, START_TEAM_RULES.rarityId);
+      const takenNames = this.guild.heroes.map((other) => other.name.split(' ')[0]);
+      const hero = this.recruitmentSystem.createHero(this.guild.createHeroId(), classId, START_TEAM_RULES.rarityId, takenNames);
       this.guild.heroes.push(hero);
     }
     this.guild.founded = true;
@@ -787,6 +788,7 @@ export class Game {
   // Legt für jeden Platz das beste passende Item aus dem Inventar an ("Bestes anlegen").
   // "Bestes" = höchste Summe der Werte, die der Klasse nützen (Hero.getUpgradeValue); Resistenzen und Set-Boni
   // zählen nicht. Getragene Teile des eigenen Klassen-Sets bleiben aber dran, gesperrte Items (Schloss) auch.
+  // Danach gelten alle Plätze als gesehen (keine "neu"-Markierung mehr).
   // Gibt zurück, wie viele Items angelegt wurden.
   equipBestItems(heroId) {
     const hero = this.guild.findHero(heroId);
@@ -820,6 +822,10 @@ export class Game {
         this.equipItem(heroId, bestItem.id);
         count++;
       }
+    }
+    // Was jetzt noch im Inventar passt, ist nicht besser: Die Markierung "neu" verschwindet
+    for (const slot in hero.equipment) {
+      markSlotSeen(this.guild, hero, slot);
     }
     return count;
   }

@@ -1,13 +1,37 @@
 // ============================================================
 // TOAST – kurze Nachricht, die oben rechts erscheint und wieder verschwindet
+// holdToasts() sammelt Nachrichten (z.B. während der Tagesabschluss die Kämpfe zeigt,
+// sonst verraten sie das Ergebnis), releaseToasts() zeigt sie dann.
 // ============================================================
 
 // Höchstens so viele Nachrichten gleichzeitig, damit sie nichts verdecken
 const MAX_TOASTS = 4;
 
+let isHeld = false;
+let heldToasts = []; // zurückgehaltene Nachrichten: [{ text, color, action }]
+
+// Nachrichten vorerst nur sammeln
+export function holdToasts() {
+  isHeld = true;
+}
+
+// Gesammelte Nachrichten jetzt zeigen
+export function releaseToasts() {
+  isHeld = false;
+  const waiting = heldToasts;
+  heldToasts = [];
+  for (const entry of waiting) {
+    showToast(entry.text, entry.color, entry.action);
+  }
+}
+
 // action = freiwillig { label, onClick }: ein Knopf in der Nachricht (z.B. "Rückgängig").
 // Mit Knopf bleibt die Nachricht länger stehen, damit man ihn erreicht.
 export function showToast(text, color = '#ffd23f', action = null) {
+  if (isHeld) {
+    heldToasts.push({ text, color, action });
+    return;
+  }
   const container = document.getElementById('toasts');
   while (container.children.length >= MAX_TOASTS) {
     container.firstChild.remove();

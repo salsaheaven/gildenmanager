@@ -156,6 +156,7 @@ export class HeroDetailPanel {
       const snapshot = this.game.getEquipmentSnapshot([this.hero.id]);
       const count = this.game.equipBestItems(this.hero.id);
       announceEquipBest(this.game, count, this.hero.name, snapshot);
+      this.game.emit('changed'); // auch ohne Tausch: die "neu"-Markierungen sind weg
     });
   }
 

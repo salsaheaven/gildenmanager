@@ -27,7 +27,7 @@ import { FoundingScreen } from './ui/FoundingScreen.js';
 import { RaidScreen } from './ui/RaidScreen.js';
 import { EndEvaluationOverlay } from './ui/EndEvaluationOverlay.js';
 import { Sound } from './ui/Sound.js';
-import { showToast } from './ui/Toast.js';
+import { showToast, holdToasts, releaseToasts } from './ui/Toast.js';
 import { UNLOCKS, getUnlock } from './data/unlocks.js';
 
 // Alle 5 Sekunden automatisch speichern
@@ -244,7 +244,10 @@ game.on('gameWon', (evaluation) => {
 
 dayEndOverlay = new DayEndOverlay(game, {
   // Erst in der Zusammenfassung kommen die Level-Up-Banner (sonst verraten sie das Ergebnis)
-  onSummaryShown: () => levelUpBanner.release(),
+  onSummaryShown: () => {
+    levelUpBanner.release();
+    releaseToasts();
+  },
   onOpenChest: (boxTypeId) => {
     showScreen('treasury');
     lootBoxScreen.startOpening(boxTypeId);
@@ -252,12 +255,15 @@ dayEndOverlay = new DayEndOverlay(game, {
   },
   onClosed: () => {
     levelUpBanner.release();
+    releaseToasts();
     showPendingEndEvaluation();
   },
 });
 
 game.on('dayEnding', () => {
   levelUpBanner.hold();
+  holdToasts(); // Meldungen (Freischaltungen, Bewerber …) erst nach den Kämpfen
+
   dayIsEnding = true;
 });
 
@@ -268,6 +274,7 @@ game.on('dayEnded', (data) => {
   const somethingHappened = summary.tasks.some((task) => task.taskId !== 'rest') || summary.news.length > 0 ||
     summary.finishedBuilding !== null || summary.wages.paid < summary.wages.total || summary.upkeep.paid < summary.upkeep.total;
   if (data.reports.length === 0 && !data.raidReport && !somethingHappened) {
+    releaseToasts();
     Sound.click();
     showToast('Ein ruhiger Tag. Sold: −' + data.summary.wages.paid + ' Gold. Tag ' + game.day + ' beginnt.', '#ffd23f');
     levelUpBanner.release();

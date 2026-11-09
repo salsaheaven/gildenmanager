@@ -407,6 +407,7 @@ export class DungeonScreen {
       const snapshot = this.game.getEquipmentSnapshot(heroIds);
       const count = this.game.equipBestForGroup(heroIds);
       announceEquipBest(this.game, count, 'Gruppe', snapshot);
+      this.game.emit('changed'); // auch ohne Tausch: die "neu"-Markierungen sind weg
     });
     buttons.appendChild(equipButton);
     container.appendChild(buttons);

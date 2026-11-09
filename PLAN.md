@@ -156,6 +156,9 @@ Umgesetzt (2026-11-06) aus dem Bericht: **Risiko live mit Konter-Symbolen** und 
 
 **Tagesplan und Helden entschlackt (2026-11-09):** Hinweise und Kosten als Symbol-Chips, Gruppen im Tagesplan als Kachel-Zeile (antippen = zum Helden), Stufe/Rückzug/Einschätzung als Symbole, Vorräte kompakt, Helden ohne Kampf in einer Zeile; Heldenübersicht mit Positions-Symbolen und kurzer Gruppen-Zeile; am Helden Klasse als Symbol, Hinweise im ⓘ, Talent-Beschreibungen nur bei wählbaren Talenten. Handy: Tagesplan 1.763 → 1.298 Pixel (191 → 129 Wörter), Held 1.362 → 1.165 Pixel (125 → 79 Wörter).
 
+**Spieltest als Neuling (2026-11-09), umgesetzt:** „Neuer Dungeon offen“ im Aufgaben-Kasten und Knopf „Gruppe hierher verlegen“ (`Game.moveStandingGroup`), Karte klappt nach dem Einplanen zu; Speichern kurz nach jeder Aktion und bei `pagehide`/`visibilitychange`; höchstens eine Freischaltung pro Tag, ihr Hinweis steht einen Tag (`guild.lastUnlockDay`); Gildenhalle erklärt fehlenden Staub mit Knopf „Schrott zerlegen“; Kisten: „Alle öffnen“, Bühne scrollt ins Bild, „Fertig“ statt „Ins Inventar“; Waffen aus Kisten zu 70 % passend zum Kader (`ownClassWeaponChance`); Schrott-Namen pro Vorlage (`poorName`); „Bestes anlegen“ löscht die „neu“-Marken; ein gemeinsames Level-Up-Banner; Meldungen warten bis nach den Kämpfen (`holdToasts`); Sold in der Taverne, keine doppelten Vornamen. Spielstand-Version 28.
+Noch offen aus dem Spieltest: „Bericht von gestern“ nach Neuladen (bräuchte den gespeicherten Kampfverlauf), Wissen durch Siege (Design-Frage), Taverne im Symbol-Stil.
+
 Offen aus dem Bericht (größere Umbauten): vorbelegte Vorräte, Ausrüstung vom Vorgänger übernehmen, kompakte Listenansicht für den Raid.
 
 **M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.

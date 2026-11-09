@@ -5196,3 +5196,18 @@ body.locked-collection .collection-button {
   border-color: #ffd23f;
   color: #ffd23f;
 }
+
+/* Level-Up-Banner mit mehreren Helden: Porträts nebeneinander */
+.level-up-portrait {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Taverne: Sold des Bewerbers */
+.hero-card-wage {
+  color: #ffd23f;
+  font-size: 0.85em;
+  margin-bottom: 6px;
+}

@@ -4,6 +4,7 @@
 // Seltene Bewerber werden mit Sound und Leuchten angekündigt.
 // ============================================================
 
+import { HERO_RARITIES } from '../data/heroRarities.js';
 import { BALANCING } from '../data/balancing.js';
 import { ROLE_NAMES, ROW_NAMES } from '../data/heroClasses.js';
 import { ABILITIES } from '../data/abilities.js';
@@ -113,6 +114,11 @@ export class TavernScreen {
     const hireButton = card.querySelector('.hire-button');
     hireButton.prepend(createSpriteCanvas('coin', 2));
     hireButton.append(' Anheuern (' + candidate.getHireCost() + ')');
+    // Sold pro Tag, damit man die laufenden Kosten vor dem Anheuern kennt
+    const wage = document.createElement('div');
+    wage.className = 'hero-card-wage';
+    wage.textContent = 'Sold: ' + HERO_RARITIES[candidate.rarityId].dailyWage + ' Gold pro Tag';
+    hireButton.before(wage);
     hireButton.disabled = !this.game.guild.canAfford(candidate.getHireCost()) || !this.game.guild.hasRoomForHero();
     hireButton.addEventListener('click', () => {
       const result = this.game.hireHero(candidate.id);
