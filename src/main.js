@@ -28,6 +28,11 @@ import { RaidScreen } from './ui/RaidScreen.js';
 import { EndEvaluationOverlay } from './ui/EndEvaluationOverlay.js';
 import { Sound } from './ui/Sound.js';
 import { showToast, holdToasts, releaseToasts } from './ui/Toast.js';
+import { t } from './core/Language.js';
+import { loadLanguage, changeLanguage } from './ui/LanguageSetting.js';
+
+// Zuerst die Sprache (alle Texte danach kommen schon in der gewählten Sprache)
+loadLanguage();
 import { UNLOCKS, getUnlock } from './data/unlocks.js';
 
 // Alle 5 Sekunden automatisch speichern
@@ -36,11 +41,11 @@ const AUTOSAVE_SECONDS = 5;
 // Die 5 Abschnitte des Spiels, jeder mit seinen Bildschirmen (Unterreitern).
 // Inventar und Sammelbuch sind Fenster und hängen als Extra-Knöpfe am Abschnitt "Beute" (siehe unten).
 const SECTIONS = [
-  { id: 'today', name: 'Heute', screens: [{ id: 'plan', name: 'Tagesplan' }] },
-  { id: 'heroesSection', name: 'Helden', screens: [{ id: 'heroes', name: 'Übersicht' }, { id: 'tavern', name: 'Taverne' }] },
-  { id: 'dungeonsSection', name: 'Dungeons', screens: [{ id: 'dungeons', name: 'Dungeons' }, { id: 'raid', name: 'Raid' }] },
-  { id: 'loot', name: 'Beute', screens: [{ id: 'treasury', name: 'Kisten' }] },
-  { id: 'guildSection', name: 'Gilde', screens: [{ id: 'hall', name: 'Gildenhalle' }, { id: 'shop', name: 'Händler' }] },
+  { id: 'today', name: t('nav.today'), screens: [{ id: 'plan', name: t('nav.plan') }] },
+  { id: 'heroesSection', name: t('nav.heroesSection'), screens: [{ id: 'heroes', name: t('nav.heroes') }, { id: 'tavern', name: t('nav.tavern') }] },
+  { id: 'dungeonsSection', name: t('nav.dungeonsSection'), screens: [{ id: 'dungeons', name: t('nav.dungeons') }, { id: 'raid', name: t('nav.raid') }] },
+  { id: 'loot', name: t('nav.loot'), screens: [{ id: 'treasury', name: t('nav.treasury') }] },
+  { id: 'guildSection', name: t('nav.guildSection'), screens: [{ id: 'hall', name: t('nav.hall') }, { id: 'shop', name: t('nav.shop') }] },
 ];
 
 // Bildschirme ohne Abschnitt: nur über das Test-Menü erreichbar (Entwickler-Werkzeug)
@@ -61,11 +66,20 @@ if (savedData) {
 
 let isResetting = false;
 
+// Sprache wechseln: Spielstand sichern, Sprache merken, Seite neu laden
+function switchLanguage(language) {
+  changeLanguage(language, () => {
+    if (game.guild.founded) {
+      saveManager.save(game);
+    }
+  });
+}
+
 new TopBar(document.getElementById('top-bar'), game, () => {
   isResetting = true;
   saveManager.deleteSave();
   location.reload();
-}, (screenId) => showScreen(screenId));
+}, (screenId) => showScreen(screenId), switchLanguage);
 
 // Jeder Bildschirm bekommt einen eigenen Bereich. Sichtbar ist immer nur einer.
 const screenArea = document.getElementById('screen');
@@ -105,12 +119,12 @@ const nextTodoBar = new NextTodoBar(document.getElementById('next-todo'), game, 
 const inventory = new InventoryOverlay(game, (newItemCount) => {
   navBar.setBadge('inventory', newItemCount > 0 ? String(newItemCount) : '');
 });
-navBar.addExtraButton('loot', 'inventory', 'Inventar', () => inventory.toggle());
+navBar.addExtraButton('loot', 'inventory', t('nav.inventory'), () => inventory.toggle());
 // Geschmiedete Items bekommen wie Beute den "neu"-Punkt im Inventar
 game.on('itemForged', (item) => inventory.revealItem(item));
 
 const collection = new CollectionOverlay(game);
-navBar.addExtraButton('loot', 'collection', 'Sammelbuch', () => collection.open());
+navBar.addExtraButton('loot', 'collection', t('nav.collection'), () => collection.open());
 const lootBoxScreen = new LootBoxScreen(screenElements.treasury, game, inventory, collection);
 const heroScreen = new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'), inventory);
 new TavernScreen(screenElements.tavern, game);
@@ -202,7 +216,7 @@ applyUnlocks();
 // Etwas Neues ist frei: kurze Fanfare und Meldung (der Hinweis steht dann in "Was gibt es heute zu tun?")
 game.on('featureUnlocked', (unlockId) => {
   Sound.collectionPage();
-  showToast('Neu freigeschaltet: ' + getUnlock(unlockId).name, '#1eff00');
+  showToast(t('main.unlocked', { name: getUnlock(unlockId).name }), '#1eff00');
 });
 
 game.on('candidatesRefreshed', () => {
@@ -227,7 +241,7 @@ game.on('heroLevelUp', (data) => {
 });
 
 game.on('heroHealed', (hero) => {
-  showToast(hero.name + ' ist wieder fit!', '#1eff00');
+  showToast(t('main.healed', { name: hero.name }), '#1eff00');
 });
 
 // Tagesabschluss: Kämpfe als Szene, danach Zusammenfassung mit Beute
@@ -282,7 +296,7 @@ game.on('dayEnded', (data) => {
   if (data.reports.length === 0 && !data.raidReport && !somethingHappened) {
     releaseToasts();
     Sound.click();
-    showToast('Ein ruhiger Tag. Sold: −' + data.summary.wages.paid + ' Gold. Tag ' + game.day + ' beginnt.', '#ffd23f');
+    showToast(t('main.quietDay', { wages: data.summary.wages.paid, day: game.day }), '#ffd23f');
     levelUpBanner.release();
   } else {
     dayEndOverlay.start(data.day, data.reports, data.summary, data.raidReport);
@@ -297,7 +311,7 @@ if (!game.guild.founded) {
   new FoundingScreen(game, () => {
     saveManager.save(game);
     showScreen('plan');
-  });
+  }, switchLanguage);
 }
 
 // ---------- Bild-Schleife ----------

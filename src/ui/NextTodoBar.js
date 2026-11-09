@@ -5,6 +5,7 @@
 // Die offenen Punkte kommen aus systems/DailyTodo.js, die Texte aus TodoBox.js.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { describeTodo } from './TodoBox.js';
 import { Sound } from './Sound.js';
 
@@ -35,7 +36,7 @@ export class NextTodoBar {
     }
     const button = document.createElement('button');
     button.className = 'next-todo-button';
-    button.textContent = 'Noch ' + todos.length + ' offen · Weiter: ' + describeTodo(next) + ' ›';
+    button.textContent = t('todo.nextBar', { count: todos.length, text: describeTodo(next) });
     button.addEventListener('click', () => {
       Sound.click();
       if (next.id === 'unlock') {

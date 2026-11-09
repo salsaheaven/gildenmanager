@@ -5,13 +5,9 @@
 // Die offenen Punkte kommen aus systems/DailyTodo.js (getEndDayWarnings).
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { Sound } from './Sound.js';
 
-const WARNING_TEXTS = {
-  idleHeroes: (count) => count === 1 ? '1 Held hat keine Aufgabe' : count + ' Helden haben keine Aufgabe',
-  groupMissing: (count) => count === 1 ? 'Einer Gruppe fehlt jemand' : count + ' Gruppen fehlt jemand',
-  raidNotReady: () => 'Raid-Tag, aber die Raid-Aufstellung reicht nicht: Der Raid fällt heute aus',
-};
 
 // onGoTo(screenId) = zu einem Bildschirm springen
 export function requestEndDay(game, onGoTo) {
@@ -24,11 +20,11 @@ export function requestEndDay(game, onGoTo) {
   overlay.className = 'end-day-check';
   overlay.innerHTML = `
     <div class="panel end-day-check-box">
-      <h2>Noch offen</h2>
+      <h2>${t('endDayCheck.title')}</h2>
       <div class="end-day-check-list"></div>
       <div class="end-day-check-actions">
-        <button class="end-day-check-cancel">Zurück</button>
-        <button class="big-button end-day-check-confirm">Trotzdem beenden ▶</button>
+        <button class="end-day-check-cancel">${t('endDayCheck.back')}</button>
+        <button class="big-button end-day-check-confirm">${t('endDayCheck.confirm')}</button>
       </div>
     </div>
   `;
@@ -36,7 +32,7 @@ export function requestEndDay(game, onGoTo) {
   for (const warning of warnings) {
     const button = document.createElement('button');
     button.className = 'todo-entry warning';
-    button.textContent = WARNING_TEXTS[warning.id](warning.count) + ' ›';
+    button.textContent = t('endDayCheck.' + warning.id, { count: warning.count }) + ' ›';
     button.addEventListener('click', () => {
       Sound.click();
       overlay.remove();

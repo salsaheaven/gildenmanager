@@ -38,7 +38,8 @@ Eine Option, die immer die beste ist, ist keine Wahl. Geprüft wird das per Simu
 
 ## Aufbau
 ```
-src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen, Tageszähler, endDay), Random, SaveManager
+src/core/      Grundgerüst: Game (hält alles zusammen, alle Aktionen, Tageszähler, endDay), Random, SaveManager,
+               Language (Sprache Deutsch/Englisch, t('bereich.name') schlägt Texte nach, Rückfall auf Deutsch)
 src/entities/  Spielobjekte: Guild, Hero, Item, LootBox, CollectionBook (Sammelbuch: beste gefundene Seltenheit je Boss-Item, Titel, Gold-Bonus),
                RivalGuild (eine KI-Gilde: welche Dungeons an welchem Tag),
                GuildHall (Gildenhalle: Stufe jedes Gebäudes, laufende Baustelle, Unterhalt bezahlt?; getEffect liefert die Wirkung), Expedition (für heute geplanter Dungeon-Run, wird bei endDay ausgekämpft),
@@ -67,7 +68,7 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
                AbilityEffects (was ein Skill bewirkt), OrderSettings (gewählte Anweisungen + Talente → ein Paket mit Wirkungen für den Kampf, Gruppen-Auren),
                CauseTracker (woher der Schaden an den Helden kommt, nicht gekonterte Panzer/Wutanfälle), CounterPoints (wie viel ein Held gegen Panzer und Wutanfall ausrichtet), SupplyEffects (Wirkung der mitgenommenen Vorräte im Run), DefeatAnalysis („Woran es lag“: Top 3 Ursachen + Tipp), ChanceEstimator (200 Kämpfe → Siegchance; estimateRunChances = ganzer Dungeon),
                TestGroup (Testgruppe fürs Labor, Klassen frei wählbar; createTestRaid = 4 Gruppen)
-src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes (Legendär nur in Raid-Kisten: Waffen/Ringe, Raid-Pity, Aschenessenz), balancing, sprites (Pixel-Art als Text),
+src/data/      Reine Inhalte: texts/de.js + texts/en.js (alle Texte der Oberfläche nach Bildschirm, gleiche Namen in beiden Sprachen), rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes (Legendär nur in Raid-Kisten: Waffen/Ringe, Raid-Pity, Aschenessenz), balancing, sprites (Pixel-Art als Text),
                heroClasses (15 Klassen inkl. Rüstungsart, nützliche Werte, Dauer-Fähigkeit `passive` und Begleiter `pet`), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
                enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), raidBosses (Raid-Bosse: Phasen, Tank-Stapel, Gruppenschlag), raids (Raid-Regeln: Raid-Tage, Mindestgröße; Raid 1 „Die Aschenhallen“, Raid 2 „Der Nachtthron“ mit dem Endboss), endEvaluation (Ränge nach Spieltagen, Größe der Bestenliste), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
                dungeons (7 Level-Dungeons + 3 Set-Dungeons mit je 2 Bossen: Begegnungen, Stufe, Belohnung), retreatRules,
@@ -124,6 +125,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                RiskBadge = Einschätzung eines Runs in Worten, je nach Dungeonwissen „Unbekannt“, „Eher leicht/schwer“ oder genau („Riskant · Gefallene: oft“).
                OrdersPanel = Auswahllisten für Anweisungen mit Vorteil (grün) und Nachteil (rot) (Labor, Dungeon, Tagesplan, Heldenbildschirm).
                Gesperrtes (Tutorial) blendet applyUnlocks in main.js aus: Reiter über NavBar.setHidden, sonst CSS-Klassen locked-… am <body>.
+               LanguageSetting = Sprache im Browser merken (erst Browser-Sprache), Umschalter DE/EN oben und auf dem Gründungs-Bildschirm lädt die Seite neu.
                Leisten: TopBar, NavBar (Abschnitte + Unterreiter, auf dem Handy unten). Helfer: PixelArt, Sound, Toast, format, TraitChip.
                InfoTip = Info-Blase (Handy: Antippen, PC: Maus drüber) statt Erklärsätzen; UiIcons = kleines Pixel-Symbol mit Zahl (Bilder icon… in sprites.js), Symbole für Positionen und Konter.
                DebugPanel = Test-Menü (Taste F2), öffnet auch das Kampf-Labor
@@ -136,6 +138,7 @@ tools/         Mess-Werkzeuge für Balancing (Node-Skripte mit der echten Spiell
 - Zufall läuft immer über `Random`, nie direkt über `Math.random()`. So bleibt er testbar und wird mitgespeichert.
 - Balancing (erst ganz am Ende, wenn Roster, Dungeons und Raids stehen): Kampf-Labor und Mess-Werkzeuge in `tools/`. Die Zielwerte stehen unter „Schwierigkeit“ in KONZEPT.md.
 - Die Oberfläche muss auch auf dem Handy funktionieren (Breite ~390 px). Handy-Regeln stehen am Ende von `main.css` (`@media (max-width: 700px)`).
+- **Zwei Sprachen:** Neue Texte der Oberfläche nie fest in den Code schreiben, sondern in `src/data/texts/de.js` und `en.js` eintragen und mit `t('bereich.name')` holen (ein Test prüft, dass beide Sprachen dieselben Namen haben).
 - Pixel-Art steht als Text-Raster in `src/data/sprites.js`. Ein Zeichen ist ein Pixel, die Farben stehen in `PALETTE`.
 
 ## Befehle

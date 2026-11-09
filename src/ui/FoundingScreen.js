@@ -6,6 +6,7 @@
 // Die Starttruppe steht in data/startTeam.js (für alle gleich).
 // ============================================================
 
+import { t, getLanguage, LANGUAGES } from '../core/Language.js';
 import { START_TEAM_CLASSES, START_TEAM_RULES } from '../data/startTeam.js';
 import { getHeroClass } from '../data/heroClasses.js';
 import { getPositionId, getPositionName } from '../data/groupRules.js';
@@ -18,7 +19,8 @@ const PREVIEW_LOOKS = { skin: '#f1c39b', hair: '#6b3f17' };
 
 export class FoundingScreen {
   // onFounded = wird aufgerufen, wenn die Gilde gegründet ist
-  constructor(game, onFounded) {
+  // onLanguageChange(language) = andere Sprache wählen (speichert und lädt neu, siehe main.js)
+  constructor(game, onFounded, onLanguageChange) {
     this.game = game;
     this.onFounded = onFounded;
 
@@ -26,15 +28,16 @@ export class FoundingScreen {
     this.root.className = 'founding-screen';
     this.root.innerHTML = `
       <div class="founding-box">
-        <h1>Gründe deine Gilde</h1>
+        <h1>${t('founding.title')}</h1>
         <label class="founding-name">
-          Name der Gilde
+          ${t('founding.nameLabel')}
           <input type="text" maxlength="${START_TEAM_RULES.maxGuildNameLength}" placeholder="${START_TEAM_RULES.defaultGuildName}">
         </label>
-        <p class="hint">Diese fünf Helden schließen sich dir an. Weitere Helden findest du später in der Taverne.</p>
+        <p class="hint">${t('founding.hint')}</p>
         <div class="founding-team"></div>
         <div class="founding-footer">
-          <button class="big-button founding-start-button">Los geht's!</button>
+          <button class="language-button founding-language-button"></button>
+          <button class="big-button founding-start-button">${t('founding.start')}</button>
         </div>
       </div>
     `;
@@ -46,6 +49,12 @@ export class FoundingScreen {
     document.body.classList.add('overlay-open');
 
     this.root.querySelector('.founding-start-button').addEventListener('click', () => this.found());
+    // Sprache gleich hier umschaltbar (zeigt die andere Sprache an)
+    const otherLanguage = getLanguage() === 'de' ? 'en' : 'de';
+    const languageButton = this.root.querySelector('.founding-language-button');
+    languageButton.textContent = LANGUAGES[otherLanguage];
+    languageButton.title = t('topBar.languageInfo');
+    languageButton.addEventListener('click', () => onLanguageChange(otherLanguage));
   }
 
   found() {

@@ -195,3 +195,7 @@ Alle Formeln und Zahlen dafür stehen in `src/data/` (`scaling.js`, `experience.
 - **Beute:** Waffen und Schilde aus Kisten passen zu etwa 70 % zu einer Klasse im eigenen Kader; Rüstung und Ringe bleiben zufällig.
 - **Staub:** Die Gildenhalle erklärt bei fehlendem Staub, dass er vom Zerlegen kommt, und bietet „Schrott zerlegen“ an (kein automatisches Zerlegen ab Start).
 - **Neuer Dungeon:** Ein offener, nie versuchter Dungeon ohne Gruppe steht im Aufgaben-Kasten; stehende Gruppen lassen sich in einen anderen Dungeon verlegen.
+
+## Sprachen (entschieden 2026-11-09)
+- Deutsch und Englisch. Beim ersten Start gilt die Browser-Sprache (Deutsch bei „de…“, sonst Englisch), umschaltbar mit DE/EN oben in der Leiste und auf dem Gründungs-Bildschirm.
+- Übersetzt werden Oberfläche, Erklärtexte und Eigennamen von Bossen, Dungeons und Items; Heldennamen bleiben, wie sie sind.
