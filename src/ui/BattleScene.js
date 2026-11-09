@@ -16,6 +16,7 @@
 // dann steht oben "Zeitraffer ⏩".
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { getBoss, MINIONS } from '../data/enemies.js';
 import { createHeroCanvas, createSpriteCanvas } from './PixelArt.js';
 import { playEffect } from './BattleEffects.js';
@@ -77,10 +78,10 @@ export class BattleScene {
     this.container.innerHTML = `
       <div class="battle-scene">
         <div class="scene-top">
-          <span class="scene-round">Bereit …</span>
-          <span class="scene-timelapse" hidden>Zeitraffer ⏩</span>
+          <span class="scene-round">${t('dayEnd.ready')}</span>
+          <span class="scene-timelapse" hidden>${t('dayEnd.timeLapse')}</span>
           <span class="scene-speeds"></span>
-          <button class="scene-skip">Überspringen</button>
+          <button class="scene-skip">${t('dayEnd.skip')}</button>
         </div>
         <div class="scene-field">
           <div class="cast-bar" hidden><span class="cast-name"></span><div class="cast-fill"></div></div>
@@ -110,10 +111,10 @@ export class BattleScene {
     this.container.innerHTML = `
       <div class="battle-scene raid-scene">
         <div class="scene-top">
-          <span class="scene-round">Bereit …</span>
-          <span class="scene-timelapse" hidden>Zeitraffer ⏩</span>
+          <span class="scene-round">${t('dayEnd.ready')}</span>
+          <span class="scene-timelapse" hidden>${t('dayEnd.timeLapse')}</span>
           <span class="scene-speeds"></span>
-          <button class="scene-skip">Überspringen</button>
+          <button class="scene-skip">${t('dayEnd.skip')}</button>
         </div>
         <div class="scene-field raid-field">
           <div class="cast-bar" hidden><span class="cast-name"></span><div class="cast-fill"></div></div>
@@ -361,7 +362,7 @@ export class BattleScene {
   playEntry(entry, quiet) {
     if (entry.round > 0) {
       this.round = entry.round;
-      this.container.querySelector('.scene-round').textContent = 'Runde ' + entry.round;
+      this.container.querySelector('.scene-round').textContent = t('dayEnd.round', { round: entry.round });
     }
     if (entry.kind === 'action') {
       this.playAction(entry.action, quiet);

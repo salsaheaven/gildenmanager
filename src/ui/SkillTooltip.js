@@ -7,6 +7,7 @@
 // damit die Abklingzeiten während des Kampfes mitlaufen.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { getHeroClass } from '../data/heroClasses.js';
 import { ABILITIES } from '../data/abilities.js';
 
@@ -101,32 +102,32 @@ export class SkillTooltip {
 // manaCost = echte Kosten für diesen Helden (Anweisungen können sie ändern), sonst die normalen
 export function getSkillStatus(ability, usedRound, currentRound, mana, manaCost = ability.manaCost) {
   if (usedRound !== undefined && ability.oncePerFight) {
-    return { ready: false, text: 'schon benutzt' };
+    return { ready: false, text: t('guide.used') };
   }
   if (usedRound !== undefined && ability.cooldown > 0) {
     const roundsLeft = Math.min(ability.cooldown, usedRound + ability.cooldown + 1 - currentRound);
     if (roundsLeft > 0) {
-      return { ready: false, text: 'noch ' + roundsLeft + (roundsLeft === 1 ? ' Runde' : ' Runden') };
+      return { ready: false, text: t('guide.roundsLeft', { count: roundsLeft }) };
     }
   }
   if (mana !== null && mana !== undefined && mana < manaCost) {
-    return { ready: false, text: 'zu wenig Mana' };
+    return { ready: false, text: t('guide.noMana') };
   }
-  return { ready: true, text: 'bereit' };
+  return { ready: true, text: t('guide.ready') };
 }
 
 // "28 Mana · Abklingzeit 2 Runden"
 function describeCosts(ability, manaCost) {
   const parts = [];
   if (manaCost > 0) {
-    parts.push(manaCost + ' Mana');
+    parts.push(t('guide.mana', { cost: manaCost }));
   }
   if (ability.oncePerFight) {
-    parts.push('einmal pro Kampf');
+    parts.push(t('guide.oncePerFight'));
   } else if (ability.cooldown > 0) {
-    parts.push('Abklingzeit ' + ability.cooldown + (ability.cooldown === 1 ? ' Runde' : ' Runden'));
+    parts.push(t('guide.cooldown', { count: ability.cooldown }));
   } else {
-    parts.push('keine Abklingzeit');
+    parts.push(t('guide.noCooldown'));
   }
   return parts.join(' · ');
 }

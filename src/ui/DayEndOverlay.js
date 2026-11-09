@@ -13,6 +13,7 @@
 //      Erst jetzt erscheinen die Level-Up-Banner, damit sie das Ergebnis nicht vorher verraten.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { createNewsLine } from './NewsLine.js';
 import { getServerFirstTitle } from '../systems/RivalSystem.js';
 import { showToast } from './Toast.js';
@@ -35,9 +36,9 @@ import { Sound } from './Sound.js';
 
 // Welche Kämpfe als Szene laufen (die Wahl merkt sich der Browser, siehe loadSceneMode)
 const SCENE_MODES = [
-  { id: 'all', label: 'Alle Kämpfe' },
-  { id: 'bosses', label: 'Nur Bosse' },
-  { id: 'none', label: 'Keine' },
+  { id: 'all', label: t('dayEnd.modeAll') },
+  { id: 'bosses', label: t('dayEnd.modeBosses') },
+  { id: 'none', label: t('dayEnd.modeNone') },
 ];
 const SCENE_MODE_KEY = 'gildenmanager-dayend-scenes';
 
@@ -63,7 +64,7 @@ export class DayEndOverlay {
     this.root.innerHTML = `
       <div class="day-end-header">
         <h2 class="day-end-title"></h2>
-        <button class="skip-all-button">Alles überspringen</button>
+        <button class="skip-all-button">${t('dayEnd.skipAll')}</button>
       </div>
       <div class="button-row day-end-modes"></div>
       <div class="day-end-sub"></div>
@@ -141,7 +142,7 @@ export class DayEndOverlay {
     this.prepare(last.day, last.reports, last.daySummary, last.raidReport);
     this.root.hidden = false;
     document.body.classList.add('overlay-open');
-    this.root.querySelector('.day-end-title').textContent = 'Bericht von Tag ' + last.day;
+    this.root.querySelector('.day-end-title').textContent = t('dayEnd.reportOf', { day: last.day });
     this.root.querySelector('.day-end-modes').innerHTML = '';
     this.phase = 'closed';
     this.isReplay = true;
@@ -164,7 +165,7 @@ export class DayEndOverlay {
 
     this.root.hidden = false;
     document.body.classList.add('overlay-open');
-    this.root.querySelector('.day-end-title').textContent = 'Tag ' + day + ' – Abend';
+    this.root.querySelector('.day-end-title').textContent = t('dayEnd.evening', { day });
     this.root.querySelector('.skip-all-button').hidden = false;
     this.renderModeButtons();
     this.stepIndex = 0;
@@ -224,14 +225,14 @@ export class DayEndOverlay {
     if (run.isRaid) {
       // Raid: Begegnungen zählen ab dem Anfang des Raids (heute ging es evtl. erst beim 2. Boss los)
       const raid = getRaid(run.report.raidId);
-      subText = 'Raid · ' + raid.name + ' · Begegnung ' + (run.report.startIndex + step.encounterIndex + 1) + '/' +
-        raid.encounters.length + ': ' + encounterResult.encounterName;
+      subText = t('dayEnd.raidEncounter', { name: raid.name, number: run.report.startIndex + step.encounterIndex + 1,
+        total: raid.encounters.length, encounter: encounterResult.encounterName });
     } else {
       const dungeon = getDungeon(run.report.dungeonId);
-      subText = dungeon.name + ' · Begegnung ' + (step.encounterIndex + 1) + '/' + dungeon.encounters.length +
-        ': ' + encounterResult.encounterName;
+      subText = t('dayEnd.dungeonEncounter', { name: dungeon.name, number: step.encounterIndex + 1,
+        total: dungeon.encounters.length, encounter: encounterResult.encounterName });
       if (dungeonRuns.length > 1) {
-        subText = 'Gruppe ' + (dungeonRuns.indexOf(run) + 1) + ' von ' + dungeonRuns.length + ' · ' + subText;
+        subText = t('dayEnd.groupOf', { number: dungeonRuns.indexOf(run) + 1, total: dungeonRuns.length }) + subText;
       }
     }
     this.root.querySelector('.day-end-sub').textContent = subText;
@@ -265,7 +266,7 @@ export class DayEndOverlay {
     } else {
       const note = document.createElement('div');
       note.className = 'day-end-travel';
-      note.textContent = run.isRaid ? 'Der Raid zieht weiter …' : 'Die Gruppe zieht weiter …';
+      note.textContent = run.isRaid ? t('dayEnd.raidMovesOn') : t('dayEnd.groupMovesOn');
       body.appendChild(note);
       this.waitSeconds = TRAVEL_SECONDS;
     }
@@ -281,7 +282,7 @@ export class DayEndOverlay {
     this.phase = 'summary';
     this.scene = null;
     this.root.querySelector('.skip-all-button').hidden = true;
-    this.root.querySelector('.day-end-sub').textContent = this.isReplay ? 'Das hat deine Gilde an diesem Tag erreicht:' : 'Das hat deine Gilde heute erreicht:';
+    this.root.querySelector('.day-end-sub').textContent = this.isReplay ? t('dayEnd.achievedThatDay') : t('dayEnd.achievedToday');
     this.root.querySelector('.day-end-modes').innerHTML = '';
 
     const body = this.root.querySelector('.day-end-body');
@@ -301,7 +302,7 @@ export class DayEndOverlay {
     }
 
     const nextButton = body.querySelector('.next-day-button');
-    nextButton.textContent = this.isReplay ? 'Schließen' : 'Weiter zu Tag ' + (this.day + 1);
+    nextButton.textContent = this.isReplay ? t('dayEnd.close') : t('dayEnd.nextDay', { day: this.day + 1 });
     nextButton.addEventListener('click', () => {
       Sound.click();
       this.close();
@@ -349,11 +350,11 @@ export class DayEndOverlay {
     bar.className = 'day-balance';
     const gold = this.daySummary.goldChange || 0;
     const parts = [
-      { text: (gold >= 0 ? '+' : '−') + Math.abs(gold) + ' Gold', className: gold >= 0 ? 'good' : 'bad' },
-      { text: chests + (chests === 1 ? ' Kiste' : ' Kisten'), className: chests > 0 ? 'good' : '', show: chests > 0 },
-      { text: bosses + (bosses === 1 ? ' Boss besiegt' : ' Bosse besiegt'), className: 'good', show: bosses > 0 },
-      { text: levelUps + '× Level-Up', className: 'good', show: levelUps > 0 },
-      { text: injured + ' verletzt', className: 'bad', show: injured > 0 },
+      { text: t('dayEnd.gold', { sign: gold >= 0 ? '+' : '−', amount: Math.abs(gold) }), className: gold >= 0 ? 'good' : 'bad' },
+      { text: t('dayEnd.chests', { count: chests }), className: chests > 0 ? 'good' : '', show: chests > 0 },
+      { text: t('dayEnd.bosses', { count: bosses }), className: 'good', show: bosses > 0 },
+      { text: t('dayEnd.levelUps', { count: levelUps }), className: 'good', show: levelUps > 0 },
+      { text: t('dayEnd.injured', { count: injured }), className: 'bad', show: injured > 0 },
     ];
     for (const part of parts) {
       if (part.show === false) {
@@ -372,7 +373,7 @@ export class DayEndOverlay {
   createNewsCard(newsList) {
     const card = document.createElement('div');
     card.className = 'day-run-card day-news-card';
-    card.innerHTML = '<div class="day-run-head"><b class="day-run-name">Neues vom Server</b></div><div class="day-news-lines"></div>';
+    card.innerHTML = '<div class="day-run-head"><b class="day-run-name">' + t('dayEnd.serverNews') + '</b></div><div class="day-news-lines"></div>';
     for (const news of newsList.slice().reverse()) {
       card.querySelector('.day-news-lines').appendChild(createNewsLine(news));
     }
@@ -386,9 +387,9 @@ export class DayEndOverlay {
     card.className = 'day-run-card day-building-card';
     card.innerHTML = '<div class="day-run-head"><b class="day-run-name"></b><span class="day-run-outcome"></span></div>' +
       '<div class="day-building-effect"></div>';
-    card.querySelector('.day-run-name').textContent = 'Gebäude fertig: ' + building.name + ' Stufe ' + finished.level;
+    card.querySelector('.day-run-name').textContent = t('dayEnd.buildingDone', { name: building.name, level: finished.level });
     card.querySelector('.day-run-outcome').textContent = '⚒';
-    card.querySelector('.day-building-effect').textContent = 'Ab morgen: ' + building.levels[finished.level - 1].text;
+    card.querySelector('.day-building-effect').textContent = t('dayEnd.fromTomorrow', { text: building.levels[finished.level - 1].text });
     // Kurz nach der Fanfare des besten Runs, damit sich die Töne nicht überlagern
     setTimeout(() => Sound.buildingDone(), this.runs.length > 0 ? 900 : 0);
     return card;
@@ -398,7 +399,7 @@ export class DayEndOverlay {
   createHomeCard(daySummary) {
     const card = document.createElement('div');
     card.className = 'day-run-card day-home-card';
-    card.innerHTML = '<div class="day-run-head"><b class="day-run-name">Daheim in der Gilde</b></div><div class="day-home-lines"></div>';
+    card.innerHTML = '<div class="day-run-head"><b class="day-run-name">' + t('dayEnd.home') + '</b></div><div class="day-home-lines"></div>';
     const lines = card.querySelector('.day-home-lines');
     for (const task of daySummary.tasks) {
       const text = describeTaskResult(task);
@@ -414,9 +415,8 @@ export class DayEndOverlay {
     const wageLine = document.createElement('div');
     wageLine.className = 'day-home-line wages' + (wages.paid < wages.total ? ' unpaid' : '');
     wageLine.textContent = wages.paid < wages.total
-      ? 'Sold nicht voll bezahlt: ' + wages.paid + ' von ' + wages.total + ' Gold. Unzufrieden (weniger Schaden): ' +
-        wages.unpaidNames.join(', ')
-      : 'Sold: −' + wages.total + ' Gold';
+      ? t('dayEnd.wagesUnpaid', { paid: wages.paid, total: wages.total, names: wages.unpaidNames.join(', ') })
+      : t('dayEnd.wages', { total: wages.total });
     lines.appendChild(wageLine);
 
     // Unterhalt der Gebäude: alles oder nichts
@@ -425,8 +425,8 @@ export class DayEndOverlay {
       const upkeepLine = document.createElement('div');
       upkeepLine.className = 'day-home-line wages' + (upkeep.paid < upkeep.total ? ' unpaid' : '');
       upkeepLine.textContent = upkeep.paid < upkeep.total
-        ? 'Unterhalt nicht bezahlt (' + upkeep.total + ' Gold): Morgen wirkt kein Gebäude!'
-        : 'Unterhalt der Gebäude: −' + upkeep.total + ' Gold';
+        ? t('dayEnd.upkeepUnpaid', { total: upkeep.total })
+        : t('dayEnd.upkeep', { total: upkeep.total });
       lines.appendChild(upkeepLine);
     }
     return card;
@@ -458,13 +458,13 @@ export class DayEndOverlay {
       bossLine.appendChild(chip);
     }
     if (report.defeatedBossIds.length === 0) {
-      bossLine.textContent = 'Heute fiel kein Boss.';
+      bossLine.textContent = t('dayEnd.noBossToday');
     }
     if (report.gold > 0) {
       const goldLine = document.createElement('div');
       goldLine.className = 'day-reward';
       goldLine.appendChild(createSpriteCanvas('coin', 2));
-      goldLine.insertAdjacentHTML('beforeend', '<span>+' + report.gold + ' Gold</span>');
+      goldLine.insertAdjacentHTML('beforeend', '<span>' + t('dayEnd.plusGold', { gold: report.gold }) + '</span>');
       card.querySelector('.day-run-rewards').appendChild(goldLine);
     }
     // Eine Raid-Kiste pro besiegtem Boss, jede mit "Jetzt öffnen!"
@@ -475,20 +475,19 @@ export class DayEndOverlay {
     const nextIndex = getNextEncounterIndex(raid, this.game.getDefeatedRaidBossIds(raid.id));
     const nextBoss = nextIndex === null ? null : raid.encounters.slice(nextIndex).find((encounter) => encounter.type === 'boss');
     let nextText = nextBoss
-      ? 'Am nächsten Raid-Tag dieser Woche geht es bei ' + getBoss(nextBoss.bossId).name + ' weiter.'
-      : 'Alle Bosse dieser Woche sind besiegt! Nächste Woche beginnt der Raid von vorn.';
+      ? t('dayEnd.raidNext', { name: getBoss(nextBoss.bossId).name })
+      : t('dayEnd.raidWeekDone');
     if (report.endbossDefeated) {
-      nextText = 'Der Endboss ist besiegt! Gleich kommt die Endauswertung.';
+      nextText = t('dayEnd.endbossDown');
     }
     // Zum ersten Mal ganz geschafft: der nächste Raid ist offen
     if (report.unlockedRaidId) {
-      nextText += ' Neu: ' + getRaid(report.unlockedRaidId).name + ' ist offen (Reiter „Raid“)!';
+      nextText += t('dayEnd.raidUnlocked', { name: getRaid(report.unlockedRaidId).name });
     }
     card.querySelector('.day-raid-next').textContent = nextText;
 
     const heroResults = report.heroResults || [];
-    card.querySelector('.day-raid-heroes summary').textContent = heroResults.length + ' Helden · ' +
-      (report.fallenNames.length > 0 ? report.fallenNames.length + ' gefallen' : 'niemand gefallen');
+    card.querySelector('.day-raid-heroes summary').textContent = t('dayEnd.raidHeroes', { count: heroResults.length, fallen: report.fallenNames.length });
     const heroList = card.querySelector('.day-run-heroes');
     for (const heroResult of heroResults) {
       heroList.appendChild(this.createHeroRow(heroResult));
@@ -511,7 +510,7 @@ export class DayEndOverlay {
     `;
     card.querySelector('.day-run-name').textContent = dungeon.name;
     card.querySelector('.day-run-outcome').textContent = outcomeText(report.outcome) +
-      (report.serverFirst ? ' Server-First: als erste Gilde geschafft!' : (report.firstClear ? ' Zum ersten Mal geschafft!' : ''));
+      (report.serverFirst ? t('dayEnd.serverFirst') : (report.firstClear ? t('dayEnd.firstClear') : ''));
 
     this.renderRewards(card.querySelector('.day-run-rewards'), report);
 
@@ -530,33 +529,31 @@ export class DayEndOverlay {
       const goldLine = document.createElement('div');
       goldLine.className = 'day-reward';
       goldLine.appendChild(createSpriteCanvas('coin', 2));
-      goldLine.insertAdjacentHTML('beforeend', '<span>+' + gold + ' Gold</span>');
+      goldLine.insertAdjacentHTML('beforeend', '<span>' + t('dayEnd.plusGold', { gold }) + '</span>');
       container.appendChild(goldLine);
     }
     // Wirkung der Eigenschaften sichtbar machen
     if (report.bonusGold > 0) {
-      container.appendChild(createTraitBonusLine(report.bonusGoldHero + ' ist gierig: +' + report.bonusGold + ' Gold'));
+      container.appendChild(createTraitBonusLine(t('dayEnd.greedy', { name: report.bonusGoldHero, gold: report.bonusGold })));
     }
     if (report.collectionGold > 0) {
-      container.appendChild(createTraitBonusLine('Sammelbuch (volle Seite): +' + report.collectionGold + ' Gold'));
+      container.appendChild(createTraitBonusLine(t('dayEnd.collectionGold', { gold: report.collectionGold })));
     }
     if (report.chestBonusItems > 0) {
-      container.appendChild(createTraitBonusLine(report.chestBonusHero + ' ist ein Glückspilz: +' +
-        report.chestBonusItems + ' Item in der Kiste'));
+      container.appendChild(createTraitBonusLine(t('dayEnd.lucky', { name: report.chestBonusHero, count: report.chestBonusItems })));
     }
 
     if (report.supplies && report.supplies.length > 0) {
-      container.appendChild(createTraitBonusLine('Vorräte verbraucht: ' + describeSupplies(report.supplies)));
+      container.appendChild(createTraitBonusLine(t('dayEnd.suppliesUsed', { list: describeSupplies(report.supplies) })));
     }
     if (report.scouted) {
-      container.appendChild(createTraitBonusLine('Erkundet: Die Gruppe war vorbereitet (mehr Schaden' +
-        (report.scouting === 'full' ? ', weniger erlittener Schaden)' : ')')));
+      container.appendChild(createTraitBonusLine(report.scouting === 'full' ? t('dayEnd.scoutedFull') : t('dayEnd.scoutedPartial')));
     }
 
     if (report.chest) {
       container.appendChild(this.createChestLine(report.chest));
     } else if (gold === 0) {
-      container.innerHTML = '<span class="hint">Keine Beute.</span>';
+      container.innerHTML = '<span class="hint">' + t('dayEnd.noLoot') + '</span>';
     }
   }
 
@@ -567,7 +564,8 @@ export class DayEndOverlay {
     chestLine.className = 'day-reward day-chest';
     chestLine.style.setProperty('--rarity', chest.mainColor);
     chestLine.appendChild(createChestCanvas(chest, 3));
-    chestLine.insertAdjacentHTML('beforeend', '<span></span><button class="open-chest-button">Jetzt öffnen!</button>');
+    chestLine.insertAdjacentHTML('beforeend', '<span></span><button class="open-chest-button"></button>');
+    chestLine.querySelector('.open-chest-button').textContent = t('dayEnd.openNow');
     chestLine.querySelector('span').textContent = chest.name;
     const button = chestLine.querySelector('.open-chest-button');
     // Die Kiste könnte schon geöffnet sein (zweite Kiste derselben Art)
@@ -589,13 +587,13 @@ export class DayEndOverlay {
     }
     const text = document.createElement('span');
     text.className = 'day-hero-text';
-    text.textContent = heroResult.name + ' +' + heroResult.xp + ' EP' + (heroResult.catchUp ? ' (Aufhol-Bonus)' : '');
+    text.textContent = t('dayEnd.heroXp', { name: heroResult.name, xp: heroResult.xp, catchUp: heroResult.catchUp });
     row.appendChild(text);
     if (heroResult.levelsGained > 0) {
-      row.insertAdjacentHTML('beforeend', '<span class="day-level-up">Level ' + heroResult.newLevel + '!</span>');
+      row.insertAdjacentHTML('beforeend', '<span class="day-level-up">' + t('dayEnd.levelReached', { level: heroResult.newLevel }) + '</span>');
     }
     if (heroResult.injured) {
-      row.insertAdjacentHTML('beforeend', '<span class="day-injured">verletzt</span>');
+      row.insertAdjacentHTML('beforeend', '<span class="day-injured">' + t('dayEnd.injuredShort') + '</span>');
     }
     return row;
   }
@@ -615,20 +613,19 @@ export class DayEndOverlay {
 function describeTaskResult(task) {
   if (task.taskId === 'training') {
     if (task.skipped === 'noGold') {
-      return task.name + ': Training fiel aus, zu wenig Gold für den Trainer';
+      return t('dayEnd.trainingSkipped', { name: task.name });
     }
-    return task.name + ' trainiert: +' + task.xp + ' EP' + (task.levelsGained > 0 ? ' · Level ' + task.newLevel + '!' : '');
+    return t('dayEnd.trained', { name: task.name, xp: task.xp, level: task.levelsGained > 0 ? task.newLevel : null });
   }
   if (task.taskId === 'herbs' || task.taskId === 'gatherRaw') {
-    return task.name + ': ' + HERO_TASKS[task.taskId].name + ' +' + describeMaterials(task.gathered);
+    return t('dayEnd.gathered', { name: task.name, task: HERO_TASKS[task.taskId].name, materials: describeMaterials(task.gathered) });
   }
   if (task.taskId === 'jobs') {
-    return task.name + ' ' + task.jobText + ': +' + task.gold + ' Gold' +
-      (task.greedyGold > 0 ? ' (davon ' + task.greedyGold + ' durch Gierig)' : '');
+    return t('dayEnd.job', { name: task.name, job: task.jobText, gold: task.gold, greedy: task.greedyGold });
   }
   if (task.taskId === 'scouting' && task.scoutedDungeonId) {
-    const found = task.revealedBossId ? getBoss(task.revealedBossId).name + ' aufgedeckt!' : 'alles schon bekannt';
-    return task.name + ' erkundet ' + getDungeon(task.scoutedDungeonId).name + ': ' + found + ' Der nächste Run dort ist vorbereitet.';
+    const found = task.revealedBossId ? t('dayEnd.revealed', { name: getBoss(task.revealedBossId).name }) : t('dayEnd.allKnown');
+    return t('dayEnd.scouting', { name: task.name, dungeon: getDungeon(task.scoutedDungeonId).name, found });
   }
   return null;
 }
@@ -644,12 +641,12 @@ function createTraitBonusLine(text) {
 function raidOutcomeText(report) {
   const bosses = report.defeatedBossIds.length;
   if (report.outcome === 'success') {
-    return 'Raid geschafft!';
+    return t('dayEnd.raidCleared');
   }
   if (bosses === 0) {
-    return 'Wipe! Kein Boss besiegt';
+    return t('dayEnd.wipeNone');
   }
-  return 'Wipe nach ' + bosses + (bosses === 1 ? ' Boss' : ' Bossen');
+  return t('dayEnd.wipeAfter', { count: bosses });
 }
 
 // ---------- Gemerkte Szenen-Wahl ----------

@@ -6,6 +6,7 @@
 // Wird im Kampf-Labor benutzt (und später bei den Dungeons).
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { getHeroClass } from '../data/heroClasses.js';
 
 export function renderCombatReport(container, result) {
@@ -20,18 +21,18 @@ function createBanner(result) {
   const name = result.encounterName;
   if (result.isDummy) {
     banner.className = 'result-banner neutral';
-    banner.textContent = 'Messung beendet: ' + result.rounds + ' Runden';
+    banner.textContent = t('guide.measured', { rounds: result.rounds });
   } else if (result.outcome === 'victory') {
     banner.className = 'result-banner victory';
-    banner.textContent = 'SIEG gegen ' + name + ' nach ' + result.rounds + ' Runden';
+    banner.textContent = t('guide.victory', { name, rounds: result.rounds });
   } else if (result.outcome === 'retreat') {
     banner.className = 'result-banner neutral';
-    banner.textContent = 'RÜCKZUG nach ' + result.rounds + ' Runden';
+    banner.textContent = t('guide.retreated', { rounds: result.rounds });
   } else {
     banner.className = 'result-banner defeat';
     // Aufrunden, damit ein knapp überlebender Gegner nicht als "0 %" erscheint
     const enemyLeft = Math.ceil(result.bossHpPercent * 100);
-    banner.textContent = 'NIEDERLAGE nach ' + result.rounds + ' Runden (' + name + ' hatte noch ' + enemyLeft + ' % Leben)';
+    banner.textContent = t('guide.defeat', { rounds: result.rounds, name, left: enemyLeft });
   }
   return banner;
 }
@@ -41,7 +42,7 @@ function createMeter(result) {
   const meter = document.createElement('table');
   meter.className = 'meter';
   meter.innerHTML = `
-    <tr><th>Held</th><th>Schaden</th><th>pro Runde</th><th>Heilung / Schutz</th><th>Erlitten</th><th>Status</th></tr>
+    <tr><th>${t('guide.colHero')}</th><th>${t('guide.colDamage')}</th><th>${t('guide.colPerRound')}</th><th>${t('guide.colHealing')}</th><th>${t('guide.colTaken')}</th><th>${t('guide.colStatus')}</th></tr>
   `;
 
   let maxDamage = 1;
@@ -61,7 +62,7 @@ function createMeter(result) {
       <td>${Math.round(hero.damageDone / Math.max(1, result.rounds))}</td>
       <td>${createBarHtml(hero.healingDone, maxHealing, 'healing')}</td>
       <td>${hero.damageTaken}</td>
-      <td class="${hero.alive ? 'status-alive' : 'status-fallen'}">${hero.alive ? hero.hp + ' / ' + hero.maxHp : 'gefallen'}</td>
+      <td class="${hero.alive ? 'status-alive' : 'status-fallen'}">${hero.alive ? hero.hp + ' / ' + hero.maxHp : t('guide.fallen')}</td>
     `;
     row.querySelector('.meter-name').textContent = hero.name;
     meter.appendChild(row);
@@ -94,7 +95,7 @@ function createLog(result) {
       if (currentRound > 0) {
         const header = document.createElement('div');
         header.className = 'log-round';
-        header.textContent = 'Runde ' + currentRound;
+        header.textContent = t('guide.round', { round: currentRound });
         log.appendChild(header);
       }
     }

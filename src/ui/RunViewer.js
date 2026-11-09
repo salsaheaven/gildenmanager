@@ -4,6 +4,7 @@
 // (Die Kampfszenen am Tagesende kommen im nächsten Schritt dazu.)
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { createDefeatCausesView } from './DefeatCausesView.js';
 import { Expedition } from '../entities/Expedition.js';
 import { renderCombatReport } from './CombatReport.js';
@@ -31,7 +32,7 @@ export class RunViewer {
     for (let i = 0; i < result.encounters.length; i++) {
       const encounterResult = result.encounters[i];
       const heading = document.createElement('h3');
-      heading.textContent = 'Begegnung ' + (i + 1) + ': ' + encounterResult.encounterName;
+      heading.textContent = t('guide.encounter', { number: i + 1, name: encounterResult.encounterName });
       this.container.appendChild(heading);
       const box = document.createElement('div');
       box.className = 'final-report';

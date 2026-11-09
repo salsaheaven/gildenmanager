@@ -8,6 +8,7 @@
 // Benutzt vom Dungeon-Bildschirm. Die Daten kommen aus data/dungeons.js, enemies.js und lootBoxes.js.
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { getBoss, MINIONS, MECHANIC_TYPE_TEXTS } from '../data/enemies.js';
 import { getDamageType } from '../data/damageTypes.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
@@ -28,7 +29,7 @@ export function renderDungeonGuide(container, game, dungeon, openSections) {
   container.innerHTML = '';
   container.appendChild(createLevelBox(game, dungeon));
 
-  const enemies = createSection('enemies', 'Gegner (' + dungeon.encounters.length + ' Begegnungen)', openSections);
+  const enemies = createSection('enemies', t('guide.enemies', { count: dungeon.encounters.length }), openSections);
   dungeon.encounters.forEach((encounter, index) => {
     if (encounter.type === 'boss') {
       const known = game.isEncounterKnown(dungeon.id, index);
@@ -40,7 +41,7 @@ export function renderDungeonGuide(container, game, dungeon, openSections) {
   container.appendChild(enemies.section);
 
   const chest = getLootBoxType(dungeon.rewards.chest);
-  const loot = createSection('loot', 'Beute: ' + chest.name, openSections);
+  const loot = createSection('loot', t('guide.loot', { name: chest.name }), openSections);
   renderLoot(loot.body, game, dungeon, chest);
   container.appendChild(loot.section);
 }
@@ -64,24 +65,24 @@ function createLevelBox(game, dungeon) {
   const box = document.createElement('div');
   box.className = 'guide-level';
   box.innerHTML = `
-    <div><b>Stufe ${dungeon.level}</b> · empfohlen: Level ${dungeon.level}, Ausrüstungswert ${dungeon.recommendedGearScore}</div>
+    <div>${t('guide.level', { level: dungeon.level, gear: dungeon.recommendedGearScore })}</div>
     <div class="hint">Beute hat Item-Level ${dungeon.level}</div>
     <div class="guide-knowledge knowledge-${knowledge.level}"></div>
     <div class="guide-damage-types"></div>
   `;
   box.querySelector('.guide-knowledge').textContent = knowledge.level === 'full'
-    ? 'Vollständig erkundet (' + knowledge.known + ' von ' + knowledge.total + ' Bossen)'
-    : 'Erkundet: ' + knowledge.known + ' von ' + knowledge.total + ' Bossen. Schicke einen Helden zum Erkunden (Tagesplan).';
+    ? t('guide.fullyScouted', { known: knowledge.known, total: knowledge.total })
+    : t('guide.scouted', { known: knowledge.known, total: knowledge.total });
 
   const damageTypes = game.getKnownDamageTypes(dungeon.id);
   const line = box.querySelector('.guide-damage-types');
   if (damageTypes.length > 0) {
-    line.innerHTML = '<span class="hint">Bekannte Schadensarten (Resistenzen helfen):</span> ';
+    line.innerHTML = '<span class="hint">' + t('guide.knownDamage') + '</span> ';
     for (const damageTypeId of damageTypes) {
       line.appendChild(createDamageTypeChip(damageTypeId));
     }
   } else if (knowledge.level !== 'full') {
-    line.innerHTML = '<span class="hint">Schadensarten: noch unbekannt</span>';
+    line.innerHTML = '<span class="hint">' + t('guide.damageUnknown') + '</span>';
   }
   return box;
 }
@@ -133,12 +134,12 @@ function createBossCard(boss, level, index, known) {
   }
 
   const health = Math.round(boss.stats.health * getEnemyLevelFactors(level).health);
-  const stats = ['Leben ' + health];
+  const stats = [t('guide.health', { health })];
   if (boss.enrageRound) {
-    stats.push('rast ab Runde ' + boss.enrageRound + ' (doppelter Schaden)');
+    stats.push(t('guide.enrage', { round: boss.enrageRound }));
   }
   if (boss.attackDamageType && boss.attackDamageType !== 'physical') {
-    stats.push('greift mit ' + getDamageType(boss.attackDamageType).name + ' an');
+    stats.push(t('guide.attacksWith', { type: getDamageType(boss.attackDamageType).name }));
   }
   card.querySelector('.boss-card-stats').textContent = stats.join(' · ');
 
@@ -152,10 +153,10 @@ function createBossCard(boss, level, index, known) {
       what.push(getDamageType(mechanic.damageType).name);
     }
     if (mechanic.interruptible) {
-      what.push('unterbrechbar');
+      what.push(t('guide.interruptible'));
     }
     item.querySelector('.mechanic-what').textContent = '– ' + what.join(' · ');
-    item.querySelector('.mechanic-tip').textContent = 'Tipp: ' + mechanic.hint;
+    item.querySelector('.mechanic-tip').textContent = t('guide.tip', { text: mechanic.hint });
     // Wer kann kontern? z.B. "Unterbrechen: Schurke · per Talent: Jäger (Netzwurf), Magier (Bannendes Eis)"
     for (const counterId of getCounterIds(mechanic)) {
       item.appendChild(createCounterLine(getCounter(counterId)));
@@ -170,15 +171,15 @@ function renderLoot(container, game, dungeon, chest) {
   const reward = document.createElement('div');
   reward.className = 'reward-line';
   reward.appendChild(createSpriteCanvas('coin', 2));
-  reward.insertAdjacentHTML('beforeend', '<span>' + dungeon.rewards.gold + ' Gold bei Erfolg (+' +
-    dungeon.rewards.trashGold + ' pro besiegter Trash-Gruppe)</span>');
+  reward.insertAdjacentHTML('beforeend', '<span></span>');
+  reward.querySelector('span').textContent = t('guide.reward', { gold: dungeon.rewards.gold, trash: dungeon.rewards.trashGold });
   container.appendChild(reward);
 
   const chestLine = document.createElement('div');
   chestLine.className = 'reward-line';
   chestLine.appendChild(createChestCanvas(chest, 2));
   chestLine.insertAdjacentHTML('beforeend', '<span></span>');
-  chestLine.querySelector('span').textContent = chest.name + ': ' + chest.itemCount + ' Items, eines davon ist sicher ein Boss-Item:';
+  chestLine.querySelector('span').textContent = t('guide.chest', { name: chest.name, count: chest.itemCount });
   container.appendChild(chestLine);
 
   const book = game.guild.collection;
@@ -208,18 +209,18 @@ function createBossItemRow(entry, bestRarity) {
   name.style.color = getRarity(entry.minRarity).color;
   const armorTypeName = getArmorTypeName(template);
   row.querySelector('.boss-item-kind').textContent = SLOT_NAMES[template.slot] + (armorTypeName ? ' · ' + armorTypeName : '') +
-    ' · mindestens ' + getRarity(entry.minRarity).name;
-  row.querySelector('.boss-item-for').textContent = 'Für: ' + getSuitableClasses(template).map((heroClass) => heroClass.name).join(', ');
+    t('guide.atLeast', { rarity: getRarity(entry.minRarity).name });
+  row.querySelector('.boss-item-for').textContent = t('parts.for', { names: getSuitableClasses(template).map((heroClass) => heroClass.name).join(', ') });
 
   const found = row.querySelector('.boss-item-found');
   if (bestRarity) {
     found.textContent = STARS[bestRarity] || '✓';
     found.style.color = getRarity(bestRarity).color;
-    found.title = 'Im Sammelbuch: beste gefundene Seltenheit ' + getRarity(bestRarity).name;
+    found.title = t('guide.inCollection', { rarity: getRarity(bestRarity).name });
   } else {
     found.textContent = '???';
     found.classList.add('boss-item-missing');
-    found.title = 'Noch nicht gefunden (fehlt im Sammelbuch)';
+    found.title = t('guide.notFound');
   }
   return row;
 }
@@ -230,6 +231,6 @@ function createCounterLine(counter) {
   line.className = 'mechanic-counter';
   const fixed = counter.classIds.map((classId) => getHeroClass(classId).name).join(', ');
   const byTalent = counter.talents.map((entry) => getHeroClass(entry.classId).name + ' (' + findTalent(entry.talentId).name + ')').join(', ');
-  line.textContent = counter.name + ': ' + fixed + ' · per Talent: ' + byTalent;
+  line.textContent = t('guide.counterLine', { name: counter.name, fixed, talents: byTalent });
   return line;
 }
