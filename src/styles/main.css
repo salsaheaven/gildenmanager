@@ -5188,3 +5188,11 @@ body.locked-collection .collection-button {
 .hall-dust-hint[hidden] {
   display: none;
 }
+
+/* Schatzkammer: alle Kisten auf einmal öffnen */
+.open-all-button {
+  width: 100%;
+  margin-top: 6px;
+  border-color: #ffd23f;
+  color: #ffd23f;
+}

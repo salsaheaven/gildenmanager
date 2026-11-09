@@ -26,6 +26,10 @@ import { getRarityRank } from '../data/rarities.js';
 // Zeiten der Animation in Millisekunden
 const FIRST_ITEM_DELAY = 450;
 const TIME_BETWEEN_ITEMS = 500;
+// Bei "Alle öffnen" kommen die Items schneller
+const TIME_BETWEEN_ITEMS_FAST = 150;
+// Bis zu dieser Breite gilt der Bildschirm als Handy (wie in main.css)
+const MOBILE_WIDTH = 700;
 
 export class LootBoxScreen {
   // inventory = das InventoryOverlay. Frische Items werden dort versteckt, bis sie aufgedeckt sind.
@@ -115,6 +119,17 @@ export class LootBoxScreen {
       list.appendChild(button);
     }
 
+    // Mehrere Kisten: alle auf einmal öffnen
+    const totalBoxes = this.game.guild.boxes.length;
+    if (totalBoxes >= 2) {
+      const allButton = document.createElement('button');
+      allButton.className = 'open-all-button';
+      allButton.textContent = 'Alle öffnen (' + totalBoxes + ')';
+      allButton.disabled = this.isOpening;
+      allButton.addEventListener('click', () => this.openAll());
+      list.appendChild(allButton);
+    }
+
     if (list.children.length === 0) {
       list.innerHTML = '<p class="empty">Keine Kisten. Schaffe einen Dungeon für eine Boss-Kiste!</p>';
     }
@@ -160,10 +175,60 @@ export class LootBoxScreen {
     if (!items) {
       return;
     }
+    this.playOpening(getLootBoxType(boxTypeId), items, TIME_BETWEEN_ITEMS);
+  }
 
+  // "Alle öffnen": alle Kisten auf einmal öffnen und die Beute zusammen zeigen.
+  // Gezeigt wird die beste Kiste, die Items kommen schneller nacheinander, das beste zuletzt.
+  openAll() {
+    if (this.isOpening) {
+      return;
+    }
+    const allItems = [];
+    let bestBoxType = null;
+    let bestRank = -1;
+    const autoJunk = { mode: this.game.guild.autoJunk, count: 0, gold: 0, materials: {} };
+    const ingredients = {};
+    for (const boxType of LOOT_BOXES) {
+      while (this.game.guild.countBoxes(boxType.id) > 0) {
+        const items = this.game.openBox(boxType.id);
+        if (!items) {
+          break;
+        }
+        // Gezeigt wird die Kiste, aus der das beste Item kommt
+        const bestOfBox = Math.max(...items.map((item) => item.getRarityRank()));
+        if (bestBoxType === null || bestOfBox > bestRank) {
+          bestBoxType = boxType;
+          bestRank = bestOfBox;
+        }
+        allItems.push(...items);
+        if (items.autoJunk) {
+          autoJunk.count += items.autoJunk.count;
+          autoJunk.gold += items.autoJunk.gold;
+          addMaterials(autoJunk.materials, items.autoJunk.materials);
+        }
+        if (items.ingredients) {
+          addMaterials(ingredients, items.ingredients);
+        }
+      }
+    }
+    if (allItems.length === 0) {
+      return;
+    }
+    allItems.sort((a, b) => a.getRarityRank() - b.getRarityRank());
+    allItems.autoJunk = autoJunk;
+    if (Object.keys(ingredients).length > 0) {
+      allItems.ingredients = ingredients;
+    }
+    this.playOpening(bestBoxType, allItems, TIME_BETWEEN_ITEMS_FAST);
+  }
+
+  // Die Öffnen-Animation für bereits geöffnete Items abspielen: wackeln, aufspringen, Items nacheinander
+  playOpening(boxType, items, timeBetweenItems) {
     this.isOpening = true;
-    this.currentBoxType = getLootBoxType(boxTypeId);
+    this.currentBoxType = boxType;
     this.currentItems = items;
+    this.timeBetweenItems = timeBetweenItems;
     this.revealedCount = 0;
     this.inventory.hideItems(items);
     this.renderBoxList();
@@ -182,6 +247,10 @@ export class LootBoxScreen {
     Sound.shake(this.currentBoxType.shakeTime);
 
     this.later(this.currentBoxType.shakeTime * 1000, () => this.burstOpen());
+    // Auf dem Handy steht die Bühne unter der Kistenliste: hinscrollen, damit man das Öffnen sieht
+    if (window.innerWidth <= MOBILE_WIDTH) {
+      this.stage.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
   }
 
   // Phase 2: Kiste springt auf. Das Leuchten verrät schon die beste Seltenheit!
@@ -202,9 +271,9 @@ export class LootBoxScreen {
 
     // Phase 3: Items nacheinander zeigen
     for (let i = 0; i < this.currentItems.length; i++) {
-      this.later(FIRST_ITEM_DELAY + i * TIME_BETWEEN_ITEMS, () => this.revealNextItem());
+      this.later(FIRST_ITEM_DELAY + i * this.timeBetweenItems, () => this.revealNextItem());
     }
-    this.later(FIRST_ITEM_DELAY + this.currentItems.length * TIME_BETWEEN_ITEMS, () => this.finishOpening());
+    this.later(FIRST_ITEM_DELAY + this.currentItems.length * this.timeBetweenItems, () => this.finishOpening());
   }
 
   revealNextItem() {
@@ -411,14 +480,21 @@ export class LootBoxScreen {
     }
   }
 
-  // Knöpfe "Noch eine öffnen" (direkt weitermachen) und "Ins Inventar"
+  // Knöpfe "Fertig" und "Noch eine öffnen" (direkt weitermachen)
   renderActions() {
     this.actionsElement.innerHTML = '';
-    const inventoryButton = document.createElement('button');
-    inventoryButton.className = 'big-button';
-    inventoryButton.textContent = 'Ins Inventar';
-    inventoryButton.addEventListener('click', () => this.inventory.open());
-    this.actionsElement.appendChild(inventoryButton);
+    // "Fertig": Die Items liegen schon im Inventar, die Bühne wird wieder frei
+    const doneButton = document.createElement('button');
+    doneButton.className = 'big-button';
+    doneButton.textContent = 'Fertig';
+    doneButton.addEventListener('click', () => {
+      Sound.click();
+      this.showIdle();
+      if (window.innerWidth <= MOBILE_WIDTH) {
+        this.root.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
+    });
+    this.actionsElement.appendChild(doneButton);
 
     const remaining = this.game.guild.countBoxes(this.currentBoxType.id);
     if (remaining > 0) {
@@ -464,4 +540,11 @@ function getPityHint(progress) {
     }
   }
   return hint;
+}
+
+// Material-Mengen zusammenzählen: target += source (beide { materialId: Anzahl })
+function addMaterials(target, source) {
+  for (const materialId in source) {
+    target[materialId] = (target[materialId] || 0) + source[materialId];
+  }
 }
