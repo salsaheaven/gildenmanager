@@ -3,6 +3,7 @@
 // Prüft die Bedingungen aus data/unlocks.js und merkt sich, was schon frei ist (guild.unlockedFeatures)
 // und welche Hinweise der Spieler schon gesehen hat (guild.acknowledgedUnlocks).
 // Geprüft wird nach jedem Tagesende, beim Kistenöffnen und beim Gründen der Gilde (siehe Game.updateUnlocks).
+// Höchstens eine Freischaltung pro Tag; ihr Hinweis steht einen Tag lang im Aufgaben-Kasten.
 // ============================================================
 
 import { UNLOCKS } from '../data/unlocks.js';
@@ -33,16 +34,21 @@ function countAllClears(guild) {
   return total;
 }
 
-// Schaltet frei, was jetzt dran ist. Gibt die ids zurück, die gerade neu dazugekommen sind.
+// Schaltet frei, was jetzt dran ist: höchstens EINE Freischaltung pro Tag (in der Reihenfolge aus data/unlocks.js),
+// damit nicht alles auf einmal kommt. Was auch schon dran wäre, wartet auf die nächsten Tage.
+// Gibt die ids zurück, die gerade neu dazugekommen sind (leer oder eine).
 export function updateUnlocks(guild, day) {
-  const added = [];
+  if (guild.lastUnlockDay === day) {
+    return [];
+  }
   for (const unlock of UNLOCKS) {
     if (!guild.unlockedFeatures.includes(unlock.id) && isConditionMet(guild, day, unlock.condition)) {
       guild.unlockedFeatures.push(unlock.id);
-      added.push(unlock.id);
+      guild.lastUnlockDay = day;
+      return [unlock.id];
     }
   }
-  return added;
+  return [];
 }
 
 // Freigeschaltet, aber der Hinweis wurde noch nicht angeschaut

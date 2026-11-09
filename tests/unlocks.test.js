@@ -42,6 +42,21 @@ describe('Schrittweises Freischalten', () => {
     expect(game.isFeatureUnlocked('tavern')).toBe(true);
   });
 
+  it('höchstens eine Freischaltung pro Tag, der Hinweis steht einen Tag', () => {
+    const game = foundedGame();
+    game.day = 10; // alles nach Tagen wäre jetzt dran
+    game.guild.lastUnlockDay = 9;
+    game.updateUnlocks();
+    game.updateUnlocks();
+    expect(game.guild.unlockedFeatures.length).toBe(1);
+    const first = game.guild.unlockedFeatures[0];
+    game.endDay();
+    expect(game.guild.unlockedFeatures.length).toBe(2);
+    // Der gestrige Hinweis gilt als gesehen, nur der neue steht im Kasten
+    expect(game.getUnannouncedUnlocks()).not.toContain(first);
+    expect(game.getUnannouncedUnlocks().length).toBe(1);
+  });
+
   it('Talente kommen mit Level 5, das Freigeschaltete wird gespeichert', () => {
     const game = foundedGame();
     game.guild.heroes[0].level = 5;

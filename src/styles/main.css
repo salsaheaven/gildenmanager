@@ -5172,3 +5172,19 @@ body.locked-collection .collection-button {
   border-color: #ffd23f;
   color: #ffd23f;
 }
+
+/* Gildenhalle: Hinweis, woher Staub kommt (mit "Schrott zerlegen") */
+.hall-dust-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px;
+  border: 2px dashed #c084fc;
+  color: #e9d5ff;
+}
+
+.hall-dust-hint[hidden] {
+  display: none;
+}

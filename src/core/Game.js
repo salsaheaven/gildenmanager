@@ -167,7 +167,11 @@ export class Game {
     this.refreshDailyOffer();
     // Die stehenden Gruppen ziehen auch heute los (Verletzte fehlen)
     this.planStandingGroups();
-    // Neue Teile des Spiels freischalten (Tutorial)
+    // Gestrige "Neu:"-Hinweise gelten jetzt als gesehen (jeder steht einen Tag im Aufgaben-Kasten),
+    // dann neue Teile des Spiels freischalten (Tutorial, höchstens eins pro Tag)
+    for (const unlockId of this.getUnannouncedUnlocks()) {
+      this.guild.acknowledgedUnlocks.push(unlockId);
+    }
     this.updateUnlocks();
 
     this.emit('dayEnded', { day: endedDay, reports: reports, summary: this.lastDaySummary, raidReport: this.lastRaidReport });

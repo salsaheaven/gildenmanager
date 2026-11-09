@@ -46,6 +46,7 @@ export class Guild {
     this.raidPlan = new RaidPlan(RAIDS[0].id); // Raid-Aufstellung, gewählter Raid, Wochen-Sperre pro Raid (siehe RaidPlan.js)
     this.unlockedFeatures = [];   // freigeschaltete Teile des Spiels (ids aus data/unlocks.js)
     this.acknowledgedUnlocks = []; // Freischaltungen, deren Hinweis der Spieler schon angeschaut hat
+    this.lastUnlockDay = 0;        // Tag der letzten Freischaltung (höchstens eine pro Tag, siehe systems/Unlocks.js)
     this.nextStandingGroupId = 1;
     this.hall = new GuildHall(); // Gildenhalle: Gebäude und Baustelle (siehe data/buildings.js)
     this.firstClearDays = {};  // Dungeon-id → Tag, an dem deine Gilde ihn zum ersten Mal geschafft hat (Rangliste)
@@ -332,6 +333,7 @@ export class Guild {
       nextStandingGroupId: this.nextStandingGroupId,
       unlockedFeatures: this.unlockedFeatures,
       acknowledgedUnlocks: this.acknowledgedUnlocks,
+      lastUnlockDay: this.lastUnlockDay,
       firstClearDays: this.firstClearDays,
       hall: this.hall.toSaveData(),
       rivals: this.rivals.map((rival) => rival.toSaveData()),
@@ -375,6 +377,7 @@ export class Guild {
     guild.nextStandingGroupId = data.nextStandingGroupId;
     guild.unlockedFeatures = data.unlockedFeatures;
     guild.acknowledgedUnlocks = data.acknowledgedUnlocks;
+    guild.lastUnlockDay = data.lastUnlockDay;
     guild.firstClearDays = data.firstClearDays;
     guild.hall = GuildHall.fromSaveData(data.hall);
     guild.rivals = data.rivals.map((rivalData) => RivalGuild.fromSaveData(rivalData));

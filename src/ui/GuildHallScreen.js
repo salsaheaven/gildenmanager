@@ -11,6 +11,7 @@
 import { BUILDING_ORDER, getBuilding } from '../data/buildings.js';
 import { getNextLevel, canAffordCost } from '../systems/BuildingSystem.js';
 import { describeMaterials } from './UpgradeControls.js';
+import { getSalvageYield } from '../systems/CraftingSystem.js';
 import { createForgePanel, createBrewPanel } from './CraftingControls.js';
 import { Sound } from './Sound.js';
 import { showToast } from './Toast.js';
@@ -26,6 +27,7 @@ export class GuildHallScreen {
         <section class="panel hall-header">
           <h2>Gildenhalle</h2>
           <div class="hall-info"></div>
+          <div class="hall-dust-hint" hidden></div>
           <div class="hall-warning" hidden>Der Unterhalt wurde gestern nicht bezahlt. Heute wirkt kein Gebäude.</div>
           <div class="hall-construction"></div>
         </section>
@@ -46,6 +48,7 @@ export class GuildHallScreen {
     this.root.querySelector('.hall-info').textContent = 'Unterhalt: ' + upkeep + ' Gold pro Tag · Material: ' +
       describeMaterials(guild.materials, true);
     this.root.querySelector('.hall-warning').hidden = hall.upkeepPaid;
+    this.renderDustHint();
     this.renderConstruction();
 
     const list = this.root.querySelector('.hall-list');
@@ -55,6 +58,42 @@ export class GuildHallScreen {
       this.addWorkshop(card, buildingId);
       list.appendChild(card);
     }
+  }
+
+  // Fehlt Staub für das nächste Gebäude? Dann erklären, woher er kommt, und Schrott gleich hier zerlegen lassen.
+  renderDustHint() {
+    const guild = this.game.guild;
+    const hint = this.root.querySelector('.hall-dust-hint');
+    const dustMissing = BUILDING_ORDER.some((buildingId) => {
+      const nextLevel = getNextLevel(guild.hall, buildingId);
+      return nextLevel && (nextLevel.cost.dust || 0) > guild.materials.dust;
+    });
+    hint.hidden = !dustMissing;
+    if (!dustMissing) {
+      return;
+    }
+    hint.innerHTML = '<span>✧ Staub bekommst du beim Zerlegen von Items.</span>';
+    const junk = this.game.getJunkItems();
+    if (junk.length === 0) {
+      hint.querySelector('span').textContent += ' Zerlege überzählige Items im Inventar.';
+      return;
+    }
+    const total = {};
+    for (const item of junk) {
+      const materials = getSalvageYield(item);
+      for (const materialId in materials) {
+        total[materialId] = (total[materialId] || 0) + materials[materialId];
+      }
+    }
+    const button = document.createElement('button');
+    button.className = 'hall-salvage-button';
+    button.textContent = 'Schrott zerlegen (' + junk.length + ' = ' + describeMaterials(total) + ')';
+    button.addEventListener('click', () => {
+      const result = this.game.salvageItems(junk.map((item) => item.id));
+      Sound.click();
+      showToast('Schrott zerlegt: ' + result.count + ' Items, +' + describeMaterials(result.materials), '#c084fc');
+    });
+    hint.appendChild(button);
   }
 
   // Die laufende Baustelle mit Balken, z.B. "Baustelle: Kaserne Stufe 2 · noch 2 Tage"
