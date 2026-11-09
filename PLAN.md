@@ -181,6 +181,9 @@ Plan vom 2026-11-01 (Entscheidungen in `KONZEPT.md` unter „Raids“, „Klasse
   **Damit ist M4 fertig.**
 
 **M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie.
+Notiert (2026-11-09):
+- **Deutsch und Englisch mit Sprachauswahl:** alle Texte (Oberfläche und Inhalte aus `src/data/`) in beiden Sprachen, Sprache im Spiel umschaltbar und gespeichert.
+- **GitHub-Seite überarbeiten und aufhübschen** (Projektseite/README und die veröffentlichte Seite).
 
 **Nach dem ersten Release (erste Erweiterung):** Heroisch mit Permadeath und Ehrenhalle, New Game+ / Incremental-Teil (entschieden 2026-10-30).
 
