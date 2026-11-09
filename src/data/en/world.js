@@ -168,3 +168,11 @@ export const DUNGEONS_EN = {
   wildGrove: { name: 'The Wild Grove', description: 'Set dungeon for leather: the bark giant Gnarr blocks the way. Deep in the grove, the primal beast Skaar watches over the garb of hunters and keepers.', encounters: { 0: { name: 'Wild Wolf Pack' }, 1: { name: 'Thorn Thicket' }, 3: { name: 'Moor Path' } } },
   arcaneArchive: { name: 'The Arcane Archive', description: 'Set dungeon for cloth: the ink witch Selvra dwells between the shelves. In the innermost hall, the archivist Mythrel keeps the robes of the great mages.', encounters: { 0: { name: 'Flying Pages' }, 1: { name: 'Reading Room' }, 3: { name: 'Forbidden Section' } } },
 };
+
+// Set-Boni je Rolle (ab 2 und ab 3 getragenen Teilen)
+export const ROLE_BONUSES_EN = {
+  tank: { 2: { text: '+15 % health' }, 3: { text: '−10 % damage taken' } },
+  healer: { 2: { text: '+15 % healing' }, 3: { text: '−15 % mana costs' } },
+  damage: { 2: { text: '+10 % damage' }, 3: { text: '+10 % damage, survives a deadly hit once per fight' } },
+  support: { 2: { text: '+8 % damage and healing' }, 3: { text: '−8 % damage taken, +10 % health' } },
+};

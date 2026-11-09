@@ -24,7 +24,7 @@ import { COUNTERS } from '../counters.js';
 import { COLLECTION_PAGES } from '../collectionBook.js';
 import { RAIDS } from '../raids.js';
 import { CAUSE_TIPS, UNKNOWN_CAUSE, CAUSE_NOTES, CLASS_TIPS } from '../defeatCauses.js';
-import { SETS } from '../sets.js';
+import { SETS, ROLE_BONUSES } from '../sets.js';
 import { DUNGEONS } from '../dungeons.js';
 import { HERO_CLASSES } from '../heroClasses.js';
 import { ABILITIES } from '../abilities.js';
@@ -32,7 +32,10 @@ import { TALENTS } from '../talents.js';
 import { HERO_ORDERS } from '../heroOrders.js';
 import { BOSSES, MINIONS, MECHANIC_TYPE_TEXTS } from '../enemies.js';
 import { RAID_BOSSES } from '../raidBosses.js';
+import { LOOT_BOXES } from '../lootBoxes.js';
+import { BALANCING } from '../balancing.js';
 import * as BASICS from './basics.js';
+import { LOOT_BOXES_EN, BALANCING_EN } from './lootBoxes.js';
 import * as ENEMIES from './enemies.js';
 import { RAID_BOSSES_EN } from './raidBosses.js';
 import * as CLASSES from './classes.js';
@@ -75,6 +78,7 @@ export const DATA_TRANSLATIONS_EN = [
   { name: 'CLASS_TIPS', target: CLASS_TIPS, texts: WORLD.CLASS_TIPS_EN },
   { name: 'UNKNOWN_CAUSE', target: UNKNOWN_CAUSE, texts: WORLD.UNKNOWN_CAUSE_EN },
   { name: 'SETS', target: SETS, texts: WORLD.SETS_EN },
+  { name: 'ROLE_BONUSES', target: ROLE_BONUSES, texts: WORLD.ROLE_BONUSES_EN },
   { name: 'DUNGEONS', target: DUNGEONS, texts: WORLD.DUNGEONS_EN },
   { name: 'HERO_CLASSES', target: HERO_CLASSES, texts: CLASSES.HERO_CLASSES_EN },
   { name: 'ABILITIES', target: ABILITIES, texts: CLASSES.ABILITIES_EN },
@@ -84,4 +88,6 @@ export const DATA_TRANSLATIONS_EN = [
   { name: 'MECHANIC_TYPE_TEXTS', target: MECHANIC_TYPE_TEXTS, texts: ENEMIES.MECHANIC_TYPE_TEXTS_EN },
   { name: 'MINIONS', target: MINIONS, texts: ENEMIES.MINIONS_EN },
   { name: 'RAID_BOSSES', target: RAID_BOSSES, texts: RAID_BOSSES_EN },
+  { name: 'LOOT_BOXES', target: LOOT_BOXES, texts: LOOT_BOXES_EN },
+  { name: 'BALANCING', target: BALANCING, texts: BALANCING_EN },
 ];

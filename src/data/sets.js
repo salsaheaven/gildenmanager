@@ -19,7 +19,7 @@
 export const SET_BONUS_COUNTS = [2, 3];
 
 // Boni je Rolle (damit nicht jedes Set eigene Zahlen braucht; einzelne Sets dürfen später eigene bekommen)
-const ROLE_BONUSES = {
+export const ROLE_BONUSES = {
   tank: {
     2: { effects: { statBonus: { health: 0.15 } }, text: '+15 % Leben' },
     3: { effects: { damageTaken: -0.1 }, text: '−10 % erlittener Schaden' },
