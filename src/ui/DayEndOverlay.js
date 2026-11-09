@@ -316,7 +316,7 @@ export class DayEndOverlay {
       // "Bericht von gestern": keine Fanfare und keine Meldungen noch einmal
     } else if (serverFirst) {
       Sound.collectionPage();
-      showToast('Server-First! Neuer Titel: „' + getServerFirstTitle(serverFirst.report.dungeonId) + '“', '#ffd23f');
+      showToast(t('misc2.serverFirstTitle', { title: getServerFirstTitle(serverFirst.report.dungeonId) }), '#ffd23f');
     } else if (best) {
       Sound.itemReveal(best.report.firstClear ? 4 : 3);
     }
@@ -447,7 +447,7 @@ export class DayEndOverlay {
       <div class="day-raid-next hint"></div>
       <details class="day-raid-heroes"><summary></summary><div class="day-run-heroes"></div></details>
     `;
-    card.querySelector('.day-run-name').textContent = 'Raid: ' + raid.name;
+    card.querySelector('.day-run-name').textContent = t('misc.raidCard', { name: raid.name });
     card.querySelector('.day-run-outcome').textContent = raidOutcomeText(report);
 
     const bossLine = card.querySelector('.day-raid-bosses');

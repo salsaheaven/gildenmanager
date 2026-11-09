@@ -142,7 +142,7 @@ export function createReforgeControls(game, item) {
   for (const target of targets) {
     const option = document.createElement('option');
     option.value = target.id;
-    option.textContent = 'zu ' + describeTemplate(target);
+    option.textContent = t('misc.toTemplate', { name: describeTemplate(target) });
     select.appendChild(option);
   }
 

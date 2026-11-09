@@ -93,7 +93,7 @@ export class LootBoxScreen {
 
   renderSidePanel() {
     const progress = this.game.guild.collection.getProgress();
-    this.root.querySelector('.collection-button').textContent = '📖 Sammelbuch (' + progress.found + ' / ' + progress.total + ')';
+    this.root.querySelector('.collection-button').textContent = t('misc.collectionButton', { found: progress.found, total: progress.total });
     this.renderBoxList();
     this.renderPity();
   }
@@ -342,7 +342,7 @@ export class LootBoxScreen {
     if (item.collectionStatus) {
       const chip = document.createElement('div');
       chip.className = 'collection-chip ' + item.collectionStatus;
-      chip.textContent = item.collectionStatus === 'new' ? 'Neu im Sammelbuch!' : 'Sammelbuch verbessert!';
+      chip.textContent = item.collectionStatus === 'new' ? t('misc.newInCollection') : t('misc.collectionImproved');
       card.appendChild(chip);
     }
     return card;

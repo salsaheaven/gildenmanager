@@ -10,7 +10,8 @@ export function createNewsLine(news) {
   line.className = 'news-line' + (news.kind === 'serverFirst' ? ' server-first' : '') + (news.isPlayer ? ' player' : '');
   line.style.setProperty('--news-color', news.color);
   line.innerHTML = '<span class="news-day"></span><span class="news-text"></span>';
-  line.querySelector('.news-day').textContent = 'Tag ' + news.day;
+  line.querySelector('.news-day').textContent = t('common.day', { day: news.day });
   line.querySelector('.news-text').textContent = news.text;
   return line;
 }
+import { t } from '../core/Language.js';

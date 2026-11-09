@@ -126,10 +126,10 @@ function createBossCard(boss, level, index, known) {
     <ul class="boss-mechanics"></ul>
   `;
   card.querySelector('.boss-card-icon').appendChild(createSpriteCanvas(boss.sprite, 4, boss.colors || {}));
-  card.querySelector('.boss-card-name').textContent = (index + 1) + '. Boss: ' + boss.name + ' – ' + boss.title;
+  card.querySelector('.boss-card-name').textContent = t('misc.bossCard', { number: index + 1, name: boss.name, title: boss.title });
   if (!known) {
     card.classList.add('unknown');
-    card.querySelector('.boss-card-stats').textContent = 'Noch nicht erkundet: Leben, Fähigkeiten und Schadensarten sind unbekannt.';
+    card.querySelector('.boss-card-stats').textContent = t('misc.notScouted');
     return card;
   }
 

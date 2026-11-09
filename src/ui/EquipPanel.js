@@ -59,7 +59,7 @@ export class EquipPanel {
       <div class="equip-current"></div>
       <div class="equip-list"></div>
     `;
-    this.root.querySelector('h2').textContent = SLOT_NAMES[this.slot] + ' für ' + this.hero.name;
+    this.root.querySelector('h2').textContent = t('misc.slotFor', { slot: SLOT_NAMES[this.slot], name: this.hero.name });
     this.root.querySelector('.sheet-close-button').addEventListener('click', () => {
       Sound.click();
       this.onClose();

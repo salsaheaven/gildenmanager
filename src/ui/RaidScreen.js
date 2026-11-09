@@ -10,6 +10,7 @@
 // Die Regeln stehen in systems/RaidRules.js, die Aktionen in Game (Raid-Abschnitt).
 // ============================================================
 
+import { t } from '../core/Language.js';
 import { RAID_RULES, RAIDS } from '../data/raids.js';
 import { getBoss, MECHANIC_TYPE_TEXTS } from '../data/enemies.js';
 import { ROLE_NAMES } from '../data/heroClasses.js';
@@ -34,20 +35,20 @@ export class RaidScreen {
           <div class="raid-progress"></div>
           <div class="raid-check"></div>
           <div class="button-row raid-actions">
-            <button class="auto-raid-button" title="Verteilt die einsatzbereiten Helden: Tanks in verschiedene Gruppen, Heiler gleichmäßig, dann die Stärksten.">Auto-Raid</button>
+            <button class="auto-raid-button" title="${t('raid.autoInfo')}">${t('raid.auto')}</button>
             <button class="raid-skip-button"></button>
           </div>
         </section>
         <section class="panel">
-          <h2>Aufstellung</h2>
+          <h2>${t('raid.lineup')}</h2>
           <p class="hint raid-select-hint"></p>
           <div class="raid-edit-groups"></div>
-          <h3>Nicht im Raid</h3>
+          <h3>${t('raid.bench')}</h3>
           <div class="raid-bench"></div>
-          <div class="button-row"><button class="raid-remove-button" hidden>Aus dem Raid nehmen</button></div>
+          <div class="button-row"><button class="raid-remove-button" hidden>${t('raid.remove')}</button></div>
         </section>
         <section class="panel">
-          <h2>Bosse</h2>
+          <h2>${t('raid.bosses')}</h2>
           <div class="raid-bosses"></div>
         </section>
       </div>
@@ -94,8 +95,8 @@ export class RaidScreen {
     const inRaid = this.selectedHeroId !== null && plan.isMember(this.selectedHeroId);
     this.root.querySelector('.raid-remove-button').hidden = !inRaid;
     this.root.querySelector('.raid-select-hint').textContent = this.selectedHeroId === null
-      ? 'Tippe einen Helden an, dann einen anderen Helden (tauschen) oder einen freien Platz „+“ (verschieben).'
-      : this.game.guild.findHero(this.selectedHeroId).name + ' ist ausgewählt. Wohin soll er?';
+      ? t('raid.selectHint')
+      : t('raid.selected', { name: this.game.guild.findHero(this.selectedHeroId).name });
   }
 
   // Knöpfe zum Wählen des Raids (gesperrte Raids ausgegraut, mit Grund)
@@ -107,10 +108,10 @@ export class RaidScreen {
       const button = document.createElement('button');
       button.className = 'filter-button';
       button.classList.toggle('active', raid.id === this.game.guild.raidPlan.selectedRaidId);
-      button.textContent = raid.name + (raid.isFinal ? ' (Endboss)' : '');
+      button.textContent = raid.name + (raid.isFinal ? t('raid.finalBoss') : '');
       button.disabled = !unlocked.includes(raid.id);
       if (button.disabled && raid.unlockAfterRaid) {
-        button.title = 'Öffnet, wenn du ' + RAIDS.find((entry) => entry.id === raid.unlockAfterRaid).name + ' einmal ganz geschafft hast.';
+        button.title = t('raid.opensAfter', { name: RAIDS.find((entry) => entry.id === raid.unlockAfterRaid).name });
         button.textContent += ' 🔒';
       }
       button.addEventListener('click', () => {
@@ -131,24 +132,24 @@ export class RaidScreen {
     line.className = 'raid-day-line';
 
     if (!game.isRaidUnlocked()) {
-      line.textContent = 'Öffnet, sobald ein Held Level ' + game.getRaid().unlockLevel + ' erreicht.';
+      line.textContent = t('raid.opensAtLevel', { level: game.getRaid().unlockLevel });
       return;
     }
     if (game.isRaidDayToday()) {
       skipButton.hidden = plan.lastFoughtDay === game.day || game.getNextRaidEncounterIndex() === null;
       if (plan.skippedDay === game.day) {
-        line.textContent = 'Heute ist Raid-Tag, aber der Raid setzt aus.';
-        skipButton.textContent = 'Doch raiden';
+        line.textContent = t('raid.todaySkipped');
+        skipButton.textContent = t('raid.raidAnyway');
       } else if (plan.activeToday) {
-        line.textContent = 'Heute ist Raid-Tag! Der Raid zieht bei „Tag beenden“ los. Dungeons sind heute geschlossen.';
+        line.textContent = t('raid.todayRaid');
         line.classList.add('raid-today');
-        skipButton.textContent = 'Heute aussetzen';
+        skipButton.textContent = t('raid.skipToday');
       } else if (game.getNextRaidEncounterIndex() === null) {
-        line.textContent = 'Heute ist Raid-Tag, aber alle Bosse dieser Woche sind besiegt.';
+        line.textContent = t('raid.todayAllDone');
       } else {
-        line.textContent = 'Heute ist Raid-Tag, aber die Aufstellung reicht noch nicht (siehe unten).';
+        line.textContent = t('raid.todayNotReady');
         line.classList.add('raid-warning');
-        skipButton.textContent = 'Heute aussetzen';
+        skipButton.textContent = t('raid.skipToday');
       }
       return;
     }
@@ -157,8 +158,7 @@ export class RaidScreen {
       nextDay++;
     }
     const daysAway = nextDay - game.day;
-    line.textContent = 'Raid-Tage: Tag ' + RAID_RULES.raidDays.join(' und ') + ' jeder Woche. Nächster Raid-Tag: Tag ' + nextDay +
-      ' (' + (daysAway === 1 ? 'morgen' : 'in ' + daysAway + ' Tagen') + ').';
+    line.textContent = t('raid.raidDays', { days: RAID_RULES.raidDays.join(t('raid.and')), next: nextDay, away: daysAway });
   }
 
   // Die Bosse der Woche: ✓ besiegt, ➜ als Nächstes, sonst offen
@@ -186,7 +186,7 @@ export class RaidScreen {
     }
     const note = document.createElement('div');
     note.className = 'hint';
-    note.textContent = 'Besiegte Bosse bleiben bis zum Ende der Woche besiegt. Jede Woche beginnt der Raid von vorn.';
+    note.textContent = t('raid.lockoutNote');
     container.appendChild(note);
   }
 
@@ -195,11 +195,10 @@ export class RaidScreen {
     const check = this.game.checkRaid();
     const box = this.root.querySelector('.raid-check');
     box.className = 'raid-check ' + (check.ok ? 'ok' : 'bad');
-    const counts = check.heroCount + ' / ' + (RAID_RULES.groupCount * RAID_RULES.groupSize) + ' Helden · ' +
-      check.tanks + ' Tanks · ' + check.healers + ' Heiler';
+    const counts = t('raid.counts', { count: check.heroCount, max: RAID_RULES.groupCount * RAID_RULES.groupSize, tanks: check.tanks, healers: check.healers });
     box.textContent = check.ok
-      ? 'Bereit: ' + counts + (check.heroCount < RAID_RULES.groupCount * RAID_RULES.groupSize ? ' (mit weniger als 20 wird es schwerer)' : '')
-      : counts + ' – Es fehlt: ' + check.problems.join(', ');
+      ? t('raid.ready', { counts, fewer: check.heroCount < RAID_RULES.groupCount * RAID_RULES.groupSize })
+      : t('raid.missing', { counts, problems: check.problems.join(', ') });
   }
 
   // Die 4 Gruppen mit ihren Helden und freien Plätzen
@@ -213,8 +212,7 @@ export class RaidScreen {
       box.innerHTML = '<button class="raid-edit-group-head"></button><div class="raid-edit-tiles"></div>';
       const head = box.querySelector('.raid-edit-group-head');
       const healers = group.filter((heroId) => this.getRole(heroId) === 'healer').length;
-      head.textContent = 'Gruppe ' + (groupIndex + 1) + ' (' + group.length + '/' + RAID_RULES.groupSize + ')' +
-        (group.length > 0 && healers === 0 ? ' · kein Heiler!' : '');
+      head.textContent = t('raid.groupHead', { number: groupIndex + 1, count: group.length, size: RAID_RULES.groupSize, noHealer: group.length > 0 && healers === 0 });
       head.classList.toggle('no-healer', group.length > 0 && healers === 0);
       head.addEventListener('click', () => this.moveSelectedTo(groupIndex));
       const tiles = box.querySelector('.raid-edit-tiles');
@@ -225,7 +223,7 @@ export class RaidScreen {
         const slot = document.createElement('button');
         slot.className = 'raid-empty-slot';
         slot.textContent = '+';
-        slot.title = 'Ausgewählten Helden hierher setzen';
+        slot.title = t('raid.placeHere');
         slot.addEventListener('click', () => this.moveSelectedTo(groupIndex));
         tiles.appendChild(slot);
       }
@@ -243,7 +241,7 @@ export class RaidScreen {
       container.appendChild(this.createTile(hero.id));
     }
     if (bench.length === 0) {
-      container.innerHTML = '<p class="hint">Alle Helden stehen im Raid.</p>';
+      container.innerHTML = '<p class="hint">' + t('raid.allInRaid') + '</p>';
     }
   }
 
@@ -259,7 +257,7 @@ export class RaidScreen {
     tile.style.setProperty('--rarity', hero.getRarity().color);
     tile.classList.toggle('selected', heroId === this.selectedHeroId);
     tile.classList.toggle('injured', hero.isInjured());
-    tile.title = hero.name + ' · ' + hero.getClass().name + ' · Lv ' + hero.level + (hero.isInjured() ? ' · verletzt' : '');
+    tile.title = hero.name + ' · ' + hero.getClass().name + ' · ' + t('common.lv') + ' ' + hero.level + (hero.isInjured() ? t('heroes.injuredShort') : '');
     tile.appendChild(createHeroCanvas(hero, 3));
     tile.insertAdjacentHTML('beforeend', '<span class="hero-tile-name"></span><span class="hero-tile-level"></span>');
     tile.querySelector('.hero-tile-name').textContent = hero.name.split(' ')[0];
@@ -330,14 +328,13 @@ export class RaidScreen {
       card.querySelector('.hint').textContent = boss.title;
       const list = card.querySelector('.mechanic-list');
       if (boss.tankStacks) {
-        this.addMechanicLine(list, boss.tankStacks.name + ' (Tankwechsel)',
-          'Jeder Schlag macht den Tank anfälliger. Ab ' + boss.tankStacks.swapAt + ' Stapeln übernimmt ein zweiter Tank von selbst.');
+        this.addMechanicLine(list, t('raid.tankSwap', { name: boss.tankStacks.name }), t('raid.tankSwapText', { count: boss.tankStacks.swapAt }));
       }
       for (const mechanic of boss.mechanics) {
         this.addMechanicLine(list, mechanic.name, MECHANIC_TYPE_TEXTS[mechanic.type] + '. ' + mechanic.hint);
       }
       for (const phase of boss.phases || []) {
-        this.addMechanicLine(list, phase.name + ' (unter ' + Math.round(phase.belowHpPercent * 100) + ' % Leben)', phase.text);
+        this.addMechanicLine(list, t('raid.phase', { name: phase.name, percent: Math.round(phase.belowHpPercent * 100) }), phase.text);
         for (const mechanic of phase.mechanics) {
           this.addMechanicLine(list, '· ' + mechanic.name, MECHANIC_TYPE_TEXTS[mechanic.type] + '. ' + mechanic.hint);
         }

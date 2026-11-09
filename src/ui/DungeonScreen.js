@@ -329,7 +329,7 @@ export class DungeonScreen {
       this.game.setHeroOrder(hero.id, orderId, optionId);
     });
     if (group.length === 0) {
-      card.querySelector('.orders-list').innerHTML = '<p class="hint">Wähle zuerst Helden aus.</p>';
+      card.querySelector('.orders-list').innerHTML = '<p class="hint">' + t('misc.pickHeroesFirst') + '</p>';
     }
     // Dungeonführer: Niveau, Gegner und Beute (siehe DungeonGuide.js)
     renderDungeonGuide(card.querySelector('.dungeon-guide'), this.game, dungeon, this.guideSections);

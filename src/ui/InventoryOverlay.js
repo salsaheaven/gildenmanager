@@ -202,7 +202,7 @@ export class InventoryOverlay {
       grid.innerHTML = '<p class="empty">' + t('loot.emptyCategory') + '</p>';
     }
 
-    this.root.querySelector('.select-mode-button').textContent = this.selectMode ? 'Fertig' : 'Mehrere auswählen';
+    this.root.querySelector('.select-mode-button').textContent = this.selectMode ? t('loot.done') : t('loot.selectMode');
     this.root.querySelector('.select-mode-button').classList.toggle('active', this.selectMode);
     if (this.selectMode) {
       this.renderSelection(shownItems);

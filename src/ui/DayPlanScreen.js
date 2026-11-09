@@ -203,7 +203,7 @@ export class DayPlanScreen {
     const row = document.createElement('div');
     row.className = 'run-row day-plan-raid';
     row.innerHTML = '<div class="run-head"><b class="run-name"></b><span class="run-status"></span></div><div class="run-controls"></div>';
-    row.querySelector('.run-name').textContent = 'Raid · ' + raid.name;
+    row.querySelector('.run-name').textContent = t('misc.raidRow', { name: raid.name });
     const status = row.querySelector('.run-status');
     const nextIndex = game.getNextRaidEncounterIndex();
     if (nextIndex === null) {
