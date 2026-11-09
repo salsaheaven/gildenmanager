@@ -26,7 +26,14 @@ import { RAIDS } from '../raids.js';
 import { CAUSE_TIPS, UNKNOWN_CAUSE, CAUSE_NOTES, CLASS_TIPS } from '../defeatCauses.js';
 import { SETS } from '../sets.js';
 import { DUNGEONS } from '../dungeons.js';
+import { HERO_CLASSES } from '../heroClasses.js';
+import { ABILITIES } from '../abilities.js';
+import { TALENTS } from '../talents.js';
+import { HERO_ORDERS } from '../heroOrders.js';
 import * as BASICS from './basics.js';
+import * as CLASSES from './classes.js';
+import { TALENTS_EN } from './talents.js';
+import { HERO_ORDERS_EN } from './heroOrders.js';
 import * as WORLD from './world.js';
 
 export const DATA_TRANSLATIONS_EN = [
@@ -65,4 +72,8 @@ export const DATA_TRANSLATIONS_EN = [
   { name: 'UNKNOWN_CAUSE', target: UNKNOWN_CAUSE, texts: WORLD.UNKNOWN_CAUSE_EN },
   { name: 'SETS', target: SETS, texts: WORLD.SETS_EN },
   { name: 'DUNGEONS', target: DUNGEONS, texts: WORLD.DUNGEONS_EN },
+  { name: 'HERO_CLASSES', target: HERO_CLASSES, texts: CLASSES.HERO_CLASSES_EN },
+  { name: 'ABILITIES', target: ABILITIES, texts: CLASSES.ABILITIES_EN },
+  { name: 'TALENTS', target: TALENTS, texts: TALENTS_EN },
+  { name: 'HERO_ORDERS', target: HERO_ORDERS, texts: HERO_ORDERS_EN },
 ];
