@@ -28,11 +28,13 @@ import { RaidScreen } from './ui/RaidScreen.js';
 import { EndEvaluationOverlay } from './ui/EndEvaluationOverlay.js';
 import { Sound } from './ui/Sound.js';
 import { showToast, holdToasts, releaseToasts } from './ui/Toast.js';
-import { t } from './core/Language.js';
+import { t, getLanguage } from './core/Language.js';
+import { applyDataLanguage } from './core/DataLanguage.js';
 import { loadLanguage, changeLanguage } from './ui/LanguageSetting.js';
 
 // Zuerst die Sprache (alle Texte danach kommen schon in der gewählten Sprache)
 loadLanguage();
+applyDataLanguage(getLanguage()); // Namen und Texte aus src/data (Klassen, Bosse, Items …) in der gewählten Sprache
 import { UNLOCKS, getUnlock } from './data/unlocks.js';
 
 // Alle 5 Sekunden automatisch speichern
