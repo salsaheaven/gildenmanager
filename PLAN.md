@@ -154,6 +154,8 @@ Umgesetzt (2026-11-06) aus dem Bericht: **Risiko live mit Konter-Symbolen** und 
 
 **Dungeon-Planung entschlackt (2026-11-09):** Pixel-Symbole (`icon…` in sprites.js, `UiIcons.js`), Info-Blasen (`InfoTip.js`: Antippen/Maus drüber), Dungeon-Zeilen mit Symbolen, gesperrte Dungeons zusammengefasst, 5 Plätze + Auswahl von unten, eine Status-Leiste mit Symbolen (Gruppe, Tank/Heiler, Konter, Einschätzung), Erklärsätze in Blasen, „Heute geplant“/„Berichte“ einklappbar. Handy: Seite 2.850 → 1.230 Pixel, Text 260 → 50 Wörter.
 
+**Tagesplan und Helden entschlackt (2026-11-09):** Hinweise und Kosten als Symbol-Chips, Gruppen im Tagesplan als Kachel-Zeile (antippen = zum Helden), Stufe/Rückzug/Einschätzung als Symbole, Vorräte kompakt, Helden ohne Kampf in einer Zeile; Heldenübersicht mit Positions-Symbolen und kurzer Gruppen-Zeile; am Helden Klasse als Symbol, Hinweise im ⓘ, Talent-Beschreibungen nur bei wählbaren Talenten. Handy: Tagesplan 1.763 → 1.298 Pixel (191 → 129 Wörter), Held 1.362 → 1.165 Pixel (125 → 79 Wörter).
+
 Offen aus dem Bericht (größere Umbauten): vorbelegte Vorräte, Ausrüstung vom Vorgänger übernehmen, kompakte Listenansicht für den Raid.
 
 **M4 – Raids & Endboss:** Zwei 20-Mann-Raids (der letzte ist der Endboss), Endauswertung nach Spieltagen. Zielbild: ~30 Helden im Roster, 10+ Dungeons. Ein Durchlauf etwa 2–3 Stunden.

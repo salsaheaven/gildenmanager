@@ -54,7 +54,9 @@ export function createRunControls(game, expedition) {
   }
   // Wer heute mitgeht (mit Ersatz), wird ausgerüstet
   container.appendChild(createEquipBestButton(game, group.name, expedition.getHeroIds()));
-  container.appendChild(createButton('Heute aussetzen', () => game.skipStandingGroupToday(group.id)));
+  const skip = createButton('Aussetzen', () => game.skipStandingGroupToday(group.id));
+  skip.title = 'Die Gruppe setzt heute aus und zieht morgen wieder los.';
+  container.appendChild(skip);
   container.appendChild(createDisbandButton(game, group));
   return container;
 }
@@ -106,7 +108,7 @@ function createButton(label, onClick) {
 function createEquipBestButton(game, groupName, heroIds) {
   const button = document.createElement('button');
   button.className = 'equip-group-button';
-  button.textContent = 'Bestes ausrüsten';
+  button.textContent = 'Ausrüsten';
   button.title = 'Legt allen Mitgliedern das Beste aus dem Inventar an. Gesperrte Items (🔒) und eigene Set-Teile bleiben dran.';
   button.addEventListener('click', () => {
     const snapshot = game.getEquipmentSnapshot(heroIds);

@@ -9,6 +9,7 @@
 // ============================================================
 
 import { estimateRunChances } from '../systems/combat/ChanceEstimator.js';
+import { attachInfo } from './InfoTip.js';
 import { getRiskLevel, getFallLevel, getPartialRiskLevel, UNKNOWN_RISK, RISK_SIMULATION_COUNT } from '../data/riskLevels.js';
 
 // Die Einschätzung als Daten (für den Kasten unten und für den Knopf "Auto-Gruppe"):
@@ -64,5 +65,15 @@ export function createRiskBadgeFromSummary(game, summary) {
     forecastLine.textContent = 'Kartenraum: Größte Gefahr ist „' + summary.likelyCause.name + '“';
     badge.appendChild(forecastLine);
   }
+  return badge;
+}
+
+// Kompakte Einschätzung: nur das Wort ("Riskant"), alle Einzelheiten in der Info-Blase (Antippen / Maus drüber)
+export function createCompactRiskBadge(game, heroes, dungeonId, retreatRuleId, supplies = []) {
+  const summary = getRiskSummary(game, heroes, dungeonId, retreatRuleId, supplies);
+  const badge = createRiskBadgeFromSummary(game, summary);
+  badge.classList.add('compact');
+  const forecast = game.hasDefeatForecast() && summary.likelyCause ? ' Größte Gefahr: ' + summary.likelyCause.name + '.' : '';
+  attachInfo(badge, 'Einschätzung: ' + summary.name + ' ' + summary.detail + '. ' + summary.title + forecast);
   return badge;
 }

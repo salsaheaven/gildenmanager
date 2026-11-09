@@ -19,7 +19,9 @@ import { getDungeon } from '../data/dungeons.js';
 import { RETREAT_RULES } from '../data/retreatRules.js';
 import { createHeroCanvas } from './PixelArt.js';
 import { describeInjury } from './DungeonScreen.js';
-import { createRiskBadge } from './RiskBadge.js';
+import { createCompactRiskBadge } from './RiskBadge.js';
+import { createIconChip } from './UiIcons.js';
+import { createInfoIcon } from './InfoTip.js';
 import { renderOrders } from './OrdersPanel.js';
 import { createNewsLine } from './NewsLine.js';
 import { createSupplyPicker } from './SupplyPicker.js';
@@ -161,21 +163,26 @@ export class DayPlanScreen {
       counts.appendChild(chip);
     }
 
-    // Sold und Trainer-Kosten heute Abend
+    // Kosten heute Abend (Sold + Trainer) als Münze mit Zahl, Einzelheiten in der Info-Blase
     const training = plan.counts.training * getTrainingCost(this.game.guild);
-    this.root.querySelector('.day-plan-wages').textContent = plan.entries.length === 0 ? '' :
-      'Heute Abend: Sold ' + this.game.getDailyWages() + ' Gold' + (training > 0 ? ' · Training ' + training + ' Gold' : '');
+    const wages = this.root.querySelector('.day-plan-wages');
+    wages.innerHTML = '';
+    if (plan.entries.length > 0) {
+      const costs = this.game.getDailyWages() + training;
+      wages.appendChild(createIconChip('coin', '−' + costs, 'Heute Abend fällig: Sold ' + this.game.getDailyWages() + ' Gold' +
+        (training > 0 ? ', Training ' + training + ' Gold' : '') + '.'));
+    }
 
-    // Hinweis, was man als Nächstes tun könnte
+    // Hinweis, was man als Nächstes tun könnte: kurz, die Erklärung in der Info-Blase
     const hint = this.root.querySelector('.day-plan-hint');
+    hint.innerHTML = '';
     if (plan.entries.length === 0) {
-      hint.textContent = 'Du hast noch keine Helden. In der Taverne warten Bewerber.';
+      hint.textContent = 'Noch keine Helden: In der Taverne warten Bewerber.';
     } else if (plan.counts.rest > 0) {
-      hint.textContent = plan.counts.rest === 1
-        ? '1 Held ruht sich nur aus. Schick ihn in einen Dungeon oder gib ihm unten eine Aufgabe!'
-        : plan.counts.rest + ' Helden ruhen sich nur aus. Schick sie in einen Dungeon oder gib ihnen unten eine Aufgabe!';
+      hint.appendChild(createIconChip('iconHero', plan.counts.rest + ' ohne Aufgabe',
+        'Diese Helden ruhen sich nur aus. Schick sie in einen Dungeon oder gib ihnen unten eine Aufgabe (Training, Sammeln, Aufträge, Erkunden).', 'warn'));
     } else {
-      hint.textContent = 'Alle Helden haben eine Aufgabe. Zeit, den Tag zu beenden!';
+      hint.appendChild(createIconChip('iconHero', 'Alle haben eine Aufgabe', 'Zeit, den Tag zu beenden!', 'ok'));
     }
     const goButton = this.root.querySelector('.go-dungeons-button');
     goButton.textContent = plan.entries.length === 0 ? 'Zur Taverne' : 'Gruppe einplanen';
@@ -239,7 +246,8 @@ export class DayPlanScreen {
       return;
     }
     if (this.game.guild.expeditions.length === 0 && this.game.guild.standingGroups.length === 0) {
-      list.innerHTML = '<p class="empty">Heute zieht keine Gruppe los. Bilde eine Gruppe im Abschnitt Dungeons, sie zieht dann jeden Tag los.</p>';
+      list.innerHTML = '<p class="empty">Heute zieht keine Gruppe los.</p>';
+      list.appendChild(createInfoIcon('Bilde eine Gruppe im Abschnitt Dungeons: Sie zieht dann jeden Tag los, bis du sie auflöst.'));
       return;
     }
     for (const expedition of this.game.guild.expeditions) {
@@ -255,15 +263,21 @@ export class DayPlanScreen {
         <div class="day-plan-heroes"></div>
       `;
       card.querySelector('.run-name').textContent = getRunTitle(this.game, expedition);
-      card.querySelector('.run-status').textContent = 'Stufe ' + dungeon.level +
-        (retreatRule ? ' · Rückzug: ' + retreatRule.name : '');
+      // Stufe, Rückzug und Einschätzung als Symbole (Einzelheiten per Antippen / Maus drüber)
+      const status = card.querySelector('.run-status');
+      status.appendChild(createIconChip('iconSword', String(dungeon.level), 'Stufe des Dungeons: ' + dungeon.level + '.'));
+      if (retreatRule && retreatRule.afterFallen !== null) {
+        status.appendChild(createIconChip('iconSkull', String(retreatRule.afterFallen), 'Rückzug: ' + retreatRule.name + '.'));
+      }
 
       const heroList = card.querySelector('.day-plan-heroes');
       const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
+      status.appendChild(createCompactRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies));
+      // Die Gruppe als kleine Kacheln in einer Zeile (antippen = zum Helden)
+      heroList.classList.add('day-plan-hero-tiles');
       for (const hero of heroes) {
-        heroList.appendChild(this.createHeroRow(hero, null));
+        heroList.appendChild(this.createHeroTile(hero));
       }
-      heroList.before(createRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies));
       heroList.after(this.createOrdersSection(expedition, heroes));
       heroList.after(this.createSupplySection(expedition));
       // Fehlende Mitglieder, Ersatz, Heute aussetzen, Auflösen (bzw. Absagen bei einmaligen Runs)
@@ -272,15 +286,35 @@ export class DayPlanScreen {
     }
   }
 
-  // Vorräte der Gruppe: tauschen ist bis zum Tagesende möglich
+  // Kleine Kachel eines Helden der Gruppe: Bild, Vorname, Level; "neu" bei neuer Ausrüstung. Antippen = zum Helden.
+  createHeroTile(hero) {
+    const tile = document.createElement('button');
+    tile.className = 'day-plan-hero-tile';
+    tile.style.setProperty('--rarity', hero.getRarity().color);
+    tile.title = hero.name + ' · ' + hero.getClass().name + ' · Lv ' + hero.level;
+    tile.appendChild(createHeroCanvas(hero, 2));
+    tile.insertAdjacentHTML('beforeend', '<span class="group-slot-name"></span><span class="hero-tile-level"></span>');
+    tile.querySelector('.group-slot-name').textContent = hero.name.split(' ')[0];
+    tile.querySelector('.hero-tile-level').textContent = 'Lv ' + hero.level;
+    if (this.game.getSlotsWithNewGear(hero.id).length > 0) {
+      tile.insertAdjacentHTML('beforeend', '<span class="new-gear-badge">neu</span>');
+    }
+    tile.addEventListener('click', () => {
+      Sound.click();
+      this.onShowHero(hero.id);
+    });
+    return tile;
+  }
+
+  // Vorräte der Gruppe: tauschen ist bis zum Tagesende möglich (kompakt: Trank-Symbol, Hinweis als ⓘ)
   createSupplySection(expedition) {
     const section = document.createElement('div');
-    section.className = 'day-plan-supplies';
-    section.innerHTML = '<span class="day-plan-supplies-label">Vorräte</span>';
+    section.className = 'day-plan-supplies plan-row';
+    section.appendChild(createIconChip('iconPotion', '', 'Vorräte: Tränke aus der Vorratskammer, die die Gruppe mitnimmt. Tauschen geht bis zum Tagesende.'));
     section.appendChild(createSupplyPicker(this.game.guild, expedition.supplies, expedition.supplies, (next) => {
       Sound.click();
       this.game.setExpeditionSupplies(expedition.id, next);
-    }));
+    }, true));
     return section;
   }
 
@@ -289,7 +323,7 @@ export class DayPlanScreen {
     const section = document.createElement('details');
     section.className = 'day-plan-orders';
     section.open = this.openOrders.has(expedition.id);
-    section.innerHTML = '<summary>Anweisungen für diesen Dungeon</summary><div class="orders-list"></div>';
+    section.innerHTML = '<summary>Anweisungen</summary><div class="orders-list"></div>';
     section.addEventListener('toggle', () => {
       if (section.open) {
         this.openOrders.add(expedition.id);
@@ -327,13 +361,14 @@ export class DayPlanScreen {
     const text = document.createElement('span');
     text.className = 'day-plan-hero-text';
     text.innerHTML = '<b></b><span class="roster-sub"></span>';
-    text.querySelector('b').textContent = hero.name;
+    text.querySelector('b').textContent = hero.name.split(' ')[0];
     text.querySelector('.roster-sub').textContent = hero.getClass().name + ' · Lv ' + hero.level;
+    text.title = hero.name;
     // Neue Ausrüstung für diesen Helden: antippen springt zu ihm in den Heldenbildschirm
     if (this.game.getSlotsWithNewGear(hero.id).length > 0) {
       const badge = document.createElement('button');
       badge.className = 'new-gear-badge new-gear-button';
-      badge.textContent = 'neue Ausrüstung';
+      badge.textContent = 'neu';
       badge.title = 'Zum Helden, um sie anzuschauen';
       badge.addEventListener('click', () => {
         Sound.click();

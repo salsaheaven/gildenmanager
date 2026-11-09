@@ -22,7 +22,7 @@ import { COMBAT_RULES } from '../data/combatRules.js';
 import { createHeroCanvas, createSpriteCanvas } from './PixelArt.js';
 import { renderOrders } from './OrdersPanel.js';
 import { RunViewer } from './RunViewer.js';
-import { createRiskBadge, createRiskBadgeFromSummary, getRiskSummary } from './RiskBadge.js';
+import { createCompactRiskBadge, getRiskSummary } from './RiskBadge.js';
 import { renderDungeonGuide } from './DungeonGuide.js';
 import { getRunTitle, createRunControls } from './StandingGroupControls.js';
 import { renderRoleTiles } from './RoleOverview.js';
@@ -234,7 +234,7 @@ export class DungeonScreen {
     if (expeditions.length > 0) {
       const expedition = expeditions[0];
       const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
-      line.appendChild(createRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies));
+      line.appendChild(createCompactRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies));
     }
   }
 
@@ -544,11 +544,7 @@ export class DungeonScreen {
 
     if (unlocked && group.length > 0) {
       // Kurz nur das Wort ("Riskant"), die Einzelheiten stehen in der Info-Blase
-      const summary = getRiskSummary(this.game, group, dungeon.id, this.retreatRuleId, this.chosenSupplies);
-      const badge = createRiskBadgeFromSummary(this.game, summary);
-      const forecast = this.game.hasDefeatForecast() && summary.likelyCause ? ' Größte Gefahr: ' + summary.likelyCause.name + '.' : '';
-      attachInfo(badge, 'Einschätzung: ' + summary.name + ' ' + summary.detail + '. ' + summary.title + forecast);
-      container.appendChild(badge);
+      container.appendChild(createCompactRiskBadge(this.game, group, dungeon.id, this.retreatRuleId, this.chosenSupplies));
     }
   }
 
@@ -614,7 +610,7 @@ export class DungeonScreen {
         (retreatRule && retreatRule.afterFallen !== null ? ' · Rückzug nach ' + retreatRule.afterFallen : '') +
         (expedition.supplies.length > 0 ? ' · ' + describeSupplies(expedition.supplies) : '');
       const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
-      row.querySelector('.run-head').after(createRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId,
+      row.querySelector('.run-head').after(createCompactRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId,
         expedition.supplies));
       row.appendChild(createRunControls(this.game, expedition));
       list.appendChild(row);

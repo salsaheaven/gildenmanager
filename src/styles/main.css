@@ -4885,6 +4885,9 @@ body.locked-collection .collection-button {
 
 .group-count-line {
   margin-bottom: 6px;
+  /* lange Zeile darf umbrechen (sonst schiebt sie auf dem Handy die Seite seitlich hinaus) */
+  white-space: normal;
+  max-width: 100%;
 }
 
 .dungeon-chips,
@@ -4988,10 +4991,17 @@ body.locked-collection .collection-button {
   gap: 6px;
 }
 
-/* In der festen Leiste: nur das Wort ("Riskant"), der Zusatz steht in der Info-Blase */
-.plan-live .risk-label,
-.plan-live .risk-fall,
-.plan-live .risk-forecast {
+/* Kompakte Einschätzung: nur das Wort ("Riskant"), der Zusatz steht in der Info-Blase */
+.risk-badge.compact {
+  display: inline-block;
+  margin: 0;
+  padding: 1px 6px;
+  font-size: 16px;
+}
+
+.risk-badge.compact .risk-label,
+.risk-badge.compact .risk-fall,
+.risk-badge.compact .risk-forecast {
   display: none;
 }
 
@@ -5078,5 +5088,73 @@ body.locked-collection .collection-button {
     padding: 10px 12px 20px;
     box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.7);
   }
+}
+
+/* ---------- Tagesplan und Helden, schlanke Fassung ---------- */
+
+.day-plan-hint,
+.day-plan-wages {
+  display: inline-flex;
+  margin: 4px 6px 4px 0;
+}
+
+.run-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.day-plan-hero-tiles {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  margin: 6px 0;
+}
+
+.day-plan-hero-tile {
+  --rarity: var(--border);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 2px;
+  border-bottom: 4px solid var(--rarity);
+  line-height: 1.1;
+}
+
+.day-plan-hero-tile .new-gear-badge {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  margin: 0;
+}
+
+/* Helden ohne Kampf: Bild, Name und Aufgabe in einer Zeile */
+.day-plan-hero {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.day-plan-hero .task-picker {
+  margin-left: auto;
+  max-width: 55%;
+}
+
+.role-row-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.talent-option-wrap {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.talent-option-wrap .talent-option {
+  flex: 1;
 }
 

@@ -10,7 +10,8 @@
 // ============================================================
 
 import { POSITIONS, GROUP_RULES, getPositionName } from '../data/groupRules.js';
-import { createHeroCanvas } from './PixelArt.js';
+import { createHeroCanvas, createSpriteCanvas } from './PixelArt.js';
+import { createIconChip, POSITION_ICONS } from './UiIcons.js';
 import { Sound } from './Sound.js';
 
 // container = wohin die Übersicht gezeichnet wird, selectedHeroId = hervorgehobener Held
@@ -37,7 +38,10 @@ export function renderRoleTiles(container, game, options) {
     row.className = 'role-row';
     row.innerHTML = '<div class="role-row-head"></div><div class="role-tiles"></div>';
     const freeCount = heroes.filter((hero) => !hero.isInjured() && !game.guild.isHeroBusy(hero.id)).length;
-    row.querySelector('.role-row-head').textContent = position.name + ' (' + heroes.length + ')' +
+    const head = row.querySelector('.role-row-head');
+    head.appendChild(createSpriteCanvas(POSITION_ICONS[position.id], 2));
+    head.insertAdjacentHTML('beforeend', '<span></span>');
+    head.querySelector('span').textContent = position.name + ' ' + heroes.length +
       (freeCount < heroes.length ? ' · ' + freeCount + ' frei' : '');
     const tiles = row.querySelector('.role-tiles');
     for (const hero of heroes) {
@@ -50,14 +54,9 @@ export function renderRoleTiles(container, game, options) {
   }
 }
 
-// Kasten oben: wie viele Gruppen gehen, und was für die nächste fehlt
+// Kasten oben, kurz: "2 Gruppen frei"; was für die nächste fehlt, steht in der Info-Blase
 export function createGroupCounter(game) {
   const result = game.countPossibleGroups();
-  const box = document.createElement('div');
-  box.className = 'group-counter' + (result.groups > 0 ? ' has-groups' : '');
-  const groupsText = result.groups === 0 ? 'Keine vollständige Gruppe frei' :
-    (result.groups === 1 ? '1 Gruppe möglich' : result.groups + ' Gruppen möglich');
-
   const missingParts = [];
   for (const positionId in GROUP_RULES.required) {
     if (result.missing[positionId]) {
@@ -67,13 +66,12 @@ export function createGroupCounter(game) {
   if (result.missing.any) {
     missingParts.push(result.missing.any + (result.missing.any === 1 ? ' weiterer Held' : ' weitere Helden'));
   }
-  box.innerHTML = '<b class="group-counter-main"></b><span class="group-counter-missing hint"></span>';
-  box.querySelector('.group-counter-main').textContent = groupsText;
-  box.querySelector('.group-counter-missing').textContent =
-    'Für Gruppe ' + (result.groups + 1) + ' fehlen: ' + missingParts.join(', ');
-  box.title = 'Gezählt werden freie Helden (nicht verletzt, heute noch nicht eingeplant). ' +
-    'Eine Gruppe braucht 1 Tank, 1 Heiler und 3 beliebige Helden.';
-  return box;
+  const text = result.groups === 1 ? '1 Gruppe frei' : result.groups + ' Gruppen frei';
+  const chip = createIconChip('iconHero', text + ' · für Gruppe ' + (result.groups + 1) + ': ' + missingParts.join(', '),
+    'Gezählt werden freie Helden (nicht verletzt, heute nicht eingeplant). Eine Gruppe braucht 1 Tank, 1 Heiler und 3 beliebige Helden.',
+    result.groups > 0 ? 'ok' : 'missing');
+  chip.classList.add('group-count-line');
+  return chip;
 }
 
 // Eine Kachel: Bild, Vorname, Level und kleine Zeichen

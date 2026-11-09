@@ -4,10 +4,12 @@
 //   - gesperrte Reihe: "ab Level 15"
 //   - freie Reihe: beide Talente antippbar, das gewählte leuchtet
 //   - Doppelwahl (seltene Helden): Hinweis "beide wählbar"
+//   - Beschreibung nur bei Talenten, die man gerade wählen kann; sonst nur der Name mit ⓘ (Info-Blase)
 // Die Regeln stehen in Hero.js (canChooseTalent), die Talente in data/talents.js.
 // ============================================================
 
 import { getTalentRows, TALENT_RULES } from '../data/talents.js';
+import { createInfoIcon } from './InfoTip.js';
 
 // container = wohin, hero = der Held
 // callbacks = { onChoose(hero, talentId), onReset(hero) (freiwillig), resetLabel (Text für den Knopf, freiwillig) }
@@ -42,9 +44,19 @@ export function renderTalents(container, hero, callbacks) {
       button.disabled = !choosable;
       button.innerHTML = '<span class="talent-name"></span><span class="talent-description"></span>';
       button.querySelector('.talent-name').textContent = (chosen ? '✓ ' : '') + talent.name;
-      button.querySelector('.talent-description').textContent = talent.description;
       button.addEventListener('click', () => callbacks.onChoose(hero, talent.id));
-      options.appendChild(button);
+      if (choosable) {
+        // Hier fällt gerade eine Entscheidung: Beschreibung sichtbar
+        button.querySelector('.talent-description').textContent = talent.description;
+        options.appendChild(button);
+      } else {
+        // Gesperrt oder schon entschieden: nur der Name, die Beschreibung im ⓘ (außerhalb des Knopfs, damit es auch gesperrt geht)
+        button.querySelector('.talent-description').remove();
+        const wrap = document.createElement('div');
+        wrap.className = 'talent-option-wrap';
+        wrap.append(button, createInfoIcon(talent.name + ': ' + talent.description));
+        options.appendChild(wrap);
+      }
     }
     rowElement.appendChild(options);
     container.appendChild(rowElement);

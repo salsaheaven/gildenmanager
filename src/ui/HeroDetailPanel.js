@@ -21,6 +21,9 @@ import { renderOrders } from './OrdersPanel.js';
 import { applyUpgradeGlow } from './UpgradeControls.js';
 import { createHeroSetView } from './SetInfo.js';
 import { createLockBadge } from './LockButton.js';
+import { createIconChip, POSITION_ICONS } from './UiIcons.js';
+import { createInfoIcon } from './InfoTip.js';
+import { getPositionId, getPositionName } from '../data/groupRules.js';
 import { WAGE_RULES } from '../data/heroRarities.js';
 
 export class HeroDetailPanel {
@@ -57,7 +60,7 @@ export class HeroDetailPanel {
         <div class="detail-info">
           <div class="detail-hero-name"></div>
           <div class="detail-hero-rarity">${rarity.name}</div>
-          <div class="detail-hero-class">${heroClass.name} · ${ROLE_NAMES[heroClass.role]} · steht ${ROW_NAMES[heroClass.row]}</div>
+          <div class="detail-hero-class"></div>
           <div class="detail-level">
             <span>Level ${hero.level}</span>
             <div class="bar" title="Erfahrung gibt es für gewonnene Begegnungen in Dungeons"><div class="bar-fill xp-fill" style="width: ${Math.round(hero.getXpProgress() * 100)}%"></div></div>
@@ -71,8 +74,8 @@ export class HeroDetailPanel {
       </div>
 
       <div class="equipment-head">
-        <h3>Ausrüstung <span class="hint equipment-hint">Tippe einen Platz an</span></h3>
-        <button class="equip-best-button" title="Legt für jeden Platz das Item mit den meisten nützlichen Werten an. Resistenzen und Set-Boni zählen nicht, getragene Teile des eigenen Sets bleiben dran.">Bestes anlegen <span class="button-note">(nach Werten)</span></button>
+        <h3>Ausrüstung</h3>
+        <button class="equip-best-button" title="Legt für jeden Platz das Item mit den meisten nützlichen Werten an. Resistenzen und Set-Boni zählen nicht, getragene und gesperrte Teile bleiben dran.">Bestes anlegen</button>
       </div>
       <div class="equipment-grid"></div>
       <div class="hero-set-slot"></div>
@@ -107,6 +110,11 @@ export class HeroDetailPanel {
 
     this.root.querySelector('.detail-portrait').appendChild(createHeroCanvas(hero, 9));
     this.root.querySelector('.detail-hero-name').textContent = hero.name;
+    // Klasse mit Positions-Symbol; Rolle und Reihe stehen in der Info-Blase
+    this.root.querySelector('.detail-hero-class').appendChild(createIconChip(POSITION_ICONS[getPositionId(heroClass)], heroClass.name,
+      heroClass.name + ' · ' + ROLE_NAMES[heroClass.role] + ' · steht ' + ROW_NAMES[heroClass.row] + '. ' + getPositionName(getPositionId(heroClass)) + '.'));
+    this.root.querySelector('.equipment-head h3').appendChild(createInfoIcon(
+      'Tippe einen Platz an: Dann erscheinen alle passenden Items, nach Item-Level sortiert, mit dem Unterschied Wert für Wert. „neu“ = neue passende Ausrüstung im Inventar.'));
     if (hero.isInjured()) {
       const days = hero.injuryDays === 1 ? '1 Tag' : hero.injuryDays + ' Tage';
       this.root.querySelector('.detail-injury').textContent = 'Verletzt, noch ' + days + ' – kann nicht in Dungeons';
