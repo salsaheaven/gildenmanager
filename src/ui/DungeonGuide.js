@@ -66,7 +66,7 @@ function createLevelBox(game, dungeon) {
   box.className = 'guide-level';
   box.innerHTML = `
     <div>${t('guide.level', { level: dungeon.level, gear: dungeon.recommendedGearScore })}</div>
-    <div class="hint">Beute hat Item-Level ${dungeon.level}</div>
+    <div class="hint">${t('guide2.lootLevel', { level: dungeon.level })}</div>
     <div class="guide-knowledge knowledge-${knowledge.level}"></div>
     <div class="guide-damage-types"></div>
   `;
@@ -106,7 +106,7 @@ function createTrashRow(encounter, index) {
   }
   row.querySelector('b').textContent = (index + 1) + '. ' + encounter.name;
   const names = [...new Set(encounter.enemies.map((enemyId) => MINIONS[enemyId].name))];
-  row.querySelector('span').textContent = encounter.enemies.length + ' Gegner: ' + names.join(', ');
+  row.querySelector('span').textContent = t('guide2.enemyCount', { count: encounter.enemies.length, names: names.join(', ') });
   return row;
 }
 

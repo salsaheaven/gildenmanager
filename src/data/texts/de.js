@@ -629,4 +629,10 @@ export const TEXTS_DE = {
   misc2: {
     serverFirstTitle: ({ title }) => 'Server-First! Neuer Titel: „' + title + '“',
   },
+
+  // Dungeonführer: weitere Zeilen
+  guide2: {
+    lootLevel: ({ level }) => 'Beute hat Item-Level ' + level,
+    enemyCount: ({ count, names }) => count + ' Gegner: ' + names,
+  },
 };
