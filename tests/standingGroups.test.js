@@ -94,4 +94,20 @@ describe('Stehende Gruppen', () => {
     const loaded = Game.fromSaveData(JSON.parse(JSON.stringify(game.toSaveData())));
     expect(loaded.guild.standingGroups.map((group) => group.name)).toEqual(['Gruppe A', 'Gruppe B']);
   });
+
+  it('Verlegen: Gruppe zieht ab heute in einen neuen Dungeon, "Neuer Dungeon offen" verschwindet', () => {
+    const game = gameWithHeroes(5);
+    game.createStandingGroup('bearCave', startTeamIds(game), 'never');
+    const group = game.guild.standingGroups[0];
+    // Gesperrt: geht nicht
+    expect(game.moveStandingGroup(group.id, 'ruinedChapel')).toBe('locked');
+    game.guild.dungeonClears.bearCave = 1;
+    const newDungeon = () => game.getDailyTodos().find((todo) => todo.id === 'newDungeon');
+    expect(newDungeon().dungeonId).toBe('ruinedChapel');
+
+    expect(game.moveStandingGroup(group.id, 'ruinedChapel')).toBe('ok');
+    expect(group.dungeonId).toBe('ruinedChapel');
+    expect(game.getTodaysExpedition(group.id).dungeonId).toBe('ruinedChapel');
+    expect(newDungeon()).toBeUndefined();
+  });
 });

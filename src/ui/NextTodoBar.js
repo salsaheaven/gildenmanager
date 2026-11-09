@@ -41,7 +41,7 @@ export class NextTodoBar {
       if (next.id === 'unlock') {
         this.game.acknowledgeUnlock(next.unlockId);
       }
-      this.onGoTo(next.screenId);
+      this.onGoTo(next.screenId, next);
     });
     this.root.appendChild(button);
   }

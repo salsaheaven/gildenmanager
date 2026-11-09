@@ -8,6 +8,7 @@
 
 import { Sound } from './Sound.js';
 import { getUnlock } from '../data/unlocks.js';
+import { getDungeon } from '../data/dungeons.js';
 
 // Text pro Eintrag, abhängig von der Anzahl
 const TODO_TEXTS = {
@@ -21,6 +22,7 @@ const TODO_TEXTS = {
   unhappy: (count) => count === 1 ? '1 Held ist unzufrieden (kein Sold)' : count + ' Helden sind unzufrieden (kein Sold)',
   groups: (count) => count === 1 ? '1 vollständige Gruppe könnte noch los' : count + ' vollständige Gruppen könnten noch los',
   candidate: () => 'Ein seltener Bewerber wartet in der Taverne',
+  newDungeon: (count, todo) => 'Neuer Dungeon offen: ' + getDungeon(todo.dungeonId).name,
 };
 
 // Wichtige Einträge (rot statt gold)
@@ -45,10 +47,10 @@ export function createTodoBox(game, onGoTo) {
     }
     const button = document.createElement('button');
     button.className = 'todo-entry' + (WARNING_IDS.includes(todo.id) ? ' warning' : '');
-    button.textContent = TODO_TEXTS[todo.id](todo.count) + ' ›';
+    button.textContent = TODO_TEXTS[todo.id](todo.count, todo) + ' ›';
     button.addEventListener('click', () => {
       Sound.click();
-      onGoTo(todo.screenId);
+      onGoTo(todo.screenId, todo);
     });
     list.appendChild(button);
   }
@@ -79,5 +81,5 @@ export function describeTodo(todo) {
   if (todo.id === 'unlock') {
     return 'Neu: ' + getUnlock(todo.unlockId).name;
   }
-  return TODO_TEXTS[todo.id](todo.count);
+  return TODO_TEXTS[todo.id](todo.count, todo);
 }

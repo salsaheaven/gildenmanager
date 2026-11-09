@@ -5158,3 +5158,17 @@ body.locked-collection .collection-button {
   flex: 1;
 }
 
+
+/* Stehende Gruppe aus einem anderen Dungeon hierher verlegen (Planungs-Karte) */
+.plan-move-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.move-group-button {
+  border-color: #ffd23f;
+  color: #ffd23f;
+}

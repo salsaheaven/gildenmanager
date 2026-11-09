@@ -12,6 +12,8 @@
 //   upkeep     = Unterhalt nicht bezahlt, Gebäude wirken nicht → Gildenhalle
 //   unhappy    = Helden ohne Sold (unzufrieden)            → Helden
 //   groups     = so viele vollständige Gruppen könnten noch los → Dungeons
+//   newDungeon = ein offener Dungeon, der noch nie versucht wurde und zu dem keine Gruppe zieht → Dungeons
+//                ({ dungeonId } = der erste davon, für den Text)
 //   candidate  = ein epischer oder legendärer Bewerber      → Taverne
 // ============================================================
 
@@ -21,6 +23,7 @@ import { getMissingMembers } from './StandingGroups.js';
 import { getDayPlan } from './DayPlan.js';
 import { getUnannouncedUnlocks } from './Unlocks.js';
 import { getUnlock } from '../data/unlocks.js';
+import { DUNGEONS } from '../data/dungeons.js';
 
 // Ab diesem Rang ist ein Bewerber eine Meldung wert (4 = Episch, siehe rarities.js)
 const NOTABLE_CANDIDATE_RANK = 4;
@@ -41,6 +44,11 @@ export function getDailyTodos(guild, lastDaySummary) {
   const unlocked = (unlockId) => guild.unlockedFeatures.includes(unlockId);
 
   add('groupMissing', countGroupsWithMissingMembers(guild), 'plan');
+  // Ein neuer Dungeon ist offen, aber noch nie versucht (sonst merkt man es leicht nicht)
+  const newDungeons = findNewDungeons(guild);
+  if (newDungeons.length > 0) {
+    todos.push({ id: 'newDungeon', count: newDungeons.length, screenId: 'dungeons', dungeonId: newDungeons[0].id });
+  }
   // Heute ist Raid-Tag, aber die Raid-Aufstellung reicht nicht (zu wenige Helden, Tanks oder Heiler)
   add('raidNotReady', guild.raidPlan.notReadyToday ? 1 : 0, 'raid');
   add('boxes', guild.boxes.length, 'treasury');
@@ -61,6 +69,19 @@ export function getDailyTodos(guild, lastDaySummary) {
     add('candidate', guild.candidates.filter((candidate) => candidate.getRarityRank() >= NOTABLE_CANDIDATE_RANK).length, 'tavern');
   }
   return todos;
+}
+
+// Offene Dungeons, die noch nie versucht wurden und zu denen keine stehende Gruppe zieht.
+// Erst ab dem zweiten Dungeon (den ersten zeigt "Gruppe könnte noch los").
+function findNewDungeons(guild) {
+  return DUNGEONS.filter((dungeon) => {
+    if (dungeon.unlockAfter === null || guild.getClears(dungeon.unlockAfter) === 0) {
+      return false;
+    }
+    const attempted = (guild.dungeonAttempts[dungeon.id] || 0) > 0;
+    const groupGoes = guild.standingGroups.some((group) => group.dungeonId === dungeon.id);
+    return !attempted && !groupGoes;
+  });
 }
 
 // Stehende Gruppen, die heute losziehen, denen aber mehr Mitglieder fehlen, als Ersatz eingesprungen ist.

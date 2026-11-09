@@ -81,6 +81,18 @@ export class DungeonScreen {
     this.render();
   }
 
+  // Karte eines Dungeons öffnen und hinscrollen (z.B. aus "Neuer Dungeon offen" im Tagesplan)
+  openDungeon(dungeonId) {
+    this.dungeonId = dungeonId;
+    this.expanded = true;
+    this.picker = null;
+    this.render();
+    const card = this.root.querySelector('.dungeon-card.selected');
+    if (card) {
+      card.scrollIntoView({ block: 'start' });
+    }
+  }
+
   render() {
     // Gewählte Helden, die inzwischen eingeplant, verletzt oder weg sind, abwählen
     for (const heroId of this.selectedHeroIds) {
@@ -264,6 +276,12 @@ export class DungeonScreen {
       });
     }
 
+    // Stehende Gruppen aus anderen Dungeons: mit einem Tipp hierher verlegen
+    const moveRow = this.createMoveRow(dungeon);
+    if (moveRow) {
+      card.insertBefore(moveRow, card.firstChild);
+    }
+
     const group = this.getSelectedHeroes();
     this.renderSlots(card.querySelector('.plan-slots'), card);
     this.renderStats(card.querySelector('.plan-stats'), dungeon, group);
@@ -303,6 +321,35 @@ export class DungeonScreen {
       createInfoIcon('Einplanen macht die Gruppe zu einer festen Gruppe: Sie kämpft am Ende jedes Tages hier, bis du sie im Tagesplan auflöst. Verletzte fehlen, bis sie wieder fit sind.'),
       startButton);
     return card;
+  }
+
+  // Zeile "Gruppe A hierher verlegen" für jede stehende Gruppe, die gerade in einen anderen Dungeon zieht (oder null)
+  createMoveRow(dungeon) {
+    const groups = this.game.guild.standingGroups.filter((group) => group.dungeonId !== dungeon.id);
+    if (groups.length === 0 || !this.game.isDungeonUnlocked(dungeon.id)) {
+      return null;
+    }
+    const row = document.createElement('div');
+    row.className = 'plan-move-row';
+    for (const group of groups) {
+      const button = document.createElement('button');
+      button.className = 'move-group-button';
+      button.textContent = group.name + ' hierher verlegen';
+      button.title = 'Zieht bisher in ' + getDungeon(group.dungeonId).name;
+      button.addEventListener('click', () => {
+        if (this.game.moveStandingGroup(group.id, dungeon.id) !== 'ok') {
+          showToast('Das geht gerade nicht.', '#ff6b6b');
+          return;
+        }
+        Sound.boxArrived();
+        showToast(group.name + ' zieht ab jetzt in ' + dungeon.name + '.', '#ffd23f');
+        this.expanded = false;
+        this.render();
+      });
+      row.appendChild(button);
+    }
+    row.appendChild(createInfoIcon('Verlegen: Die Gruppe behält Mitglieder, Vorräte und Rückzug und zieht ab heute in diesen Dungeon statt in den bisherigen.'));
+    return row;
   }
 
   // Die 5 Plätze: gewählte Helden, dann leere Plätze (fehlende Tank/Heiler mit Symbol). Daneben "Auto" und "Ausrüsten".
@@ -577,6 +624,8 @@ export class DungeonScreen {
     this.selectedHeroIds.clear();
     this.chosenSupplies = [];
     this.picker = null;
+    // Karte zuklappen: Die Gruppe steht jetzt in der Dungeon-Zeile (sonst sähe es nach leeren, fehlerhaften Plätzen aus)
+    this.expanded = false;
     this.render();
   }
 

@@ -85,7 +85,14 @@ for (const screenId of screenIds.concat(HIDDEN_SCREENS)) {
 
 const navBar = new NavBar(document.getElementById('nav-bar'), document.getElementById('sub-nav'), SECTIONS, showScreen);
 // "Weiter" zum nächsten offenen Punkt aus "Was gibt es heute zu tun?"
-const nextTodoBar = new NextTodoBar(document.getElementById('next-todo'), game, (screenId) => showScreen(screenId));
+// Zu einem Eintrag aus "Was gibt es heute zu tun?" springen (bei einem neuen Dungeon gleich dessen Karte öffnen)
+function goToTodo(screenId, todo) {
+  showScreen(screenId);
+  if (todo && todo.dungeonId) {
+    dungeonScreen.openDungeon(todo.dungeonId);
+  }
+}
+const nextTodoBar = new NextTodoBar(document.getElementById('next-todo'), game, goToTodo);
 
 // Das Inventar ist ein Vollbild-Fenster, das von überall geöffnet werden kann.
 // Das Abzeichen am Knopf zeigt, wie viele frische Items noch nicht angeschaut wurden.
@@ -102,7 +109,7 @@ const lootBoxScreen = new LootBoxScreen(screenElements.treasury, game, inventory
 const heroScreen = new HeroScreen(screenElements.heroes, game, () => showScreen('tavern'), inventory);
 new TavernScreen(screenElements.tavern, game);
 const combatLabScreen = new CombatLabScreen(screenElements.lab, game);
-new DungeonScreen(screenElements.dungeons, game);
+const dungeonScreen = new DungeonScreen(screenElements.dungeons, game);
 new RaidScreen(screenElements.raid, game);
 new GuildHallScreen(screenElements.hall, game);
 new ShopScreen(screenElements.shop, game);
@@ -112,7 +119,7 @@ const lastReport = {
   show: () => dayEndOverlay.showLastReport(),
 };
 let dayEndOverlay = null;
-new DayPlanScreen(screenElements.plan, game, showScreen, (heroId) => {
+new DayPlanScreen(screenElements.plan, game, goToTodo, (heroId) => {
   showScreen('heroes');
   heroScreen.selectHero(heroId);
 }, lastReport);
@@ -306,10 +313,29 @@ function frameLoop(now) {
 }
 requestAnimationFrame(frameLoop);
 
-// Beim Schließen oder Wechseln des Tabs speichern
-window.addEventListener('beforeunload', () => {
+// Nach jeder Aktion kurz danach speichern (gesammelt, damit nicht bei jedem Klick mehrfach gespeichert wird)
+let saveTimer = null;
+game.on('changed', () => {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if (!isResetting) {
+      saveManager.save(game);
+    }
+  }, 300);
+});
+
+// Beim Schließen oder Wechseln des Tabs speichern.
+// Auf dem Handy kommt "beforeunload" oft nicht an, deshalb auch "pagehide" und "Seite unsichtbar".
+function saveNow() {
   if (!isResetting) {
     saveManager.save(game);
+  }
+}
+window.addEventListener('beforeunload', saveNow);
+window.addEventListener('pagehide', saveNow);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    saveNow();
   }
 });
 

@@ -1156,6 +1156,26 @@ export class Game {
     return expedition ? this.cancelExpedition(expedition.id) : false;
   }
 
+  // Verlegen: Die stehende Gruppe zieht ab jetzt in einen anderen Dungeon (Mitglieder, Vorräte und Rückzug bleiben).
+  // Der heutige Run wird gleich auf den neuen Dungeon umgeplant. Gibt 'ok', 'locked' oder 'invalid' zurück.
+  moveStandingGroup(groupId, dungeonId) {
+    const group = this.findStandingGroup(groupId);
+    if (!group || group.dungeonId === dungeonId) {
+      return 'invalid';
+    }
+    if (!this.isDungeonUnlocked(dungeonId)) {
+      return 'locked';
+    }
+    const wasPlanned = this.getTodaysExpedition(groupId) !== null;
+    this.skipStandingGroupToday(groupId);
+    group.dungeonId = dungeonId;
+    if (wasPlanned && !this.areDungeonsClosedToday()) {
+      this.planStandingGroup(groupId);
+    }
+    this.emit('changed');
+    return 'ok';
+  }
+
   // Auflösen: Die Gruppe gibt es nicht mehr, ihr heutiger Run fällt aus.
   disbandStandingGroup(groupId) {
     this.skipStandingGroupToday(groupId);
