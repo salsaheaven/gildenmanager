@@ -1,0 +1,82 @@
+// ============================================================
+// ENGLISCH: Bosse der Dungeons (Name, Titel, Mechaniken mit Tipp; Mechaniken = Nummer 0, 1, 2),
+// Texte der Mechanik-Arten und Diener
+// ============================================================
+
+const FRONT_ROW_HINT = 'Only hits the front row: bring fewer melee fighters.';
+const CLEANSE_HINT = 'The runeweaver removes curses with the Releasing Rune.';
+
+export const BOSSES_EN = {
+  trainingDummy: { name: 'Training Dummy', title: 'Measure damage' },
+  grimfang: { name: 'Grimfang', title: 'The Cave Bear',
+    mechanics: { 0: { name: 'Crushing Paw Strike', hint: 'Shields (runeweaver) or Iron Watch (warrior) absorb the strike.' } } },
+  morva: { name: 'Sister Morva', title: 'The Shadowcaller',
+    mechanics: { 0: { name: 'Shadow Surge', hint: 'A rogue can interrupt the surge with Silencing Blow.' }, 1: { name: 'Curse of Rot', hint: CLEANSE_HINT } } },
+  skarrix: { name: 'Skarrix', title: 'The Brood Mother',
+    mechanics: { 0: { name: 'Brood Hatches', hint: 'Area damage (the mage\'s Ash Rain) clears the brood quickly.' }, 1: { name: 'Acid Spray', hint: FRONT_ROW_HINT },
+      2: { name: 'Chitin Shell', hint: 'Samurai, barbarian or monk break the shell with their hits. Without them the fight takes much longer (enrage).' } } },
+  hrimgar: { name: 'Hrimgar', title: 'The Frost Giant',
+    mechanics: { 0: { name: 'Frost Breath', hint: 'Stone Totem (shaman), Glyph Circle and ice resistance soften the breath.' },
+      1: { name: 'Annihilating Blow', hint: 'Deadly for any tank. Only the paladin\'s Divine Shield absorbs it safely; Iron Watch + Rune Armor barely does.' },
+      2: { name: 'Frost Wrath', hint: 'Bard, chronomancer or warlock calm the wrath. Otherwise Hrimgar hits much harder for three rounds.' } } },
+  grezza: { name: 'Mother Grezza', title: 'The Moor Witch',
+    mechanics: { 0: { name: 'Swamp Fever', hint: 'Constant curses: healing over time (druid) or the Releasing Rune (runeweaver) keep the group alive.' },
+      1: { name: 'Curse of the Toad', hint: 'A long fight with lots of health: this is where the warlock\'s growing curses shine.' },
+      2: { name: 'Call Will-o\'-Wisps', hint: 'Will-o\'-wisps attack at random. The hunter\'s wolf or Slumber Tune (bard) hold them.' } } },
+  stoneGuardian: { name: 'The Stone Guardian', title: 'Keeper of the Gate',
+    mechanics: { 0: { name: 'Stone Fist', hint: 'Very frequent big blows: the warrior\'s Iron Watch is ready often enough, Divine Shield only once.' },
+      1: { name: 'Quake', hint: 'Hits the front row. Ranged fighters are safe.' } } },
+  azhur: { name: 'High Priest Azhur', title: 'The Last Sun',
+    mechanics: { 0: { name: 'Sun Shield', hint: 'Samurai, barbarian or monk break the shield. With the early enrage every round counts.' },
+      1: { name: 'Call Acolytes', hint: 'Early frenzy (round 18): lots of damage needed in a short time. Bloodlust, Song of Blades and the samurai\'s first strike help.' } } },
+  vorrak: { name: 'Vorrak', title: 'The Forge Lord',
+    mechanics: { 0: { name: 'Glowing Hammer', hint: 'Shields (runeweaver) or Iron Watch (warrior) absorb the hammer; fire resistance helps the tank.' },
+      1: { name: 'Slag Wave', hint: 'Only hits the front row: bring fewer melee fighters or fire ward potions.' } } },
+  ignara: { name: 'Ignara', title: 'The Dragon Mother',
+    mechanics: { 0: { name: 'Firestorm', hint: 'A rogue can interrupt the firestorm. Fire resistance on everyone helps.' },
+      1: { name: 'Dragon Burn', hint: 'The runeweaver extinguishes the dragon burn with the Releasing Rune.' },
+      2: { name: 'Wake the Brood', hint: 'The young dragons attack at random: area damage clears them quickly.' } } },
+  ironWarden: { name: 'The Iron Warden', title: 'Keeper of the Citadel Gate',
+    mechanics: { 0: { name: 'Spark Rain', hint: 'Hits the whole group: fire resistance and a healer with group heals help.' },
+      1: { name: 'Call Guards', hint: 'The iron guard goes for the tank: area damage clears it.' } } },
+  gnarr: { name: 'Gnarr', title: 'The Bark Giant',
+    mechanics: { 0: { name: 'Root Lash', hint: FRONT_ROW_HINT }, 1: { name: 'Thorn Poison', hint: 'The runeweaver cleanses the poison with the Releasing Rune. Acid resistance helps.' } } },
+  selvra: { name: 'Selvra', title: 'The Ink Witch',
+    mechanics: { 0: { name: 'Animate Pages', hint: 'Area damage (the mage\'s Ash Rain) clears the books quickly.' }, 1: { name: 'Ink Spear', hint: 'Shields (runeweaver) or Iron Watch (warrior) absorb the spear.' } } },
+  ferron: { name: 'Commander Ferron', title: 'The Iron Wall',
+    mechanics: { 0: { name: 'Siege Strike', hint: 'Shields (runeweaver) or Iron Watch (warrior) absorb the strike. A second healer helps.' }, 1: { name: 'Shield Wall Thrust', hint: FRONT_ROW_HINT } } },
+  skaar: { name: 'Skaar', title: 'The Primal Beast',
+    mechanics: { 0: { name: 'Primal Wrath', hint: 'Bard, chronomancer or warlock calm the primal wrath.' }, 1: { name: 'Call the Pack', hint: 'The wolf goes for the tank: area damage clears it.' } } },
+  mythrel: { name: 'Mythrel', title: 'The Archivist',
+    mechanics: { 0: { name: 'Arcane Flood', hint: 'A rogue can interrupt the Arcane Flood. Shadow resistance helps.' }, 1: { name: 'Oblivion', hint: 'The runeweaver cleanses the curse with the Releasing Rune.' } } },
+};
+
+export const MECHANIC_TYPE_TEXTS_EN = {
+  tankBuster: 'Huge blow on whoever it attacks',
+  groupCast: 'Hits the whole group',
+  frontWave: 'Hits the front row',
+  summon: 'Summons minions',
+  curse: 'Curse: damage over time on one hero',
+  shell: 'Shell: takes hardly any damage for a few rounds',
+  frenzy: 'Frenzy: deals much more damage for a few rounds',
+  groupStrike: 'Hits a whole raid group',
+};
+
+export const MINIONS_EN = {
+  broodling: { name: 'Broodling' },
+  caveWolf: { name: 'Cave Wolf' },
+  cultist: { name: 'Cultist' },
+  ghoul: { name: 'Ghoul' },
+  armoredBeetle: { name: 'Armored Beetle' },
+  iceKobold: { name: 'Ice Kobold' },
+  frostWolf: { name: 'Frost Wolf' },
+  bogCorpse: { name: 'Bog Corpse' },
+  wisp: { name: 'Will-o\'-Wisp' },
+  templeConstruct: { name: 'Temple Construct' },
+  ironGuard: { name: 'Iron Guardsman' },
+  wildWolf: { name: 'Wild Wolf' },
+  livingTome: { name: 'Living Tome' },
+  emberImp: { name: 'Ember Imp' },
+  drakeling: { name: 'Drakeling' },
+  sunAcolyte: { name: 'Sun Acolyte' },
+};

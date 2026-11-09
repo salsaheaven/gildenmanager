@@ -30,7 +30,11 @@ import { HERO_CLASSES } from '../heroClasses.js';
 import { ABILITIES } from '../abilities.js';
 import { TALENTS } from '../talents.js';
 import { HERO_ORDERS } from '../heroOrders.js';
+import { BOSSES, MINIONS, MECHANIC_TYPE_TEXTS } from '../enemies.js';
+import { RAID_BOSSES } from '../raidBosses.js';
 import * as BASICS from './basics.js';
+import * as ENEMIES from './enemies.js';
+import { RAID_BOSSES_EN } from './raidBosses.js';
 import * as CLASSES from './classes.js';
 import { TALENTS_EN } from './talents.js';
 import { HERO_ORDERS_EN } from './heroOrders.js';
@@ -76,4 +80,8 @@ export const DATA_TRANSLATIONS_EN = [
   { name: 'ABILITIES', target: ABILITIES, texts: CLASSES.ABILITIES_EN },
   { name: 'TALENTS', target: TALENTS, texts: TALENTS_EN },
   { name: 'HERO_ORDERS', target: HERO_ORDERS, texts: HERO_ORDERS_EN },
+  { name: 'BOSSES', target: BOSSES, texts: ENEMIES.BOSSES_EN },
+  { name: 'MECHANIC_TYPE_TEXTS', target: MECHANIC_TYPE_TEXTS, texts: ENEMIES.MECHANIC_TYPE_TEXTS_EN },
+  { name: 'MINIONS', target: MINIONS, texts: ENEMIES.MINIONS_EN },
+  { name: 'RAID_BOSSES', target: RAID_BOSSES, texts: RAID_BOSSES_EN },
 ];
