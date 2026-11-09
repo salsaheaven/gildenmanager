@@ -7,7 +7,7 @@
 //   groupMissing = stehende Gruppen, die heute losziehen, denen aber jemand fehlt (verletzt, noch kein Ersatz) → Tagesplan
 //   boxes      = ungeöffnete Kisten                         → Beute
 //   newGear    = Helden mit neuer, passender Ausrüstung     → Helden
-//   talents    = Helden mit freiem Talent                   → Helden
+//   talents    = Helden mit freiem Talent                   → Helden ({ heroId } = der erste davon)
 //   building   = gestern ist ein Gebäude fertig geworden    → Gildenhalle
 //   upkeep     = Unterhalt nicht bezahlt, Gebäude wirken nicht → Gildenhalle
 //   unhappy    = Helden ohne Sold (unzufrieden)            → Helden
@@ -54,7 +54,11 @@ export function getDailyTodos(guild, lastDaySummary) {
   add('boxes', guild.boxes.length, 'treasury');
   add('newGear', guild.heroes.filter((hero) => getSlotsWithNewGear(guild, hero).length > 0).length, 'heroes');
   if (unlocked('talents')) {
-    add('talents', guild.heroes.filter((hero) => hero.getFreeTalentPicks() > 0).length, 'heroes');
+    // heroId = der erste Held mit freiem Talent (dorthin springt der Eintrag)
+    const withTalent = guild.heroes.filter((hero) => hero.getFreeTalentPicks() > 0);
+    if (withTalent.length > 0) {
+      todos.push({ id: 'talents', count: withTalent.length, screenId: 'heroes', heroId: withTalent[0].id });
+    }
   }
   if (unlocked('guildHall')) {
     add('building', lastDaySummary && lastDaySummary.finishedBuilding ? 1 : 0, 'hall');

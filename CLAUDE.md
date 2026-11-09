@@ -91,9 +91,9 @@ src/data/      Reine Inhalte: rarities, items (Vorlagen, Rüstungsarten Platte/L
                collectionBook (Sammelbuch-Seiten pro Dungeon mit Titel und Gold-Bonus; die Items kommen aus `bossLoot` in lootBoxes)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute · Helden · Dungeons · Beute · Gilde mit Unterreitern (Liste SECTIONS in main.js).
                Bildschirme: DayPlanScreen (Tagesplan, Startseite, oben TodoBox = „Was gibt es heute zu tun?“), LootBoxScreen (Kisten öffnen, danach Zerlegen direkt im Ergebnis), ShopScreen (Händler + Vorratskammer),
-               HeroScreen (+ RoleOverview = Kacheln nach Position mit Gruppen-Zähler; HeroDetailPanel = Plätze direkt unter dem Porträt, Rest aufklappbar, Blättern ‹ ›; EquipPanel = Ausrüstungsliste für den angetippten Platz,
+               HeroScreen (+ RoleOverview = Kacheln nach Position mit Gruppen-Zähler; HeroDetailPanel = Plätze direkt unter dem Porträt, darunter Talente, Rest aufklappbar, Blättern ‹ ›; EquipPanel = Ausrüstungsliste für den angetippten Platz,
                auf dem Handy als Fenster von unten, nach Item-Level sortiert, Vergleich pro Wert; „Bestes anlegen“ am Helden), TavernScreen, CombatLabScreen (Kampf-Labor, auch „Test-Raid“ mit 4 Gruppen),
-               DungeonScreen („Ein Dungeon = eine Karte“, wenig Text: Dungeon-Zeilen mit Symbolen, Planungs-Karte mit 5 Plätzen + Auswahl von unten, feste Leiste mit Symbolen für Gruppe, Konter ✓/✗ und Einschätzung live;
+               DungeonScreen („Ein Dungeon = eine Karte“, wenig Text: Dungeon-Zeilen mit Symbolen und einer Zeile pro Gruppe dort (Name, Status, Porträts), Planungs-Karte mit 5 Plätzen + Auswahl von unten, feste Leiste mit Symbolen für Gruppe, Konter ✓/✗ und Einschätzung live;
                + DungeonGuide = Dungeonführer: Niveau, Gegner und Bosse im Detail, Beute mit Sammelbuch-Sternen;
                Gruppenwahl mit Kacheln nach Position, Statuszeile, „Auto-Gruppe“ und „Gruppe ausrüsten“; + RunViewer = Bericht eines beendeten Runs zeigen),
                GuildHallScreen (Gildenhalle: Karte pro Gebäude, Bauen, Baustelle mit Balken),

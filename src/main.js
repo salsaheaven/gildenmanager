@@ -85,11 +85,17 @@ for (const screenId of screenIds.concat(HIDDEN_SCREENS)) {
 
 const navBar = new NavBar(document.getElementById('nav-bar'), document.getElementById('sub-nav'), SECTIONS, showScreen);
 // "Weiter" zum nächsten offenen Punkt aus "Was gibt es heute zu tun?"
-// Zu einem Eintrag aus "Was gibt es heute zu tun?" springen (bei einem neuen Dungeon gleich dessen Karte öffnen)
+// Zu einem Eintrag aus "Was gibt es heute zu tun?" springen (bei einem neuen Dungeon gleich dessen Karte öffnen,
+// bei einem freien Talent gleich den Helden)
 function goToTodo(screenId, todo) {
   showScreen(screenId);
   if (todo && todo.dungeonId) {
     dungeonScreen.openDungeon(todo.dungeonId);
+  }
+  // Freies Talent: gleich den Helden öffnen (der Talent-Bereich klappt dann von selbst auf)
+  if (todo && todo.id === 'talents' && todo.heroId) {
+    heroScreen.selectHero(todo.heroId);
+    heroScreen.scrollToTalents();
   }
 }
 const nextTodoBar = new NextTodoBar(document.getElementById('next-todo'), game, goToTodo);

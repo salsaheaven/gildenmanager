@@ -14,12 +14,17 @@
 //   heroLevel  = ein Held hat dieses Level erreicht
 //   bossItems  = so viele Boss-Items stehen im Sammelbuch
 // Einmal freigeschaltet bleibt es frei. Zahlen grob gesetzt.
+// Pro Tag kommt höchstens eine Freischaltung, in der Reihenfolge dieser Liste: Wichtiges (Talente) steht deshalb weit oben.
 // ============================================================
 
 export const UNLOCKS = [
   {
     id: 'tavern', name: 'Taverne', screenId: 'tavern', condition: { day: 2 },
     text: 'In der Taverne warten jeden Tag neue Bewerber. Mehr Helden bedeuten mehr Gruppen.',
+  },
+  {
+    id: 'talents', name: 'Talente', screenId: 'heroes', condition: { heroLevel: 5 },
+    text: 'Ab Level 5 wählen Helden Talente. Jede Reihe bietet zwei Wege.',
   },
   {
     id: 'shop', name: 'Händler', screenId: 'shop', condition: { day: 3, clears: 1 },
@@ -36,10 +41,6 @@ export const UNLOCKS = [
   {
     id: 'collection', name: 'Sammelbuch', screenId: 'treasury', condition: { bossItems: 1 },
     text: 'Jedes Boss-Item kommt ins Sammelbuch. Eine volle Seite bringt einen Titel und mehr Gold.',
-  },
-  {
-    id: 'talents', name: 'Talente', screenId: 'heroes', condition: { heroLevel: 5 },
-    text: 'Ab Level 5 wählen Helden Talente. Jede Reihe bietet zwei Wege.',
   },
   {
     id: 'raid', name: 'Raid', screenId: 'raid', condition: { heroLevel: 30 },

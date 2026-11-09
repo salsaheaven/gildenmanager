@@ -191,7 +191,7 @@ Alle Formeln und Zahlen dafür stehen in `src/data/` (`scaling.js`, `experience.
 - **Spieldauer – entschieden 2026-10-30:** Ein kompletter Durchlauf bis zum Endboss soll **etwa 2–3 Stunden** dauern. Deshalb sind die Raids auf **20 Helden** verkleinert.
 
 ## Spieltest-Entscheidungen (2026-11-09)
-- **Freischaltungen:** höchstens eine pro Tag (Reihenfolge wie in `data/unlocks.js`), ihr „Neu:“-Hinweis steht einen Tag im Aufgaben-Kasten.
+- **Freischaltungen:** höchstens eine pro Tag (Reihenfolge wie in `data/unlocks.js`, Talente gleich nach der Taverne), ihr „Neu:“-Hinweis steht einen Tag im Aufgaben-Kasten. Gesperrte Talente sind am Helden blass mit „ab Level 5“ sichtbar.
 - **Beute:** Waffen und Schilde aus Kisten passen zu etwa 70 % zu einer Klasse im eigenen Kader; Rüstung und Ringe bleiben zufällig.
 - **Staub:** Die Gildenhalle erklärt bei fehlendem Staub, dass er vom Zerlegen kommt, und bietet „Schrott zerlegen“ an (kein automatisches Zerlegen ab Start).
 - **Neuer Dungeon:** Ein offener, nie versuchter Dungeon ohne Gruppe steht im Aufgaben-Kasten; stehende Gruppen lassen sich in einen anderen Dungeon verlegen.

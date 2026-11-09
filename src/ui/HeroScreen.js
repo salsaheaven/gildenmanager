@@ -173,6 +173,15 @@ export class HeroScreen {
     this.showingDetail = true;
     this.render();
   }
+
+  // Zum Talent-Bereich des gezeigten Helden scrollen (z.B. aus "Helden können ein Talent wählen")
+  scrollToTalents() {
+    const section = this.root.querySelector('.detail-section[data-section="talents"]');
+    if (section) {
+      section.open = true;
+      section.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
+  }
 }
 
 // Schmaler Bildschirm (Handy-Regeln in main.css gelten ab dieser Breite)

@@ -2,11 +2,12 @@
 // HERODETAILPANEL – zeigt alles über einen Helden:
 //   - oben: Bild, Name, Klasse, Eigenschaften (darunter der Knopf "Entlassen")
 //   - direkt darunter die 6 Ausrüstungsplätze (Plätze mit neuer Ausrüstung sind markiert)
-//   - dann aufklappbare Bereiche: Werte und Skills, Talente, Anweisungen
+//   - dann aufklappbare Bereiche: Talente (gleich unter der Ausrüstung), Werte und Skills, Anweisungen
 //     (auf dem Handy anfangs zu, damit die Ausrüstung ohne Scrollen zu sehen ist)
 // Klick auf einen Ausrüstungsplatz öffnet die Ausrüstungsliste für diesen Platz (EquipPanel).
 // ============================================================
 
+import { getUnlock } from '../data/unlocks.js';
 import { renderTalents } from './TalentPanel.js';
 import { ROLE_NAMES, ROW_NAMES } from '../data/heroClasses.js';
 import { ABILITIES } from '../data/abilities.js';
@@ -80,6 +81,11 @@ export class HeroDetailPanel {
       <div class="equipment-grid"></div>
       <div class="hero-set-slot"></div>
 
+      <details class="detail-section" data-section="talents">
+        <summary>Talente <span class="talent-lock-hint">· ab Level ${getUnlock('talents').condition.heroLevel}</span>${hero.getFreeTalentPicks() > 0 ? ' <span class="talent-free-chip">Talent frei!</span>' : ''}</summary>
+        <div class="hero-talents"></div>
+      </details>
+
       <details class="detail-section" data-section="stats">
         <summary>Werte und Skills <span class="hint">· AW ${hero.getGearScore()}</span></summary>
         <div class="detail-columns">
@@ -94,11 +100,6 @@ export class HeroDetailPanel {
             <ul class="skill-list"></ul>
           </div>
         </div>
-      </details>
-
-      <details class="detail-section" data-section="talents">
-        <summary>Talente${hero.getFreeTalentPicks() > 0 ? ' <span class="talent-free-chip">Talent frei!</span>' : ''}</summary>
-        <div class="hero-talents"></div>
       </details>
 
       <details class="detail-section" data-section="orders">

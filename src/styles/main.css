@@ -4395,9 +4395,28 @@ body.locked-crafting .salvage-junk-button,
 body.locked-crafting .auto-junk-salvage,
 body.locked-rivals .day-plan-server,
 body.locked-rivals .day-news-card,
-body.locked-talents .detail-section[data-section="talents"],
 body.locked-collection .collection-button {
   display: none;
+}
+
+/* Talente noch gesperrt: der Bereich ist sichtbar (damit man weiß, wo es sie gibt), aber blass und zu */
+body.locked-talents .detail-section[data-section="talents"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+body.locked-talents .detail-section[data-section="talents"] .hero-talents {
+  display: none;
+}
+
+/* Hinweis "ab Level 5" (Text aus data/unlocks.js) nur, solange die Talente gesperrt sind */
+.talent-lock-hint {
+  display: none;
+  color: var(--text-dim);
+}
+
+body.locked-talents .talent-lock-hint {
+  display: inline;
 }
 
 /* Klassen-Sets (SetInfo) */
@@ -5210,4 +5229,56 @@ body.locked-collection .collection-button {
   color: #ffd23f;
   font-size: 0.85em;
   margin-bottom: 6px;
+}
+
+/* Dungeon-Zeile: Gruppen, die hierher ziehen (Name, Status, kleine Porträts) */
+.dungeon-today {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.dungeon-group-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 6px;
+  border-left: 3px solid #1eff00;
+  background: rgba(30, 255, 0, 0.07);
+}
+
+.dungeon-group-line.waiting {
+  border-left-color: #9d9d9d;
+  background: rgba(157, 157, 157, 0.08);
+}
+
+.dungeon-group-name {
+  color: #1eff00;
+}
+
+.dungeon-group-line.waiting .dungeon-group-name {
+  color: #c8c8c8;
+}
+
+.dungeon-group-status {
+  color: #c8c8c8;
+  font-size: 0.85em;
+}
+
+.dungeon-group-heroes {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dungeon-group-hero.injured {
+  opacity: 0.35;
+}
+
+.dungeon-group-heroes .risk-badge {
+  display: inline-block;
+  margin: 0 0 0 4px;
 }

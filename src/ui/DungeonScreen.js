@@ -44,7 +44,8 @@ export class DungeonScreen {
     this.guideSections = {}; // welche Bereiche des Dungeonführers aufgeklappt sind (Gegner, Beute)
     this.retreatRuleId = 'never';
     this.chosenSupplies = []; // Vorräte, die die Gruppe mitnehmen soll (siehe SupplyPicker)
-    this.expanded = true;     // ist die Karte des gewählten Dungeons aufgeklappt?
+    // Ist die Karte des gewählten Dungeons aufgeklappt? Nur am Anfang (noch keine Gruppe), sonst stehen oben die Gruppen
+    this.expanded = game.guild.standingGroups.length === 0;
     this.showAllLocked = false; // alle gesperrten Dungeons zeigen (sonst nur den nächsten)
     // Auswahl von unten: null = zu, sonst { heroId (der ersetzt wird, oder null), positionId (nur diese Position, oder null) }
     this.picker = null;
@@ -236,18 +237,45 @@ export class DungeonScreen {
     return row;
   }
 
-  // Heute eingeplante Gruppen in diesem Dungeon (mit Einschätzung der ersten)
+  // Gruppen in diesem Dungeon, gut sichtbar: pro Gruppe eine Zeile mit Name, Status, kleinen Porträts und Einschätzung.
+  // Stehende Gruppen erscheinen auch, wenn sie heute nicht losziehen (ausgesetzt, alle verletzt, Raid-Tag).
   fillTodayLine(line, dungeon) {
-    const expeditions = this.game.guild.expeditions.filter((expedition) => expedition.dungeonId === dungeon.id);
-    for (const expedition of expeditions) {
-      const group = this.game.findStandingGroup(expedition.standingGroupId);
-      line.appendChild(createIconChip('iconHero', group ? group.name : 'Gruppe', 'Diese Gruppe zieht heute hierher.'));
+    const guild = this.game.guild;
+    for (const group of guild.standingGroups.filter((entry) => entry.dungeonId === dungeon.id)) {
+      const expedition = this.game.getTodaysExpedition(group.id);
+      const heroIds = expedition ? expedition.getHeroIds() : group.heroIds;
+      line.appendChild(this.createGroupLine(group.name, heroIds, expedition, dungeon));
     }
-    if (expeditions.length > 0) {
-      const expedition = expeditions[0];
-      const heroes = expedition.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
-      line.appendChild(createCompactRiskBadge(this.game, heroes, expedition.dungeonId, expedition.retreatRuleId, expedition.supplies));
+    // Einzelne Runs ohne stehende Gruppe (falls es sie gibt)
+    for (const expedition of guild.expeditions.filter((entry) => entry.dungeonId === dungeon.id && !entry.standingGroupId)) {
+      line.appendChild(this.createGroupLine('Gruppe', expedition.getHeroIds(), expedition, dungeon));
     }
+  }
+
+  // Eine Gruppen-Zeile: "Gruppe A · zieht heute los" + Porträts (verletzte blass) + Einschätzung
+  createGroupLine(name, heroIds, expedition, dungeon) {
+    const row = document.createElement('span');
+    row.className = 'dungeon-group-line' + (expedition ? ' going' : ' waiting');
+    row.innerHTML = '<span class="dungeon-group-head"><b class="dungeon-group-name"></b><span class="dungeon-group-status"></span></span><span class="dungeon-group-heroes"></span>';
+    row.querySelector('.dungeon-group-name').textContent = name;
+    let status = 'zieht heute los';
+    if (!expedition) {
+      status = this.game.areDungeonsClosedToday() ? 'Raid-Tag, wartet' : 'heute nicht dabei';
+    }
+    row.querySelector('.dungeon-group-status').textContent = ' · ' + status;
+    const heroesElement = row.querySelector('.dungeon-group-heroes');
+    const heroes = heroIds.map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
+    for (const hero of heroes) {
+      const portrait = createHeroCanvas(hero, 2);
+      portrait.classList.add('dungeon-group-hero');
+      portrait.classList.toggle('injured', hero.isInjured());
+      portrait.title = hero.name + ' · ' + hero.getClass().name + ' · Lv ' + hero.level + (hero.isInjured() ? ' · verletzt' : '');
+      heroesElement.appendChild(portrait);
+    }
+    if (expedition) {
+      heroesElement.appendChild(createCompactRiskBadge(this.game, heroes, dungeon.id, expedition.retreatRuleId, expedition.supplies));
+    }
+    return row;
   }
 
   // ---------- Planungs-Karte des gewählten Dungeons ----------
