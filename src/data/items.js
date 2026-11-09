@@ -6,6 +6,7 @@
 // id            = interner Name
 // name          = Grundname im Spiel
 // legendaryName = besonderer Name, wenn das Item legendär ist
+// poorName      = Name als Schrott (grau), z.B. "Rissige Streitaxt"
 // slot          = wo der Held es trägt (Waffe, Kopf, Brust …)
 // sprite        = welches Pixelbild aus sprites.js benutzt wird
 // stats         = Grundwerte (werden mit der Seltenheit multipliziert)
@@ -26,44 +27,44 @@ export const ARMOR_TYPES = {
 };
 
 export const ITEM_TEMPLATES = [
-  { id: 'sword',  name: 'Schwert', legendaryName: 'Morgenröte',               slot: 'weapon',  sprite: 'sword',  stats: { attack: 6 } },
-  { id: 'staff',  name: 'Stab',    legendaryName: 'Stab der tausend Sterne',  slot: 'weapon',  sprite: 'staff',  stats: { magic: 7, mana: 15 } },
-  { id: 'shield', name: 'Schild',  legendaryName: 'Bollwerk der Ewigkeit',    slot: 'offhand', sprite: 'shield', stats: { defense: 6 } },
-  { id: 'mace',       name: 'Streitkolben', legendaryName: 'Hammer der Morgendämmerung', slot: 'weapon', sprite: 'mace',   stats: { magic: 5, defense: 2, mana: 8 } },
-  { id: 'fistWeapon', name: 'Faustklinge',  legendaryName: 'Pranken des Tigers',         slot: 'weapon', sprite: 'fist',   stats: { attack: 5, defense: 1 } },
-  { id: 'katana',     name: 'Katana',       legendaryName: 'Mondklinge',                 slot: 'weapon', sprite: 'katana', stats: { attack: 7 } },
-  { id: 'axe',        name: 'Streitaxt',    legendaryName: 'Schädelspalter',             slot: 'weapon', sprite: 'axe',    stats: { attack: 7, health: 8 } },
-  { id: 'bow',        name: 'Bogen',        legendaryName: 'Sehne des Sturms',           slot: 'weapon', sprite: 'bow',    stats: { attack: 6 } },
-  { id: 'lute',       name: 'Laute',        legendaryName: 'Laute der ersten Lieder',    slot: 'weapon', sprite: 'lute',   stats: { magic: 6, mana: 12 } },
+  { id: 'sword',  name: 'Schwert', poorName: 'Rissiges Schwert', legendaryName: 'Morgenröte',               slot: 'weapon',  sprite: 'sword',  stats: { attack: 6 } },
+  { id: 'staff',  name: 'Stab',    poorName: 'Rissiger Stab', legendaryName: 'Stab der tausend Sterne',  slot: 'weapon',  sprite: 'staff',  stats: { magic: 7, mana: 15 } },
+  { id: 'shield', name: 'Schild',  poorName: 'Rissiger Schild', legendaryName: 'Bollwerk der Ewigkeit',    slot: 'offhand', sprite: 'shield', stats: { defense: 6 } },
+  { id: 'mace',       name: 'Streitkolben', poorName: 'Rissiger Streitkolben', legendaryName: 'Hammer der Morgendämmerung', slot: 'weapon', sprite: 'mace',   stats: { magic: 5, defense: 2, mana: 8 } },
+  { id: 'fistWeapon', name: 'Faustklinge',  poorName: 'Rissige Faustklinge', legendaryName: 'Pranken des Tigers',         slot: 'weapon', sprite: 'fist',   stats: { attack: 5, defense: 1 } },
+  { id: 'katana',     name: 'Katana',       poorName: 'Rissiges Katana', legendaryName: 'Mondklinge',                 slot: 'weapon', sprite: 'katana', stats: { attack: 7 } },
+  { id: 'axe',        name: 'Streitaxt',    poorName: 'Rissige Streitaxt', legendaryName: 'Schädelspalter',             slot: 'weapon', sprite: 'axe',    stats: { attack: 7, health: 8 } },
+  { id: 'bow',        name: 'Bogen',        poorName: 'Rissiger Bogen', legendaryName: 'Sehne des Sturms',           slot: 'weapon', sprite: 'bow',    stats: { attack: 6 } },
+  { id: 'lute',       name: 'Laute',        poorName: 'Rissige Laute', legendaryName: 'Laute der ersten Lieder',    slot: 'weapon', sprite: 'lute',   stats: { magic: 6, mana: 12 } },
 
   // ---------- Platte (Krieger, Samurai): viel Rüstung und Leben ----------
-  { id: 'plateHelmet', name: 'Plattenhelm',     legendaryName: 'Krone des Sturmkönigs',   slot: 'head',  sprite: 'helmet', armorType: 'plate', stats: { defense: 3, health: 12 } },
-  { id: 'plateArmor',  name: 'Plattenharnisch', legendaryName: 'Drachenschuppenharnisch', slot: 'chest', sprite: 'armor',  armorType: 'plate', stats: { defense: 5, health: 20 } },
-  { id: 'plateBoots',  name: 'Plattenstiefel',  legendaryName: 'Tritt des Titanen',       slot: 'feet',  sprite: 'boots',  armorType: 'plate', stats: { defense: 2, health: 8 } },
+  { id: 'plateHelmet', name: 'Plattenhelm',     poorName: 'Rissiger Plattenhelm', legendaryName: 'Krone des Sturmkönigs',   slot: 'head',  sprite: 'helmet', armorType: 'plate', stats: { defense: 3, health: 12 } },
+  { id: 'plateArmor',  name: 'Plattenharnisch', poorName: 'Rissiger Plattenharnisch', legendaryName: 'Drachenschuppenharnisch', slot: 'chest', sprite: 'armor',  armorType: 'plate', stats: { defense: 5, health: 20 } },
+  { id: 'plateBoots',  name: 'Plattenstiefel',  poorName: 'Rissige Plattenstiefel', legendaryName: 'Tritt des Titanen',       slot: 'feet',  sprite: 'boots',  armorType: 'plate', stats: { defense: 2, health: 8 } },
 
   // ---------- Geweihte Platte (Paladin, Schamane): Rüstung, Leben und Magie ----------
-  { id: 'holyPlateHelmet', name: 'Geweihter Plattenhelm',     legendaryName: 'Heiligenschein des Lichtbringers', slot: 'head',  sprite: 'helmet', armorType: 'plate', stats: { defense: 2, health: 10, magic: 2 } },
-  { id: 'holyPlateArmor',  name: 'Geweihter Plattenharnisch', legendaryName: 'Harnisch der Gelübde',             slot: 'chest', sprite: 'armor',  armorType: 'plate', stats: { defense: 4, health: 16, magic: 3, mana: 8 } },
-  { id: 'holyPlateBoots',  name: 'Geweihte Plattenstiefel',   legendaryName: 'Schritte des Kreuzzugs',           slot: 'feet',  sprite: 'boots',  armorType: 'plate', stats: { defense: 2, health: 6, magic: 1 } },
+  { id: 'holyPlateHelmet', name: 'Geweihter Plattenhelm',     poorName: 'Rissiger geweihter Plattenhelm', legendaryName: 'Heiligenschein des Lichtbringers', slot: 'head',  sprite: 'helmet', armorType: 'plate', stats: { defense: 2, health: 10, magic: 2 } },
+  { id: 'holyPlateArmor',  name: 'Geweihter Plattenharnisch', poorName: 'Rissiger geweihter Plattenharnisch', legendaryName: 'Harnisch der Gelübde',             slot: 'chest', sprite: 'armor',  armorType: 'plate', stats: { defense: 4, health: 16, magic: 3, mana: 8 } },
+  { id: 'holyPlateBoots',  name: 'Geweihte Plattenstiefel',   poorName: 'Rissige geweihte Plattenstiefel', legendaryName: 'Schritte des Kreuzzugs',           slot: 'feet',  sprite: 'boots',  armorType: 'plate', stats: { defense: 2, health: 6, magic: 1 } },
 
   // ---------- Leder (Schurke, Mönch, Barbar, Jäger): Angriff, etwas Rüstung und Leben ----------
-  { id: 'leatherHelmet', name: 'Lederkappe',   legendaryName: 'Maske des Schattenfürsten', slot: 'head',  sprite: 'helmet', armorType: 'leather', stats: { attack: 2, defense: 1, health: 10 } },
-  { id: 'leatherArmor',  name: 'Lederwams',    legendaryName: 'Mantel der Tausend Klingen', slot: 'chest', sprite: 'armor',  armorType: 'leather', stats: { attack: 3, defense: 2, health: 16 } },
-  { id: 'leatherBoots',  name: 'Lederstiefel', legendaryName: 'Schritte des Windes',        slot: 'feet',  sprite: 'boots',  armorType: 'leather', stats: { attack: 1, defense: 1, health: 6 } },
+  { id: 'leatherHelmet', name: 'Lederkappe',   poorName: 'Rissige Lederkappe', legendaryName: 'Maske des Schattenfürsten', slot: 'head',  sprite: 'helmet', armorType: 'leather', stats: { attack: 2, defense: 1, health: 10 } },
+  { id: 'leatherArmor',  name: 'Lederwams',    poorName: 'Rissiger Lederwams', legendaryName: 'Mantel der Tausend Klingen', slot: 'chest', sprite: 'armor',  armorType: 'leather', stats: { attack: 3, defense: 2, health: 16 } },
+  { id: 'leatherBoots',  name: 'Lederstiefel', poorName: 'Rissige Lederstiefel', legendaryName: 'Schritte des Windes',        slot: 'feet',  sprite: 'boots',  armorType: 'leather', stats: { attack: 1, defense: 1, health: 6 } },
 
   // ---------- Wildleder (Druide): Magie, Mana, etwas Rüstung ----------
-  { id: 'wildLeatherHelmet', name: 'Wildlederkappe',   legendaryName: 'Geweih des Hainwächters', slot: 'head',  sprite: 'helmet', armorType: 'leather', stats: { magic: 2, defense: 1, health: 8, mana: 6 } },
-  { id: 'wildLeatherArmor',  name: 'Wildlederwams',    legendaryName: 'Rinde der Weltesche',     slot: 'chest', sprite: 'armor',  armorType: 'leather', stats: { magic: 3, defense: 2, health: 12, mana: 10 } },
-  { id: 'wildLeatherBoots',  name: 'Wildlederstiefel', legendaryName: 'Pfad der Wurzeln',        slot: 'feet',  sprite: 'boots',  armorType: 'leather', stats: { magic: 1, defense: 1, health: 6, mana: 4 } },
+  { id: 'wildLeatherHelmet', name: 'Wildlederkappe',   poorName: 'Rissige Wildlederkappe', legendaryName: 'Geweih des Hainwächters', slot: 'head',  sprite: 'helmet', armorType: 'leather', stats: { magic: 2, defense: 1, health: 8, mana: 6 } },
+  { id: 'wildLeatherArmor',  name: 'Wildlederwams',    poorName: 'Rissiger Wildlederwams', legendaryName: 'Rinde der Weltesche',     slot: 'chest', sprite: 'armor',  armorType: 'leather', stats: { magic: 3, defense: 2, health: 12, mana: 10 } },
+  { id: 'wildLeatherBoots',  name: 'Wildlederstiefel', poorName: 'Rissige Wildlederstiefel', legendaryName: 'Pfad der Wurzeln',        slot: 'feet',  sprite: 'boots',  armorType: 'leather', stats: { magic: 1, defense: 1, health: 6, mana: 4 } },
 
   // ---------- Stoff (Priester, Runenwirker, Magier, Hexenmeister, Barde, Chronomant): Magie und Mana, wenig Rüstung ----------
-  { id: 'clothHelmet', name: 'Stoffkapuze',  legendaryName: 'Kapuze der Sternenseherin', slot: 'head',  sprite: 'helmet', armorType: 'cloth', dropWeight: 2, stats: { magic: 2, health: 8, mana: 8 } },
-  { id: 'clothArmor',  name: 'Stoffrobe',    legendaryName: 'Robe des Erzmagiers',       slot: 'chest', sprite: 'armor',  armorType: 'cloth', dropWeight: 2, stats: { magic: 3, defense: 1, health: 12, mana: 12 } },
-  { id: 'clothBoots',  name: 'Stoffschuhe',  legendaryName: 'Pfad der Leere',            slot: 'feet',  sprite: 'boots',  armorType: 'cloth', dropWeight: 2, stats: { magic: 1, health: 6, mana: 6 } },
+  { id: 'clothHelmet', name: 'Stoffkapuze',  poorName: 'Rissige Stoffkapuze', legendaryName: 'Kapuze der Sternenseherin', slot: 'head',  sprite: 'helmet', armorType: 'cloth', dropWeight: 2, stats: { magic: 2, health: 8, mana: 8 } },
+  { id: 'clothArmor',  name: 'Stoffrobe',    poorName: 'Rissige Stoffrobe', legendaryName: 'Robe des Erzmagiers',       slot: 'chest', sprite: 'armor',  armorType: 'cloth', dropWeight: 2, stats: { magic: 3, defense: 1, health: 12, mana: 12 } },
+  { id: 'clothBoots',  name: 'Stoffschuhe',  poorName: 'Rissige Stoffschuhe', legendaryName: 'Pfad der Leere',            slot: 'feet',  sprite: 'boots',  armorType: 'cloth', dropWeight: 2, stats: { magic: 1, health: 6, mana: 6 } },
 
   // ---------- Ringe: jeder darf sie tragen ----------
-  { id: 'attackRing', name: 'Kampfring',  legendaryName: 'Siegel des Kriegsherrn', slot: 'ring', sprite: 'ring', forScaling: 'attack', stats: { attack: 4 } },
-  { id: 'magicRing',  name: 'Zauberring', legendaryName: 'Siegel der Leere',       slot: 'ring', sprite: 'ring', forScaling: 'magic',  stats: { magic: 3, mana: 6 },
+  { id: 'attackRing', name: 'Kampfring',  poorName: 'Rissiger Kampfring', legendaryName: 'Siegel des Kriegsherrn', slot: 'ring', sprite: 'ring', forScaling: 'attack', stats: { attack: 4 } },
+  { id: 'magicRing',  name: 'Zauberring', poorName: 'Rissiger Zauberring', legendaryName: 'Siegel der Leere',       slot: 'ring', sprite: 'ring', forScaling: 'magic',  stats: { magic: 3, mana: 6 },
     colors: { g: '#5ef2ff', G: '#2a7a8a' } },
 ];
 

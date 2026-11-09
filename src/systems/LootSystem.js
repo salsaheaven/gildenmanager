@@ -45,7 +45,7 @@ export class LootSystem {
         rarityId = 'legendary';
       }
       // Legendär (nur aus Raid-Kisten) ist immer eine Waffe oder ein Ring
-      const template = rarityId === 'legendary' ? this.pickTemplate(boxType.legendarySlots || null) : null;
+      const template = rarityId === 'legendary' ? this.pickTemplate(boxType.legendarySlots || null) : this.pickTemplateForGuild(guild);
       const item = this.createItem(rarityId, guild.createItemId(), itemLevel, template);
       items.push(item);
       guild.addItem(item);
@@ -163,12 +163,38 @@ export class LootSystem {
     return getItemTemplate(this.random.pickWeighted(weights));
   }
 
+  // Eine zufällige Vorlage für ein Kisten-Item. Waffen und Schilde passen meist zum eigenen Kader:
+  // Mit der Chance BALANCING.ownClassWeaponChance wird eine Waffe gegen eine getauscht, die ein eigener Held tragen darf.
+  // Rüstung und Ringe bleiben ganz zufällig.
+  pickTemplateForGuild(guild) {
+    const template = this.pickTemplate();
+    if (template.slot !== 'weapon' && template.slot !== 'offhand') {
+      return template;
+    }
+    if (this.random.next() >= BALANCING.ownClassWeaponChance) {
+      return template;
+    }
+    // Welche Waffen dürfen die eigenen Helden tragen? (gleicher Platz wie die gewürfelte)
+    const usable = new Set();
+    for (const hero of guild.heroes) {
+      for (const templateId of hero.getClass().weapons) {
+        if (getItemTemplate(templateId).slot === template.slot) {
+          usable.add(templateId);
+        }
+      }
+    }
+    if (usable.size === 0 || usable.has(template.id)) {
+      return template;
+    }
+    return getItemTemplate(this.random.pick([...usable]));
+  }
+
   createItemName(template, rarityId) {
     if (rarityId === 'legendary') {
       return template.legendaryName;
     }
     if (rarityId === 'poor') {
-      return 'Rissige(r) ' + template.name;
+      return template.poorName;
     }
     if (rarityId === 'common') {
       return template.name;

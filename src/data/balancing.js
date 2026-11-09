@@ -19,6 +19,8 @@ export const BALANCING = {
   // Schrott-Verwertung: Items bis zu dieser Seltenheit gelten als "Schrott" (Weiß und Grau).
   // Knöpfe "Schrott verkaufen/zerlegen" und die automatische Verwertung neuer Kisten-Items nutzen diese Grenze.
   junkMaxRarity: 'common',
+  // So oft wird eine Waffe (oder ein Schild) aus einer Kiste gegen eine getauscht, die ein eigener Held tragen darf (0.7 = 70 %)
+  ownClassWeaponChance: 0.7,
 
   // Was die Schatzkammer zum Pity-Stand anzeigt. Bewusst ungenau: keine Zahlen, nur eine Stimmung.
   // fromProgress = ab welchem Anteil des Weges (0 = gerade Glück gehabt, 1 = gleich garantiert)

@@ -84,6 +84,29 @@ describe('Tage (Runden)', () => {
 });
 
 describe('LootSystem', () => {
+  it('Waffen aus Kisten passen meist zum eigenen Kader, Schrott hat einen richtigen Namen', async () => {
+    const { Hero } = await import('../src/entities/Hero.js');
+    const { getItemTemplate } = await import('../src/data/items.js');
+    const guild = new Guild();
+    guild.heroes.push(new Hero(1, 'Krieger', 'warrior', 'uncommon', [], { skin: '#f1c39b', hair: '#6b3f17' }));
+    const lootSystem = new LootSystem(new Random(11));
+    let weapons = 0;
+    let swords = 0;
+    for (let i = 0; i < 400; i++) {
+      for (const item of lootSystem.rollBoxContents(getLootBoxType('wood'), guild)) {
+        if (getItemTemplate(item.templateId).slot === 'weapon') {
+          weapons++;
+          if (item.templateId === 'sword') {
+            swords++;
+          }
+        }
+        expect(item.name).not.toContain('(r)');
+      }
+    }
+    // Ohne Gewichtung wäre nur jede 8. Waffe ein Schwert
+    expect(swords / weapons).toBeGreaterThan(0.6);
+  });
+
   it('eine Kiste enthält die richtige Anzahl Items, seltenstes zuletzt', () => {
     const guild = new Guild();
     const lootSystem = new LootSystem(new Random(7));
