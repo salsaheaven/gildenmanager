@@ -19,3 +19,9 @@ Faustregel: Unterschiede bis etwa ±4 Prozentpunkte sind Zufall.
 `messhilfen.mjs` enthält die gemeinsamen Bausteine (Testgruppe bauen, viele Runs messen).
 
 Bei Balancing-Änderungen: vorher und nachher messen und beide Zahlen vergleichen.
+
+## Sonstige Werkzeuge
+
+| Werkzeug | Wozu | Aufruf |
+|---|---|---|
+| `screenshots.cjs` | Nimmt die Bilder für die README neu auf (`docs/screenshots/`, Handy und PC, Deutsch) | erst `npm run dev`, dann `node tools/screenshots.cjs` |

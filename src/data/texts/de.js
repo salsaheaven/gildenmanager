@@ -742,4 +742,9 @@ export const TEXTS_DE = {
   logic2: {
     firstRaidTitle: ({ name }) => 'Erste: ' + name,
   },
+
+  // Titel des Browser-Tabs
+  page: {
+    title: 'Gildenmanager – Führe deine MMORPG-Gilde',
+  },
 };

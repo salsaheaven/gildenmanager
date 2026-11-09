@@ -186,7 +186,7 @@ Plan vom 2026-11-01 (Entscheidungen in `KONZEPT.md` unter „Raids“, „Klasse
 **M5 – Feinschliff:** Balancing, Sounds, Grafik. Optional: Diplomatie.
 Notiert (2026-11-09):
 - ✅ **Deutsch und Englisch mit Sprachauswahl** (2026-11-09): `core/Language.js` + `data/texts/` (Oberfläche, Logik-Meldungen, Kampfprotokoll), `core/DataLanguage.js` + `data/en/` (Inhalte), Umschalter DE/EN oben und beim Gründen, erste Sprache = Browser-Sprache, Item- und Gruppennamen werden beim Laden in der aktuellen Sprache neu gebaut (Spielstand-Version 29). Test-Menü und Kampf-Labor bleiben deutsch.
-- **GitHub-Seite überarbeiten und aufhübschen** (Projektseite/README und die veröffentlichte Seite).
+- ✅ **GitHub-Seite aufgehübscht** (2026-11-09): neue README mit Titelbild, „Jetzt spielen“, Bildergalerie (`docs/screenshots/`, neu aufnehmen mit `tools/screenshots.cjs`), Funktionsliste und englischem Teil; veröffentlichte Seite mit Pixel-Favicon, Beschreibung und Vorschaubild für geteilte Links (`public/`), Tab-Titel in beiden Sprachen.
 
 **Nach dem ersten Release (erste Erweiterung):** Heroisch mit Permadeath und Ehrenhalle, New Game+ / Incremental-Teil (entschieden 2026-10-30).
 

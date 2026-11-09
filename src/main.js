@@ -35,6 +35,7 @@ import { loadLanguage, changeLanguage } from './ui/LanguageSetting.js';
 // Zuerst die Sprache (alle Texte danach kommen schon in der gewählten Sprache)
 loadLanguage();
 applyDataLanguage(getLanguage()); // Namen und Texte aus src/data (Klassen, Bosse, Items …) in der gewählten Sprache
+document.title = t('page.title');
 import { UNLOCKS, getUnlock } from './data/unlocks.js';
 
 // Alle 5 Sekunden automatisch speichern

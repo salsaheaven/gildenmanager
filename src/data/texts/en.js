@@ -734,4 +734,9 @@ export const TEXTS_EN = {
   logic2: {
     firstRaidTitle: ({ name }) => 'First: ' + name,
   },
+
+  // Titel des Browser-Tabs
+  page: {
+    title: 'Guild Manager – Run your MMORPG guild',
+  },
 };
