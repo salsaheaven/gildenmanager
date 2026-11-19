@@ -16,7 +16,7 @@ import { t } from '../core/Language.js';
 import { getDayPlan } from '../systems/DayPlan.js';
 import { HERO_TASKS } from '../data/heroTasks.js';
 import { getJobGold, getTrainingCost } from '../systems/HeroTaskSystem.js';
-import { getDungeon } from '../data/dungeons.js';
+import { getRunDungeon } from '../systems/HeroicMode.js';
 import { RETREAT_RULES } from '../data/retreatRules.js';
 import { createHeroCanvas } from './PixelArt.js';
 import { describeInjury } from './DungeonScreen.js';
@@ -252,7 +252,8 @@ export class DayPlanScreen {
       return;
     }
     for (const expedition of this.game.guild.expeditions) {
-      const dungeon = getDungeon(expedition.dungeonId);
+      // bei Heroisch: höhere Stufe
+      const dungeon = getRunDungeon(expedition.dungeonId, this.game.isDungeonHeroic(expedition.dungeonId));
       const retreatRule = RETREAT_RULES.find((rule) => rule.id === expedition.retreatRuleId);
       const card = document.createElement('div');
       card.className = 'run-row day-plan-run';

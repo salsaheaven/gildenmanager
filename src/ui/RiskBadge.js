@@ -26,6 +26,7 @@ export function getRiskSummary(game, heroes, dungeonId, retreatRuleId, supplies 
   const chances = estimateRunChances({
     heroes, dungeonId, retreatRuleId, supplies,
     scouting: game.getScoutingLevel(dungeonId),
+    heroic: game.isDungeonHeroic(dungeonId),
     count: RISK_SIMULATION_COUNT,
   });
   if (knowledge.level === 'partial') {

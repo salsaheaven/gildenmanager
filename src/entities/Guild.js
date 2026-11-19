@@ -35,6 +35,8 @@ export class Guild {
     this.nextExpeditionId = 1;
     this.dungeonClears = {};   // Dungeon-id → wie oft geschafft
     this.dungeonAttempts = {}; // Dungeon-id → wie oft versucht (egal wie es ausging)
+    this.heroicDungeons = [];  // Dungeon-ids, die auf Heroisch gestellt sind (siehe systems/HeroicMode.js)
+    this.heroicClears = {};    // Dungeon-id → wie oft heroisch geschafft
     this.reports = [];         // Berichte über abgeschlossene Runs (neueste zuerst)
     this.collection = new CollectionBook(); // Sammelbuch: welche Boss-Items schon gefunden wurden
     this.materials = { dust: 0, crystal: 0, raw: 0, herbs: 0, ashEssence: 0 }; // Materiallager: Staub, Kristalle, Rohstoffe, Kräuter, Aschenessenz (siehe data/crafting.js)
@@ -238,6 +240,10 @@ export class Guild {
     return this.dungeonClears[dungeonId] || 0;
   }
 
+  getHeroicClears(dungeonId) {
+    return this.heroicClears[dungeonId] || 0;
+  }
+
   getAttempts(dungeonId) {
     return this.dungeonAttempts[dungeonId] || 0;
   }
@@ -334,6 +340,8 @@ export class Guild {
       nextExpeditionId: this.nextExpeditionId,
       dungeonClears: this.dungeonClears,
       dungeonAttempts: this.dungeonAttempts,
+      heroicDungeons: this.heroicDungeons,
+      heroicClears: this.heroicClears,
       reports: this.reports,
       collection: this.collection.toSaveData(),
       materials: this.materials,
@@ -378,6 +386,8 @@ export class Guild {
     guild.nextExpeditionId = data.nextExpeditionId || 1;
     guild.dungeonClears = data.dungeonClears || {};
     guild.dungeonAttempts = data.dungeonAttempts || {};
+    guild.heroicDungeons = data.heroicDungeons;
+    guild.heroicClears = data.heroicClears;
     guild.reports = data.reports || [];
     guild.collection = CollectionBook.fromSaveData(data.collection);
     guild.materials = data.materials;

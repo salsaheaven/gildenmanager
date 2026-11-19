@@ -8,7 +8,7 @@ Faustregel: Unterschiede bis etwa ±4 Prozentpunkte sind Zufall.
 
 | Werkzeug | Frage | Aufruf |
 |---|---|---|
-| `bot-durchlauf.mjs` | Wie schnell kommt ein Bot voran? Erfolgsquote, Tage bis zu jedem Dungeon, Gold, Anteil Upgrade-Items | `node tools/bot-durchlauf.mjs 60 20 level 0.5` (Modus `level` oder `push`, letzte Zahl = Wert von 1 % Resistenz, 0 = ignorieren) |
+| `bot-durchlauf.mjs` | Wie schnell kommt ein Bot voran? Erfolgsquote, Tage bis zu jedem Dungeon, Gold, Anteil Upgrade-Items | `node tools/bot-durchlauf.mjs 60 20 level 0.5` (Modus `level` oder `push`, dann Wert von 1 % Resistenz, 0 = ignorieren; mit `heroisch` am Ende spielt der Bot geschaffte Dungeons heroisch, sobald er das Level dafür hat) |
 | `siegchance.mjs` | Siegchance der Standardgruppe je Dungeon und Level, nackt und grün ausgerüstet | `node tools/siegchance.mjs` |
 | `gruppen-vergleich.mjs` | Wie stark hängt der Erfolg von der Klassenmischung ab? (mit Ausrüstung aus dem vorherigen Dungeon) | `node tools/gruppen-vergleich.mjs` |
 | `anweisungen.mjs` | Was bewirkt jedes Extrem einer Anweisung gegenüber „Ausgewogen“, in 4 Gruppen (zusammen alle 15 Klassen) und allen Dungeons? Am Ende: welche Optionen situativ sind, nie helfen oder immer helfen | `node tools/anweisungen.mjs 300` (etwa 1–2 Minuten), schneller für einen Dungeon: `node tools/anweisungen.mjs 200 bearCave` |

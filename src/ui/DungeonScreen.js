@@ -17,6 +17,8 @@
 
 import { t } from '../core/Language.js';
 import { DUNGEONS, getDungeon } from '../data/dungeons.js';
+import { HEROIC } from '../data/heroic.js';
+import { getRunDungeon } from '../systems/HeroicMode.js';
 import { RETREAT_RULES } from '../data/retreatRules.js';
 import { getLootBoxType } from '../data/lootBoxes.js';
 import { COMBAT_RULES } from '../data/combatRules.js';
@@ -184,16 +186,26 @@ export class DungeonScreen {
   createDungeonCard(dungeon) {
     const clears = this.game.guild.getClears(dungeon.id);
     const knowledge = this.game.getDungeonKnowledge(dungeon.id);
+    const heroic = this.game.isDungeonHeroic(dungeon.id);
+    const runDungeon = getRunDungeon(dungeon.id, heroic); // bei Heroisch: höhere Stufe
     const card = document.createElement('button');
     card.className = 'dungeon-card';
+    card.classList.toggle('heroic', heroic);
     card.classList.toggle('selected', dungeon.id === this.dungeonId && this.expanded);
     card.innerHTML = '<span class="dungeon-name"></span><span class="dungeon-chips"></span><span class="dungeon-today"></span>';
     card.querySelector('.dungeon-name').textContent = dungeon.name;
     // Beschreibung des Dungeons als Info-Blase statt als Text
     card.querySelector('.dungeon-name').appendChild(createInfoIcon(dungeon.description));
     const chips = card.querySelector('.dungeon-chips');
-    chips.appendChild(createIconChip('iconSword', String(dungeon.level),
-      t('dungeon.levelInfo', { level: dungeon.level })));
+    chips.appendChild(createIconChip('iconSword', String(runDungeon.level),
+      t('dungeon.levelInfo', { level: runDungeon.level })));
+    if (heroic) {
+      const heroicChip = document.createElement('span');
+      heroicChip.className = 'icon-chip heroic-chip';
+      heroicChip.textContent = t('dungeon.heroicTag');
+      attachInfo(heroicChip, t('dungeon.heroicInfo', { bonus: HEROIC.levelBonus }));
+      chips.appendChild(heroicChip);
+    }
     chips.appendChild(createIconChip('iconArmor', String(dungeon.recommendedGearScore),
       t('dungeon.gearInfo', { gear: dungeon.recommendedGearScore })));
     chips.appendChild(createIconChip('iconLens', knowledge.known + '/' + knowledge.total,
@@ -285,6 +297,7 @@ export class DungeonScreen {
     const card = document.createElement('div');
     card.className = 'dungeon-plan-card';
     card.innerHTML = `
+      <div class="plan-row plan-heroic"></div>
       <div class="plan-slots"></div>
       <div class="hero-pick-sheet" hidden></div>
       <div class="plan-stats"></div>
@@ -312,7 +325,9 @@ export class DungeonScreen {
 
     const group = this.getSelectedHeroes();
     this.renderSlots(card.querySelector('.plan-slots'), card);
-    this.renderStats(card.querySelector('.plan-stats'), dungeon, group);
+    this.renderHeroicSwitch(card.querySelector('.plan-heroic'), dungeon);
+    // Ø Level und Ausrüstung im Vergleich zur Stufe, auf der wirklich gekämpft wird (Heroisch = höher)
+    this.renderStats(card.querySelector('.plan-stats'), getRunDungeon(dungeon.id, this.game.isDungeonHeroic(dungeon.id)), group);
     this.renderRetreat(card.querySelector('.plan-retreat'));
 
     // Vorräte: kompakt, der Hinweis "Vorratskammer leer" steckt in der Info-Blase
@@ -567,6 +582,40 @@ export class DungeonScreen {
     container.appendChild(createIconChip('iconArmor', t('heroes.gs') + ' ' + averageGear + '/' + dungeon.recommendedGearScore,
       t('dungeon.avgGear', { gear: averageGear, recommended: dungeon.recommendedGearScore }) + (gearOk ? '' : t('dungeon.gearLow')),
       gearOk ? 'ok' : 'warn'));
+  }
+
+  // Schalter "Normal | Heroisch" (gilt für alle Gruppen in diesem Dungeon).
+  // Erst nach dem ersten Sieg im Dungeon; vorher bleibt die Zeile leer.
+  renderHeroicSwitch(container, dungeon) {
+    if (!this.game.isHeroicAvailable(dungeon.id)) {
+      container.hidden = true;
+      return;
+    }
+    const heroic = this.game.isDungeonHeroic(dungeon.id);
+    for (const option of [false, true]) {
+      const button = document.createElement('button');
+      button.className = 'filter-button heroic-button' + (option ? ' heroic-option' : '');
+      button.classList.toggle('active', option === heroic);
+      button.textContent = option ? t('dungeon.heroicTag') : t('dungeon.heroicNormal');
+      button.addEventListener('click', () => {
+        if (option === heroic) {
+          return;
+        }
+        this.game.setDungeonHeroic(dungeon.id, option);
+        if (option) {
+          Sound.levelUp();
+          showToast(t('dungeon.heroicOn', { name: dungeon.name }), '#c77dff');
+        } else {
+          Sound.click();
+          showToast(t('dungeon.heroicOff', { name: dungeon.name }), '#ffd23f');
+        }
+        this.render();
+      });
+      container.appendChild(button);
+    }
+    const heroicClears = this.game.guild.getHeroicClears(dungeon.id);
+    container.appendChild(createInfoIcon(t('dungeon.heroicInfo', { bonus: HEROIC.levelBonus }) +
+      (heroicClears > 0 ? ' ' + t('dungeon.heroicClears', { count: heroicClears }) : '')));
   }
 
   // Rückzug: drei kurze Knöpfe ("Nie", "☠1", "☠2"), die Erklärung steckt im ⓘ

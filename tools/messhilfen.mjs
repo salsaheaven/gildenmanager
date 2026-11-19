@@ -73,7 +73,7 @@ export function measureRuns(options) {
         hero.setOrder(orderId, heroOrders[orderId]);
       }
     }
-    const result = simulateRun({ heroes: group, dungeonId: options.dungeonId, seed: 1 + i * 7919 });
+    const result = simulateRun({ heroes: group, dungeonId: options.dungeonId, seed: 1 + i * 7919, heroic: options.heroic || false });
     if (result.outcome === 'success') {
       wins++;
     }

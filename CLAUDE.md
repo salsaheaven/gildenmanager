@@ -62,6 +62,7 @@ src/systems/   Regeln/Abläufe: LootSystem, RecruitmentSystem, ExperienceSystem 
                CraftingSystem (Zerlegen → Staub/Kristalle/Rohstoffe, Verbessern +1 bis +10 mit Fehlschlag ab +6),
                ClassTips („Helfen würde: …“: welche Klassen gegen die größte Ursache einer Niederlage helfen),
                EndEvaluation (Endauswertung nach dem Endboss: Rang nach Tagen, Statistik, Platz im Raid-Rennen),
+               HeroicMode (Heroisch: Dungeon-Kopie mit höherer Stufe und mehr Gold, erst nach dem ersten Sieg; gilt für alle Gruppen im Dungeon),
                ForgeSystem (Schmieden: weißes Item nach Vorlage; Umschmieden: andere Rüstungsart; Set-Teil in anderes Set mit Aschenessenz), AlchemySystem (Brauen: Kräuter → Waren), TraitEffects (Eigenschaften, die nach einem Run wirken: Gierig, Glückspilz)
 src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein Bosskampf,
                simulateRun = ganzer Dungeon mit Trash, Bossen, Erholung und Rückzug; simulateRaid = Raid-Bosskampf mit 4 Gruppen à 5; simulateRaidRun = Raid-Tag bis zum ersten Wipe),
@@ -74,6 +75,7 @@ src/data/      Reine Inhalte: texts/de.js + texts/en.js (alle Texte der Oberflä
                en/ (englische Namen und Texte der Inhalte nach id, Liste in en/index.js; die deutschen stehen direkt in den Datendateien), rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes (Legendär nur in Raid-Kisten: Waffen/Ringe, Raid-Pity, Aschenessenz), balancing, sprites (Pixel-Art als Text),
                heroClasses (15 Klassen inkl. Rüstungsart, nützliche Werte, Dauer-Fähigkeit `passive` und Begleiter `pet`), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
                enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), raidBosses (Raid-Bosse: Phasen, Tank-Stapel, Gruppenschlag), raids (Raid-Regeln: Raid-Tage, Mindestgröße; Raid 1 „Die Aschenhallen“, Raid 2 „Der Nachtthron“ mit dem Endboss), endEvaluation (Ränge nach Spieltagen, Größe der Bestenliste), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
+               heroic (Heroisch: Stufen mehr, Gold-Faktor, Extra-Item),
                dungeons (7 Level-Dungeons + 3 Set-Dungeons mit je 2 Bossen: Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),
@@ -97,7 +99,7 @@ src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute 
                Bildschirme: DayPlanScreen (Tagesplan, Startseite, oben TodoBox = „Was gibt es heute zu tun?“), LootBoxScreen (Kisten öffnen, danach Zerlegen direkt im Ergebnis), ShopScreen (Händler + Vorratskammer),
                HeroScreen (+ RoleOverview = Kacheln nach Position mit Gruppen-Zähler; HeroDetailPanel = Plätze direkt unter dem Porträt, darunter Talente, Rest aufklappbar, Blättern ‹ ›; EquipPanel = Ausrüstungsliste für den angetippten Platz,
                auf dem Handy als Fenster von unten, nach Item-Level sortiert, Vergleich pro Wert; „Bestes anlegen“ am Helden), TavernScreen, CombatLabScreen (Kampf-Labor, auch „Test-Raid“ mit 4 Gruppen),
-               DungeonScreen („Ein Dungeon = eine Karte“, wenig Text: Dungeon-Zeilen mit Symbolen und einer Zeile pro Gruppe dort (Name, Status, Porträts), Planungs-Karte mit 5 Plätzen + Auswahl von unten, feste Leiste mit Symbolen für Gruppe, Konter ✓/✗ und Einschätzung live;
+               DungeonScreen („Ein Dungeon = eine Karte“, wenig Text, Schalter Normal/Heroisch: Dungeon-Zeilen mit Symbolen und einer Zeile pro Gruppe dort (Name, Status, Porträts), Planungs-Karte mit 5 Plätzen + Auswahl von unten, feste Leiste mit Symbolen für Gruppe, Konter ✓/✗ und Einschätzung live;
                + DungeonGuide = Dungeonführer: Niveau, Gegner und Bosse im Detail, Beute mit Sammelbuch-Sternen;
                Gruppenwahl mit Kacheln nach Position, Statuszeile, „Auto-Gruppe“ und „Gruppe ausrüsten“; + RunViewer = Bericht eines beendeten Runs zeigen),
                GuildHallScreen (Gildenhalle: Karte pro Gebäude, Bauen, Baustelle mit Balken),

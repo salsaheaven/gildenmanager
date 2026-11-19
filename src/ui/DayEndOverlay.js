@@ -509,9 +509,17 @@ export class DayEndOverlay {
       <div class="day-run-rewards"></div>
       <div class="day-run-heroes"></div>
     `;
-    card.querySelector('.day-run-name').textContent = dungeon.name;
-    card.querySelector('.day-run-outcome').textContent = outcomeText(report.outcome) +
-      (report.serverFirst ? t('dayEnd.serverFirst') : (report.firstClear ? t('dayEnd.firstClear') : ''));
+    card.querySelector('.day-run-name').textContent = dungeon.name + (report.heroic ? t('dayEnd.heroicTag') : '');
+    card.classList.toggle('heroic', report.heroic === true);
+    let firstText = '';
+    if (report.serverFirst) {
+      firstText = t('dayEnd.serverFirst');
+    } else if (report.firstClear) {
+      firstText = t('dayEnd.firstClear');
+    } else if (report.heroicFirstClear) {
+      firstText = t('dayEnd.heroicFirstClear');
+    }
+    card.querySelector('.day-run-outcome').textContent = outcomeText(report.outcome) + firstText;
 
     this.renderRewards(card.querySelector('.day-run-rewards'), report);
 

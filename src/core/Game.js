@@ -18,6 +18,8 @@
 //   'gameWon'              → der Endboss ist zum ersten Mal besiegt (Daten: die Endauswertung)
 // ============================================================
 
+import { getRunDungeon, isHeroicAvailable, isDungeonHeroic } from '../systems/HeroicMode.js';
+import { HEROIC } from '../data/heroic.js';
 import { getSalvageYield, upgradeItem } from '../systems/CraftingSystem.js';
 import { forgeItem, reforgeItem, reforgeSetItem } from '../systems/ForgeSystem.js';
 import { getSlotsWithNewGear, markSlotSeen, markItemSeen } from '../systems/NewGear.js';
@@ -506,6 +508,30 @@ export class Game {
     return dungeon.unlockAfter === null || this.guild.getClears(dungeon.unlockAfter) > 0;
   }
 
+  // Darf dieser Dungeon auf Heroisch gestellt werden? (erst nach dem ersten Sieg, siehe systems/HeroicMode.js)
+  isHeroicAvailable(dungeonId) {
+    return isHeroicAvailable(this.guild, dungeonId);
+  }
+
+  // Ist dieser Dungeon gerade auf Heroisch gestellt?
+  isDungeonHeroic(dungeonId) {
+    return isDungeonHeroic(this.guild, dungeonId);
+  }
+
+  // Stellt einen Dungeon auf Heroisch (heroic = true) oder Normal. Gilt für alle Gruppen dort.
+  // Gibt 'ok' oder 'notAvailable' zurück (noch nie geschafft).
+  setDungeonHeroic(dungeonId, heroic) {
+    if (!isHeroicAvailable(this.guild, dungeonId)) {
+      return 'notAvailable';
+    }
+    this.guild.heroicDungeons = this.guild.heroicDungeons.filter((id) => id !== dungeonId);
+    if (heroic) {
+      this.guild.heroicDungeons.push(dungeonId);
+    }
+    this.emit('changed');
+    return 'ok';
+  }
+
   // Plant einen Run für heute. Ausgekämpft wird er erst bei "Tag beenden".
   // Gibt 'ok' oder einen Grund zurück:
   // 'locked' (Dungeon gesperrt), 'noHeroes', 'tooMany', 'busy' (ein Held ist heute schon eingeplant),
@@ -571,8 +597,11 @@ export class Game {
     // Erkundet? Dann ist dieser Run vorbereitet, der Vorteil hängt vom Wissen ab. Verbraucht wird die
     // Vorbereitung erst in endDay, wenn alle Gruppen des Tages gekämpft haben (alle Gruppen im selben Dungeon profitieren).
     expedition.scouting = this.getScoutingLevel(expedition.dungeonId);
+    // Heroisch? Gilt für alle Runs in diesem Dungeon, solange er so eingestellt ist
+    expedition.heroic = isDungeonHeroic(this.guild, expedition.dungeonId);
     const result = expedition.resolve(heroes);
-    const dungeon = getDungeon(expedition.dungeonId);
+    // Bei Heroisch: Kopie mit höherer Stufe und mehr Gold (Kampf, EP und Kiste nutzen diese Stufe)
+    const dungeon = getRunDungeon(expedition.dungeonId, expedition.heroic);
     const success = result.outcome === 'success';
 
     const report = {
@@ -593,6 +622,8 @@ export class Game {
       chest: null,
       chestBonusItems: 0,   // Extra-Items durch "Glückspilz"
       chestBonusHero: null,
+      heroic: expedition.heroic,  // heroische Stufe?
+      heroicFirstClear: false,    // zum ersten Mal heroisch geschafft?
       firstClear: false,
       serverFirst: false,   // als erste Gilde des Servers geschafft?
       // "Woran es lag": Top-Ursachen, Tipp und Hinweise (nur bei Niederlage oder Gefallenen, sonst null)
@@ -624,8 +655,14 @@ export class Game {
       const extraItems = getGroupExtraChestItems(heroes);
       report.chestBonusItems = extraItems.bonus;
       report.chestBonusHero = extraItems.heroName;
-      this.guild.addBox(dungeon.rewards.chest, dungeon.level, extraItems.bonus); // Items in der Stufe des Dungeons
+      // Heroisch: ein Item mehr in der Kiste
+      const heroicItems = expedition.heroic ? HEROIC.extraChestItems : 0;
+      this.guild.addBox(dungeon.rewards.chest, dungeon.level, extraItems.bonus + heroicItems); // Items in der Stufe des Dungeons
       this.guild.dungeonClears[dungeon.id] = this.guild.getClears(dungeon.id) + 1;
+      if (expedition.heroic) {
+        report.heroicFirstClear = this.guild.getHeroicClears(dungeon.id) === 0;
+        this.guild.heroicClears[dungeon.id] = this.guild.getHeroicClears(dungeon.id) + 1;
+      }
     }
 
     // Ein Gieriger in der Gruppe holt mehr Gold heraus (auf Boss- und Trash-Gold)
