@@ -6,6 +6,8 @@
 //   sprite       = Pixelbild aus sprites.js (colors = freiwillig andere Farben für dasselbe Bild, wie bei den Dienern)
 //   stats        = health (Leben), attack (Angriff), defense (Rüstung)
 //   attackDamageType = Schadensart des normalen Angriffs (siehe damageTypes.js), ohne Angabe 'physical'
+//   (Leben und Angriff der Bosse 2026-11-19 per tools/zielwerte.mjs geglättet: jeder Dungeon mit Ausrüstung des vorigen
+//    auf seiner Stufe etwa 70 % Siegchance, damit es keine Mauern mehr gibt)
 //   enrageRound  = ab dieser Runde rast der Boss (doppelter Schaden). null = nie.
 //   isDummy      = Übungspuppe: greift nicht an, nur zum Schaden-Messen
 //   mechanics    = besondere Fähigkeiten (siehe unten)
@@ -75,7 +77,7 @@ export const BOSSES = [
     sprite: 'bossCultist',
     attackFx: 'shadowBolt',
     attackDamageType: 'shadow',
-    stats: { health: 1250, attack: 25, defense: 5 },
+    stats: { health: 1650, attack: 33, defense: 5 },
     enrageRound: 30,
     mechanics: [
       {
@@ -96,7 +98,7 @@ export const BOSSES = [
     title: 'Die Brutmutter',
     sprite: 'bossBroodmother',
     attackFx: 'claw',
-    stats: { health: 1500, attack: 26, defense: 8 },
+    stats: { health: 1200, attack: 21, defense: 8 },
     enrageRound: 30,
     mechanics: [
       {
@@ -123,7 +125,7 @@ export const BOSSES = [
     sprite: 'bossFrostGiant',
     attackFx: 'claw',
     attackDamageType: 'ice',
-    stats: { health: 1600, attack: 28, defense: 12 },
+    stats: { health: 1300, attack: 22, defense: 12 },
     enrageRound: 30,
     mechanics: [
       {
@@ -176,7 +178,7 @@ export const BOSSES = [
     title: 'Hüter des Tores',
     sprite: 'bossGolem',
     attackFx: 'claw',
-    stats: { health: 1700, attack: 23, defense: 14 },
+    stats: { health: 1450, attack: 20, defense: 14 },
     enrageRound: 30,
     mechanics: [
       {
@@ -198,7 +200,7 @@ export const BOSSES = [
     sprite: 'bossSunPriest',
     attackFx: 'fireBolt',
     attackDamageType: 'fire',
-    stats: { health: 1500, attack: 27, defense: 8 },
+    stats: { health: 1300, attack: 23, defense: 8 },
     enrageRound: 18,
     mechanics: [
       {
@@ -271,7 +273,7 @@ export const BOSSES = [
     sprite: 'bossGolem',
     colors: { s: '#9aa3b5', S: '#4a5268', r: '#ff6b3a' },
     attackFx: 'bigImpact',
-    stats: { health: 1200, attack: 25, defense: 10 },
+    stats: { health: 900, attack: 18, defense: 10 },
     enrageRound: 26,
     mechanics: [
       {
@@ -293,7 +295,7 @@ export const BOSSES = [
     sprite: 'bossFrostGiant',
     colors: { i: '#8fbf5a', I: '#4a3a22', w: '#c8e89a' },
     attackFx: 'claw',
-    stats: { health: 1100, attack: 25, defense: 6 },
+    stats: { health: 1350, attack: 31, defense: 6 },
     enrageRound: 26,
     mechanics: [
       {
@@ -316,7 +318,7 @@ export const BOSSES = [
     colors: { P: '#1e3a6a', V: '#3a5aa0', v: '#7ab8ff' },
     attackFx: 'shadowBolt',
     attackDamageType: 'shadow',
-    stats: { health: 1300, attack: 26, defense: 5 },
+    stats: { health: 1400, attack: 28, defense: 5 },
     enrageRound: 26,
     mechanics: [
       {
@@ -338,7 +340,7 @@ export const BOSSES = [
     sprite: 'bossForgeLord',
     colors: { o: '#d8dee9', O: '#4a5268' },
     attackFx: 'bigImpact',
-    stats: { health: 1500, attack: 28, defense: 16 },
+    stats: { health: 1100, attack: 21, defense: 16 },
     enrageRound: 26,
     mechanics: [
       {
@@ -360,7 +362,7 @@ export const BOSSES = [
     sprite: 'bossBear',
     colors: { b: '#6f8a4a', B: '#3a4a22' },
     attackFx: 'claw',
-    stats: { health: 1100, attack: 24, defense: 8 },
+    stats: { health: 1350, attack: 29, defense: 8 },
     enrageRound: 24,
     mechanics: [
       {
@@ -383,7 +385,7 @@ export const BOSSES = [
     colors: { o: '#7ab8ff', g: '#b07ce8', G: '#5a2a8a' },
     attackFx: 'shadowBolt',
     attackDamageType: 'shadow',
-    stats: { health: 1400, attack: 27, defense: 6 },
+    stats: { health: 1550, attack: 30, defense: 6 },
     enrageRound: 24,
     mechanics: [
       {

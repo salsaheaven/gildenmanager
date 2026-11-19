@@ -22,8 +22,9 @@ export const EXPERIENCE = {
   // Zu leichte Dungeons: Bis overLevelGrace Level über der Stufe gibt es noch volle EP.
   // Danach pro weiterem Level 30 % weniger, aber mindestens 10 %.
   // Damit lohnt es sich nicht, ewig die Bärenhöhle zu wiederholen.
-  // (2 Level Spielraum, weil die Level-Dungeons 4 bis 5 Stufen auseinanderliegen)
-  overLevelGrace: 2,
+  // (2026-11-19 von 2 auf 4 angehoben: Die Level-Dungeons liegen 4 bis 5 Stufen auseinander. Mit 2 Level
+  //  Spielraum gab der alte Dungeon schon vor dem Level für den nächsten kaum noch EP. Gemessen mit tools/bot-durchlauf.mjs)
+  overLevelGrace: 4,
   overLevelPenaltyPerLevel: 0.3,
   minOverLevelFactor: 0.1,
 

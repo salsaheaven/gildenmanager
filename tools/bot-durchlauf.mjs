@@ -8,7 +8,7 @@
 //                      0 = Resistenzen ignorieren). So lässt sich messen, wie viel Resistenzen bringen.
 // Beispiel: node tools/bot-durchlauf.mjs 60 20 level 0.5
 //
-// Der Bot heuert je einen Helden jeder Klasse an, schickt die Gruppe jeden Tag los (wenn niemand
+// Der Bot gründet die Gilde mit der festen Starttruppe, schickt die Gruppe jeden Tag los (wenn niemand
 // verletzt ist), öffnet alle Kisten und verkauft Schrott. Vor jedem Run rüstet er für den Ziel-Dungeon aus:
 // pro Platz das Teil mit den meisten nützlichen Werten plus Resistenz gegen die Schadensarten des Dungeons.
 // ============================================================
@@ -23,7 +23,6 @@ const SAVEGAMES = Number(process.argv[3] || 20);
 const MODE = process.argv[4] || 'level';
 const RESISTANCE_WEIGHT = process.argv[5] === undefined ? 0.5 : Number(process.argv[5]);
 const REPORT_DAYS = [10, 20, 30, 45, 60, 90];
-const CHEAPEST_HERO = 40;
 
 const stats = {
   firstClearDays: {},  // Dungeon-id → Liste: an welchem Tag zum ersten Mal geschafft
@@ -43,28 +42,6 @@ const stats = {
 };
 for (const dungeon of DUNGEONS) {
   stats.firstClearDays[dungeon.id] = [];
-}
-
-// Heuert je einen Helden jeder Klasse an. Nur so teuer, dass danach noch Gold
-// für die restlichen Plätze bleibt (sonst sitzt der Bot ohne Gold und ohne Gruppe fest).
-function hireGroup(game) {
-  const guild = game.guild;
-  let tries = 0;
-  while (guild.heroes.length < 5 && tries < 200) {
-    tries++;
-    const haveClasses = guild.heroes.map((hero) => hero.classId);
-    const stillNeeded = 4 - guild.heroes.length;
-    const candidate = guild.candidates.find((c) =>
-      STANDARD_GROUP.includes(c.classId) &&
-      !haveClasses.includes(c.classId) &&
-      c.getHireCost() + stillNeeded * CHEAPEST_HERO <= guild.gold);
-    if (candidate) {
-      game.hireHero(candidate.id);
-    } else {
-      game.endDay(); // am nächsten Morgen kommen kostenlos neue Bewerber
-    }
-  }
-  return guild.heroes.length === 5;
 }
 
 // Welcher Dungeon heute? (siehe Modus oben)
@@ -137,7 +114,8 @@ for (let savegame = 1; savegame <= SAVEGAMES; savegame++) {
   while (guild.boxes.length > 0) {
     game.openBox(guild.boxes[0].typeId);
   }
-  if (!hireGroup(game)) {
+  // Wie ein Spieler: Gilde gründen, das bringt die feste Starttruppe (data/startTeam.js)
+  if (game.foundGuild('Bot-Gilde') !== 'ok' || guild.heroes.length !== 5) {
     stats.stuckSavegames++;
     continue;
   }

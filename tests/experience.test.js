@@ -72,7 +72,7 @@ describe('EP-Berechnung', () => {
     const fitting = makeHero(1, cave.level);
     guild.heroes.push(fitting);
     expect(getHeroXpFactor(fitting, cave, guild)).toBe(1);
-    const tooHigh = makeHero(2, cave.level + 4);
+    const tooHigh = makeHero(2, cave.level + EXPERIENCE.overLevelGrace + 2);
     guild.heroes = [tooHigh];
     expect(getHeroXpFactor(tooHigh, cave, guild)).toBeLessThan(1);
     expect(getHeroXpFactor(tooHigh, cave, guild)).toBeGreaterThanOrEqual(EXPERIENCE.minOverLevelFactor);
