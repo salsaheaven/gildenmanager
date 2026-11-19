@@ -37,7 +37,7 @@ import { getDungeon } from '../../data/dungeons.js';
 import { getRaid } from '../../data/raids.js';
 import { getRetreatRule } from '../../data/retreatRules.js';
 import { TASK_RULES } from '../../data/heroTasks.js';
-import { combineSupplyEffects, applySupplyEffects, applyManaAtStart, applyRestHealth } from './SupplyEffects.js';
+import { combineSupplyEffects, applySupplyEffects, applyManaAtStart, applyRestHealth, drinkEmergencyPotions } from './SupplyEffects.js';
 
 // Macht aus einem Helden (entities/Hero.js) einen Kämpfer
 // Talente mit Werte-Bonus (z.B. +20 % Leben) wirken hier auf die Werte.
@@ -459,6 +459,10 @@ function startRound(battle) {
       continue;
     }
     combatant.startRound();
+    // Notfall-Tränke (Heil- und Manatränke aus den Vorräten, siehe SupplyEffects.js)
+    if (combatant.side === 'hero') {
+      logEmergencyPotions(battle, combatant, drinkEmergencyPotions(combatant));
+    }
 
     for (const effect of combatant.effects.slice()) {
       if (effect.kind === 'dot') {
@@ -470,6 +474,19 @@ function startRound(battle) {
       effect.remaining--;
     }
     combatant.effects = combatant.effects.filter((effect) => effect.remaining > 0);
+  }
+}
+
+// Kampfbericht und Szene: "Mara trinkt einen Heiltrank (+120 Leben)"
+function logEmergencyPotions(battle, hero, drunk) {
+  for (const potion of drunk) {
+    if (potion.kind === 'heal') {
+      battle.addLog(t('combat.drinksHealing', { name: hero.name, amount: potion.amount }), 'heal',
+        { hits: [hero.describeHit(potion.amount, 'heal')], labels: [{ targetId: hero.id, text: t('combat.potionLabel') }] });
+    } else {
+      battle.addLog(t('combat.drinksMana', { name: hero.name, amount: potion.amount }), 'info',
+        { labels: [{ targetId: hero.id, text: t('combat.potionLabel') }] });
+    }
   }
 }
 

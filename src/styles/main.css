@@ -3064,6 +3064,33 @@ h3 {
   color: var(--text-dim);
 }
 
+/* Werbung für die Tränke (Händler, Alchemielabor) */
+.potion-pitch {
+  margin: 6px 0 10px;
+  padding: 6px 8px;
+  border: 2px solid #ffd23f;
+  background: #2b2140;
+  color: #ffe9a0;
+  font-size: 16px;
+}
+
+.potion-pitch.small {
+  font-size: 14px;
+  margin: 4px 0 6px;
+}
+
+/* "Stark bei: …" unter Tränken */
+.supply-strong-at {
+  display: block;
+  font-size: 13px;
+  color: #ffd23f;
+}
+
+.brew-text {
+  display: flex;
+  flex-direction: column;
+}
+
 .supply-icon {
   width: 22px;
   text-align: center;
@@ -4101,6 +4128,26 @@ h3 {
 }
 
 /* Kartenraum Stufe 3: Vorhersage in der Einschätzung */
+/* Tränke-Ratgeber: "Mit Wutelixier + Steinhaut: Machbar" (auffällig, damit man die Tränke bemerkt) */
+.risk-supplies {
+  margin-top: 2px;
+  font-size: 15px;
+  color: #ffd23f;
+}
+
+.risk-supplies::before {
+  content: '⚗ ';
+}
+
+.risk-supplies-name {
+  color: var(--risk-color);
+}
+
+.risk-badge.compact .risk-supplies {
+  font-size: 13px;
+  margin-top: 0;
+}
+
 .risk-forecast {
   color: #ff9f43;
   font-size: 16px;

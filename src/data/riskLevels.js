@@ -22,6 +22,9 @@ export const FALL_LEVELS = [
 
 export const RISK_SIMULATION_COUNT = 100;
 
+// Tränke-Ratgeber: "Mit Tränken: …" erscheint nur, wenn die Tränke die Siegchance um mindestens so viel heben (0.1 = 10 Prozentpunkte)
+export const SUPPLY_ADVICE_MIN_GAIN = 0.1;
+
 // Dungeonwissen (siehe systems/DungeonKnowledge.js): Ohne Erkunden gibt es keine Einschätzung,
 // teilweise erkundet nur eine grobe. Erst vollständig erkundet gilt RISK_LEVELS mit "Gefallene: …".
 export const UNKNOWN_RISK = { name: 'Unbekannt', hint: 'erst erkunden', color: '#8f86a3' };

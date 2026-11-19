@@ -40,6 +40,10 @@ import { HERO_TASKS } from '../data/heroTasks.js';
 import { resolveHeroTasks, payWages, getDailyWages } from '../systems/HeroTaskSystem.js';
 import { startConstruction, payUpkeep, advanceConstruction, getDailyUpkeep } from '../systems/BuildingSystem.js';
 import { CONSUMABLES, DAILY_OFFER_COUNT, SUPPLY_SLOTS, getConsumable } from '../data/consumables.js';
+import { suggestSupplies } from '../systems/SupplyAdvice.js';
+import { t } from './Language.js';
+import { estimateRunChances } from '../systems/combat/ChanceEstimator.js';
+import { RISK_SIMULATION_COUNT } from '../data/riskLevels.js';
 import { needsDefeatAnalysis, analyzeRun } from '../systems/combat/DefeatAnalysis.js';
 import { Random } from './Random.js';
 import { Guild } from '../entities/Guild.js';
@@ -638,6 +642,14 @@ export class Game {
     report.collectionGold = Math.round((report.gold + report.trashGold) * this.guild.collection.getGoldBonus(dungeon.id));
     this.guild.addGold(report.collectionGold);
 
+    // "Woran es lag": Ohne Vorräte gescheitert? Dann sagen, was die besten Tränke gebracht hätten
+    if (!success && report.analysis && expedition.supplies.length === 0) {
+      const note = this.getSupplyNote(heroes, expedition, report.analysis);
+      if (note) {
+        report.analysis.notes.push(note);
+      }
+    }
+
     // Erfahrung für alle gewonnenen Begegnungen, Verletzungen für Gefallene
     report.heroResults = applyRunResults(this.guild, result, dungeon, this.random);
 
@@ -653,6 +665,25 @@ export class Game {
     }
     this.emit('changed');
     return report;
+  }
+
+  // Hinweis für "Woran es lag" nach einer Niederlage ohne Vorräte (Tränke-Ratgeber, siehe systems/SupplyAdvice.js):
+  // "Ohne Tränke losgezogen. Mit Wutelixier + Steinhaut hätte diese Gruppe etwa 70 % der Runs geschafft." Oder null.
+  getSupplyNote(heroes, expedition, analysis) {
+    const causeTypes = analysis.causes.map((cause) => cause.type);
+    const suggestion = suggestSupplies(this.guild, expedition.dungeonId, causeTypes);
+    if (suggestion.length === 0) {
+      return null;
+    }
+    const chances = estimateRunChances({
+      heroes, dungeonId: expedition.dungeonId, retreatRuleId: expedition.retreatRuleId, supplies: suggestion,
+      scouting: expedition.scouting, count: RISK_SIMULATION_COUNT,
+    });
+    if (chances.winRate <= 0) {
+      return null;
+    }
+    const names = suggestion.map((id) => getConsumable(id).name).join(' + ');
+    return t('logic.supplyNote', { names, chance: Math.round(chances.winRate * 100) });
   }
 
   // ---------- Aktionen: Helden ----------

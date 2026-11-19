@@ -209,9 +209,13 @@ Alle Formeln und Zahlen dafür stehen in `src/data/` (`scaling.js`, `experience.
 - **Encounter-Boni am 3er-Set, je Rolle** (statt pro Set und Boss, das wäre Kleinkram): Tank-Sets halbieren die Tank-Stapel, Heiler-Sets geben +30 % Heilung für 2 Runden nach einem Gruppenschlag auf die eigene Gruppe, Schadens-Sets +25 % Schaden gegen Diener und gepanzerte Bosse, Unterstützer-Sets −40 % Schaden durch Flüche. Damit lohnt es, Sets gezielt für die passenden Helden zu farmen, und die Aufstellung wird eine Entscheidung. Zahlen in `sets.js`.
 - **Eingestellt** (20 Helden, Level 30, episch): die Hälfte mit vollem Set, der Rest mit 2 Teilen: Hrimvald ~75 % → Vaelor ~40 %; alle mit vollem Set ~100 % → ~90 %; ohne Sets oder nur 2er-Sets kaum schaffbar.
 
-## Für später: Tränke sichtbarer machen (Wunsch 2026-11-19)
-- Die Vorbereitung mit Tränken (und Erkunden) macht schwere Stellen viel leichter (Messung: Sonnentempel mit Ausrüstung des vorigen Dungeons 0 % → 94 % mit Wutelixier, Steinhaut und vollem Erkunden). Das weiß der Spieler aber nicht.
-- Gewünscht: **mehr Hinweise und deutliches „Marketing“ für die Stärke der Tränke**, z.B. in der Risiko-Anzeige („Mit Tränken: Machbar“), in „Woran es lag“, beim Händler und im Alchemielabor. Noch nicht umgesetzt.
+## Tränke sichtbar machen (umgesetzt 2026-11-19)
+- Die Vorbereitung mit Tränken macht schwere Stellen viel leichter (Messung, eine Stufe unter dem Dungeon mit Ausrüstung des vorigen: Brutnester 12 % → 79 %, Sonnentempel 13 % → 91 % mit Wutelixier + Steinhaut). Das soll der Spieler merken.
+- **Tränke-Ratgeber** (`systems/SupplyAdvice.js`): wählt die 2 hilfreichsten Waren, die man heute bekommt (Vorratskammer oder Händler). Bewertung über `advice` in `consumables.js` (allgemeine Stärke + passt zur Ursache aus „Woran es lag“); Schutztränke nur bei bekannter Schadensart.
+- **Risiko-Anzeige:** Zieht eine Gruppe ohne Vorräte los und würden Tränke die Siegchance um mindestens 10 Prozentpunkte heben, steht darunter „⚗ Mit Wutelixier + Steinhaut: Machbar“ (`SUPPLY_ADVICE_MIN_GAIN` in `riskLevels.js`).
+- **„Woran es lag“:** Nach einer Niederlage ohne Vorräte: „Ohne Tränke losgezogen. Mit … hätte diese Gruppe etwa X % der Runs geschafft.“
+- **Händler und Alchemielabor:** Werbe-Kasten oben und unter jeder Ware „Stark bei: …“ (`strongAt`); auch der Freischalt-Hinweis des Händlers wirbt dafür.
+- **Heil- und Manatränke umgebaut:** Sie wirkten nur zwischen Begegnungen bzw. zu Beginn und brachten messbar nichts. Jetzt sind es **Notfall-Tränke im Kampf**: Fällt ein Held unter 50 % Leben, trinkt er (+50 %), einmal pro Begegnung; Manatrank unter 30 % Mana (+60 %). Sie bleiben schwächer als Wutelixier und Steinhaut, sind aber billiger und situativ (Manatrank gegen „Mana leer“).
 
 ## Sprachen (entschieden 2026-11-09)
 - Deutsch und Englisch. Beim ersten Start gilt die Browser-Sprache (Deutsch bei „de…“, sonst Englisch), umschaltbar mit DE/EN oben in der Leiste und auf dem Gründungs-Bildschirm.

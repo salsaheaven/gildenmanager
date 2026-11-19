@@ -41,16 +41,16 @@ export const BUILDINGS_EN = {
 };
 
 export const CONSUMABLES_EN = {
-  healingPotions: { name: 'Healing potions', description: '+30 % extra health after every encounter' },
-  manaPotions: { name: 'Mana potions', description: 'Healers and casters start every encounter with +30 % mana' },
-  bandages: { name: 'Bandages', description: 'Shortens a hero\'s injury by 1 day right away' },
-  shadowWard: { name: 'Shadow ward potion', description: 'All heroes +15 % shadow resistance' },
-  acidWard: { name: 'Acid ward potion', description: 'All heroes +15 % acid resistance' },
-  frostWard: { name: 'Frost ward potion', description: 'All heroes +15 % ice resistance' },
-  fireWard: { name: 'Fire ward potion', description: 'All heroes +15 % fire resistance' },
-  lightWard: { name: 'Light ward potion', description: 'All heroes +15 % light resistance' },
-  furyElixir: { name: 'Fury elixir', description: 'All heroes deal +10 % damage' },
-  stoneskin: { name: 'Stoneskin potion', description: 'All heroes take −10 % damage' },
+  healingPotions: { name: 'Healing potions', strongAt: 'groups that keep losing heroes', description: 'If a hero drops below 50 % health, they drink: +50 % health (once per encounter)' },
+  manaPotions: { name: 'Mana potions', strongAt: 'long fights where healers run out of mana', description: 'If a healer or caster drops below 30 % mana, they drink: +60 % mana (once per encounter)' },
+  bandages: { name: 'Bandages', strongAt: 'getting injured heroes back into the group faster', description: 'Shortens a hero\'s injury by 1 day right away' },
+  shadowWard: { name: 'Shadow ward potion', strongAt: 'dungeons with shadow damage', description: 'All heroes +15 % shadow resistance' },
+  acidWard: { name: 'Acid ward potion', strongAt: 'dungeons with acid damage', description: 'All heroes +15 % acid resistance' },
+  frostWard: { name: 'Frost ward potion', strongAt: 'dungeons with ice damage', description: 'All heroes +15 % ice resistance' },
+  fireWard: { name: 'Fire ward potion', strongAt: 'dungeons with fire damage', description: 'All heroes +15 % fire resistance' },
+  lightWard: { name: 'Light ward potion', strongAt: 'dungeons with light damage', description: 'All heroes +15 % light resistance' },
+  furyElixir: { name: 'Fury elixir', strongAt: 'bosses that enrage because the fight takes too long', description: 'All heroes deal +10 % damage' },
+  stoneskin: { name: 'Stoneskin potion', strongAt: 'heavy hits on the tank and the group', description: 'All heroes take −10 % damage' },
 };
 
 export const MATERIALS_EN = {
@@ -64,7 +64,7 @@ export const MATERIALS_EN = {
 export const UNLOCKS_EN = {
   tavern: { name: 'Tavern', text: 'New applicants wait in the tavern every day. More heroes mean more groups.' },
   talents: { name: 'Talents', text: 'From level 5, heroes pick talents. Every row offers two paths.' },
-  shop: { name: 'Merchant', text: 'The merchant sells potions. Every group takes up to 2 supplies into the dungeon.' },
+  shop: { name: 'Merchant', text: 'The merchant sells potions. Two fitting potions often make hard dungeons doable: each group takes up to 2 into the dungeon.' },
   rivals: { name: 'Other guilds', text: 'Four other guilds compete for the same dungeons. News ticker and leaderboard are in the day plan.' },
   crafting: { name: 'Salvage and upgrade', text: 'In the inventory you can salvage items and use the material to upgrade others (+1 to +10).' },
   collection: { name: 'Collection', text: 'Every boss item goes into the collection. A full page gives a title and more gold.' },

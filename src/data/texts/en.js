@@ -142,6 +142,7 @@ export const TEXTS_EN = {
     riskPartialDetail: ({ known, total }) => '(scouted ' + known + ' of ' + total + ' bosses)',
     riskPartialTitle: 'The estimate only becomes precise once all bosses are scouted.',
     riskFallen: ({ level }) => '· Fallen: ' + level,
+    riskWithSupplies: ({ names }) => 'With ' + names + ':',
     riskForecast: ({ name }) => 'Map room: biggest danger is "' + name + '"',
     riskBiggest: ({ name }) => ' Biggest danger: ' + name + '.',
     riskInfo: ({ name, detail, title, forecast }) => 'Estimate: ' + name + ' ' + detail + '. ' + title + forecast,
@@ -331,6 +332,8 @@ export const TEXTS_EN = {
     always: 'Always in stock',
     todayOffer: 'Today\'s offer',
     storeroom: 'Storeroom',
+    potionPitch: '⚗ Potions are the way past hard spots! Two fitting potions often turn a gamble into a safe win. The estimate in the dungeon shows what they bring ("With …: Doable").',
+    strongAt: ({ text }) => 'Strong for: ' + text,
     shopHint: ({ count }) => 'Potions for a run. Each group takes up to ' + count + ' supplies (when planning in the dungeon or the day plan). The offer changes every day.',
     bought: ({ name }) => name + ' bought!',
     storeEmpty: 'Still empty.',
@@ -338,6 +341,7 @@ export const TEXTS_EN = {
 
   // Gildenhalle und Werkstätten (Schmieden, Brauen, Umschmieden)
   hall: {
+    brewPitch: 'Brewing your own is cheaper than buying. Fury elixir and stoneskin are the strongest potions against hard bosses.',
     title: 'Guild hall',
     upkeepWarning: 'Upkeep was not paid yesterday. No building works today.',
     header: ({ upkeep, materials }) => 'Upkeep: ' + upkeep + ' gold per day · Material: ' + materials,
@@ -633,6 +637,7 @@ export const TEXTS_EN = {
 
   // Texte, die die Spiellogik erzeugt: Raid-Prüfung, Neuigkeiten-Ticker, Gruppennamen, Klassen-Tipps
   logic: {
+    supplyNote: ({ names, chance }) => 'Went in without potions. With ' + names + ' this group would have won about ' + chance + ' % of runs.',
     raidMinHeroes: ({ need, ready }) => 'At least ' + need + ' heroes (ready: ' + ready + ')',
     raidMinTanks: ({ need, ready }) => 'At least ' + need + ' tanks (ready: ' + ready + ')',
     raidMinHealers: ({ need, ready }) => 'At least ' + need + ' healers (ready: ' + ready + ')',
@@ -729,6 +734,9 @@ export const TEXTS_EN = {
     loses: ({ enemy, verb, crit, target, amount }) => enemy + ' ' + verb + crit + ': ' + target + ' loses ' + amount + ' health',
     byType: ({ type }) => ' from ' + type,
     absorbed: ({ amount }) => ' (' + amount + ' absorbed by the shield)',
+    drinksHealing: ({ name, amount }) => name + ' drinks a healing potion (+' + amount + ' health).',
+    drinksMana: ({ name, amount }) => name + ' drinks a mana potion (+' + amount + ' mana).',
+    potionLabel: 'Potion!',
     lastStrength: ({ name }) => name + ' survives with their last strength!',
     lastStrengthLabel: 'Last strength!',
   },

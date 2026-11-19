@@ -84,8 +84,9 @@ export function createBrewPanel(game) {
   const guild = game.guild;
   const panel = document.createElement('div');
   panel.className = 'workshop-panel';
-  panel.innerHTML = '<div class="workshop-title"></div><div class="brew-list"></div>';
+  panel.innerHTML = '<div class="workshop-title"></div><div class="potion-pitch small"></div><div class="brew-list"></div>';
   panel.querySelector('.workshop-title').textContent = t('hall.brew');
+  panel.querySelector('.potion-pitch').textContent = t('hall.brewPitch');
   const list = panel.querySelector('.brew-list');
 
   for (const recipe of BREW_RECIPES) {
@@ -93,11 +94,12 @@ export function createBrewPanel(game) {
     const check = checkBrew(guild, recipe.id);
     const row = document.createElement('div');
     row.className = 'brew-row' + (check === 'noLab' ? ' locked' : '');
-    row.innerHTML = '<span class="brew-name"></span><button class="brew-button"></button>';
+    row.innerHTML = '<span class="brew-text"><span class="brew-name"></span><span class="supply-strong-at"></span></span><button class="brew-button"></button>';
     row.querySelector('.brew-name').textContent = consumable.icon + ' ' + consumable.name +
       t('hall.inStock', { count: guild.countSupply(consumable.id) });
     row.querySelector('.brew-name').style.color = consumable.color;
     row.querySelector('.brew-name').title = consumable.description;
+    row.querySelector('.supply-strong-at').textContent = t('loot.strongAt', { text: consumable.strongAt });
 
     const button = row.querySelector('.brew-button');
     if (check === 'noLab') {

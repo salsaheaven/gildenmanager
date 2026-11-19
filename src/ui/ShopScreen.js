@@ -19,6 +19,7 @@ export class ShopScreen {
     this.root.innerHTML = `
       <section class="panel shop-screen">
         <h2>${t('loot.merchant')}</h2>
+        <div class="potion-pitch"></div>
         <p class="hint shop-hint"></p>
         <h3>${t('loot.always')}</h3>
         <div class="shop-list shop-always"></div>
@@ -39,6 +40,8 @@ export class ShopScreen {
 
   // Händler: Grundware (immer da) und das heutige Tagesangebot (wechselt jeden Tag)
   renderShop() {
+    // Werbung für die Tränke: Sie sind der vorgesehene Weg über schwere Stellen
+    this.root.querySelector('.potion-pitch').textContent = t('loot.potionPitch');
     this.root.querySelector('.shop-hint').textContent = t('loot.shopHint', { count: SUPPLY_SLOTS });
     const always = CONSUMABLES.filter((consumable) => consumable.stock === 'always');
     const daily = this.game.guild.dailyOffer.map((id) => CONSUMABLES.find((consumable) => consumable.id === id));
@@ -53,7 +56,7 @@ export class ShopScreen {
       row.className = 'shop-entry';
       row.innerHTML = `
         <span class="supply-icon"></span>
-        <span class="shop-text"><span class="box-name"></span><span class="shop-description"></span></span>
+        <span class="shop-text"><span class="box-name"></span><span class="shop-description"></span><span class="supply-strong-at"></span></span>
         <button class="buy-button"><span class="price">${consumable.price}</span></button>
       `;
       const icon = row.querySelector('.supply-icon');
@@ -61,6 +64,7 @@ export class ShopScreen {
       icon.style.color = consumable.color;
       row.querySelector('.box-name').textContent = consumable.name;
       row.querySelector('.shop-description').textContent = consumable.description;
+      row.querySelector('.supply-strong-at').textContent = t('loot.strongAt', { text: consumable.strongAt });
 
       const buyButton = row.querySelector('.buy-button');
       buyButton.prepend(createSpriteCanvas('coin', 2));

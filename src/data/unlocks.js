@@ -28,7 +28,7 @@ export const UNLOCKS = [
   },
   {
     id: 'shop', name: 'Händler', screenId: 'shop', condition: { day: 3, clears: 1 },
-    text: 'Der Händler verkauft Tränke. Jede Gruppe nimmt bis zu 2 Vorräte mit in den Dungeon.',
+    text: 'Der Händler verkauft Tränke. Zwei passende Tränke machen schwere Dungeons oft machbar: Jede Gruppe nimmt bis zu 2 mit in den Dungeon.',
   },
   {
     id: 'rivals', name: 'Andere Gilden', screenId: 'plan', condition: { day: 3 },

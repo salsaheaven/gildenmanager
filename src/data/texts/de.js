@@ -150,6 +150,7 @@ export const TEXTS_DE = {
     riskPartialDetail: ({ known, total }) => '(erkundet ' + known + ' von ' + total + ' Bossen)',
     riskPartialTitle: 'Erst wenn alle Bosse erkundet sind, wird die Einschätzung genau.',
     riskFallen: ({ level }) => '· Gefallene: ' + level,
+    riskWithSupplies: ({ names }) => 'Mit ' + names + ':',
     riskForecast: ({ name }) => 'Kartenraum: Größte Gefahr ist „' + name + '“',
     riskBiggest: ({ name }) => ' Größte Gefahr: ' + name + '.',
     riskInfo: ({ name, detail, title, forecast }) => 'Einschätzung: ' + name + ' ' + detail + '. ' + title + forecast,
@@ -339,6 +340,8 @@ export const TEXTS_DE = {
     always: 'Immer da',
     todayOffer: 'Heute im Angebot',
     storeroom: 'Vorratskammer',
+    potionPitch: '⚗ Tränke sind der Weg über schwere Stellen! Zwei passende Tränke machen aus einem Wagnis oft einen sicheren Sieg. Die Einschätzung im Dungeon zeigt, was sie bringen („Mit …: Machbar“).',
+    strongAt: ({ text }) => 'Stark bei: ' + text,
     shopHint: ({ count }) => 'Tränke für einen Run. Jede Gruppe nimmt bis zu ' + count + ' Vorräte mit (beim Einplanen im Dungeon oder im Tagesplan). Das Angebot wechselt jeden Tag.',
     bought: ({ name }) => name + ' gekauft!',
     storeEmpty: 'Noch leer.',
@@ -346,6 +349,7 @@ export const TEXTS_DE = {
 
   // Gildenhalle und Werkstätten (Schmieden, Brauen, Umschmieden)
   hall: {
+    brewPitch: 'Selbst gebraut ist billiger als gekauft. Wutelixier und Steinhaut sind die stärksten Tränke für schwere Bosse.',
     title: 'Gildenhalle',
     upkeepWarning: 'Der Unterhalt wurde gestern nicht bezahlt. Heute wirkt kein Gebäude.',
     header: ({ upkeep, materials }) => 'Unterhalt: ' + upkeep + ' Gold pro Tag · Material: ' + materials,
@@ -641,6 +645,7 @@ export const TEXTS_DE = {
 
   // Texte, die die Spiellogik erzeugt: Raid-Prüfung, Neuigkeiten-Ticker, Gruppennamen, Klassen-Tipps
   logic: {
+    supplyNote: ({ names, chance }) => 'Ohne Tränke losgezogen. Mit ' + names + ' hätte diese Gruppe etwa ' + chance + ' % der Runs geschafft.',
     raidMinHeroes: ({ need, ready }) => 'Mindestens ' + need + ' Helden (bereit: ' + ready + ')',
     raidMinTanks: ({ need, ready }) => 'Mindestens ' + need + ' Tanks (bereit: ' + ready + ')',
     raidMinHealers: ({ need, ready }) => 'Mindestens ' + need + ' Heiler (bereit: ' + ready + ')',
@@ -737,6 +742,9 @@ export const TEXTS_DE = {
     loses: ({ enemy, verb, crit, target, amount }) => enemy + ' ' + verb + crit + ': ' + target + ' verliert ' + amount + ' Leben',
     byType: ({ type }) => ' durch ' + type,
     absorbed: ({ amount }) => ' (' + amount + ' vom Schild abgefangen)',
+    drinksHealing: ({ name, amount }) => name + ' trinkt einen Heiltrank (+' + amount + ' Leben).',
+    drinksMana: ({ name, amount }) => name + ' trinkt einen Manatrank (+' + amount + ' Mana).',
+    potionLabel: 'Trank!',
     lastStrength: ({ name }) => name + ' überlebt mit letzter Kraft!',
     lastStrengthLabel: 'Letzte Kraft!',
   },
