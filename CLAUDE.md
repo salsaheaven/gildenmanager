@@ -22,18 +22,17 @@ Das Projekt ist ein Vibecoding-Übungsprojekt. Der Code soll auch für Programmi
 
 ## Design-Grundsatz
 **Jede Wahlmöglichkeit im Spiel braucht Vor- und Nachteile** (Anweisungen, Klassen, Eigenschaften, Talente …).
-Eine Option, die immer die beste ist, ist keine Wahl. Geprüft wird das per Simulation erst beim Endbalancing, nicht jetzt. Details stehen in `KONZEPT.md`.
+Eine Option, die immer die beste ist, ist keine Wahl. Geprüft wird das per Simulation (`tools/anweisungen.mjs` u. a.). Details stehen in `KONZEPT.md`.
 
 ## Arbeitsweise
 - **Klein und spielbar:** Große Features in Schritte zerlegen, die jeweils einzeln spielbar sind. Nach jedem Schritt lokal committen. **Gepusht (und damit von GitHub Pages veröffentlicht) wird nur bei Meilensteinen**, z.B. wenn ein Review-Vorschlag komplett umgesetzt ist, nicht bei jeder kleinen Änderung.
   **Ausnahme UI-Änderungen:** Ein fertiger, getesteter Schritt, der nur die Oberfläche ändert (z.B. im UI-Neubau), wird gleich auf `main` gepusht, damit er direkt auf dem Handy testbar ist.
 - **Modular, auch um Token zu sparen:** Kleine Dateien mit einer klaren Aufgabe. Für eine Änderung nur die betroffenen Dateien lesen, nicht das ganze Projekt. Die Übersicht unten zeigt, wo was liegt.
 - Testhilfen wie ein Test-Menü oder ein Kampf-Labor sind ausdrücklich erwünscht, damit spätere Inhalte schnell prüfbar sind
-- **Kein Balancing, keine Progressions-Arbeit – aktuell ein reiner Testballon.** Ziel des fertigen Spiels: Roster von ~30 Helden, 10+ Dungeons,
-  zwei 20-Mann-Raids (der letzte Raid ist der Endboss). Mit 10 Helden und 3 Dungeons ist Balancing sinnlos.
-  Jetzt werden **Gameplay-Loops und Features** eingebaut. Die Progression muss weder Sinn ergeben noch motivieren.
-  Keine Zielwert-Messungen, keine Parameter-Suchen, kein Nachtunen von Gegnern oder Chancen, auch nicht „nur kurz“.
-  Erlaubt ist nur: prüfen, dass ein neues Feature nicht kaputt ist (Tests grün, kein Absturz). Zahlen einfach grob setzen und weitermachen.
+- **Balancing läuft (seit 2026-11-19).** Ziel ist eine **spürbare Progression ohne Mauern**: Jeder Dungeon ist etwas schwerer als der vorige
+  und mit Level, Ausrüstung und Vorbereitung (Tränke, Erkunden) aus dem vorigen Dungeon erreichbar. Feste Prozent-Zielwerte gelten nicht starr.
+  Gemessen wird mit den Werkzeugen in `tools/` (vor allem `zielwerte.mjs` für die Kurve und `bot-durchlauf.mjs` für Tage bis zu jedem Dungeon).
+  Zahlen bleiben in `src/data/`; bei jeder Balancing-Änderung vorher und nachher messen.
 - **Keine Abwärtskompatibilität während der Entwicklung:** Alte Spielstände müssen nicht weiter funktionieren. Kein Umrechnungs-Code für alte Speicherformate; stattdessen `SAVE_VERSION` in `SaveManager.js` erhöhen, dann werden alte Stände ignoriert. Beim Testen einfach „Neu“ drücken.
 
 ## Aufbau
@@ -139,7 +138,7 @@ tools/         Mess-Werkzeuge für Balancing (Node-Skripte mit der echten Spiell
 - Die UI ruft Methoden von `Game` auf und hört auf `game.on('changed')` bzw. auf weitere Events.
 - Jede Klasse, die gespeichert wird, hat `toSaveData()` und `static fromSaveData()`.
 - Zufall läuft immer über `Random`, nie direkt über `Math.random()`. So bleibt er testbar und wird mitgespeichert.
-- Balancing (erst ganz am Ende, wenn Roster, Dungeons und Raids stehen): Kampf-Labor und Mess-Werkzeuge in `tools/`. Die Zielwerte stehen unter „Schwierigkeit“ in KONZEPT.md.
+- Balancing: Kampf-Labor und Mess-Werkzeuge in `tools/`. Leitlinie unter „Schwierigkeit“ in KONZEPT.md.
 - Die Oberfläche muss auch auf dem Handy funktionieren (Breite ~390 px). Handy-Regeln stehen am Ende von `main.css` (`@media (max-width: 700px)`).
 - **Zwei Sprachen:** Neue Texte der Oberfläche (und Meldungen der Logik) nie fest in den Code schreiben, sondern in `src/data/texts/de.js` und `en.js` eintragen und mit `t('bereich.name')` holen (ein Test prüft, dass beide Sprachen dieselben Namen haben). `t()` nie auf oberster Ebene einer Datei aufrufen (dort ist die Sprache noch nicht gesetzt), sondern erst beim Anzeigen.
   Neue Inhalte in `src/data/` (Namen, Beschreibungen, Tipps) bekommen ihre englische Fassung in `src/data/en/` (ein Test prüft, dass jede Übersetzung zu einem deutschen Eintrag passt).
