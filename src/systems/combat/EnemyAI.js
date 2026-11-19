@@ -208,6 +208,7 @@ function resolveMechanic(battle, boss, mechanic) {
       for (const hero of battle.getLivingHeroes()) {
         enemyHits(battle, boss, hero, t('combat.verbHits'), mechanic.power, mechanic.damageType || 'physical', source);
       }
+      boostHealersAfterGroupHit(battle, battle.getLivingHeroes());
       break;
     case 'groupStrike': {
       // Die Gruppe wurde beim Ankündigen gewählt; ist sie inzwischen gefallen, trifft es eine andere
@@ -222,6 +223,7 @@ function resolveMechanic(battle, boss, mechanic) {
       for (const hero of group) {
         enemyHits(battle, boss, hero, t('combat.verbHits'), mechanic.power, mechanic.damageType || 'physical', source);
       }
+      boostHealersAfterGroupHit(battle, group);
       break;
     }
     case 'shell': {
@@ -279,6 +281,7 @@ function resolveMechanic(battle, boss, mechanic) {
         damageType: mechanic.damageType || 'physical',
         remaining: mechanic.duration,
         isDebuff: true,
+        isBossCurse: true, // Unterstützer-Sets mindern den Schaden (curseDamageTaken, siehe data/sets.js)
         cause: source, // für "Woran es lag"
       });
       battle.logAction(boss, mechanic.name, mechanic.fx, [target], true);
@@ -288,6 +291,17 @@ function resolveMechanic(battle, boss, mechanic) {
     }
     default:
       throw new Error('Unbekannte Mechanik: ' + mechanic.type);
+  }
+}
+
+// Nach einem Gruppenschlag oder Gruppenzauber: Heiler mit 3er-Set in der getroffenen Gruppe heilen kurz stärker
+// (healingAfterGroupHit, siehe data/sets.js). hitHeroes = die getroffenen Helden.
+function boostHealersAfterGroupHit(battle, hitHeroes) {
+  for (const hero of hitHeroes) {
+    const bonus = hero.orderSettings.healingAfterGroupHit;
+    if (hero.alive && bonus > 0) {
+      hero.addEffect({ kind: 'healingDone', value: bonus, remaining: 2, buffId: 'setGroupHitHealing' });
+    }
   }
 }
 

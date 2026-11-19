@@ -28,7 +28,7 @@ export function rollOutput(battle, caster, scaling, power, critBonus = 0) {
 export function heroDealsDamage(battle, caster, target, actionName, scaling, power, options = {}) {
   const output = rollOutput(battle, caster, scaling, power, options.critBonus || 0);
   const damageType = options.damageType || 'physical';
-  const result = target.takeDamage(output.amount * caster.getDamageDoneFactor(), false, damageType);
+  const result = target.takeDamage(output.amount * caster.getDamageDoneFactorAgainst(target), false, damageType);
   caster.damageDone += result.damage;
   caster.threat += result.damage * (options.threat || 1) * caster.getThreatFactor();
 

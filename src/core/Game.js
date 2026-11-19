@@ -1423,6 +1423,8 @@ export class Game {
       firstRaidClear: false, // zum ersten Mal ganz geschafft?
       unlockedRaidId: null, // dadurch neu geöffneter Raid
       endbossDefeated: false, // der Endboss des Spiels ist zum ersten Mal besiegt
+      // Schleier der Nacht (nur Raids mit veil): so viele Helden kämpften ohne volles Klassen-Set
+      veilHeroes: raid.veil ? groups.flat().filter((hero) => hero.getMissingSetPieces() > 0).length : 0,
       gold: 0,
       heroNames: result.heroes.map((hero) => hero.name),
       fallenNames: result.heroes.filter((hero) => !hero.alive).map((hero) => hero.name),

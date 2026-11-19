@@ -204,6 +204,15 @@ Alle Formeln und Zahlen dafür stehen in `src/data/` (`scaling.js`, `experience.
 - **Raids** (20 Helden, Level 30): Raid 1 mit grüner Ausrüstung von Boss zu Boss schwerer (Steinkoloss ~85 % → Aschenkönig ~45 %), Raid 2 braucht epische Raid-Beute (Hrimvald ~75 % → Vaelor ~30 %; mit Grün kaum schaffbar). Vorher fiel fast jeder Raid-Boss beim ersten Versuch, nur Morvath war eine Mauer.
 - **Offen:** Vorbereitung (Tränke, Erkunden) als Weg über schwere Stellen sichtbarer machen; Wutelixier und Steinhaut kommen erst mit dem Alchemielabor Stufe 3. Anweisungen und Klassen sind noch nicht ausbalanciert.
 
+## Raid 2 nur mit Klassen-Sets (entschieden 2026-11-19)
+- **Schleier der Nacht:** Im Nachtthron liegt auf jedem Helden ein Fluch: pro fehlendem Teil seines eigenen Klassen-Sets +15 % erlittener und −15 % ausgeteilter Schaden; mit vollem 3er-Set wirkt er nicht. So ist sichtbar, *warum* Raid 2 die Sets aus den Set-Dungeons braucht. Der Raid-Bildschirm zeigt den Schleier, „Set x/3“ an jedem Helden und wie viele Helden ihr volles Set tragen; der Tagesabschluss weist auf geschwächte Helden hin. Zahlen in `raids.js` (`veil`).
+- **Encounter-Boni am 3er-Set, je Rolle** (statt pro Set und Boss, das wäre Kleinkram): Tank-Sets halbieren die Tank-Stapel, Heiler-Sets geben +30 % Heilung für 2 Runden nach einem Gruppenschlag auf die eigene Gruppe, Schadens-Sets +25 % Schaden gegen Diener und gepanzerte Bosse, Unterstützer-Sets −40 % Schaden durch Flüche. Damit lohnt es, Sets gezielt für die passenden Helden zu farmen, und die Aufstellung wird eine Entscheidung. Zahlen in `sets.js`.
+- **Eingestellt** (20 Helden, Level 30, episch): die Hälfte mit vollem Set, der Rest mit 2 Teilen: Hrimvald ~75 % → Vaelor ~40 %; alle mit vollem Set ~100 % → ~90 %; ohne Sets oder nur 2er-Sets kaum schaffbar.
+
+## Für später: Tränke sichtbarer machen (Wunsch 2026-11-19)
+- Die Vorbereitung mit Tränken (und Erkunden) macht schwere Stellen viel leichter (Messung: Sonnentempel mit Ausrüstung des vorigen Dungeons 0 % → 94 % mit Wutelixier, Steinhaut und vollem Erkunden). Das weiß der Spieler aber nicht.
+- Gewünscht: **mehr Hinweise und deutliches „Marketing“ für die Stärke der Tränke**, z.B. in der Risiko-Anzeige („Mit Tränken: Machbar“), in „Woran es lag“, beim Händler und im Alchemielabor. Noch nicht umgesetzt.
+
 ## Sprachen (entschieden 2026-11-09)
 - Deutsch und Englisch. Beim ersten Start gilt die Browser-Sprache (Deutsch bei „de…“, sonst Englisch), umschaltbar mit DE/EN oben in der Leiste und auf dem Gründungs-Bildschirm.
 - Übersetzt werden Oberfläche, Erklärtexte, Kampfprotokoll, Ticker und Eigennamen von Bossen, Dungeons und Items; Heldennamen bleiben, wie sie sind.

@@ -20,7 +20,9 @@
 // ============================================================
 
 // Leben und Angriff 2026-11-19 per Simulation eingestellt (20 Helden, Level 30): Raid 1 mit grüner Ausrüstung
-// von Boss zu Boss schwerer (etwa 80 % → 40 %), Raid 2 braucht epische Raid-Beute (etwa 75 % → 30 %, grün kaum schaffbar).
+// von Boss zu Boss schwerer (etwa 80 % → 40 %). Raid 2 braucht wegen des Schleiers der Nacht (raids.js) die Klassen-Sets:
+// episch, die Hälfte der Helden mit vollem Set, der Rest mit 2 Teilen: etwa 75 % → 40 %; alle mit vollem Set etwa 100 % → 90 %;
+// ohne Sets oder nur mit 2er-Sets kaum schaffbar.
 export const RAID_BOSSES = [
   // ---------- Raid 1: Die Aschenhallen (siehe data/raids.js) ----------
   {
@@ -204,7 +206,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'ice',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 10400, attack: 38, defense: 14 },
+    stats: { health: 12600, attack: 42, defense: 14 },
     enrageRound: 40,
     tankStacks: { name: 'Erfroren', damageTakenPerStack: 0.12, swapAt: 4 },
     mechanics: [
@@ -235,7 +237,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'water',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 16650, attack: 47, defense: 6 },
+    stats: { health: 21250, attack: 53, defense: 6 },
     enrageRound: 40,
     mechanics: [
       {
@@ -279,7 +281,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'shadow',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 9850, attack: 37, defense: 10 },
+    stats: { health: 10500, attack: 38, defense: 10 },
     enrageRound: 40,
     tankStacks: { name: 'Verwest', damageTakenPerStack: 0.1, swapAt: 5 },
     mechanics: [
@@ -310,7 +312,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'shadow',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 13950, attack: 42, defense: 8 },
+    stats: { health: 16750, attack: 46, defense: 8 },
     enrageRound: 40,
     tankStacks: { name: 'Umschattet', damageTakenPerStack: 0.12, swapAt: 4 },
     mechanics: [
@@ -356,7 +358,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'shadow',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 15300, attack: 42, defense: 14 },
+    stats: { health: 19050, attack: 47, defense: 14 },
     enrageRound: 50,
     tankStacks: { name: 'Verschlungen', damageTakenPerStack: 0.12, swapAt: 4 },
     mechanics: [

@@ -88,15 +88,31 @@ export function simulateBattle(options) {
     options.enemyLevel || 1);
 }
 
+// Schleier der Nacht (veil in data/raids.js): Pro fehlendem Teil des eigenen Klassen-Sets macht der Held
+// weniger Schaden und nimmt mehr. raid = Raid-Daten (oder null), combatant = Kämpfer, hero = Hero-Objekt dazu.
+function applyRaidVeil(combatant, hero, raid) {
+  if (!raid || !raid.veil) {
+    return;
+  }
+  const missing = hero.getMissingSetPieces();
+  combatant.orderSettings.veilMissingPieces = missing;
+  combatant.orderSettings.damageDone += missing * raid.veil.perMissingPiece.damageDone;
+  combatant.orderSettings.damageTaken += missing * raid.veil.perMissingPiece.damageTaken;
+}
+
 // Ein Raid-Bosskampf. options = { groups: [[Hero, …], …] (bis zu 4 Gruppen à 5), bossId, seed, recordLog,
-//                                  enemyLevel (Stufe des Bosses, Standard 1) }
+//                                  enemyLevel (Stufe des Bosses, Standard 1),
+//                                  raidId (freiwillig: Raid, aus dem der Boss stammt, z.B. für den Schleier der Nacht) }
 // Heilung, Buffs und Auren wirken nur in der eigenen Gruppe (siehe Battle.getAlliedHeroes).
 export function simulateRaid(options) {
   const random = new Random(options.seed);
+  const raid = options.raidId ? getRaid(options.raidId) : null;
   const heroes = [];
   options.groups.forEach((group, groupIndex) => {
     for (const hero of group) {
-      heroes.push(createHeroCombatant(hero, groupIndex));
+      const combatant = createHeroCombatant(hero, groupIndex);
+      applyRaidVeil(combatant, hero, raid);
+      heroes.push(combatant);
     }
   });
   applyGroupAuras(heroes);
@@ -118,7 +134,9 @@ export function simulateRaidRun(options) {
   const heroes = [];
   options.groups.forEach((group, groupIndex) => {
     for (const hero of group) {
-      heroes.push(createHeroCombatant(hero, groupIndex));
+      const combatant = createHeroCombatant(hero, groupIndex);
+      applyRaidVeil(combatant, hero, raid);
+      heroes.push(combatant);
     }
   });
   applyGroupAuras(heroes);
@@ -462,7 +480,9 @@ function tickDamageOverTime(battle, target, effect, everyone) {
   }
   const growthFactor = 1 + (effect.growth || 0) * (effect.ticks || 0);
   effect.ticks = (effect.ticks || 0) + 1;
-  const result = target.takeDamage(effect.damagePerRound * growthFactor, true, effect.damageType || 'physical');
+  // Flüche von Bossen: Unterstützer-Sets mindern den Schaden (curseDamageTaken, siehe data/sets.js)
+  const curseFactor = effect.isBossCurse ? Math.max(0, 1 + target.orderSettings.curseDamageTaken) : 1;
+  const result = target.takeDamage(effect.damagePerRound * growthFactor * curseFactor, true, effect.damageType || 'physical');
   const source = everyone.find((combatant) => combatant.id === effect.sourceId);
   if (source) {
     source.damageDone += result.damage;

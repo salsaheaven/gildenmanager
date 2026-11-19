@@ -22,12 +22,15 @@
 //                  (Raid-Bosse stehen in raidBosses.js, 1–2 Trash-Gruppen vor jedem Boss;
 //                   chest = Raid-Kiste aus lootBoxes.js, die dieser Boss gibt)
 //   bossGold     = Gold für jeden besiegten Boss
+//   veil         = freiwillig: Fluch auf allen Helden, der nur mit dem eigenen Klassen-Set (data/sets.js) schwächer wird.
+//                  { name, text, perMissingPiece: { damageDone, damageTaken } }: pro fehlendem Set-Teil (von 3)
+//                  zählen diese Werte einmal (mit vollem Set wirkt der Schleier gar nicht).
 //   trashGold    = Gold für jede besiegte Trash-Gruppe
 //
 // Ablauf eines Raid-Tags: Der Raid kämpft sich Begegnung für Begegnung vor, bis zum ersten Wipe.
 // Besiegte Bosse bleiben bis zum Ende der Woche besiegt (Wochen-Sperre), der nächste Raid-Tag macht
 // beim nächsten Boss weiter (mit dem Trash davor). Jede Woche beginnt der Raid von vorn.
-// Zahlen grob gesetzt (Testballon, kein Balancing).
+// Zahlen per Simulation eingestellt (siehe KONZEPT.md, Balancing).
 // ============================================================
 
 export const RAID_RULES = {
@@ -70,6 +73,12 @@ export const RAIDS = [
     unlockLevel: 30,
     unlockAfterRaid: 'ashHalls',
     isFinal: true,
+    // Schleier der Nacht: Raid 2 ist nur mit den Klassen-Sets aus den Set-Dungeons zu schaffen
+    veil: {
+      name: 'Schleier der Nacht',
+      text: 'Pro fehlendem Teil des eigenen Klassen-Sets: +15 % erlittener Schaden, −15 % Schaden. Mit vollem Set wirkt der Schleier nicht.',
+      perMissingPiece: { damageDone: -0.15, damageTaken: 0.15 },
+    },
     encounters: [
       { type: 'trash', name: 'Eistor', enemies: ['frostWolf', 'frostWolf', 'frostWolf', 'iceKobold', 'iceKobold', 'iceKobold'] },
       { type: 'boss', bossId: 'hrimvald', chest: 'raidChestHrimvald' },

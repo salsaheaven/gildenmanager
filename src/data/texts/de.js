@@ -500,6 +500,7 @@ export const TEXTS_DE = {
 
   // Tagesabschluss (DayEndOverlay) und Kampfszene (BattleScene)
   dayEnd: {
+    veilHint: ({ name, count }) => name + ': ' + count + ' Helden ohne volles Klassen-Set waren geschwächt. Set-Teile gibt es in den Set-Dungeons.',
     modeAll: 'Alle Kämpfe',
     modeBosses: 'Nur Bosse',
     modeNone: 'Keine',
@@ -566,6 +567,8 @@ export const TEXTS_DE = {
 
   // Raid-Bildschirm und Endauswertung
   raid: {
+    veilCount: ({ full, total }) => ' Volles Set: ' + full + ' von ' + total + ' Helden der Aufstellung.',
+    setPieces: ({ count }) => 'Set ' + count + '/3',
     autoInfo: 'Verteilt die einsatzbereiten Helden: Tanks in verschiedene Gruppen, Heiler gleichmäßig, dann die Stärksten.',
     auto: 'Auto-Raid',
     lineup: 'Aufstellung',

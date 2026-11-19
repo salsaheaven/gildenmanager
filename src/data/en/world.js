@@ -105,6 +105,7 @@ export const RAIDS_EN = {
   nightThrone: {
     name: 'The Night Throne',
     description: 'Behind the Ice Gate waits Vaelor, the World Devourer. Whoever defeats him saves the world – and wins the game.',
+    veil: { name: 'Veil of Night', text: 'For each missing piece of the hero\'s own class set: +15 % damage taken, −15 % damage. With the full set the veil has no effect.' },
     encounters: { 0: { name: 'Ice Gate' }, 2: { name: 'Storm Gallery' }, 3: { name: 'Thunder Bridge' }, 5: { name: 'Bone Pit' }, 7: { name: 'Shadow Chapel' }, 8: { name: 'Path of Darkness' }, 10: { name: 'Throne Forecourt' } },
   },
 };
@@ -171,8 +172,8 @@ export const DUNGEONS_EN = {
 
 // Set-Boni je Rolle (ab 2 und ab 3 getragenen Teilen)
 export const ROLE_BONUSES_EN = {
-  tank: { 2: { text: '+15 % health' }, 3: { text: '−10 % damage taken' } },
-  healer: { 2: { text: '+15 % healing' }, 3: { text: '−15 % mana costs' } },
-  damage: { 2: { text: '+10 % damage' }, 3: { text: '+10 % damage, survives a deadly hit once per fight' } },
-  support: { 2: { text: '+8 % damage and healing' }, 3: { text: '−8 % damage taken, +10 % health' } },
+  tank: { 2: { text: '+15 % health' }, 3: { text: '−10 % damage taken. Raid: tank stacks only half as strong' } },
+  healer: { 2: { text: '+15 % healing' }, 3: { text: '−15 % mana costs. Raid: +30 % healing for 2 rounds after a group hit on own group' } },
+  damage: { 2: { text: '+10 % damage' }, 3: { text: '+10 % damage, survives a deadly hit once per fight. +25 % damage against minions and shielded bosses' } },
+  support: { 2: { text: '+8 % damage and healing' }, 3: { text: '−8 % damage taken, +10 % health. Curses deal 40 % less damage' } },
 };

@@ -171,7 +171,9 @@ export class Combatant {
       }
     }
     // Raid-Tankwechsel: jeder Stapel des Bosses erhöht den erlittenen Schaden
-    factor = factor * (1 + this.tankStacks * this.tankStackValue);
+    // (3er-Set eines Tanks: Stapel wirken schwächer, siehe tankStackReduction in data/sets.js)
+    const stackValue = this.tankStackValue * (1 - this.orderSettings.tankStackReduction);
+    factor = factor * (1 + this.tankStacks * stackValue);
     return factor;
   }
 
@@ -185,6 +187,17 @@ export class Combatant {
     }
     if (this.rageFromMissingHealth > 0) {
       factor = factor * (1 + (1 - this.getHpPercent()) * this.rageFromMissingHealth);
+    }
+    return factor;
+  }
+
+  // Faktor auf den eigenen Schaden gegen ein bestimmtes Ziel:
+  // wie getDamageDoneFactor, dazu der Encounter-Bonus der Schadens-Sets gegen Diener und gepanzerte Bosse
+  getDamageDoneFactorAgainst(target) {
+    let factor = this.getDamageDoneFactor();
+    const bonus = this.orderSettings.damageVsMinionsAndShell;
+    if (bonus > 0 && (target.isMinion || target.hasBuff('shell'))) {
+      factor = factor * (1 + bonus);
     }
     return factor;
   }
@@ -204,7 +217,14 @@ export class Combatant {
 
   // Faktor auf die eigene Heilung und eigene Schilde
   getHealingFactor() {
-    return 1 + this.orderSettings.healingDone;
+    let factor = 1 + this.orderSettings.healingDone;
+    // Kurzzeitige Heil-Buffs (z.B. nach einem Gruppenschlag mit Heiler-Set, siehe EnemyAI.js)
+    for (const effect of this.effects) {
+      if (effect.kind === 'healingDone') {
+        factor = factor * (1 + effect.value);
+      }
+    }
+    return factor;
   }
 
   // Faktor auf die Aggro, die dieser Kämpfer erzeugt

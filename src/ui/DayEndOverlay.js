@@ -461,6 +461,13 @@ export class DayEndOverlay {
     if (report.defeatedBossIds.length === 0) {
       bossLine.textContent = t('dayEnd.noBossToday');
     }
+    // Schleier der Nacht: Helden ohne volles Klassen-Set waren geschwächt (Hinweis wie bei "Woran es lag")
+    if (report.veilHeroes > 0) {
+      const veilLine = document.createElement('div');
+      veilLine.className = 'raid-veil-hint';
+      veilLine.textContent = t('dayEnd.veilHint', { name: raid.veil.name, count: report.veilHeroes });
+      card.insertBefore(veilLine, card.querySelector('.day-run-rewards'));
+    }
     if (report.gold > 0) {
       const goldLine = document.createElement('div');
       goldLine.className = 'day-reward';

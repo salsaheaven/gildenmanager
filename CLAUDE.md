@@ -72,7 +72,7 @@ src/systems/combat/  Kampf: CombatSimulator (Rundenablauf; simulateBattle = ein 
 src/data/      Reine Inhalte: texts/de.js + texts/en.js (alle Texte der Oberfläche und der Logik nach Bereich, gleiche Namen in beiden Sprachen),
                en/ (englische Namen und Texte der Inhalte nach id, Liste in en/index.js; die deutschen stehen direkt in den Datendateien), rarities, items (Vorlagen, Rüstungsarten Platte/Leder/Stoff), lootBoxes (Legendär nur in Raid-Kisten: Waffen/Ringe, Raid-Pity, Aschenessenz), balancing, sprites (Pixel-Art als Text),
                heroClasses (15 Klassen inkl. Rüstungsart, nützliche Werte, Dauer-Fähigkeit `passive` und Begleiter `pet`), abilities (inkl. Kampfwerte), heroRarities, traits, heroNames,
-               enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), raidBosses (Raid-Bosse: Phasen, Tank-Stapel, Gruppenschlag), raids (Raid-Regeln: Raid-Tage, Mindestgröße; Raid 1 „Die Aschenhallen“, Raid 2 „Der Nachtthron“ mit dem Endboss), endEvaluation (Ränge nach Spieltagen, Größe der Bestenliste), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
+               enemies (Bosse + Diener/Trash, Texte der Mechanik-Arten), raidBosses (Raid-Bosse: Phasen, Tank-Stapel, Gruppenschlag), raids (Raid-Regeln: Raid-Tage, Mindestgröße; Raid 1 „Die Aschenhallen“, Raid 2 „Der Nachtthron“ mit dem Endboss und dem „Schleier der Nacht“: ohne Klassen-Set geschwächt), endEvaluation (Ränge nach Spieltagen, Größe der Bestenliste), combatRules, heroOrders (Kampf-Anweisungen: pro Klasse Haltung + Eigenheit, je Ausgewogen + zwei Extreme mit Vor- und Nachteil),
                dungeons (7 Level-Dungeons + 3 Set-Dungeons mit je 2 Bossen: Begegnungen, Stufe, Belohnung), retreatRules,
                scaling (Level-Obergrenze, Wachstum von Items und Gegnern pro Stufe, Rüstungs-Konstante),
                experience (EP pro Begegnung, EP-Kurve, Aufhol-Erfahrung, Dauer von Verletzungen),
@@ -90,7 +90,7 @@ src/data/      Reine Inhalte: texts/de.js + texts/en.js (alle Texte der Oberflä
                rivalGuilds (4 KI-Gilden mit Persönlichkeit: Versuchs- und Erfolgschance),
                consumables (Verbrauchsgüter des Händlers: Preis, Grundware/Tagesangebot, Wirkung; 2 Vorrats-Plätze pro Gruppe),
                unlocks (Tutorial: welche Teile des Spiels wann freigeschaltet werden, mit Erklärungstext),
-               sets (15 Klassen-Sets à 3 Teile, Boni bei 2 und 3 Teilen, Set-Teile als Boss-Beute der 3 Set-Dungeons),
+               sets (15 Klassen-Sets à 3 Teile, Boni bei 2 und 3 Teilen, 3er-Boni mit Encounter-Bonus je Rolle gegen Raid-Mechaniken, Set-Teile als Boss-Beute der 3 Set-Dungeons),
                collectionBook (Sammelbuch-Seiten pro Dungeon mit Titel und Gold-Bonus; die Items kommen aus `bossLoot` in lootBoxes)
 src/ui/        Ein Bildschirm/Bauteil pro Datei. Navigation: 5 Abschnitte Heute · Helden · Dungeons · Beute · Gilde mit Unterreitern (Liste SECTIONS in main.js).
                Bildschirme: DayPlanScreen (Tagesplan, Startseite, oben TodoBox = „Was gibt es heute zu tun?“), LootBoxScreen (Kisten öffnen, danach Zerlegen direkt im Ergebnis), ShopScreen (Händler + Vorratskammer),

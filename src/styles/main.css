@@ -4388,6 +4388,38 @@ h3 {
   font-size: 17px;
 }
 
+/* Schleier der Nacht im Raid-Bildschirm (siehe RaidScreen.renderVeil) */
+.raid-veil {
+  margin: 8px 0;
+  padding: 6px 8px;
+  border: 2px solid #7a3cff;
+  background: #1c1235;
+}
+
+.raid-veil.ok {
+  border-color: var(--green, #5ee05e);
+}
+
+.raid-veil-name {
+  color: #c9a6ff;
+  margin-right: 6px;
+}
+
+.raid-veil-hint {
+  color: #c9a6ff;
+  margin: 4px 0;
+}
+
+.raid-set-chip {
+  display: block;
+  font-size: 13px;
+  color: #ff8c8c;
+}
+
+.raid-set-chip.full {
+  color: #7dff7d;
+}
+
 /* Noch gesperrte Teile des Spiels ausblenden (Klassen am <body>, siehe applyUnlocks in main.js) */
 body.locked-crafting .upgrade-button,
 body.locked-crafting .salvage-button,

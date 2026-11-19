@@ -25,6 +25,13 @@ export function createEmptyOrderSettings() {
     abilityShield: {},     // Skill-id → Stärke: der Skill gibt seinen Zielen zusätzlich einen Schild (Magie × Stärke)
     counterPoints: {},     // Konter-id → Punkte durch ein Konter-Talent (Panzer brechen, Wutanfall dämpfen; siehe data/counters.js)
     cheatDeath: false,   // einmal pro Kampf einen tödlichen Treffer überleben
+    // Encounter-Boni der 3er-Sets (siehe data/sets.js)
+    tankStackReduction: 0,      // Tank-Stapel wirken um diesen Anteil schwächer
+    healingAfterGroupHit: 0,    // mehr Heilung für 2 Runden nach einem Gruppenschlag auf die eigene Gruppe
+    damageVsMinionsAndShell: 0, // mehr Schaden gegen Diener und gepanzerte Bosse
+    curseDamageTaken: 0,        // weniger Schaden durch Flüche von Bossen (negativ)
+    // Schleier der Nacht (Raid 2, siehe data/raids.js): wird beim Raid-Start eingetragen
+    veilMissingPieces: 0,       // so viele Teile des eigenen Klassen-Sets fehlen (0 = Schleier wirkt nicht)
     groupAuras: [],      // Auren für die ganze Gruppe: [{ id, damageDone, damageTaken }] (siehe applyGroupAuras)
   };
 }

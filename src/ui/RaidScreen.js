@@ -31,6 +31,7 @@ export class RaidScreen {
           <div class="button-row raid-select"></div>
           <h2 class="raid-name"></h2>
           <p class="hint raid-description"></p>
+          <div class="raid-veil" hidden></div>
           <div class="raid-day-line"></div>
           <div class="raid-progress"></div>
           <div class="raid-check"></div>
@@ -84,6 +85,7 @@ export class RaidScreen {
     this.renderRaidSelect();
     this.root.querySelector('.raid-name').textContent = raid.name;
     this.root.querySelector('.raid-description').textContent = raid.description;
+    this.renderVeil(raid);
     this.renderDayLine();
     this.renderProgress();
     this.renderCheck();
@@ -120,6 +122,22 @@ export class RaidScreen {
       });
       container.appendChild(button);
     }
+  }
+
+  // Schleier der Nacht (nur Raids mit veil, siehe data/raids.js): Erklärung und wie viele Helden ihr volles Set tragen
+  renderVeil(raid) {
+    const box = this.root.querySelector('.raid-veil');
+    box.hidden = !raid.veil;
+    if (!raid.veil) {
+      return;
+    }
+    const heroes = this.game.guild.raidPlan.getHeroIds().map((heroId) => this.game.guild.findHero(heroId)).filter((hero) => hero);
+    const fullSets = heroes.filter((hero) => hero.getMissingSetPieces() === 0).length;
+    box.innerHTML = '<b class="raid-veil-name"></b><span class="raid-veil-text"></span><span class="raid-veil-count"></span>';
+    box.querySelector('.raid-veil-name').textContent = raid.veil.name;
+    box.querySelector('.raid-veil-text').textContent = raid.veil.text;
+    box.querySelector('.raid-veil-count').textContent = t('raid.veilCount', { full: fullSets, total: heroes.length });
+    box.classList.toggle('ok', heroes.length > 0 && fullSets === heroes.length);
   }
 
   // "Heute ist Raid-Tag" oder "Nächster Raid-Tag: Tag 13 (in 3 Tagen)"
@@ -262,6 +280,14 @@ export class RaidScreen {
     tile.insertAdjacentHTML('beforeend', '<span class="hero-tile-name"></span><span class="hero-tile-level"></span>');
     tile.querySelector('.hero-tile-name').textContent = hero.name.split(' ')[0];
     tile.querySelector('.hero-tile-level').textContent = 'Lv ' + hero.level + ' · ' + ROLE_NAMES[hero.getClass().role];
+    // Im Raid mit Schleier: wie viele Teile des eigenen Klassen-Sets der Held trägt (0/3 bis 3/3)
+    if (this.game.getRaid().veil) {
+      const pieces = hero.getOwnSetPieceCount();
+      const chip = document.createElement('span');
+      chip.className = 'raid-set-chip' + (pieces === 3 ? ' full' : '');
+      chip.textContent = t('raid.setPieces', { count: pieces });
+      tile.appendChild(chip);
+    }
     tile.addEventListener('click', () => this.onTileClicked(heroId));
     return tile;
   }

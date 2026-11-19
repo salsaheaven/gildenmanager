@@ -12,7 +12,13 @@
 // pieceNames = Namen der Teile pro Platz
 // bonuses    = Bonus ab 2 und ab 3 getragenen Teilen: { effects, text } (die Wirkungen zählen zusammen)
 //
-// Zahlen grob gesetzt (je Rolle gleich), gebalanced wird am Ende.
+// Die 3er-Boni haben zusätzlich je Rolle einen Encounter-Bonus gegen typische Raid-Mechaniken (vor allem im Nachtthron):
+//   tankStackReduction      = Tank-Stapel des Raid-Bosses wirken um diesen Anteil schwächer (0.5 = halb so stark)
+//   healingAfterGroupHit    = nach einem Gruppenschlag/Gruppenzauber auf die eigene Gruppe: so viel mehr Heilung für 2 Runden
+//   damageVsMinionsAndShell = mehr Schaden gegen Diener und gegen Bosse mit Panzer
+//   curseDamageTaken        = Flüche von Bossen machen so viel weniger Schaden (−0.4 = 40 % weniger)
+//
+// Zahlen grob gesetzt (je Rolle gleich).
 // ============================================================
 
 // Ab so vielen getragenen Teilen gibt es einen Bonus
@@ -22,19 +28,19 @@ export const SET_BONUS_COUNTS = [2, 3];
 export const ROLE_BONUSES = {
   tank: {
     2: { effects: { statBonus: { health: 0.15 } }, text: '+15 % Leben' },
-    3: { effects: { damageTaken: -0.1 }, text: '−10 % erlittener Schaden' },
+    3: { effects: { damageTaken: -0.1, tankStackReduction: 0.5 }, text: '−10 % erlittener Schaden. Raid: Tank-Stapel wirken nur halb so stark' },
   },
   healer: {
     2: { effects: { healingDone: 0.15 }, text: '+15 % Heilung' },
-    3: { effects: { manaCost: -0.15 }, text: '−15 % Manakosten' },
+    3: { effects: { manaCost: -0.15, healingAfterGroupHit: 0.3 }, text: '−15 % Manakosten. Raid: +30 % Heilung für 2 Runden, nachdem ein Gruppenschlag die eigene Gruppe trifft' },
   },
   damage: {
     2: { effects: { damageDone: 0.1 }, text: '+10 % Schaden' },
-    3: { effects: { damageDone: 0.1, cheatDeath: true }, text: '+10 % Schaden, überlebt einmal pro Kampf einen tödlichen Treffer' },
+    3: { effects: { damageDone: 0.1, cheatDeath: true, damageVsMinionsAndShell: 0.25 }, text: '+10 % Schaden, überlebt einmal pro Kampf einen tödlichen Treffer. +25 % Schaden gegen Diener und gepanzerte Bosse' },
   },
   support: {
     2: { effects: { damageDone: 0.08, healingDone: 0.08 }, text: '+8 % Schaden und Heilung' },
-    3: { effects: { damageTaken: -0.08, statBonus: { health: 0.1 } }, text: '−8 % erlittener Schaden, +10 % Leben' },
+    3: { effects: { damageTaken: -0.08, statBonus: { health: 0.1 }, curseDamageTaken: -0.4 }, text: '−8 % erlittener Schaden, +10 % Leben. Flüche machen 40 % weniger Schaden' },
   },
 };
 

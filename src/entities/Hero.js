@@ -7,7 +7,7 @@
 import { Item } from './Item.js';
 import { getHeroClass } from '../data/heroClasses.js';
 import { getHeroRarity, WAGE_RULES } from '../data/heroRarities.js';
-import { getSet, getSetBonus, SET_BONUS_COUNTS } from '../data/sets.js';
+import { getSet, getSetBonus, SET_BONUS_COUNTS, SETS, SET_SLOTS } from '../data/sets.js';
 import { getRarity, getRarityRank } from '../data/rarities.js';
 import { getTrait } from '../data/traits.js';
 import { SLOT_NAMES } from '../data/items.js';
@@ -294,6 +294,20 @@ export class Hero {
       }
     }
     return counts;
+  }
+
+  // Wie viele Teile seines eigenen Klassen-Sets trägt er? (0 bis 3)
+  getOwnSetPieceCount() {
+    const ownSet = SETS.find((set) => set.classId === this.classId);
+    if (!ownSet) {
+      return 0;
+    }
+    return this.getSetCounts()[ownSet.id] || 0;
+  }
+
+  // Wie viele Teile seines eigenen Klassen-Sets fehlen ihm noch? (für den Schleier der Nacht in Raid 2)
+  getMissingSetPieces() {
+    return SET_SLOTS.length - this.getOwnSetPieceCount();
   }
 
   // Aktive Set-Boni: [{ set, count, bonus }] für jede erreichte Stufe (2 und 3 Teile).

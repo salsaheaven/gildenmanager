@@ -492,6 +492,7 @@ export const TEXTS_EN = {
 
   // Tagesabschluss (DayEndOverlay) und Kampfszene (BattleScene)
   dayEnd: {
+    veilHint: ({ name, count }) => name + ': ' + count + ' heroes without their full class set were weakened. Set pieces drop in the set dungeons.',
     modeAll: 'All fights',
     modeBosses: 'Bosses only',
     modeNone: 'None',
@@ -558,6 +559,8 @@ export const TEXTS_EN = {
 
   // Raid-Bildschirm und Endauswertung
   raid: {
+    veilCount: ({ full, total }) => ' Full set: ' + full + ' of ' + total + ' heroes in the lineup.',
+    setPieces: ({ count }) => 'Set ' + count + '/3',
     autoInfo: 'Distributes the ready heroes: tanks into different groups, healers evenly, then the strongest.',
     auto: 'Auto raid',
     lineup: 'Lineup',
