@@ -19,7 +19,6 @@
 // Gleicher Seed = gleicher Kampf. So lassen sich Kämpfe wiederholen und testen.
 // ============================================================
 
-import { getRunDungeon } from '../HeroicMode.js';
 import { t } from '../../core/Language.js';
 import { getDefenseConstant } from '../../data/scaling.js';
 import { Random } from '../../core/Random.js';
@@ -152,11 +151,10 @@ export function simulateRaidRun(options) {
 //   supplies = freiwillig: mitgenommene Verbrauchsgüter (Liste von ids, siehe data/consumables.js)
 //   scouting = freiwillig: Der Run ist durch Erkunden vorbereitet. 'partial' oder 'full' (Wissensstand, siehe
 //              systems/DungeonKnowledge.js) bestimmt den Vorteil (scoutingBonus in data/heroTasks.js), null = kein Vorteil
-//   heroic   = freiwillig: true = heroische Stufe (stärkere Gegner, siehe systems/HeroicMode.js)
 // Gibt { dungeonId, outcome, encounters, heroes } zurück.
 //   outcome = 'success', 'defeat', 'retreat' oder 'timeout'
 export function simulateRun(options) {
-  const dungeon = getRunDungeon(options.dungeonId, options.heroic);
+  const dungeon = getDungeon(options.dungeonId);
   const retreatRule = getRetreatRule(options.retreatRuleId || 'never');
   const random = new Random(options.seed);
   const heroes = options.heroes.map((hero) => createHeroCombatant(hero));

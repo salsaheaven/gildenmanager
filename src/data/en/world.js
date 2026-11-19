@@ -69,7 +69,6 @@ export const UNLOCKS_EN = {
   crafting: { name: 'Salvage and upgrade', text: 'In the inventory you can salvage items and use the material to upgrade others (+1 to +10).' },
   collection: { name: 'Collection', text: 'Every boss item goes into the collection. A full page gives a title and more gold.' },
   raid: { name: 'Raid', text: 'The Ash Halls are open! On days 6 and 7 of every week your raid (10 to 20 heroes) sets out; there are no dungeons on those days. Put together the lineup in the Raid tab.' },
-  heroic: { name: 'Heroic', text: 'Cleared dungeons are now available on heroic too: stronger enemies, better loot. The switch is on the dungeon\'s card.' },
   guildHall: { name: 'Guild hall', text: 'Expand the guild hall: barracks, infirmary, forge and more. New tasks: gather herbs and materials.' },
 };
 

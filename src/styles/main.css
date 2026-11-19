@@ -3556,29 +3556,6 @@ h3 {
   background: #3d2f5c;
 }
 
-/* Heroische Dungeons: lila Rand und Schimmer (Farbe wie die Seltenheit Lila) */
-.dungeon-card.heroic {
-  border-color: #c77dff;
-  box-shadow: 0 0 8px rgba(199, 125, 255, 0.45);
-}
-
-.heroic-chip {
-  color: #e0b3ff;
-  border-color: #c77dff;
-  font-weight: bold;
-}
-
-.heroic-button.heroic-option.active {
-  background: #5a2d82;
-  border-color: #c77dff;
-  color: #fff;
-  box-shadow: 0 0 8px rgba(199, 125, 255, 0.6);
-}
-
-.day-run-card.heroic {
-  border-color: #c77dff;
-}
-
 .dungeon-card.locked {
   opacity: 0.55;
 }
@@ -4418,9 +4395,7 @@ body.locked-crafting .salvage-junk-button,
 body.locked-crafting .auto-junk-salvage,
 body.locked-rivals .day-plan-server,
 body.locked-rivals .day-news-card,
-body.locked-collection .collection-button,
-body.locked-heroic .plan-heroic,
-body.locked-heroic .heroic-chip {
+body.locked-collection .collection-button {
   display: none;
 }
 

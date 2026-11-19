@@ -43,10 +43,6 @@ export const UNLOCKS = [
     text: 'Jedes Boss-Item kommt ins Sammelbuch. Eine volle Seite bringt einen Titel und mehr Gold.',
   },
   {
-    id: 'heroic', name: 'Heroisch', screenId: 'dungeons', condition: { clears: 4 },
-    text: 'Geschaffte Dungeons gibt es jetzt auch heroisch: stärkere Gegner, dafür bessere Beute. Der Schalter steht auf der Karte des Dungeons.',
-  },
-  {
     id: 'raid', name: 'Raid', screenId: 'raid', condition: { heroLevel: 30 },
     text: 'Die Aschenhallen sind offen! An Tag 6 und 7 jeder Woche zieht dein Raid (10 bis 20 Helden) los, an diesen Tagen gibt es keine Dungeons. Stell die Aufstellung im Reiter „Raid“ zusammen.',
   },

@@ -1,14 +1,12 @@
 // ============================================================
 // BOT-DURCHLAUF – ein Bot spielt das echte Spiel viele Tage lang und misst den Fortschritt
 //
-// Aufruf:  node tools/bot-durchlauf.mjs [Tage] [Spielstände] [Modus] [Resistenz-Gewicht] [heroisch]
+// Aufruf:  node tools/bot-durchlauf.mjs [Tage] [Spielstände] [Modus] [Resistenz-Gewicht]
 //   Modus "level": nimmt den höchsten Dungeon, dessen Stufe höchstens dem Ø Gruppenlevel entspricht
 //   Modus "push":  nimmt immer den höchsten freigeschalteten Dungeon
 //   Resistenz-Gewicht: so viele Werte-Punkte ist 1 % passende Resistenz für den Bot wert (Standard 0.5,
 //                      0 = Resistenzen ignorieren). So lässt sich messen, wie viel Resistenzen bringen.
-//   heroisch: Hat die Gruppe schon das Level der heroischen Stufe, spielt der Bot den Dungeon heroisch
-//             (nur wenn er ihn schon geschafft hat, siehe systems/HeroicMode.js)
-// Beispiel: node tools/bot-durchlauf.mjs 60 20 level 0.5 heroisch
+// Beispiel: node tools/bot-durchlauf.mjs 60 20 level 0.5
 //
 // Der Bot heuert je einen Helden jeder Klasse an, schickt die Gruppe jeden Tag los (wenn niemand
 // verletzt ist), öffnet alle Kisten und verkauft Schrott. Vor jedem Run rüstet er für den Ziel-Dungeon aus:
@@ -18,14 +16,12 @@
 import { Game } from '../src/core/Game.js';
 import { DUNGEONS, getDungeonDamageTypes } from '../src/data/dungeons.js';
 import { EQUIPMENT_SLOTS } from '../src/entities/Hero.js';
-import { getRunDungeon } from '../src/systems/HeroicMode.js';
 import { STANDARD_GROUP } from './messhilfen.mjs';
 
 const DAYS = Number(process.argv[2] || 60);
 const SAVEGAMES = Number(process.argv[3] || 20);
 const MODE = process.argv[4] || 'level';
 const RESISTANCE_WEIGHT = process.argv[5] === undefined ? 0.5 : Number(process.argv[5]);
-const USE_HEROIC = process.argv[6] === 'heroisch';
 const REPORT_DAYS = [10, 20, 30, 45, 60, 90];
 const CHEAPEST_HERO = 40;
 
@@ -151,12 +147,6 @@ for (let savegame = 1; savegame <= SAVEGAMES; savegame++) {
     const ready = guild.heroes.filter((hero) => !hero.isInjured());
     if (ready.length === 5) {
       const dungeon = chooseDungeon(game, ready);
-      if (USE_HEROIC) {
-        // Heroisch, wenn die Gruppe schon das Level der heroischen Stufe hat (und der Dungeon einmal geschafft ist)
-        const averageLevel = ready.reduce((sum, hero) => sum + hero.level, 0) / ready.length;
-        const heroicLevel = getRunDungeon(dungeon.id, true).level;
-        game.setDungeonHeroic(dungeon.id, averageLevel >= heroicLevel);
-      }
       for (const hero of ready) {
         equipForDungeon(game, hero, dungeon);
       }

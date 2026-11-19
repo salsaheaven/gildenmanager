@@ -26,7 +26,6 @@ export class Expedition {
     this.supplies = supplies;
     this.standingGroupId = null; // gehört der Run zu einer stehenden Gruppe? (id, sonst null für einen einmaligen Run)
     this.scouting = null;      // durch Erkunden vorbereitet? null, 'partial' oder 'full' (wird beim Auskämpfen festgelegt, siehe Game.finishExpedition)
-    this.heroic = false;       // heroische Stufe? (wird beim Auskämpfen festgelegt, siehe Game.finishExpedition)
     this.heroSnapshots = null; // Abbild der Helden beim Auskämpfen (null = noch nicht ausgekämpft)
     this.result = null;        // berechnetes Ergebnis (wird nicht gespeichert, sondern neu berechnet)
   }
@@ -56,7 +55,6 @@ export class Expedition {
         recordLog: true,
         supplies: this.supplies,
         scouting: this.scouting,
-        heroic: this.heroic,
       });
     }
     return this.result;
@@ -71,7 +69,6 @@ export class Expedition {
       seed: this.seed,
       supplies: this.supplies,
       scouting: this.scouting,
-      heroic: this.heroic,
       standingGroupId: this.standingGroupId,
       heroSnapshots: this.heroSnapshots,
     };
@@ -85,7 +82,6 @@ export class Expedition {
     // neu ausgekämpft (resolve). Alte Berichte behalten ihr Abbild, damit man sie weiter ansehen kann.
     expedition.heroSnapshots = data.heroSnapshots || null;
     expedition.scouting = data.scouting;
-    expedition.heroic = data.heroic || false;
     expedition.standingGroupId = data.standingGroupId;
     return expedition;
   }
