@@ -19,6 +19,8 @@
 // Die Zahlen sind grob gesetzt (Testballon, kein Balancing). Für Spieltests abgeschwächt (Leben halbiert, Angriff −20 %).
 // ============================================================
 
+// Leben und Angriff 2026-11-19 per Simulation eingestellt (20 Helden, Level 30): Raid 1 mit grüner Ausrüstung
+// von Boss zu Boss schwerer (etwa 80 % → 40 %), Raid 2 braucht epische Raid-Beute (etwa 75 % → 30 %, grün kaum schaffbar).
 export const RAID_BOSSES = [
   // ---------- Raid 1: Die Aschenhallen (siehe data/raids.js) ----------
   {
@@ -29,7 +31,7 @@ export const RAID_BOSSES = [
     attackFx: 'bigImpact',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 4500, attack: 27, defense: 10 },
+    stats: { health: 5350, attack: 29, defense: 10 },
     enrageRound: 40,
     tankStacks: { name: 'Zermalmt', damageTakenPerStack: 0.12, swapAt: 4 },
     mechanics: [
@@ -69,7 +71,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'acid',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 4750, attack: 26, defense: 8 },
+    stats: { health: 7650, attack: 33, defense: 8 },
     enrageRound: 40,
     tankStacks: { name: 'Zersetzt', damageTakenPerStack: 0.1, swapAt: 5 },
     mechanics: [
@@ -100,7 +102,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'fire',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 5000, attack: 26, defense: 6 },
+    stats: { health: 11150, attack: 39, defense: 6 },
     enrageRound: 40,
     mechanics: [
       {
@@ -144,7 +146,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'fire',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 6000, attack: 28, defense: 14 },
+    stats: { health: 8850, attack: 34, defense: 14 },
     enrageRound: 45,
     tankStacks: { name: 'Ascheglut', damageTakenPerStack: 0.12, swapAt: 4 },
     mechanics: [
@@ -202,7 +204,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'ice',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 5500, attack: 28, defense: 14 },
+    stats: { health: 10400, attack: 38, defense: 14 },
     enrageRound: 40,
     tankStacks: { name: 'Erfroren', damageTakenPerStack: 0.12, swapAt: 4 },
     mechanics: [
@@ -233,7 +235,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'water',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 5800, attack: 28, defense: 6 },
+    stats: { health: 16650, attack: 47, defense: 6 },
     enrageRound: 40,
     mechanics: [
       {
@@ -277,7 +279,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'shadow',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 6200, attack: 29, defense: 10 },
+    stats: { health: 9850, attack: 37, defense: 10 },
     enrageRound: 40,
     tankStacks: { name: 'Verwest', damageTakenPerStack: 0.1, swapAt: 5 },
     mechanics: [
@@ -308,7 +310,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'shadow',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 6500, attack: 29, defense: 8 },
+    stats: { health: 13950, attack: 42, defense: 8 },
     enrageRound: 40,
     tankStacks: { name: 'Umschattet', damageTakenPerStack: 0.12, swapAt: 4 },
     mechanics: [
@@ -354,7 +356,7 @@ export const RAID_BOSSES = [
     attackDamageType: 'shadow',
     isRaidBoss: true,
     level: 30,
-    stats: { health: 8000, attack: 30, defense: 14 },
+    stats: { health: 15300, attack: 42, defense: 14 },
     enrageRound: 50,
     tankStacks: { name: 'Verschlungen', damageTakenPerStack: 0.12, swapAt: 4 },
     mechanics: [

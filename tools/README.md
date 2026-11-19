@@ -16,7 +16,7 @@ Faustregel: Unterschiede bis etwa ±4 Prozentpunkte sind Zufall.
 | `resistenzen.mjs` | Was bringen 1–3 Rüstungsteile mit Resistenz gegen die Schadensart eines Dungeons? | `node tools/resistenzen.mjs` |
 | `kampfdauer.mjs` | Wie lange dauert ein Run in Runden und Minuten (Tempo 1x), mit Zeitraffer und zum Vergleich ohne? | `node tools/kampfdauer.mjs` |
 
-`messhilfen.mjs` enthält die gemeinsamen Bausteine (Testgruppe bauen, viele Runs messen).
+`messhilfen.mjs` enthält die gemeinsamen Bausteine (Testgruppe bauen, auch mit anderer Seltenheit der Ausrüstung, viele Runs messen).
 
 Bei Balancing-Änderungen: vorher und nachher messen und beide Zahlen vergleichen.
 

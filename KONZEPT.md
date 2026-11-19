@@ -196,6 +196,14 @@ Alle Formeln und Zahlen dafür stehen in `src/data/` (`scaling.js`, `experience.
 - **Staub:** Die Gildenhalle erklärt bei fehlendem Staub, dass er vom Zerlegen kommt, und bietet „Schrott zerlegen“ an (kein automatisches Zerlegen ab Start).
 - **Neuer Dungeon:** Ein offener, nie versuchter Dungeon ohne Gruppe steht im Aufgaben-Kasten; stehende Gruppen lassen sich in einen anderen Dungeon verlegen.
 
+## Balancing-Runde 1 (2026-11-19)
+- **Ziel:** Progression ohne Mauern (siehe „Schwierigkeit“). Feste Prozentwerte sind nur Arbeitsgrößen.
+- **Dungeons:** Leben und Angriff der Bosse so eingestellt, dass jeder Dungeon auf seiner Stufe mit grüner Ausrüstung des vorigen etwa 70 % schafft (vorher zwischen 0 % und 100 %; Brutnester, Frostzinne, Sonnentempel und Eisenzitadelle waren Mauern, die Kapelle zu leicht). Mit eigener Ausrüstung meist 85–99 %.
+- **Erfahrung:** Volle EP bis 4 Level über der Stufe des Dungeons (vorher 2), weil die Level-Dungeons 4 bis 5 Stufen auseinanderliegen.
+- **Ergebnis Bot (`tools/bot-durchlauf.mjs`, 25 Spielstände):** erster Sieg Bärenhöhle Tag 1, Kapelle ~6, Brutnester ~18, Frostzinne ~27, Spukmoor ~38, Sonnentempel ~45, Glutfeste ~50, Set-Dungeons ab ~54 (vorher: Kapelle Tag 5, Brutnester Tag 28, dann Stillstand). Der Bot setzt einen Tag aus, sobald ein Held verletzt ist; ein Spieler mit Ersatzhelden kommt schneller voran.
+- **Raids** (20 Helden, Level 30): Raid 1 mit grüner Ausrüstung von Boss zu Boss schwerer (Steinkoloss ~85 % → Aschenkönig ~45 %), Raid 2 braucht epische Raid-Beute (Hrimvald ~75 % → Vaelor ~30 %; mit Grün kaum schaffbar). Vorher fiel fast jeder Raid-Boss beim ersten Versuch, nur Morvath war eine Mauer.
+- **Offen:** Vorbereitung (Tränke, Erkunden) als Weg über schwere Stellen sichtbarer machen; Wutelixier und Steinhaut kommen erst mit dem Alchemielabor Stufe 3. Anweisungen und Klassen sind noch nicht ausbalanciert.
+
 ## Sprachen (entschieden 2026-11-09)
 - Deutsch und Englisch. Beim ersten Start gilt die Browser-Sprache (Deutsch bei „de…“, sonst Englisch), umschaltbar mit DE/EN oben in der Leiste und auf dem Gründungs-Bildschirm.
 - Übersetzt werden Oberfläche, Erklärtexte, Kampfprotokoll, Ticker und Eigennamen von Bossen, Dungeons und Items; Heldennamen bleiben, wie sie sind.

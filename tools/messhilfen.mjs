@@ -16,11 +16,12 @@ export const STANDARD_GROUP = ['warrior', 'priest', 'runeweaver', 'mage', 'rogue
 // Baut eine Testgruppe.
 // classIds  = Liste von Klassen, doppelte sind erlaubt (z.B. zwei Schurken)
 // level     = Level aller Helden
-// itemLevel = 0: ohne Ausrüstung, sonst grüne Ausrüstung mit diesem Item-Level in allen Plätzen
+// itemLevel = 0: ohne Ausrüstung, sonst Ausrüstung mit diesem Item-Level in allen Plätzen (Seltenheit rarityId, Standard grün)
 //             (jeweils die Vorlage, die zur Klasse passt: eigene Waffen, eigene Rüstungsart, passender Ring)
 // resistance = freiwillig: { damageType, pieces, percent } – so viele Rüstungsteile (Kopf, Brust, Füße)
 //              jedes Helden tragen zusätzlich diese Resistenz, z.B. { damageType: 'acid', pieces: 2, percent: 8 }
-export function createGroup(classIds, level, itemLevel = 0, resistance = null) {
+// rarityId   = freiwillig: Seltenheit der Ausrüstung (z.B. 'epic' für Raid-Messungen)
+export function createGroup(classIds, level, itemLevel = 0, resistance = null, rarityId = 'uncommon') {
   // Fester Seed: Jede Gruppe bekommt bei gleichen Angaben genau dieselbe Ausrüstung
   const lootSystem = new LootSystem(new Random(5));
   let itemId = 1;
@@ -35,7 +36,7 @@ export function createGroup(classIds, level, itemLevel = 0, resistance = null) {
         if (!suitable) {
           continue;
         }
-        const item = lootSystem.createItem('uncommon', itemId, itemLevel, template);
+        const item = lootSystem.createItem(rarityId, itemId, itemLevel, template);
         itemId++;
         // Zufällige Resistenzen aus der Kiste entfernen, die Messung soll genau festlegen, was getragen wird
         item.resistances = {};
